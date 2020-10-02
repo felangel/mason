@@ -24,4 +24,7 @@ jobs:
         run: dart format --set-exit-if-changed .
 
       - name: Analyze
-        run: dart analyze --fatal-infos --fatal-warnings bin
+        run: dart analyze --fatal-infos --fatal-warnings .
+
+      - name: Ensure Build
+        run: pub run test --run-skipped -t pull-request-only

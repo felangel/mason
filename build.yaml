@@ -1,0 +1,7 @@
+# See https://github.com/dart-lang/build/tree/master/build_web_compilers#configuration
+targets:
+  $default:
+    builders:
+      build_cli:
+        generate_for:
+          - lib/src/options.*

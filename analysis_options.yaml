@@ -5,6 +5,8 @@ analyzer:
 
   exclude:
     - "test/.test_coverage.dart"
+    - "**/*.g.dart"
+    - "**/version.dart"
 
 linter:
   rules:
