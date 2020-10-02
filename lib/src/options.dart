@@ -12,10 +12,19 @@ ArgParser get parser => _$parserForOptions;
 class Options {
   /// {@macro options}
   const Options({
+    this.template,
     this.help,
     this.version,
     this.command,
   });
+
+  /// Name of the template
+  @CliOption(
+    name: 'template',
+    abbr: 't',
+    help: 'template name',
+  )
+  final String template;
 
   /// Prints usage information.
   @CliOption(

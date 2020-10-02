@@ -7,11 +7,13 @@ part of 'options.dart';
 // **************************************************************************
 
 Options _$parseOptionsResult(ArgResults result) => Options(
+    template: result['template'] as String,
     help: result['help'] as bool,
     version: result['version'] as bool,
     command: result.command);
 
 ArgParser _$populateOptionsParser(ArgParser parser) => parser
+  ..addOption('template', abbr: 't', help: 'template name')
   ..addFlag('help',
       abbr: 'h', help: 'Prints usage information.', negatable: false)
   ..addFlag('version', help: 'Print the current version.', negatable: false);
