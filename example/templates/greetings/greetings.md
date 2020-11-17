@@ -1,1 +1,1 @@
-# Greetings __name__!
+# Greetings {{name}}!

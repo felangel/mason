@@ -1,7 +1,7 @@
 name: greetings
 description: A Simple Greetings Template
 files:
-  - path: greetings.md
-    destination: GREETINGS.md
+  - from: greetings.md
+    to: GREETINGS.md
 args:
   - name

@@ -42,21 +42,21 @@ class Manifest extends Equatable {
 @JsonSerializable()
 class TemplateFile extends Equatable {
   /// {@macro template_file}
-  const TemplateFile(this.path, this.destination);
+  const TemplateFile(this.from, this.to);
 
   /// Converts [Map] to [TemplateFile]
   factory TemplateFile.fromJson(Map<dynamic, dynamic> json) =>
       _$TemplateFileFromJson(json);
 
   /// The path to the template file.
-  final String path;
+  final String from;
 
   /// The relative path where the generated file should be created.
-  final String destination;
+  final String to;
 
   /// Converts [TemplateFile] to [Map]
   Map<dynamic, dynamic> toJson() => _$TemplateFileToJson(this);
 
   @override
-  List<Object> get props => [path, destination];
+  List<Object> get props => [from, to];
 }

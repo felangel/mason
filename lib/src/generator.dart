@@ -82,14 +82,14 @@ class TemplateFile {
   final String content;
 
   FileContents runSubstitution(Map<String, String> parameters) {
-    final newPath = substituteVars(path, parameters);
+    final newPath = path.render(parameters);
     final newContents = _createContent(parameters);
 
     return FileContents(newPath, newContents);
   }
 
   List<int> _createContent(Map<String, String> vars) {
-    return utf8.encode(substituteVars(content, vars));
+    return utf8.encode(content.render(vars));
   }
 }
 
@@ -131,8 +131,8 @@ class MasonGenerator extends Generator {
       manifest.description,
       files: manifest.files.map((f) {
         return TemplateFile(
-          f.destination,
-          File(p.join(file.parent.path, f.path)).readAsStringSync(),
+          f.to,
+          File(p.join(file.parent.path, f.from)).readAsStringSync(),
         );
       }).toList(),
       args: manifest.args,

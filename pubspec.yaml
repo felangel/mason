@@ -13,6 +13,8 @@ dependencies:
   equatable: ^1.2.5
   io: ^0.3.4
   json_annotation: ^3.0.1
+  mustache_template: ^1.0.0+1
+  recase: ^3.0.1
   yaml: ^2.2.1
 
 dev_dependencies:

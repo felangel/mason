@@ -44,10 +44,10 @@ Map<String, dynamic> _$ManifestToJson(Manifest instance) {
 
 TemplateFile _$TemplateFileFromJson(Map json) {
   return $checkedNew('TemplateFile', json, () {
-    $checkKeys(json, allowedKeys: const ['path', 'destination']);
+    $checkKeys(json, allowedKeys: const ['from', 'to']);
     final val = TemplateFile(
-      $checkedConvert(json, 'path', (v) => v as String),
-      $checkedConvert(json, 'destination', (v) => v as String),
+      $checkedConvert(json, 'from', (v) => v as String),
+      $checkedConvert(json, 'to', (v) => v as String),
     );
     return val;
   });
@@ -62,7 +62,7 @@ Map<String, dynamic> _$TemplateFileToJson(TemplateFile instance) {
     }
   }
 
-  writeNotNull('path', instance.path);
-  writeNotNull('destination', instance.destination);
+  writeNotNull('from', instance.from);
+  writeNotNull('to', instance.to);
   return val;
 }

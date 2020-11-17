@@ -1,11 +1,12 @@
-final _substitueRegExp = RegExp(r'__([a-zA-Z]+)__');
-final _nonValidSubstitueRegExp = RegExp('[^a-zA-Z]');
+import 'package:mustache_template/mustache.dart';
+import 'package:recase/recase.dart';
 
-/// Given a `String` [str] with mustache templates, and a [Map] of String key /
-/// value pairs, substitute all instances of `__key__` for `value`. I.e.,
+/// {@template templateX}
+/// Given a `String` with mustache templates, and a [Map] of String key /
+/// value pairs, substitute all instances of `{{key}}` for `value`. I.e.,
 ///
 /// ```
-/// Foo __projectName__ baz.
+/// Foo {{projectName}} baz.
 /// ```
 ///
 /// and
@@ -19,23 +20,54 @@ final _nonValidSubstitueRegExp = RegExp('[^a-zA-Z]');
 /// ```
 /// Foo bar baz.
 /// ```
-///
-/// A key value can only be an ASCII string made up of letters: A-Z, a-z.
-/// No whitespace, numbers, or other characters are allowed.
-String substituteVars(String str, Map<String, String> vars) {
-  var nonValidKeys =
-      vars.keys.where((k) => k.contains(_nonValidSubstitueRegExp)).toList();
-  if (nonValidKeys.isNotEmpty) {
-    throw ArgumentError('vars.keys can only contain letters.');
+/// {@endtemplate}
+extension TemplateX on String {
+  /// {@macro templateX}
+  String render(dynamic values) {
+    final template = Template(this);
+
+    /// camelCase
+    final camelCase = (LambdaContext ctx) => ctx.renderString().camelCase;
+
+    /// CONSTANT_CASE
+    final constantCase = (LambdaContext ctx) => ctx.renderString().constantCase;
+
+    /// dot.case
+    final dotCase = (LambdaContext ctx) => ctx.renderString().dotCase;
+
+    /// Header-Case
+    final headerCase = (LambdaContext ctx) => ctx.renderString().headerCase;
+
+    /// PascalCase
+    final pascalCase = (LambdaContext ctx) => ctx.renderString().pascalCase;
+
+    /// param-case
+    final paramCase = (LambdaContext ctx) => ctx.renderString().paramCase;
+
+    /// path/case
+    final pathCase = (LambdaContext ctx) => ctx.renderString().pathCase;
+
+    /// Sentence case
+    final sentenceCase = (LambdaContext ctx) => ctx.renderString().sentenceCase;
+
+    /// snake_case
+    final snakeCase = (LambdaContext ctx) => ctx.renderString().snakeCase;
+
+    /// Title Case
+    final titleCase = (LambdaContext ctx) => ctx.renderString().titleCase;
+
+    return template.renderString(<String, dynamic>{
+      'camelCase': camelCase,
+      'constantCase': constantCase,
+      'dotCase': dotCase,
+      'headerCase': headerCase,
+      'pascalCase': pascalCase,
+      'paramCase': paramCase,
+      'pathCase': pathCase,
+      'sentenceCase': sentenceCase,
+      'snakeCase': snakeCase,
+      'titleCase': titleCase,
+      ...values,
+    });
   }
-
-  return str.replaceAllMapped(_substitueRegExp, (match) {
-    var item = vars[match[1]];
-
-    if (item == null) {
-      return match[0];
-    } else {
-      return item;
-    }
-  });
 }
