@@ -1,4 +1,3 @@
-import 'package:equatable/equatable.dart';
 import 'package:json_annotation/json_annotation.dart';
 
 part 'manifest.g.dart';
@@ -8,7 +7,7 @@ part 'manifest.g.dart';
 /// a `MasonGenerator`.
 /// {@endtemplate}
 @JsonSerializable()
-class Manifest extends Equatable {
+class Manifest {
   /// {@macro manifest}
   const Manifest(this.name, this.description, this.files, this.args);
 
@@ -30,9 +29,6 @@ class Manifest extends Equatable {
 
   /// List of args needed when templating `MasonGenerator`
   final List<String> args;
-
-  @override
-  List<Object> get props => [name, description, files, args];
 }
 
 /// {@template template_file}
@@ -40,7 +36,7 @@ class Manifest extends Equatable {
 /// and the destination path (relative to the current working directory).
 /// {@endtemplate}
 @JsonSerializable()
-class TemplateFile extends Equatable {
+class TemplateFile {
   /// {@macro template_file}
   const TemplateFile(this.from, this.to);
 
@@ -56,7 +52,4 @@ class TemplateFile extends Equatable {
 
   /// Converts [TemplateFile] to [Map]
   Map<dynamic, dynamic> toJson() => _$TemplateFileToJson(this);
-
-  @override
-  List<Object> get props => [from, to];
 }
