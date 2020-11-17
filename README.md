@@ -1,4 +1,4 @@
-# mason
+# ⛏️ mason
 
 ![pub](https://img.shields.io/pub/v/mason.svg)
 ![mason](https://github.com/felangel/mason/workflows/mason/badge.svg?branch=master)
