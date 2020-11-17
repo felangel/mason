@@ -42,3 +42,17 @@ The above command should generate `GREETINGS.md` file with the following content
 ```md
 # Greetings Felix!
 ```
+
+## Usage
+
+```sh
+$ mason --help
+⛏️  mason • lay the foundation!
+Usage: mason <command> [<args>]
+Commands:
+  build   build new component from a template
+Arguments:
+  -t, --template    template yaml path
+  -h, --help        Prints usage information.
+      --version     Print the current version.
+```

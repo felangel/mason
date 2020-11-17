@@ -29,6 +29,7 @@ class MasonCli {
 
   /// Builds template based on supplied [options].
   Future<void> build(Options options, List<String> args) async {
+    final stopwatch = Stopwatch()..start();
     final dir = cwd;
     final target = _DirectoryGeneratorTarget(logger, dir);
 
@@ -40,23 +41,31 @@ class MasonCli {
       io.exitCode = ExitCode.usage.code;
       return;
     }
-    final generator = MasonGenerator.fromYaml(options.template);
-    final vars = <String, String>{};
+    try {
+      final generator = MasonGenerator.fromYaml(options.template);
+      final vars = <String, String>{};
 
-    for (final variable in generator.vars) {
-      final index = args.indexOf('--$variable');
-      if (index != -1) {
-        vars.addAll({variable: args[index + 1]});
+      for (final variable in generator.vars) {
+        final index = args.indexOf('--$variable');
+        if (index != -1) {
+          vars.addAll({variable: args[index + 1]});
+        }
       }
+
+      await generator.generate(target, vars: vars);
+      stopwatch.stop();
+      logger.success(
+        '''(${stopwatch.elapsed.inMilliseconds}ms) built [${generator.id}] in ${target.dir.path} ⛏️''',
+      );
+    } on Exception catch (e) {
+      logger.err(e.toString());
     }
-    await generator.generate(target, vars: vars);
-    logger.success('⚒️  ${'building ${options.template}'}');
   }
 
   /// Outputs information about CLI usage.
   void help() {
     logger
-      ..alert('⚒️  mason \u{2022} lay the foundation!')
+      ..alert('⛏️  mason \u{2022} lay the foundation!')
       ..info(usage);
   }
 
@@ -99,8 +108,6 @@ class _DirectoryGeneratorTarget extends GeneratorTarget {
   @override
   Future<io.File> createFile(String filePath, List<int> contents) {
     final file = io.File(path.join(dir.path, filePath));
-
-    logger.info('  ${file.path}');
 
     return file
         .create(recursive: true)

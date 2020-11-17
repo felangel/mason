@@ -3,22 +3,22 @@ import 'package:recase/recase.dart';
 
 /// {@template templateX}
 /// Given a `String` with mustache templates, and a [Map] of String key /
-/// value pairs, substitute all instances of `{{key}}` for `value`. I.e.,
+/// value pairs, substitute all instances of `{{key}}` for `value`.
 ///
 /// ```
-/// Foo {{projectName}} baz.
+/// Hello {{name}}!
 /// ```
 ///
 /// and
 ///
 /// ```
-/// {'projectName': 'bar'}
+/// {'name': 'Bob'}
 /// ```
 ///
 /// becomes:
 ///
 /// ```
-/// Foo bar baz.
+/// Hello Bob!
 /// ```
 /// {@endtemplate}
 extension TemplateX on String {

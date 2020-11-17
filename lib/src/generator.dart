@@ -30,11 +30,6 @@ abstract class Generator implements Comparable<Generator> {
     return file;
   }
 
-  /// Return the template file wih the given [path].
-  TemplateFile getFile(String path) {
-    return files.firstWhere((file) => file.path == path, orElse: () => null);
-  }
-
   Future generate(
     GeneratorTarget target, {
     Map<String, String> vars,
@@ -46,9 +41,6 @@ abstract class Generator implements Comparable<Generator> {
     });
   }
 
-  /// Return the number of files.
-  int numFiles() => files.length;
-
   @override
   int compareTo(Generator other) =>
       id.toLowerCase().compareTo(other.id.toLowerCase());
@@ -58,9 +50,7 @@ abstract class Generator implements Comparable<Generator> {
 }
 
 /// A target for a [Generator].
-/// This class knows how to create files given a path
-/// for the file (relavtive to the particular [GeneratorTarget] instance), and
-/// the binary content for the file.
+/// This class knows how to create files given a path and contents.
 abstract class GeneratorTarget {
   /// Create a file at the given path with the given contents.
   Future createFile(String path, List<int> contents);
@@ -107,8 +97,11 @@ class FileContents {
   final List<int> content;
 }
 
+/// A [MasonGenerator] which extends [Generator] and
+/// exposes the ability to create a [Generator] from a
+/// `yaml` file.
 class MasonGenerator extends Generator {
-  MasonGenerator(
+  MasonGenerator._(
     String id,
     String description, {
     List<TemplateFile> files,
@@ -119,6 +112,18 @@ class MasonGenerator extends Generator {
     }
   }
 
+  /// Factory which creates a [MasonGenerator] based on
+  /// a configuration file:
+  ///
+  /// ```yaml
+  /// name: greetings
+  /// description: A Simple Greetings Template
+  /// files:
+  ///   - from: greetings.md
+  ///     to: GREETINGS.md
+  /// vars:
+  ///   - name
+  /// ```
   factory MasonGenerator.fromYaml(String path) {
     final file = File(path);
     final content = file.readAsStringSync();
@@ -126,7 +131,7 @@ class MasonGenerator extends Generator {
       content,
       (m) => Manifest.fromJson(m),
     );
-    return MasonGenerator(
+    return MasonGenerator._(
       manifest.name,
       manifest.description,
       files: manifest.files.map((f) {
@@ -139,5 +144,7 @@ class MasonGenerator extends Generator {
     );
   }
 
+  /// Optional list of variables which will be used to populate
+  /// the corresponding mustache variables within the template.
   final List<String> vars;
 }

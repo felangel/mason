@@ -1,8 +1,9 @@
 import 'dart:io';
 
 import 'package:io/io.dart';
-import 'package:mason/mason.dart';
 import 'package:mason/src/logger.dart';
+import 'package:mason/src/mason_cli.dart';
+import 'package:mason/src/options.dart';
 
 void main(List<String> args) async {
   final logger = Logger();
