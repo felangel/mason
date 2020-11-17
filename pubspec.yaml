@@ -13,6 +13,7 @@ dependencies:
   io: ^0.3.4
   json_annotation: ^3.0.1
   mustache_template: ^1.0.0+1
+  path: ^1.7.0
   recase: ^3.0.1
   yaml: ^2.2.1
 
