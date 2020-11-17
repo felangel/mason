@@ -1,7 +1,7 @@
 # ⛏️ mason
 
-![pub](https://img.shields.io/pub/v/mason.svg)
-![mason](https://github.com/felangel/mason/workflows/mason/badge.svg?branch=master)
+[![pub](https://img.shields.io/pub/v/mason.svg)](https://pub.dev/packages/mason)
+[![mason](https://github.com/felangel/mason/workflows/mason/badge.svg?branch=master)](https://github.com/felangel/mason/actions)
 
 A Dart template generator which helps teams generate files quickly and consistently.
 
