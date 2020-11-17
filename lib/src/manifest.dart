@@ -9,7 +9,7 @@ part 'manifest.g.dart';
 @JsonSerializable()
 class Manifest {
   /// {@macro manifest}
-  const Manifest(this.name, this.description, this.files, this.args);
+  const Manifest(this.name, this.description, this.files, this.vars);
 
   /// Converts [Map] to [Manifest]
   factory Manifest.fromJson(Map<dynamic, dynamic> json) =>
@@ -27,8 +27,8 @@ class Manifest {
   /// List of [TemplateFile] which are used to seed the `MasonGenerator`
   final List<TemplateFile> files;
 
-  /// List of args needed when templating `MasonGenerator`
-  final List<String> args;
+  /// List of variables used when templating `MasonGenerator`
+  final List<String> vars;
 }
 
 /// {@template template_file}

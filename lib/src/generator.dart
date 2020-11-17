@@ -112,7 +112,7 @@ class MasonGenerator extends Generator {
     String id,
     String description, {
     List<TemplateFile> files,
-    this.args = const <String>[],
+    this.vars = const <String>[],
   }) : super(id, description) {
     for (final file in files) {
       addTemplateFile(file);
@@ -135,9 +135,9 @@ class MasonGenerator extends Generator {
           File(p.join(file.parent.path, f.from)).readAsStringSync(),
         );
       }).toList(),
-      args: manifest.args,
+      vars: manifest.vars,
     );
   }
 
-  final List<String> args;
+  final List<String> vars;
 }

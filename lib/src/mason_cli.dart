@@ -43,10 +43,10 @@ class MasonCli {
     final generator = MasonGenerator.fromYaml(options.template);
     final vars = <String, String>{};
 
-    for (final arg in generator.args) {
-      final index = args.indexOf('--$arg');
+    for (final variable in generator.vars) {
+      final index = args.indexOf('--$variable');
       if (index != -1) {
-        vars.addAll({arg: args[index + 1]});
+        vars.addAll({variable: args[index + 1]});
       }
     }
     await generator.generate(target, vars: vars);

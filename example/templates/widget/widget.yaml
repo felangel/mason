@@ -3,5 +3,5 @@ description: A Flutter Widget Template
 files:
   - from: "{{name}}.txt"
     to: "{{name}}.dart"
-args:
+vars:
   - name

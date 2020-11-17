@@ -19,7 +19,7 @@ description: A Simple Greetings Template
 files:
   - from: greetings.md # template file (input)
     to: GREETINGS.md # generated file (output)
-args:
+vars:
   - name
 ```
 
