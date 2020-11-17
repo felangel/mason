@@ -2,6 +2,15 @@
 targets:
   $default:
     builders:
+      json_serializable:
+        options:
+          any_map: true
+          disallow_unrecognized_keys: true
+          field_rename: kebab
+          include_if_null: false
+          checked: true
+          explicit_to_json: true
+          create_to_json: true
       build_cli:
         generate_for:
           - lib/src/options.*

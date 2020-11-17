@@ -1,7 +1,12 @@
 // ignore_for_file: public_member_api_docs
 import 'dart:convert';
+import 'dart:io';
+import 'package:path/path.dart' as p;
+
+import 'package:checked_yaml/checked_yaml.dart';
 
 import 'common.dart';
+import 'manifest.dart';
 
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
@@ -11,22 +16,13 @@ abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
   Generator(
     this.id,
-    this.label,
-    this.description, {
-    this.categories = const [],
-  });
+    this.description,
+  );
 
   final String id;
-  final String label;
   final String description;
-  final List<String> categories;
 
   final List<TemplateFile> files = [];
-  TemplateFile _entrypoint;
-
-  /// The entrypoint of the application; the main file for the project, which an
-  /// IDE might open after creating the project.
-  TemplateFile get entrypoint => _entrypoint;
 
   /// Add a new template file.
   TemplateFile addTemplateFile(TemplateFile file) {
@@ -39,37 +35,13 @@ abstract class Generator implements Comparable<Generator> {
     return files.firstWhere((file) => file.path == path, orElse: () => null);
   }
 
-  /// Set the main entrypoint of this template.
-  /// This is the 'most important' file of this template.
-  /// An IDE might use this information to open this file
-  /// after the user's project is generated.
-  void setEntrypoint(TemplateFile entrypoint) {
-    if (_entrypoint != null) throw StateError('entrypoint already set');
-    if (entrypoint == null) throw StateError('entrypoint is null');
-    _entrypoint = entrypoint;
-  }
-
   Future generate(
-    String projectName,
     GeneratorTarget target, {
-    Map<String, String> additionalVars,
+    Map<String, String> vars,
   }) {
-    final vars = {
-      'projectName': projectName,
-      'description': description,
-      'year': DateTime.now().year.toString(),
-      'author': '<your name>'
-    };
-
-    if (additionalVars != null) {
-      for (final key in additionalVars.keys) {
-        vars[key] = additionalVars[key];
-      }
-    }
-
     return Future.forEach(files, (TemplateFile file) {
-      var resultFile = file.runSubstitution(vars);
-      var filePath = resultFile.path;
+      final resultFile = file.runSubstitution(vars ?? <String, String>{});
+      final filePath = resultFile.path;
       return target.createFile(filePath, resultFile.content);
     });
   }
@@ -80,10 +52,6 @@ abstract class Generator implements Comparable<Generator> {
   @override
   int compareTo(Generator other) =>
       id.toLowerCase().compareTo(other.id.toLowerCase());
-
-  /// Return some user facing instructions
-  /// about how to finish installation of the template.
-  String getInstallInstructions() => '';
 
   @override
   String toString() => '[$id: $description]';
@@ -99,16 +67,13 @@ abstract class GeneratorTarget {
 }
 
 /// {@template template_file}
-/// This class represents a file in a generator template. The contents could
-/// either be binary or text. If text, the contents may contain mustache
+/// This class represents a file in a generator template.
+/// The contents should be text and may contain mustache
 /// variables that can be substituted (`__myVar__`).
 /// {@endtemplate}
 class TemplateFile {
   /// {@macro template_file}
   TemplateFile(this.path, this.content);
-
-  /// Creates a [TemplateFile] from binary data.
-  TemplateFile.fromBinary(this.path, this._binaryData) : content = null;
 
   /// The template file path.
   final String path;
@@ -116,29 +81,15 @@ class TemplateFile {
   /// The template file content.
   final String content;
 
-  List<int> _binaryData;
-
   FileContents runSubstitution(Map<String, String> parameters) {
-    if (path == 'pubspec.yaml' && parameters['author'] == '<your name>') {
-      parameters = Map.from(parameters);
-      parameters['author'] = 'Your Name';
-    }
-
     final newPath = substituteVars(path, parameters);
     final newContents = _createContent(parameters);
 
     return FileContents(newPath, newContents);
   }
 
-  /// Return if TemplateFile consists of binary data.
-  bool get isBinary => _binaryData != null;
-
   List<int> _createContent(Map<String, String> vars) {
-    if (isBinary) {
-      return _binaryData;
-    } else {
-      return utf8.encode(substituteVars(content, vars));
-    }
+    return utf8.encode(substituteVars(content, vars));
   }
 }
 
@@ -154,4 +105,39 @@ class FileContents {
 
   /// The contents of the file.
   final List<int> content;
+}
+
+class MasonGenerator extends Generator {
+  MasonGenerator(
+    String id,
+    String description, {
+    List<TemplateFile> files,
+    this.args = const <String>[],
+  }) : super(id, description) {
+    for (final file in files) {
+      addTemplateFile(file);
+    }
+  }
+
+  factory MasonGenerator.fromYaml(String path) {
+    final file = File(path);
+    final content = file.readAsStringSync();
+    final manifest = checkedYamlDecode(
+      content,
+      (m) => Manifest.fromJson(m),
+    );
+    return MasonGenerator(
+      manifest.name,
+      manifest.description,
+      files: manifest.files.map((f) {
+        return TemplateFile(
+          f.destination,
+          File(p.join(file.parent.path, f.path)).readAsStringSync(),
+        );
+      }).toList(),
+      args: manifest.args,
+    );
+  }
+
+  final List<String> args;
 }

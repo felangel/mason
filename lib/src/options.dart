@@ -18,11 +18,11 @@ class Options {
     this.command,
   });
 
-  /// Name of the template
+  /// Path to template.yaml
   @CliOption(
     name: 'template',
     abbr: 't',
-    help: 'template name',
+    help: 'template yaml path',
   )
   final String template;
 

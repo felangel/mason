@@ -13,7 +13,7 @@ Options _$parseOptionsResult(ArgResults result) => Options(
     command: result.command);
 
 ArgParser _$populateOptionsParser(ArgParser parser) => parser
-  ..addOption('template', abbr: 't', help: 'template name')
+  ..addOption('template', abbr: 't', help: 'template yaml path')
   ..addFlag('help',
       abbr: 'h', help: 'Prints usage information.', negatable: false)
   ..addFlag('version', help: 'Print the current version.', negatable: false);

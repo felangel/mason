@@ -4,6 +4,7 @@ import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
 
+import 'generator.dart';
 import 'logger.dart';
 import 'options.dart';
 import 'version.dart';
@@ -27,9 +28,9 @@ class MasonCli {
   set cwd(io.Directory value) => _cwd = value;
 
   /// Builds template based on supplied [options].
-  Future<void> build(Options options) async {
+  Future<void> build(Options options, List<String> args) async {
     final dir = cwd;
-    if (!await _isDirEmpty(dir)) {}
+    final target = _DirectoryGeneratorTarget(logger, dir);
 
     if (options.template == null) {
       logger
@@ -39,7 +40,16 @@ class MasonCli {
       io.exitCode = ExitCode.usage.code;
       return;
     }
+    final generator = MasonGenerator.fromYaml(options.template);
+    final vars = <String, String>{};
 
+    for (final arg in generator.args) {
+      final index = args.indexOf('--$arg');
+      if (index != -1) {
+        vars.addAll({arg: args[index + 1]});
+      }
+    }
+    await generator.generate(target, vars: vars);
     logger.success('⚒️  ${'building ${options.template}'}');
   }
 
@@ -64,20 +74,6 @@ class MasonCli {
     io.exitCode = ExitCode.usage.code;
   }
 
-  /// Returns true if the given directory does not contain non-symlinked,
-  /// non-hidden subdirectories.
-  static Future<bool> _isDirEmpty(io.Directory dir) async {
-    final isHiddenDir = (io.FileSystemEntity dir) {
-      return path.basename(dir.path).startsWith('.');
-    };
-
-    return dir
-        .list(followLinks: false)
-        .where((entity) => entity is io.Directory)
-        .where((entity) => !isHiddenDir(entity))
-        .isEmpty;
-  }
-
   /// Returns CLI Usage information.
   static String get usage {
     return '''
@@ -91,3 +87,23 @@ ${_indent(parser.usage)}''';
 
 String _indent(String input) =>
     LineSplitter.split(input).map((l) => '  $l'.trimRight()).join('\n');
+
+class _DirectoryGeneratorTarget extends GeneratorTarget {
+  _DirectoryGeneratorTarget(this.logger, this.dir) {
+    dir.createSync();
+  }
+
+  final Logger logger;
+  final io.Directory dir;
+
+  @override
+  Future<io.File> createFile(String filePath, List<int> contents) {
+    final file = io.File(path.join(dir.path, filePath));
+
+    logger.info('  ${file.path}');
+
+    return file
+        .create(recursive: true)
+        .then<io.File>((_) => file.writeAsBytes(contents));
+  }
+}
