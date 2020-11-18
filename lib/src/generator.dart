@@ -1,7 +1,7 @@
 // ignore_for_file: public_member_api_docs
 import 'dart:convert';
 import 'dart:io';
-import 'package:path/path.dart' as p;
+import 'package:http/http.dart' as http;
 
 import 'package:checked_yaml/checked_yaml.dart';
 
@@ -124,22 +124,26 @@ class MasonGenerator extends Generator {
   /// vars:
   ///   - name
   /// ```
-  factory MasonGenerator.fromYaml(String path) {
-    final file = File(path);
-    final content = file.readAsStringSync();
-    final manifest = checkedYamlDecode(
-      content,
-      (m) => Manifest.fromJson(m),
-    );
+  static Future<MasonGenerator> fromYaml(String path) async {
+    final uri = Uri.parse(path);
+    final yamlFile = File(uri.path);
+    final isRemoteYaml = uri.isScheme('http') || uri.isScheme('https');
+    final content = isRemoteYaml
+        ? (await http.get(uri)).body
+        : await yamlFile.readAsString();
+    final manifest = checkedYamlDecode(content, (m) => Manifest.fromJson(m));
+    final futures = manifest.files.map((file) {
+      return () async {
+        final content = isRemoteYaml
+            ? (await http.get(uri.resolve(file.from))).body
+            : File(uri.resolve(file.from).path).readAsStringSync();
+        return TemplateFile(file.to, content);
+      }();
+    });
     return MasonGenerator._(
       manifest.name,
       manifest.description,
-      files: manifest.files.map((f) {
-        return TemplateFile(
-          f.to,
-          File(p.join(file.parent.path, f.from)).readAsStringSync(),
-        );
-      }).toList(),
+      files: await Future.wait(futures),
       vars: manifest.vars,
     );
   }

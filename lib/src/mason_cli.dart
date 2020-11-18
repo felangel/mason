@@ -29,7 +29,7 @@ class MasonCli {
 
   /// Builds template based on supplied [options].
   Future<void> build(Options options, List<String> args) async {
-    final stopwatch = Stopwatch()..start();
+    final stop = logger.progress('building');
     final dir = cwd;
     final target = _DirectoryGeneratorTarget(logger, dir);
 
@@ -42,7 +42,7 @@ class MasonCli {
       return;
     }
     try {
-      final generator = MasonGenerator.fromYaml(options.template);
+      final generator = await MasonGenerator.fromYaml(options.template);
       final vars = <String, String>{};
 
       for (final variable in generator.vars) {
@@ -53,10 +53,8 @@ class MasonCli {
       }
 
       await generator.generate(target, vars: vars);
-      stopwatch.stop();
-      logger.success(
-        '''(${stopwatch.elapsed.inMilliseconds}ms) built [${generator.id}] in ${target.dir.path} ⛏️''',
-      );
+      stop();
+      logger.success('built [${generator.id}] in ${target.dir.path}');
     } on Exception catch (e) {
       logger.err(e.toString());
     }
