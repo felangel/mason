@@ -1,3 +1,7 @@
+# 0.0.1-dev.5
+
+- fix: stop progress on build error
+
 # 0.0.1-dev.4
 
 - fix: mason CLI version fix
