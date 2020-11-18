@@ -34,7 +34,7 @@ vars:
 ## Build
 
 ```sh
-mason build --template greetings.yaml -- --name Felix
+mason build -t greetings.yaml -- --name Felix
 ```
 
 The above command should generate `GREETINGS.md` file with the following content:

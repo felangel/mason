@@ -1,3 +1,7 @@
+# 0.0.1-dev.4
+
+- fix: mason CLI version fix
+
 # 0.0.1-dev.3
 
 - feat: support for remote templates
