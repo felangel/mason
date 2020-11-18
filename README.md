@@ -25,6 +25,8 @@ vars:
 
 ## Define Template File(s)
 
+Write your template using [mustache templates](https://mustache.github.io/). See the [mustache manual](http://mustache.github.com/mustache.5.html) for detailed usage information.
+
 `greetings.md`
 
 ```md
