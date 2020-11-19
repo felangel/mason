@@ -10,13 +10,15 @@ Options _$parseOptionsResult(ArgResults result) => Options(
     template: result['template'] as String,
     help: result['help'] as bool,
     version: result['version'] as bool,
-    command: result.command);
+    command: result.command,
+    varsFile: result['vars-file'] as String);
 
 ArgParser _$populateOptionsParser(ArgParser parser) => parser
   ..addOption('template', abbr: 't', help: 'template yaml path')
   ..addFlag('help',
       abbr: 'h', help: 'Prints usage information.', negatable: false)
-  ..addFlag('version', help: 'Print the current version.', negatable: false);
+  ..addFlag('version', help: 'Print the current version.', negatable: false)
+  ..addOption('vars-file', help: 'Variables file path.');
 
 final _$parserForOptions = _$populateOptionsParser(ArgParser());
 

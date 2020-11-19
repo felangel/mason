@@ -16,6 +16,7 @@ class Options {
     this.help,
     this.version,
     this.command,
+    this.varsFile,
   });
 
   /// Path to template.yaml
@@ -40,6 +41,14 @@ class Options {
     help: 'Print the current version.',
   )
   final bool version;
+
+  /// Optional path to vars.yaml, which contains
+  ///  the variables to be merged into the template
+  @CliOption(
+    name: 'vars-file',
+    help: 'Variables file path.',
+  )
+  final String varsFile;
 
   /// The results of parsing a series of command line arguments using
   /// [ArgParser.parse()].

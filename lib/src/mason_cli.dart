@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:io';
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:path/path.dart' as path;
@@ -46,10 +48,20 @@ class MasonCli {
       final generator = await MasonGenerator.fromYaml(options.template);
       final vars = <String, String>{};
 
-      for (final variable in generator.vars) {
-        final index = args.indexOf('--$variable');
-        if (index != -1) {
-          vars.addAll({variable: args[index + 1]});
+      if (options.varsFile != null) {
+        final file = File(options.varsFile);
+        final content = await file.readAsString();
+        final localVars = checkedYamlDecode(
+            content, (m) => Map.castFrom<dynamic, dynamic, String, String>(m));
+        for (final variable in generator.vars) {
+          vars[variable] = localVars[variable];
+        }
+      } else {
+        for (final variable in generator.vars) {
+          final index = args.indexOf('--$variable');
+          if (index != -1) {
+            vars.addAll({variable: args[index + 1]});
+          }
         }
       }
 
