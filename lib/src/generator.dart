@@ -1,6 +1,5 @@
-// ignore_for_file: public_member_api_docs
 import 'dart:convert';
-import 'dart:io';
+import 'dart:io' show File;
 import 'package:http/http.dart' as http;
 
 import 'package:checked_yaml/checked_yaml.dart';
@@ -19,9 +18,13 @@ abstract class Generator implements Comparable<Generator> {
     this.description,
   );
 
+  /// Unique identifier for the generator.
   final String id;
+
+  /// Description of the generator.
   final String description;
 
+  /// List of [TemplateFile] which will be used to generate files.
   final List<TemplateFile> files = [];
 
   /// Add a new template file.
@@ -30,6 +33,7 @@ abstract class Generator implements Comparable<Generator> {
     return file;
   }
 
+  /// Generates files based on the provided [GeneratorTarget] and [vars].
   Future generate(
     GeneratorTarget target, {
     Map<String, String> vars,
@@ -71,6 +75,7 @@ class TemplateFile {
   /// The template file content.
   final String content;
 
+  /// Performs a substitution on the [path] based on the incoming [parameters].
   FileContents runSubstitution(Map<String, String> parameters) {
     final newPath = path.render(parameters);
     final newContents = _createContent(parameters);
