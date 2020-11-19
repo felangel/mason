@@ -6,7 +6,7 @@ import 'package:mason/src/commands/commands.dart';
 import 'package:mason/src/logger.dart';
 import 'package:mason/src/version.dart';
 
-void main(List<String> args) {
+void main(List<String> args) async {
   final logger = Logger();
   final masonCli =
       CommandRunner<void>('mason', '⛏️  mason \u{2022} lay the foundation!')
@@ -17,18 +17,23 @@ void main(List<String> args) {
         )
         ..addCommand(BuildCommand(logger));
 
-  final globalArgs = masonCli.argParser.parse(args);
-  if (globalArgs['version'] == true) {
-    return logger.info('mason version: $packageVersion');
+  try {
+    final globalArgs = masonCli.argParser.parse(args);
+    if (globalArgs['version'] == true) {
+      return logger.info('mason version: $packageVersion');
+    }
+    await masonCli.run(args);
+  } on FormatException catch (e) {
+    logger
+      ..err(e.message)
+      ..info('')
+      ..info(masonCli.usage);
+    exit(io.ExitCode.usage.code);
+  } on UsageException catch (e) {
+    logger
+      ..err(e.message)
+      ..info('')
+      ..info(masonCli.usage);
+    exit(io.ExitCode.usage.code);
   }
-
-  masonCli
-    ..run(args).catchError((dynamic error) {
-      if (error is! UsageException) throw error;
-      logger
-        ..err((error as UsageException).message)
-        ..info('')
-        ..info(masonCli.usage);
-      exit(io.ExitCode.usage.code);
-    });
 }

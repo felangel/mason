@@ -78,7 +78,7 @@ class BuildCommand extends Command<dynamic> {
       generateDone = _logger.progress('building ${generator.id}');
       await generator.generate(target, vars: vars);
       generateDone?.call();
-      _logger.success('built [${generator.id}] in ${target.dir.path}');
+      _logger.success('built ${generator.id} in ${target.dir.path}');
     } on Exception catch (e) {
       fetchDone();
       generateDone?.call();

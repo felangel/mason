@@ -1,3 +1,10 @@
+# 0.0.1-dev.6
+
+- feat: support `mason.yaml`
+- feat: support prompts for vars
+- refactor: use `CommandRunner`
+- docs: `README` updates
+
 # 0.0.1-dev.5
 
 - fix: stop progress on build error
