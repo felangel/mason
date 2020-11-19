@@ -51,10 +51,17 @@ class MasonCli {
       if (options.varsFile != null) {
         final file = File(options.varsFile);
         final content = await file.readAsString();
-        final localVars = checkedYamlDecode(
-            content, (m) => Map.castFrom<dynamic, dynamic, String, String>(m));
-        for (final variable in generator.vars) {
-          vars[variable] = localVars[variable];
+        try {
+          final localVars = checkedYamlDecode(content,
+              (m) => Map.castFrom<dynamic, dynamic, String, String>(m));
+          for (final variable in generator.vars) {
+            vars[variable] = localVars[variable];
+          }
+        } on TypeError catch (_) {
+          throw Exception(
+            'Variable file (${options.varsFile})'
+            ' is not in the format Map<String, String>',
+          );
         }
       } else {
         for (final variable in generator.vars) {
