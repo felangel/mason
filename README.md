@@ -45,7 +45,8 @@ The above command should generate `GREETINGS.md` file with the following content
 # Greetings Felix!
 ```
 
-You can also input variables with a file in `.yaml` format.
+### Building with Variables File
+You can also specify variables in a file in `.yaml` format.
 
 `variables.yaml`
 
@@ -53,11 +54,13 @@ You can also input variables with a file in `.yaml` format.
 name: Felix
 ```
 
+Run the `build` command with the `--vars-file` option:
+
 ```sh
 mason build -t greetings.yaml --vars-file variables.yaml
 ```
 
-The above command should generate `GREETINGS.md` file with the following content:
+The command will generate the same content:
 
 ```md
 # Greetings Felix!
