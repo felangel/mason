@@ -1,6 +1,6 @@
 import 'dart:async';
 
-import 'dart:io' as io;
+import 'dart:io';
 import 'package:io/ansi.dart';
 
 /// A basic Logger which wraps [print] and applies various styles.
@@ -34,7 +34,7 @@ class Logger {
     _timer = Timer.periodic(const Duration(milliseconds: 80), (t) {
       _index++;
       final char = _progressAnimation[_index % _progressAnimation.length];
-      io.stdout.write(
+      stdout.write(
         '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}$char')} $message...''',
       );
     });
@@ -42,7 +42,7 @@ class Logger {
       _stopwatch.stop();
       final time =
           (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
-      io.stdout.write(
+      stdout.write(
         '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} $message... (${time}ms)\n''',
       );
       _timer?.cancel();
@@ -57,4 +57,10 @@ class Logger {
 
   /// Prints success message.
   void success(String message) => print(lightGreen.wrap(message));
+
+  /// Prompts user and returns response.
+  String prompt(String message) {
+    stdout.write('$message');
+    return stdin.readLineSync();
+  }
 }

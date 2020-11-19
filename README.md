@@ -35,8 +35,21 @@ Write your template using [mustache templates](https://mustache.github.io/). See
 
 ## Build
 
+### Command Line Variables
+
+Any variables can be passed as command line args.
+
 ```sh
-mason build -t greetings.yaml -- --name Felix
+$ mason build -t greetings.yaml -- --name Felix
+```
+
+### Variable Prompts
+
+Any variables which aren't specified as command line args will be prompted.
+
+```sh
+$ mason build -t greetings.yaml
+name: Felix
 ```
 
 The above command should generate `GREETINGS.md` file with the following content:
@@ -45,16 +58,37 @@ The above command should generate `GREETINGS.md` file with the following content
 # Greetings Felix!
 ```
 
+## Using Mason YAML
+
+Optionally define a `mason.yaml` at the root directory of your project.
+
+```yaml
+templates:
+  greetings:
+    path: ./greetings.yaml
+  widget:
+    path: https://raw.githubusercontent.com/felangel/mason/master/example/templates/widget/widget.yaml
+```
+
+Then you can use `mason build <greetings|widget>`:
+
+```sh
+mason build greetings -- --name Felix
+mason build widget -- --name my_widget
+```
+
 ## Usage
 
 ```sh
 $ mason --help
 ⛏️  mason • lay the foundation!
-Usage: mason <command> [<args>]
-Commands:
-  build   build new component from a template
-Arguments:
-  -t, --template    template yaml path
-  -h, --help        Prints usage information.
-      --version     Print the current version.
+
+Usage: mason <command> [arguments]
+
+Global options:
+-h, --help       Print this usage information.
+    --version    Print the current version.
+
+Available commands:
+  build   Generate code using an existing template.
 ```

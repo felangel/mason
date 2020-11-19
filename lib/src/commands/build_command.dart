@@ -1,6 +1,8 @@
-import 'dart:io' as io;
-import 'package:io/io.dart';
+import 'dart:io';
+import 'package:checked_yaml/checked_yaml.dart';
+import 'package:io/io.dart' as io;
 import 'package:mason/src/generator.dart';
+import 'package:mason/src/mason_configuration.dart';
 import 'package:path/path.dart' as path;
 import 'package:args/command_runner.dart';
 
@@ -23,18 +25,29 @@ class BuildCommand extends Command<dynamic> {
   @override
   final String name = 'build';
 
-  io.Directory _cwd;
+  Directory _cwd;
 
   /// Return the current working directory.
-  io.Directory get cwd => _cwd ?? io.Directory.current;
+  Directory get cwd => _cwd ?? Directory.current;
 
   /// An override for the directory to generate into; public for testing.
-  set cwd(io.Directory value) => _cwd = value;
+  set cwd(Directory value) => _cwd = value;
 
   @override
   void run() async {
-    final template = argResults['template'] as String;
+    final masonConfigFile = File(path.join(cwd.path, 'mason.yaml'));
+    final masonConfigContent = masonConfigFile.existsSync()
+        ? masonConfigFile.readAsStringSync()
+        : null;
+    final masonConfig = masonConfigContent != null
+        ? checkedYamlDecode(
+            masonConfigContent,
+            (m) => MasonConfiguration.fromJson(m),
+          )
+        : null;
     final args = argResults.rest;
+    final template = argResults['template'] as String ??
+        masonConfig.templates[args.first]?.path;
     final dir = cwd;
     final target = _DirectoryGeneratorTarget(_logger, dir);
 
@@ -43,27 +56,32 @@ class BuildCommand extends Command<dynamic> {
         ..err('Specify a template')
         ..info('')
         ..info(usage);
-      io.exitCode = ExitCode.usage.code;
+      exitCode = io.ExitCode.usage.code;
       return;
     }
 
-    final stop = _logger.progress('building');
+    final fetchDone = _logger.progress('fetching template');
+    Function generateDone;
     try {
       final generator = await MasonGenerator.fromYaml(template);
+      fetchDone();
       final vars = <String, String>{};
-
       for (final variable in generator.vars) {
         final index = args.indexOf('--$variable');
         if (index != -1) {
           vars.addAll({variable: args[index + 1]});
+        } else {
+          vars.addAll({variable: _logger.prompt('$variable: ')});
         }
       }
 
+      generateDone = _logger.progress('building ${generator.id}');
       await generator.generate(target, vars: vars);
-      stop();
+      generateDone?.call();
       _logger.success('built [${generator.id}] in ${target.dir.path}');
     } on Exception catch (e) {
-      stop();
+      fetchDone();
+      generateDone?.call();
       _logger.err(e.toString());
     }
   }
@@ -75,14 +93,14 @@ class _DirectoryGeneratorTarget extends GeneratorTarget {
   }
 
   final Logger logger;
-  final io.Directory dir;
+  final Directory dir;
 
   @override
-  Future<io.File> createFile(String filePath, List<int> contents) {
-    final file = io.File(path.join(dir.path, filePath));
+  Future<File> createFile(String filePath, List<int> contents) {
+    final file = File(path.join(dir.path, filePath));
 
     return file
         .create(recursive: true)
-        .then<io.File>((_) => file.writeAsBytes(contents));
+        .then<File>((_) => file.writeAsBytes(contents));
   }
 }
