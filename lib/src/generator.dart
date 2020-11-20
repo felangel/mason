@@ -190,15 +190,18 @@ class MasonGenerator extends Generator {
   final List<String> vars;
 }
 
-Future<ProcessResult> _runGit(List<String> args,
-    {bool throwOnError = true, String processWorkingDir}) async {
-  final pr = await Process.run('git', args,
+Future<ProcessResult> _runGit(
+  List<String> args, {
+  bool throwOnError = true,
+  String processWorkingDir,
+}) async {
+  final result = await Process.run('git', args,
       workingDirectory: processWorkingDir, runInShell: true);
 
   if (throwOnError) {
-    _throwIfProcessFailed(pr, 'git', args);
+    _throwIfProcessFailed(result, 'git', args);
   }
-  return pr;
+  return result;
 }
 
 void _throwIfProcessFailed(
@@ -224,6 +227,6 @@ void _throwIfProcessFailed(
 }
 
 Future<String> _createSystemTempDir() async {
-  var tempDir = await Directory.systemTemp.createTemp('mason_');
+  final tempDir = await Directory.systemTemp.createTemp('mason_');
   return tempDir.resolveSymbolicLinksSync();
 }
