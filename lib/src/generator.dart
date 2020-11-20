@@ -5,8 +5,8 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:path/path.dart' as p;
 import 'package:mason/src/mason_configuration.dart';
 
-import 'common.dart';
 import 'manifest.dart';
+import 'render.dart';
 
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
@@ -130,60 +130,59 @@ class MasonGenerator extends Generator {
   /// vars:
   ///   - name
   /// ```
-  static Future<MasonGenerator> fromTemplate(MasonTemplate template) async {
-    if (template.path != null) {
-      final templateYamlFile = File(template.path);
-      final templateYamlContent = await templateYamlFile.readAsString();
-      final manifest = checkedYamlDecode(
-        templateYamlContent,
-        (m) => Manifest.fromJson(m),
-      );
-      final templateDirectory = templateYamlFile.parent;
-      final futures = manifest.files.map((file) {
-        return () async {
-          final content = await File(
-            p.join(templateDirectory.path, file.from),
-          ).readAsString();
-          return TemplateFile(file.to, content);
-        }();
-      });
-      return MasonGenerator._(
-        manifest.name,
-        manifest.description,
-        files: await Future.wait(futures),
-        vars: manifest.vars,
-      );
-    }
+  static Future<MasonGenerator> fromTemplate(
+    MasonTemplate template, {
+    String workingDirectory = '',
+  }) async {
+    File templateYamlFile;
+    String templateYamlContent;
 
-    if (template.git != null) {
+    if (template.path != null) {
+      templateYamlFile = File(p.join(workingDirectory, template.path));
+      templateYamlContent = await templateYamlFile.readAsString();
+    } else if (template.git != null) {
       final tempDirectory = await _createSystemTempDir();
       await _runGit(['clone', template.git.url, tempDirectory]);
-      final templateYamlFile = File(
-        p.join(tempDirectory, template.git.path ?? ''),
+      if (template.git.ref != null) {
+        await _runGit(
+          ['checkout', template.git.ref],
+          processWorkingDir: tempDirectory,
+        );
+      }
+      templateYamlFile = File(
+        p.join(workingDirectory, tempDirectory, template.git.path ?? ''),
       );
-      final templateYamlContent = await templateYamlFile.readAsString();
-      final manifest = checkedYamlDecode(
-        templateYamlContent,
-        (m) => Manifest.fromJson(m),
-      );
-      final templateDirectory = templateYamlFile.parent;
-      final futures = manifest.files.map((file) {
-        return () async {
-          final content = File(
-            p.join(templateDirectory.path, file.from),
-          ).readAsStringSync();
-          return TemplateFile(file.to, content);
-        }();
-      });
-      return MasonGenerator._(
-        manifest.name,
-        manifest.description,
-        files: await Future.wait(futures),
-        vars: manifest.vars,
-      );
+      templateYamlContent = await templateYamlFile.readAsString();
+    } else {
+      throw const FormatException('missing template source');
     }
 
-    throw const FormatException('missing template source');
+    final manifest = checkedYamlDecode(
+      templateYamlContent,
+      (m) => Manifest.fromJson(m),
+    );
+    final parentDirectory = templateYamlFile.parent;
+    final templateDirectory = Directory(
+      p.join(parentDirectory.path, manifest.template),
+    );
+    final futures = templateDirectory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) {
+      return () async {
+        final content = await File(file.path).readAsString();
+        final relativePath = file.path.substring(
+          file.path.indexOf(manifest.template) + 1 + manifest.template.length,
+        );
+        return TemplateFile(relativePath, content);
+      }();
+    });
+    return MasonGenerator._(
+      manifest.name,
+      manifest.description,
+      files: await Future.wait(futures),
+      vars: manifest.vars,
+    );
   }
 
   /// Optional list of variables which will be used to populate

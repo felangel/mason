@@ -5,69 +5,45 @@
 
 A Dart template generator which helps teams generate files quickly and consistently.
 
-## Activate Mason
-
 `pub global activate mason`
 
-## Define Template YAML
+## Creating Custom Templates
+
+### Define Template YAML
 
 `greetings.yaml`
 
 ```yaml
 name: greetings
 description: A Simple Greetings Template
-files:
-  - from: greetings.md # template file (input)
-    to: GREETINGS.md # generated file (output)
 vars:
   - name
 ```
 
-## Define Template File(s)
+### Define Template
 
-Write your template using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
+Write your template in `__template__` using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
 
-`greetings.md`
+`__template__/greetings.md`
 
 ```md
 # Greetings {{name}}!
 ```
 
-## Build
+## Consuming Templates
 
-### Command Line Variables
+### Create a Mason YAML
 
-Any variables can be passed as command line args.
-
-```sh
-$ mason build -t greetings.yaml -- --name Felix
-```
-
-### Variable Prompts
-
-Any variables which aren't specified as command line args will be prompted.
-
-```sh
-$ mason build -t greetings.yaml
-name: Felix
-```
-
-The above command should generate `GREETINGS.md` file with the following content:
-
-```md
-# Greetings Felix!
-```
-
-## Using Mason YAML
-
-Optionally define a `mason.yaml` at the root directory of your project.
+Define a `mason.yaml` at the root directory of your project.
 
 ```yaml
 templates:
   greetings:
     path: ./greetings.yaml
   widget:
-    path: https://raw.githubusercontent.com/felangel/mason/master/example/templates/widget/widget.yaml
+    git:
+      url: git@github.com:felangel/mason.git
+      path: example/templates/widget/template.yaml
 ```
 
 Then you can use `mason build <greetings|widget>`:
@@ -75,6 +51,29 @@ Then you can use `mason build <greetings|widget>`:
 ```sh
 mason build greetings -- --name Felix
 mason build widget -- --name my_widget
+```
+
+### Command Line Variables
+
+Any variables can be passed as command line args.
+
+```sh
+$ mason build greetings -- --name Felix
+```
+
+### Variable Prompts
+
+Any variables which aren't specified as command line args will be prompted.
+
+```sh
+$ mason build greetings
+name: Felix
+```
+
+The above command should generate `GREETINGS.md` in the current directory with the following content:
+
+```md
+# Greetings Felix!
 ```
 
 ## Usage

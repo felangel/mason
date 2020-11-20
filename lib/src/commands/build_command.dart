@@ -70,7 +70,10 @@ class BuildCommand extends Command<dynamic> {
     final fetchDone = _logger.progress('fetching template');
     Function generateDone;
     try {
-      final generator = await MasonGenerator.fromTemplate(template);
+      final generator = await MasonGenerator.fromTemplate(
+        template,
+        workingDirectory: masonConfigFile.parent.path,
+      );
       fetchDone();
       final vars = <String, String>{};
       for (final variable in generator.vars) {

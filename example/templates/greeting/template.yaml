@@ -1,0 +1,4 @@
+name: greeting
+description: A Simple Greeting Template
+vars:
+  - name

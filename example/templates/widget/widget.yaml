@@ -1,7 +1,0 @@
-name: widget
-description: A Flutter Widget Template
-files:
-  - from: "{{name}}.txt"
-    to: "{{name}}.dart"
-vars:
-  - name
