@@ -1,11 +1,12 @@
 import 'dart:convert';
-import 'dart:io' show File;
-import 'package:http/http.dart' as http;
+import 'dart:io' show Directory, File, Process, ProcessException, ProcessResult;
 
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:path/path.dart' as p;
+import 'package:mason/src/mason_configuration.dart';
 
-import 'common.dart';
 import 'manifest.dart';
+import 'render.dart';
 
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
@@ -129,20 +130,51 @@ class MasonGenerator extends Generator {
   /// vars:
   ///   - name
   /// ```
-  static Future<MasonGenerator> fromYaml(String path) async {
-    final uri = Uri.parse(path);
-    final yamlFile = File(uri.path);
-    final isRemoteYaml = uri.isScheme('http') || uri.isScheme('https');
-    final content = isRemoteYaml
-        ? (await http.get(uri)).body
-        : await yamlFile.readAsString();
-    final manifest = checkedYamlDecode(content, (m) => Manifest.fromJson(m));
-    final futures = manifest.files.map((file) {
+  static Future<MasonGenerator> fromTemplate(
+    MasonTemplate template, {
+    String workingDirectory = '',
+  }) async {
+    File templateYamlFile;
+    String templateYamlContent;
+
+    if (template.path != null) {
+      templateYamlFile = File(p.join(workingDirectory, template.path));
+      templateYamlContent = await templateYamlFile.readAsString();
+    } else if (template.git != null) {
+      final tempDirectory = await _createSystemTempDir();
+      await _runGit(['clone', template.git.url, tempDirectory]);
+      if (template.git.ref != null) {
+        await _runGit(
+          ['checkout', template.git.ref],
+          processWorkingDir: tempDirectory,
+        );
+      }
+      templateYamlFile = File(
+        p.join(workingDirectory, tempDirectory, template.git.path ?? ''),
+      );
+      templateYamlContent = await templateYamlFile.readAsString();
+    } else {
+      throw const FormatException('missing template source');
+    }
+
+    final manifest = checkedYamlDecode(
+      templateYamlContent,
+      (m) => Manifest.fromJson(m),
+    );
+    final parentDirectory = templateYamlFile.parent;
+    final templateDirectory = Directory(
+      p.join(parentDirectory.path, manifest.template),
+    );
+    final futures = templateDirectory
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) {
       return () async {
-        final content = isRemoteYaml
-            ? (await http.get(uri.resolve(file.from))).body
-            : File(uri.resolve(file.from).path).readAsStringSync();
-        return TemplateFile(file.to, content);
+        final content = await File(file.path).readAsString();
+        final relativePath = file.path.substring(
+          file.path.indexOf(manifest.template) + 1 + manifest.template.length,
+        );
+        return TemplateFile(relativePath, content);
       }();
     });
     return MasonGenerator._(
@@ -156,4 +188,45 @@ class MasonGenerator extends Generator {
   /// Optional list of variables which will be used to populate
   /// the corresponding mustache variables within the template.
   final List<String> vars;
+}
+
+Future<ProcessResult> _runGit(
+  List<String> args, {
+  bool throwOnError = true,
+  String processWorkingDir,
+}) async {
+  final result = await Process.run('git', args,
+      workingDirectory: processWorkingDir, runInShell: true);
+
+  if (throwOnError) {
+    _throwIfProcessFailed(result, 'git', args);
+  }
+  return result;
+}
+
+void _throwIfProcessFailed(
+    ProcessResult pr, String process, List<String> args) {
+  assert(pr != null);
+  if (pr.exitCode != 0) {
+    final values = {
+      'Standard out': pr.stdout.toString().trim(),
+      'Standard error': pr.stderr.toString().trim()
+    }..removeWhere((k, v) => v.isEmpty);
+
+    String message;
+    if (values.isEmpty) {
+      message = 'Unknown error';
+    } else if (values.length == 1) {
+      message = values.values.single;
+    } else {
+      message = values.entries.map((e) => '${e.key}\n${e.value}').join('\n');
+    }
+
+    throw ProcessException(process, args, message, pr.exitCode);
+  }
+}
+
+Future<String> _createSystemTempDir() async {
+  final tempDir = await Directory.systemTemp.createTemp('mason_');
+  return tempDir.resolveSymbolicLinksSync();
 }

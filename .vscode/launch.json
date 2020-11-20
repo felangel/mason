@@ -9,14 +9,7 @@
       "request": "launch",
       "type": "dart",
       "program": "bin/mason.dart",
-      "args": [
-        "build",
-        "-t",
-        "example/templates/widget/widget.yaml",
-        "--",
-        "--name",
-        "my_widget"
-      ]
+      "args": []
     }
   ]
 }

@@ -1,0 +1,5 @@
+templates:
+  greetings:
+    path: ../templates/greeting/template.yaml
+  widget:
+    path: ../templates/widget/template.yaml

@@ -21,7 +21,7 @@ jobs:
         run: pub get
 
       - name: Format
-        run: dart format --set-exit-if-changed .
+        run: dart format --set-exit-if-changed lib
 
       - name: Analyze
         run: dart analyze --fatal-infos --fatal-warnings .

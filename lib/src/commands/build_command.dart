@@ -13,9 +13,7 @@ import '../logger.dart';
 /// {@endtemplate}
 class BuildCommand extends Command<dynamic> {
   /// {@macro build_command}
-  BuildCommand(this._logger) {
-    argParser.addOption('template', abbr: 't', help: 'template yaml path');
-  }
+  BuildCommand(this._logger);
 
   final Logger _logger;
 
@@ -35,23 +33,32 @@ class BuildCommand extends Command<dynamic> {
 
   @override
   void run() async {
-    final masonConfigFile = File(path.join(cwd.path, 'mason.yaml'));
+    final masonConfigFile = MasonConfiguration.findNearest(cwd);
+    if (masonConfigFile == null) {
+      _logger.err(
+        'missing mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+      );
+      return;
+    }
     final masonConfigContent = masonConfigFile.existsSync()
         ? masonConfigFile.readAsStringSync()
         : null;
-    final masonConfig = masonConfigContent != null
-        ? checkedYamlDecode(
-            masonConfigContent,
-            (m) => MasonConfiguration.fromJson(m),
-          )
-        : null;
+    if (masonConfigContent == null || masonConfigContent.isEmpty) {
+      _logger.err(
+        'malformed mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+      );
+      return;
+    }
+    final masonConfig = checkedYamlDecode(
+      masonConfigContent,
+      (m) => MasonConfiguration.fromJson(m),
+    );
     final args = argResults.rest;
-    final template = argResults['template'] as String ??
-        masonConfig.templates[args.first]?.path;
+    final template = masonConfig.templates[args.first];
     final dir = cwd;
     final target = _DirectoryGeneratorTarget(_logger, dir);
 
-    if (template == null || template.isEmpty) {
+    if (template == null) {
       _logger
         ..err('Specify a template')
         ..info('')
@@ -63,7 +70,10 @@ class BuildCommand extends Command<dynamic> {
     final fetchDone = _logger.progress('fetching template');
     Function generateDone;
     try {
-      final generator = await MasonGenerator.fromYaml(template);
+      final generator = await MasonGenerator.fromTemplate(
+        template,
+        workingDirectory: masonConfigFile.parent.path,
+      );
       fetchDone();
       final vars = <String, String>{};
       for (final variable in generator.vars) {

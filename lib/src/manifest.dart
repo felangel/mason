@@ -9,7 +9,12 @@ part 'manifest.g.dart';
 @JsonSerializable()
 class Manifest {
   /// {@macro manifest}
-  const Manifest(this.name, this.description, this.files, this.vars);
+  const Manifest(
+    this.name,
+    this.description,
+    this.vars, {
+    String template,
+  }) : template = template ?? '__template__';
 
   /// Converts [Map] to [Manifest]
   factory Manifest.fromJson(Map<dynamic, dynamic> json) =>
@@ -24,32 +29,10 @@ class Manifest {
   /// Description of the `MasonGenerator`
   final String description;
 
-  /// List of [TemplateFile] which are used to seed the `MasonGenerator`
-  final List<TemplateFile> files;
+  /// Optional path to template directory.
+  /// Defaults to `__template__`.
+  final String template;
 
   /// List of variables used when templating `MasonGenerator`
   final List<String> vars;
-}
-
-/// {@template template_file}
-/// A Template File which consists of the path to the template
-/// and the destination path (relative to the current working directory).
-/// {@endtemplate}
-@JsonSerializable()
-class TemplateFile {
-  /// {@macro template_file}
-  const TemplateFile(this.from, this.to);
-
-  /// Converts [Map] to [TemplateFile]
-  factory TemplateFile.fromJson(Map<dynamic, dynamic> json) =>
-      _$TemplateFileFromJson(json);
-
-  /// The path to the template file.
-  final String from;
-
-  /// The relative path where the generated file should be created.
-  final String to;
-
-  /// Converts [TemplateFile] to [Map]
-  Map<dynamic, dynamic> toJson() => _$TemplateFileToJson(this);
 }

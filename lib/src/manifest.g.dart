@@ -9,18 +9,13 @@ part of 'manifest.dart';
 Manifest _$ManifestFromJson(Map json) {
   return $checkedNew('Manifest', json, () {
     $checkKeys(json,
-        allowedKeys: const ['name', 'description', 'files', 'vars']);
+        allowedKeys: const ['name', 'description', 'template', 'vars']);
     final val = Manifest(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
       $checkedConvert(
-          json,
-          'files',
-          (v) => (v as List)
-              ?.map((e) => e == null ? null : TemplateFile.fromJson(e as Map))
-              ?.toList()),
-      $checkedConvert(
           json, 'vars', (v) => (v as List)?.map((e) => e as String)?.toList()),
+      template: $checkedConvert(json, 'template', (v) => v as String),
     );
     return val;
   });
@@ -37,32 +32,7 @@ Map<String, dynamic> _$ManifestToJson(Manifest instance) {
 
   writeNotNull('name', instance.name);
   writeNotNull('description', instance.description);
-  writeNotNull('files', instance.files?.map((e) => e?.toJson())?.toList());
+  writeNotNull('template', instance.template);
   writeNotNull('vars', instance.vars);
-  return val;
-}
-
-TemplateFile _$TemplateFileFromJson(Map json) {
-  return $checkedNew('TemplateFile', json, () {
-    $checkKeys(json, allowedKeys: const ['from', 'to']);
-    final val = TemplateFile(
-      $checkedConvert(json, 'from', (v) => v as String),
-      $checkedConvert(json, 'to', (v) => v as String),
-    );
-    return val;
-  });
-}
-
-Map<String, dynamic> _$TemplateFileToJson(TemplateFile instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('from', instance.from);
-  writeNotNull('to', instance.to);
   return val;
 }

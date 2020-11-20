@@ -1,4 +1,7 @@
+import 'dart:io';
+
 import 'package:json_annotation/json_annotation.dart';
+import 'package:path/path.dart' as p;
 
 part 'mason_configuration.g.dart';
 
@@ -20,6 +23,22 @@ class MasonConfiguration {
 
   /// [Map] of template alias to [MasonTemplate].
   final Map<String, MasonTemplate> templates;
+
+  /// Finds nearest ancestor `mason.yaml` file
+  /// relative to the [cwd].
+  static File findNearest(Directory cwd) {
+    Directory prev;
+    var dir = cwd;
+    while (prev?.path != dir.path) {
+      final masonConfig = File(p.join(dir.path, 'mason.yaml'));
+      if (masonConfig.existsSync()) {
+        return masonConfig;
+      }
+      prev = dir;
+      dir = dir.parent;
+    }
+    return null;
+  }
 }
 
 /// {@template mason_template}
@@ -30,7 +49,7 @@ class MasonConfiguration {
 @JsonSerializable()
 class MasonTemplate {
   /// {@macro mason_template}
-  const MasonTemplate(this.path);
+  const MasonTemplate({this.path, this.git});
 
   /// Converts [Map] to [MasonConfiguration]
   factory MasonTemplate.fromJson(Map<dynamic, dynamic> json) =>
@@ -39,7 +58,35 @@ class MasonTemplate {
   /// Converts [MasonTemplate] to [Map]
   Map<dynamic, dynamic> toJson() => _$MasonTemplateToJson(this);
 
-  /// The template path.
-  /// It can be either a remote path or a local path.
+  /// The local template path.
   final String path;
+
+  /// Git Template configuration.
+  final GitPath git;
+}
+
+/// {@template git_path}
+/// Path to templates in git.
+/// {@endtemplate}
+@JsonSerializable()
+class GitPath {
+  /// {@macro git_path}
+  const GitPath(this.url, {this.path, this.ref});
+
+  /// Converts [Map] to [MasonConfiguration]
+  factory GitPath.fromJson(Map<dynamic, dynamic> json) =>
+      _$GitPathFromJson(json);
+
+  /// Converts [GitPath] to [Map]
+  Map<dynamic, dynamic> toJson() => _$GitPathToJson(this);
+
+  /// The local template path.
+  final String url;
+
+  /// Path in repository. Defaults to /.
+  final String path;
+
+  /// Anything that git can use to identify a commit.
+  /// Can be a branch name, tag, or commit hash.
+  final String ref;
 }
