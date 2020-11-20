@@ -1,3 +1,14 @@
+# 0.0.1-dev.7
+
+- **BREAKING** `mason.yaml` is required
+- **BREAKING** template yaml no longer has files
+- **BREAKING** `mason.yaml` format changed
+  - all template files and directories should be included inside `__template__`
+- feat: `mason.yaml` format changed
+- feat: nearest `mason.yaml` will be used
+- fix: improved error handling
+- docs: `README` updates
+
 # 0.0.1-dev.6
 
 - feat: support `mason.yaml`
