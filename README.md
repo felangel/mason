@@ -43,7 +43,7 @@ templates:
   widget:
     git:
       url: git@github.com:felangel/mason.git
-      path: example/templates/widget/template.yaml
+      path: templates/widget/template.yaml
 ```
 
 Then you can use `mason build <greetings|widget>`:
