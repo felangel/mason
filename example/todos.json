@@ -1,3 +1,7 @@
 {
-  "todos": [{ "todo": "Eat" }, { "todo": "Code" }, { "todo": "Sleep" }]
+  "todos": [
+    { "todo": "Eat", "done": true },
+    { "todo": "Code", "done": true },
+    { "todo": "Sleep", "done": false }
+  ]
 }
