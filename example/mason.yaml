@@ -1,4 +1,6 @@
 templates:
+  documentation:
+    path: ../templates/documentation/template.yaml
   greetings:
     path: ../templates/greeting/template.yaml
   todos:

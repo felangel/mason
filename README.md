@@ -30,6 +30,8 @@ Write your template in `__template__` using [mustache templates](https://mustach
 # Greetings {{name}}!
 ```
 
+❗ **Note: templates can consist of multiple files and subdirectories**
+
 ## Consuming Templates
 
 ### Create a Mason YAML
