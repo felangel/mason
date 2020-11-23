@@ -1,3 +1,7 @@
+# 0.0.1-dev.9
+
+- fix: unhandled `json` exception when `--json` omitted
+
 # 0.0.1-dev.8
 
 - feat: support for `--json` option in `mason build`

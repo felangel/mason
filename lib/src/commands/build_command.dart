@@ -126,7 +126,7 @@ class BuildCommand extends Command<dynamic> {
   }
 
   Future<Map<String, dynamic>> _decodeFile(String path) async {
-    if (path == null) return null;
+    if (path == null) return <String, dynamic>{};
     final jsonVarsContent = await File(path).readAsString();
     return json.decode(jsonVarsContent) as Map<String, dynamic>;
   }
