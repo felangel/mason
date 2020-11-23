@@ -1,0 +1,4 @@
+name: todos
+description: A Todos Template
+vars:
+  - todos

@@ -37,10 +37,10 @@ abstract class Generator implements Comparable<Generator> {
   /// Generates files based on the provided [GeneratorTarget] and [vars].
   Future generate(
     GeneratorTarget target, {
-    Map<String, String> vars,
+    Map<String, dynamic> vars,
   }) {
     return Future.forEach(files, (TemplateFile file) {
-      final resultFile = file.runSubstitution(vars ?? <String, String>{});
+      final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
       final filePath = resultFile.path;
       return target.createFile(filePath, resultFile.content);
     });
@@ -77,14 +77,14 @@ class TemplateFile {
   final String content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, String> parameters) {
+  FileContents runSubstitution(Map<String, dynamic> parameters) {
     final newPath = path.render(parameters);
     final newContents = _createContent(parameters);
 
     return FileContents(newPath, newContents);
   }
 
-  List<int> _createContent(Map<String, String> vars) {
+  List<int> _createContent(Map<String, dynamic> vars) {
     return utf8.encode(content.render(vars));
   }
 }

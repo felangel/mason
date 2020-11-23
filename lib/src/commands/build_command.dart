@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/io.dart' as io;
@@ -13,7 +14,13 @@ import '../logger.dart';
 /// {@endtemplate}
 class BuildCommand extends Command<dynamic> {
   /// {@macro build_command}
-  BuildCommand(this._logger);
+  BuildCommand(this._logger) {
+    argParser.addOption(
+      'json',
+      abbr: 'j',
+      help: 'Path to json file containing variables',
+    );
+  }
 
   final Logger _logger;
 
@@ -40,6 +47,7 @@ class BuildCommand extends Command<dynamic> {
       );
       return;
     }
+
     final masonConfigContent = masonConfigFile.existsSync()
         ? masonConfigFile.readAsStringSync()
         : null;
@@ -49,6 +57,7 @@ class BuildCommand extends Command<dynamic> {
       );
       return;
     }
+
     final masonConfig = checkedYamlDecode(
       masonConfigContent,
       (m) => MasonConfiguration.fromJson(m),
@@ -75,13 +84,33 @@ class BuildCommand extends Command<dynamic> {
         workingDirectory: masonConfigFile.parent.path,
       );
       fetchDone();
-      final vars = <String, String>{};
+
+      final vars = <String, dynamic>{};
+      try {
+        vars.addAll(await _decodeFile(argResults['json'] as String));
+      } on FormatException catch (error) {
+        _logger.err('${error}in ${argResults['json']}');
+        exitCode = io.ExitCode.usage.code;
+        return;
+      } on Exception catch (error) {
+        _logger.err('$error');
+        exitCode = io.ExitCode.usage.code;
+        return;
+      }
+
       for (final variable in generator.vars) {
+        if (vars.containsKey(variable)) continue;
         final index = args.indexOf('--$variable');
         if (index != -1) {
-          vars.addAll({variable: args[index + 1]});
+          vars.addAll(
+            <String, dynamic>{variable: _maybeDecode(args[index + 1])},
+          );
         } else {
-          vars.addAll({variable: _logger.prompt('$variable: ')});
+          vars.addAll(
+            <String, dynamic>{
+              variable: _maybeDecode(_logger.prompt('$variable: '))
+            },
+          );
         }
       }
 
@@ -93,6 +122,20 @@ class BuildCommand extends Command<dynamic> {
       fetchDone();
       generateDone?.call();
       _logger.err(e.toString());
+    }
+  }
+
+  Future<Map<String, dynamic>> _decodeFile(String path) async {
+    if (path == null) return null;
+    final jsonVarsContent = await File(path).readAsString();
+    return json.decode(jsonVarsContent) as Map<String, dynamic>;
+  }
+
+  Object _maybeDecode(String value) {
+    try {
+      return json.decode(value);
+    } catch (_) {
+      return value;
     }
   }
 }

@@ -1,3 +1,8 @@
+# 0.0.1-dev.8
+
+- feat: support for `--json` option in `mason build`
+- feat: support loops in templates
+
 # 0.0.1-dev.7
 
 - **BREAKING** `mason.yaml` is required
