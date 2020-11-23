@@ -1,5 +1,5 @@
 # TODOS
 
 {{#todos}}
-- {{todo}} {{#done}} ✅ {{/done}}{{^done}} ❌ {{/done}}
+- {{#done}} [X] {{/done}}{{^done}} [ ] {{/done}} {{todo}}
 {{/todos}}
