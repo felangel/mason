@@ -70,7 +70,23 @@ $ mason build greetings
 name: Felix
 ```
 
-The above command should generate `GREETINGS.md` in the current directory with the following content:
+### JSON Input Variables
+
+Any variables can be passed via json file:
+
+```dart
+$ mason build greetings --json greetings.json
+```
+
+where `greetings.json` is:
+
+```json
+{
+  "name": "Felix"
+}
+```
+
+The above commands should all generate `GREETINGS.md` in the current directory with the following content:
 
 ```md
 # Greetings Felix!

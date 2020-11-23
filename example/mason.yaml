@@ -1,5 +1,7 @@
 templates:
   greetings:
     path: ../templates/greeting/template.yaml
+  todos:
+    path: ../templates/todos/template.yaml
   widget:
     path: ../templates/widget/template.yaml
