@@ -1,5 +1,0 @@
-# TODOS
-
-- Eat  ✅ 
-- Code  ✅ 
-- Sleep  ❌ 

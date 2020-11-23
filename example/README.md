@@ -27,7 +27,7 @@ mason build todos --json todos.json
 ```md
 # TODOS
 
-- Eat
-- Code
-- Sleep
+- Eat  ✅ 
+- Code  ✅ 
+- Sleep  ❌ 
 ```
