@@ -118,10 +118,12 @@ class BuildCommand extends Command<dynamic> {
       await generator.generate(target, vars: vars);
       generateDone?.call();
       _logger.success('built ${generator.id} in ${target.dir.path}');
+      exit(io.ExitCode.success.code);
     } on Exception catch (e) {
       fetchDone();
       generateDone?.call();
       _logger.err(e.toString());
+      exit(io.ExitCode.cantCreate.code);
     }
   }
 

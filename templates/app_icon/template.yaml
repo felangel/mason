@@ -1,0 +1,4 @@
+name: app_icon
+description: Create an app_icon file from a URL
+vars:
+  - url

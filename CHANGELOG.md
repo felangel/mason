@@ -1,3 +1,7 @@
+# 0.0.1-dev.10
+
+- feat: support file resolution from path variable
+
 # 0.0.1-dev.9
 
 - fix: unhandled `json` exception when `--json` omitted
