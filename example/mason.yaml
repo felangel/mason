@@ -1,4 +1,6 @@
 templates:
+  app_icon:
+    path: ../templates/app_icon/template.yaml
   documentation:
     path: ../templates/documentation/template.yaml
   greetings:

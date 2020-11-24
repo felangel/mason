@@ -32,6 +32,25 @@ Write your template in `__template__` using [mustache templates](https://mustach
 
 ❗ **Note: templates can consist of multiple files and subdirectories**
 
+#### File Resolution
+
+It is possible to resolve files based on path input variables using the `<% %>` tag.
+
+For example, given the following `template.yaml`:
+
+```yaml
+name: app_icon
+description: Create an app_icon file from a URL
+vars:
+  - url
+```
+
+And the following template:
+
+`__template__/<% url %>`
+
+Running `mason build app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
+
 ## Consuming Templates
 
 ### Create a Mason YAML

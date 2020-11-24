@@ -1,12 +1,16 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File, Process, ProcessException, ProcessResult;
 
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:mason/src/mason_configuration.dart';
 
 import 'manifest.dart';
 import 'render.dart';
+
+final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
 
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
@@ -18,6 +22,10 @@ abstract class Generator implements Comparable<Generator> {
     this.id,
     this.description,
   );
+
+  final List<Future<void>> _futures = [];
+
+  Future<void> get _complete => Future.wait<void>(_futures);
 
   /// Unique identifier for the generator.
   final String id;
@@ -35,15 +43,24 @@ abstract class Generator implements Comparable<Generator> {
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].
-  Future generate(
+  Future<void> generate(
     GeneratorTarget target, {
     Map<String, dynamic> vars,
-  }) {
-    return Future.forEach(files, (TemplateFile file) {
-      final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
-      final filePath = resultFile.path;
-      return target.createFile(filePath, resultFile.content);
+  }) async {
+    await Future.forEach(files, (TemplateFile file) {
+      final match = _fileRegExp.firstMatch(file.path);
+      if (match != null) {
+        final completer = Completer<void>();
+        _futures.add(completer.future);
+        _fetch(vars[match[1]] as String)
+            .then(completer.complete)
+            .catchError(completer.completeError);
+      } else {
+        final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
+        return target.createFile(resultFile.path, resultFile.content);
+      }
     });
+    return _complete;
   }
 
   @override
@@ -52,6 +69,21 @@ abstract class Generator implements Comparable<Generator> {
 
   @override
   String toString() => '[$id: $description]';
+
+  Future<void> _fetch(String path) async {
+    final file = File(path);
+    final isLocal = file.existsSync();
+    if (isLocal) {
+      final target = p.join(Directory.current.path, p.basename(file.path));
+      final bytes = await file.readAsBytes();
+      await File(target).writeAsBytes(bytes, flush: true);
+    } else {
+      final uri = Uri.parse(path);
+      final target = p.join(Directory.current.path, p.basename(uri.path));
+      final response = await http.Client().get(uri);
+      await File(target).writeAsBytes(response.bodyBytes, flush: true);
+    }
+  }
 }
 
 /// A target for a [Generator].
@@ -64,7 +96,7 @@ abstract class GeneratorTarget {
 /// {@template template_file}
 /// This class represents a file in a generator template.
 /// The contents should be text and may contain mustache
-/// variables that can be substituted (`__myVar__`).
+/// variables that can be substituted (`{{myVar}}`).
 /// {@endtemplate}
 class TemplateFile {
   /// {@macro template_file}
