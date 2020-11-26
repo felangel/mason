@@ -1,0 +1,9 @@
+# Register bricks which can be consumed via the Mason CLI.
+# https://pub.dev/packages/mason
+bricks:
+  # Sample Greeting Brick
+  # Run `mason make greeting` to try it out.
+  greeting:
+    git:
+      url: git@github.com:felangel/mason.git
+      path: bricks/greeting

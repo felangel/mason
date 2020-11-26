@@ -40,7 +40,11 @@ class InitCommand extends Command<dynamic> {
     }
     final fetchDone = _logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd, _logger);
-    final generator = _MasonYamlGenerator();
+    final basePath = File(Platform.script.path).parent.parent.path;
+    final brickPath = p.join(basePath, 'lib', 'src', 'bricks', 'mason_init');
+    final generator = await MasonGenerator.fromBrick(
+      Brick(path: File(brickPath).resolveSymbolicLinksSync()),
+    );
     await generator.generate(target);
     fetchDone('Initialized');
     _logger
@@ -49,13 +53,4 @@ class InitCommand extends Command<dynamic> {
       )
       ..flush(_logger.success);
   }
-}
-
-class _MasonYamlGenerator extends MasonGenerator {
-  _MasonYamlGenerator()
-      : super(
-          '__mason_init__',
-          'Initialize a new ${MasonYaml.file}',
-          files: [TemplateFile(MasonYaml.file, 'bricks:\n')],
-        );
 }

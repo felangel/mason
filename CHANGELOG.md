@@ -1,3 +1,9 @@
+# 0.0.1-dev.13
+
+- feat: improve `mason init` output
+- refactor: internal brick improvements
+- refactor: internal configuration file renaming
+
 # 0.0.1-dev.12
 
 - feat: add `mason init`
