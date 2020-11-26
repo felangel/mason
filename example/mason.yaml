@@ -1,11 +1,11 @@
-templates:
+bricks:
   app_icon:
-    path: ../templates/app_icon/template.yaml
+    path: ../bricks/app_icon
   documentation:
-    path: ../templates/documentation/template.yaml
+    path: ../bricks/documentation
   greetings:
-    path: ../templates/greeting/template.yaml
+    path: ../bricks/greeting
   todos:
-    path: ../templates/todos/template.yaml
+    path: ../bricks/todos
   widget:
-    path: ../templates/widget/template.yaml
+    path: ../bricks/widget

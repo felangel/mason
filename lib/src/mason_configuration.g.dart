@@ -8,14 +8,14 @@ part of 'mason_configuration.dart';
 
 MasonConfiguration _$MasonConfigurationFromJson(Map json) {
   return $checkedNew('MasonConfiguration', json, () {
-    $checkKeys(json, allowedKeys: const ['templates']);
+    $checkKeys(json, allowedKeys: const ['bricks']);
     final val = MasonConfiguration(
       $checkedConvert(
           json,
-          'templates',
+          'bricks',
           (v) => (v as Map)?.map(
-                (k, e) => MapEntry(k as String,
-                    e == null ? null : MasonTemplate.fromJson(e as Map)),
+                (k, e) => MapEntry(
+                    k as String, e == null ? null : Brick.fromJson(e as Map)),
               )),
     );
     return val;
@@ -32,14 +32,14 @@ Map<String, dynamic> _$MasonConfigurationToJson(MasonConfiguration instance) {
   }
 
   writeNotNull(
-      'templates', instance.templates?.map((k, e) => MapEntry(k, e?.toJson())));
+      'bricks', instance.bricks?.map((k, e) => MapEntry(k, e?.toJson())));
   return val;
 }
 
-MasonTemplate _$MasonTemplateFromJson(Map json) {
-  return $checkedNew('MasonTemplate', json, () {
+Brick _$BrickFromJson(Map json) {
+  return $checkedNew('Brick', json, () {
     $checkKeys(json, allowedKeys: const ['path', 'git']);
-    final val = MasonTemplate(
+    final val = Brick(
       path: $checkedConvert(json, 'path', (v) => v as String),
       git: $checkedConvert(
           json, 'git', (v) => v == null ? null : GitPath.fromJson(v as Map)),
@@ -48,7 +48,7 @@ MasonTemplate _$MasonTemplateFromJson(Map json) {
   });
 }
 
-Map<String, dynamic> _$MasonTemplateToJson(MasonTemplate instance) {
+Map<String, dynamic> _$BrickToJson(Brick instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {

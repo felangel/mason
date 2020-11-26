@@ -3,40 +3,44 @@
 [![pub](https://img.shields.io/pub/v/mason.svg)](https://pub.dev/packages/mason)
 [![mason](https://github.com/felangel/mason/workflows/mason/badge.svg?branch=master)](https://github.com/felangel/mason/actions)
 
-A Dart template generator which helps teams generate files quickly and consistently.
+A template generator which helps teams generate files quickly and consistently.
 
 `pub global activate mason`
 
-## Creating Custom Templates
+## Creating Custom Brick Templates
 
-### Define Template YAML
+Mason allows developers to create resuable templates call bricks.
 
-`greetings.yaml`
+### Create a Brick YAML
+
+The `brick.yaml` contains metadata for a `brick` template.
+
+`brick.yaml`
 
 ```yaml
 name: greetings
-description: A Simple Greetings Template
+description: A Simple Greetings Brick Template
 vars:
   - name
 ```
 
-### Define Template
+### Create a Brick Template
 
-Write your template in `__template__` using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
+Write your brick template in `__brick__` using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
 
-`__template__/greetings.md`
+`__brick__/greetings.md`
 
 ```md
 # Greetings {{name}}!
 ```
 
-❗ **Note: templates can consist of multiple files and subdirectories**
+❗ **Note: bricks can consist of multiple files and subdirectories**
 
 #### File Resolution
 
 It is possible to resolve files based on path input variables using the `<% %>` tag.
 
-For example, given the following `template.yaml`:
+For example, given the following `brick.yaml`:
 
 ```yaml
 name: app_icon
@@ -45,33 +49,33 @@ vars:
   - url
 ```
 
-And the following template:
+And the following brick template:
 
-`__template__/<% url %>`
+`__brick__/<% url %>`
 
 Running `mason build app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
 
-## Consuming Templates
+## Consuming Brick Templates
 
 ### Create a Mason YAML
 
 Define a `mason.yaml` at the root directory of your project.
 
 ```yaml
-templates:
+bricks:
   greetings:
-    path: ./greetings.yaml
+    path: .
   widget:
     git:
       url: git@github.com:felangel/mason.git
-      path: templates/widget/template.yaml
+      path: bricks/widget
 ```
 
 Then you can use `mason build <greetings|widget>`:
 
 ```sh
-mason build greetings -- --name Felix
-mason build widget -- --name my_widget
+mason build greetings
+mason build widget
 ```
 
 ### Command Line Variables
@@ -126,5 +130,5 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  build   Generate code using an existing template.
+  build   Generate code using an existing brick template.
 ```

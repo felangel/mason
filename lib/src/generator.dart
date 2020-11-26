@@ -11,6 +11,141 @@ import 'manifest.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
+const _brickYaml = 'brick.yaml';
+
+Future<String> _createSystemTempDir() async {
+  final tempDir = await Directory.systemTemp.createTemp('mason_');
+  return tempDir.resolveSymbolicLinksSync();
+}
+
+/// A [MasonGenerator] which extends [Generator] and
+/// exposes the ability to create a [Generator] from a
+/// [Brick].
+class MasonGenerator extends Generator {
+  MasonGenerator._(
+    String id,
+    String description, {
+    List<TemplateFile> files,
+    this.vars = const <String>[],
+  }) : super(id, description) {
+    for (final file in files) {
+      addTemplateFile(file);
+    }
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a configuration file for a [Brick]:
+  ///
+  /// ```yaml
+  /// name: greetings
+  /// description: A Simple Greetings Template
+  /// files:
+  ///   - from: greetings.md
+  ///     to: GREETINGS.md
+  /// vars:
+  ///   - name
+  /// ```
+  static Future<MasonGenerator> fromBrick(
+    Brick brick, {
+    String workingDirectory = '',
+  }) async {
+    File brickYamlFile;
+    String brickYamlContent;
+
+    if (brick.path != null) {
+      brickYamlFile = File(p.join(workingDirectory, brick.path, _brickYaml));
+      brickYamlContent = await brickYamlFile.readAsString();
+    } else if (brick.git != null) {
+      final tempDirectory = await _createSystemTempDir();
+      await _runGit(['clone', brick.git.url, tempDirectory]);
+      if (brick.git.ref != null) {
+        await _runGit(
+          ['checkout', brick.git.ref],
+          processWorkingDir: tempDirectory,
+        );
+      }
+      brickYamlFile = File(
+        p.join(
+          workingDirectory,
+          tempDirectory,
+          brick.git.path ?? '',
+          _brickYaml,
+        ),
+      );
+      brickYamlContent = await brickYamlFile.readAsString();
+    } else {
+      throw const FormatException('Missing brick source');
+    }
+
+    final manifest = checkedYamlDecode(
+      brickYamlContent,
+      (m) => Manifest.fromJson(m),
+    );
+    final parentDirectory = brickYamlFile.parent;
+    final brickDirectory = Directory(
+      p.join(parentDirectory.path, manifest.brick),
+    );
+    final futures =
+        brickDirectory.listSync(recursive: true).whereType<File>().map((file) {
+      return () async {
+        final content = await File(file.path).readAsString();
+        final relativePath = file.path.substring(
+          file.path.indexOf(manifest.brick) + 1 + manifest.brick.length,
+        );
+        return TemplateFile(relativePath, content);
+      }();
+    });
+    return MasonGenerator._(
+      manifest.name,
+      manifest.description,
+      files: await Future.wait(futures),
+      vars: manifest.vars,
+    );
+  }
+
+  /// Optional list of variables which will be used to populate
+  /// the corresponding mustache variables within the template.
+  final List<String> vars;
+}
+
+Future<ProcessResult> _runGit(
+  List<String> args, {
+  bool throwOnError = true,
+  String processWorkingDir,
+}) async {
+  final result = await Process.run('git', args,
+      workingDirectory: processWorkingDir, runInShell: true);
+
+  if (throwOnError) {
+    _throwIfProcessFailed(result, 'git', args);
+  }
+  return result;
+}
+
+void _throwIfProcessFailed(
+  ProcessResult pr,
+  String process,
+  List<String> args,
+) {
+  assert(pr != null);
+  if (pr.exitCode != 0) {
+    final values = {
+      'Standard out': pr.stdout.toString().trim(),
+      'Standard error': pr.stderr.toString().trim()
+    }..removeWhere((k, v) => v.isEmpty);
+
+    String message;
+    if (values.isEmpty) {
+      message = 'Unknown error';
+    } else if (values.length == 1) {
+      message = values.values.single;
+    } else {
+      message = values.entries.map((e) => '${e.key}\n${e.value}').join('\n');
+    }
+
+    throw ProcessException(process, args, message, pr.exitCode);
+  }
+}
 
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
@@ -18,10 +153,7 @@ final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
 /// {@endtemplate}
 abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
-  Generator(
-    this.id,
-    this.description,
-  );
+  Generator(this.id, this.description);
 
   final List<Future<void>> _futures = [];
 
@@ -133,132 +265,4 @@ class FileContents {
 
   /// The contents of the file.
   final List<int> content;
-}
-
-/// A [MasonGenerator] which extends [Generator] and
-/// exposes the ability to create a [Generator] from a
-/// `yaml` file.
-class MasonGenerator extends Generator {
-  MasonGenerator._(
-    String id,
-    String description, {
-    List<TemplateFile> files,
-    this.vars = const <String>[],
-  }) : super(id, description) {
-    for (final file in files) {
-      addTemplateFile(file);
-    }
-  }
-
-  /// Factory which creates a [MasonGenerator] based on
-  /// a configuration file:
-  ///
-  /// ```yaml
-  /// name: greetings
-  /// description: A Simple Greetings Template
-  /// files:
-  ///   - from: greetings.md
-  ///     to: GREETINGS.md
-  /// vars:
-  ///   - name
-  /// ```
-  static Future<MasonGenerator> fromTemplate(
-    MasonTemplate template, {
-    String workingDirectory = '',
-  }) async {
-    File templateYamlFile;
-    String templateYamlContent;
-
-    if (template.path != null) {
-      templateYamlFile = File(p.join(workingDirectory, template.path));
-      templateYamlContent = await templateYamlFile.readAsString();
-    } else if (template.git != null) {
-      final tempDirectory = await _createSystemTempDir();
-      await _runGit(['clone', template.git.url, tempDirectory]);
-      if (template.git.ref != null) {
-        await _runGit(
-          ['checkout', template.git.ref],
-          processWorkingDir: tempDirectory,
-        );
-      }
-      templateYamlFile = File(
-        p.join(workingDirectory, tempDirectory, template.git.path ?? ''),
-      );
-      templateYamlContent = await templateYamlFile.readAsString();
-    } else {
-      throw const FormatException('missing template source');
-    }
-
-    final manifest = checkedYamlDecode(
-      templateYamlContent,
-      (m) => Manifest.fromJson(m),
-    );
-    final parentDirectory = templateYamlFile.parent;
-    final templateDirectory = Directory(
-      p.join(parentDirectory.path, manifest.template),
-    );
-    final futures = templateDirectory
-        .listSync(recursive: true)
-        .whereType<File>()
-        .map((file) {
-      return () async {
-        final content = await File(file.path).readAsString();
-        final relativePath = file.path.substring(
-          file.path.indexOf(manifest.template) + 1 + manifest.template.length,
-        );
-        return TemplateFile(relativePath, content);
-      }();
-    });
-    return MasonGenerator._(
-      manifest.name,
-      manifest.description,
-      files: await Future.wait(futures),
-      vars: manifest.vars,
-    );
-  }
-
-  /// Optional list of variables which will be used to populate
-  /// the corresponding mustache variables within the template.
-  final List<String> vars;
-}
-
-Future<ProcessResult> _runGit(
-  List<String> args, {
-  bool throwOnError = true,
-  String processWorkingDir,
-}) async {
-  final result = await Process.run('git', args,
-      workingDirectory: processWorkingDir, runInShell: true);
-
-  if (throwOnError) {
-    _throwIfProcessFailed(result, 'git', args);
-  }
-  return result;
-}
-
-void _throwIfProcessFailed(
-    ProcessResult pr, String process, List<String> args) {
-  assert(pr != null);
-  if (pr.exitCode != 0) {
-    final values = {
-      'Standard out': pr.stdout.toString().trim(),
-      'Standard error': pr.stderr.toString().trim()
-    }..removeWhere((k, v) => v.isEmpty);
-
-    String message;
-    if (values.isEmpty) {
-      message = 'Unknown error';
-    } else if (values.length == 1) {
-      message = values.values.single;
-    } else {
-      message = values.entries.map((e) => '${e.key}\n${e.value}').join('\n');
-    }
-
-    throw ProcessException(process, args, message, pr.exitCode);
-  }
-}
-
-Future<String> _createSystemTempDir() async {
-  final tempDir = await Directory.systemTemp.createTemp('mason_');
-  return tempDir.resolveSymbolicLinksSync();
 }

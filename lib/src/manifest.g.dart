@@ -9,13 +9,13 @@ part of 'manifest.dart';
 Manifest _$ManifestFromJson(Map json) {
   return $checkedNew('Manifest', json, () {
     $checkKeys(json,
-        allowedKeys: const ['name', 'description', 'template', 'vars']);
+        allowedKeys: const ['name', 'description', 'brick', 'vars']);
     final val = Manifest(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
       $checkedConvert(
           json, 'vars', (v) => (v as List)?.map((e) => e as String)?.toList()),
-      template: $checkedConvert(json, 'template', (v) => v as String),
+      brick: $checkedConvert(json, 'brick', (v) => v as String),
     );
     return val;
   });
@@ -32,7 +32,7 @@ Map<String, dynamic> _$ManifestToJson(Manifest instance) {
 
   writeNotNull('name', instance.name);
   writeNotNull('description', instance.description);
-  writeNotNull('template', instance.template);
+  writeNotNull('brick', instance.brick);
   writeNotNull('vars', instance.vars);
   return val;
 }
