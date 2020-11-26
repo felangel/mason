@@ -29,7 +29,7 @@ class Manifest {
   /// Description of the `MasonGenerator`
   final String description;
 
-  /// Optional path to brick directory.
+  /// Optional path to brick template directory.
   /// Defaults to `__brick__`.
   final String brick;
 
