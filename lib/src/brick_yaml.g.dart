@@ -1,16 +1,16 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'manifest.dart';
+part of 'brick_yaml.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-Manifest _$ManifestFromJson(Map json) {
-  return $checkedNew('Manifest', json, () {
+BrickYaml _$BrickYamlFromJson(Map json) {
+  return $checkedNew('BrickYaml', json, () {
     $checkKeys(json,
         allowedKeys: const ['name', 'description', 'brick', 'vars']);
-    final val = Manifest(
+    final val = BrickYaml(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
       $checkedConvert(
@@ -21,7 +21,7 @@ Manifest _$ManifestFromJson(Map json) {
   });
 }
 
-Map<String, dynamic> _$ManifestToJson(Manifest instance) {
+Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {

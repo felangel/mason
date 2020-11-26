@@ -1,15 +1,15 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
-part of 'mason_configuration.dart';
+part of 'mason_yaml.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-MasonConfiguration _$MasonConfigurationFromJson(Map json) {
-  return $checkedNew('MasonConfiguration', json, () {
+MasonYaml _$MasonYamlFromJson(Map json) {
+  return $checkedNew('MasonYaml', json, () {
     $checkKeys(json, allowedKeys: const ['bricks']);
-    final val = MasonConfiguration(
+    final val = MasonYaml(
       $checkedConvert(
           json,
           'bricks',
@@ -22,7 +22,7 @@ MasonConfiguration _$MasonConfigurationFromJson(Map json) {
   });
 }
 
-Map<String, dynamic> _$MasonConfigurationToJson(MasonConfiguration instance) {
+Map<String, dynamic> _$MasonYamlToJson(MasonYaml instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {

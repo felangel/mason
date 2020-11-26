@@ -4,7 +4,7 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart' as io;
 import 'package:mason/src/generator.dart';
-import 'package:mason/src/mason_configuration.dart';
+import 'package:mason/src/mason_yaml.dart';
 import 'package:path/path.dart' as path;
 import 'package:args/command_runner.dart';
 
@@ -43,10 +43,10 @@ class MakeCommand extends Command<dynamic> {
   void run() async {
     final args = argResults.rest;
     final brickName = args.first;
-    final masonConfigFile = MasonConfiguration.findNearest(cwd);
+    final masonConfigFile = MasonYaml.findNearest(cwd);
     if (masonConfigFile == null) {
       _logger.err(
-        '''Missing ${MasonConfiguration.yaml} at ${path.join(cwd.path, MasonConfiguration.yaml)}.\nRun mason init, add the $brickName brick, and try again.''',
+        '''Missing ${MasonYaml.file} at ${path.join(cwd.path, MasonYaml.file)}.\nRun mason init, add the $brickName brick, and try again.''',
       );
       return;
     }
@@ -56,14 +56,14 @@ class MakeCommand extends Command<dynamic> {
         : null;
     if (masonConfigContent == null || masonConfigContent.isEmpty) {
       _logger.err(
-        '''Malformed ${MasonConfiguration.yaml} at ${path.join(cwd.path, 'mason.yaml')}''',
+        '''Malformed ${MasonYaml.file} at ${path.join(cwd.path, 'mason.yaml')}''',
       );
       return;
     }
 
     final masonConfig = checkedYamlDecode(
       masonConfigContent,
-      (m) => MasonConfiguration.fromJson(m),
+      (m) => MasonYaml.fromJson(m),
     );
     final brick = masonConfig.bricks[brickName];
     final target = DirectoryGeneratorTarget(cwd, _logger);
@@ -71,7 +71,7 @@ class MakeCommand extends Command<dynamic> {
     if (brick == null) {
       _logger.err(
         'Missing brick: $brickName.\n'
-        'Add the $brickName brick to the ${MasonConfiguration.yaml} '
+        'Add the $brickName brick to the ${MasonYaml.file} '
         'and try again.',
       );
       exitCode = io.ExitCode.usage.code;

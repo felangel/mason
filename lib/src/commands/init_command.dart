@@ -6,7 +6,7 @@ import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 
 import '../logger.dart';
-import '../mason_configuration.dart';
+import '../mason_yaml.dart';
 
 /// {@template init_command}
 /// `mason init` command which initializes a new `mason.yaml`.
@@ -18,7 +18,7 @@ class InitCommand extends Command<dynamic> {
   final Logger _logger;
 
   @override
-  final String description = 'Initialize a new ${MasonConfiguration.yaml}.';
+  final String description = 'Initialize a new ${MasonYaml.file}.';
 
   @override
   final String name = 'init';
@@ -33,9 +33,9 @@ class InitCommand extends Command<dynamic> {
 
   @override
   void run() async {
-    final masonYaml = File(p.join(cwd.path, MasonConfiguration.yaml));
+    final masonYaml = File(p.join(cwd.path, MasonYaml.file));
     if (masonYaml.existsSync()) {
-      _logger.err('Existing ${MasonConfiguration.yaml} at ${masonYaml.path}');
+      _logger.err('Existing ${MasonYaml.file} at ${masonYaml.path}');
       return;
     }
     final fetchDone = _logger.progress('Initializing');
@@ -55,7 +55,7 @@ class _MasonYamlGenerator extends MasonGenerator {
   _MasonYamlGenerator()
       : super(
           '__mason_init__',
-          'Initialize a new ${MasonConfiguration.yaml}',
-          files: [TemplateFile(MasonConfiguration.yaml, 'bricks:\n')],
+          'Initialize a new ${MasonYaml.file}',
+          files: [TemplateFile(MasonYaml.file, 'bricks:\n')],
         );
 }

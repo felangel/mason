@@ -5,10 +5,10 @@ import 'dart:io' show Directory, File, Process, ProcessException, ProcessResult;
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
-import 'package:mason/src/mason_configuration.dart';
 
+import 'brick_yaml.dart';
 import 'logger.dart';
-import 'manifest.dart';
+import 'mason_yaml.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
@@ -56,7 +56,9 @@ class MasonGenerator extends Generator {
     String brickYamlContent;
 
     if (brick.path != null) {
-      brickYamlFile = File(p.join(workingDirectory, brick.path, Brick.yaml));
+      brickYamlFile = File(
+        p.join(workingDirectory, brick.path, BrickYaml.file),
+      );
       brickYamlContent = await brickYamlFile.readAsString();
     } else if (brick.git != null) {
       final tempDirectory = await _createSystemTempDir();
@@ -72,7 +74,7 @@ class MasonGenerator extends Generator {
           workingDirectory,
           tempDirectory,
           brick.git.path ?? '',
-          Brick.yaml,
+          BrickYaml.file,
         ),
       );
       brickYamlContent = await brickYamlFile.readAsString();
@@ -82,7 +84,7 @@ class MasonGenerator extends Generator {
 
     final manifest = checkedYamlDecode(
       brickYamlContent,
-      (m) => Manifest.fromJson(m),
+      (m) => BrickYaml.fromJson(m),
     );
     final parentDirectory = brickYamlFile.parent;
     final brickDirectory = Directory(

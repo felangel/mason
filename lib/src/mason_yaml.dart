@@ -3,27 +3,27 @@ import 'dart:io';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
 
-part 'mason_configuration.g.dart';
+part 'mason_yaml.g.dart';
 
-/// {@template mason_configuration}
+/// {@template mason_yaml}
 /// Mason configuration yaml file which contains metadata
 /// used when interacting with the Mason CLI.
 /// {@endtemplate}
 @JsonSerializable()
-class MasonConfiguration {
-  /// {@macro mason_configuration}
-  const MasonConfiguration(this.bricks);
+class MasonYaml {
+  /// {@macro mason_yaml}
+  const MasonYaml(this.bricks);
 
-  /// Converts [Map] to [MasonConfiguration]
-  factory MasonConfiguration.fromJson(Map<dynamic, dynamic> json) =>
-      _$MasonConfigurationFromJson(json);
+  /// Converts [Map] to [MasonYaml]
+  factory MasonYaml.fromJson(Map<dynamic, dynamic> json) =>
+      _$MasonYamlFromJson(json);
 
-  /// static constant for mason configuration yaml name.
+  /// Converts [MasonYaml] to [Map]
+  Map<dynamic, dynamic> toJson() => _$MasonYamlToJson(this);
+
+  /// static constant for mason configuration file name.
   /// `mason.yaml`
-  static const yaml = 'mason.yaml';
-
-  /// Converts [MasonConfiguration] to [Map]
-  Map<dynamic, dynamic> toJson() => _$MasonConfigurationToJson(this);
+  static const file = 'mason.yaml';
 
   /// [Map] of [Brick] alias to [Brick] instances.
   final Map<String, Brick> bricks;
@@ -48,7 +48,7 @@ class MasonConfiguration {
 /// {@template brick}
 /// Contains metadata for a reusable brick template.
 ///
-/// Used by [MasonConfiguration].
+/// Used by [MasonYaml].
 /// {@endtemplate}
 @JsonSerializable()
 class Brick {
@@ -57,10 +57,6 @@ class Brick {
 
   /// Converts a [Map] to a [Brick].
   factory Brick.fromJson(Map<dynamic, dynamic> json) => _$BrickFromJson(json);
-
-  /// static constant for brick yaml name.
-  /// `brick.yaml`
-  static const yaml = 'brick.yaml';
 
   /// Converts [Brick] to [Map]
   Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
@@ -80,7 +76,7 @@ class GitPath {
   /// {@macro git_path}
   const GitPath(this.url, {this.path, this.ref});
 
-  /// Converts [Map] to [MasonConfiguration]
+  /// Converts [Map] to [MasonYaml]
   factory GitPath.fromJson(Map<dynamic, dynamic> json) =>
       _$GitPathFromJson(json);
 
