@@ -21,7 +21,7 @@ class MasonConfiguration {
   /// Converts [MasonConfiguration] to [Map]
   Map<dynamic, dynamic> toJson() => _$MasonConfigurationToJson(this);
 
-  /// [Map] of template alias to [Brick] instances.
+  /// [Map] of [Brick] alias to [Brick] instances.
   final Map<String, Brick> bricks;
 
   /// Finds nearest ancestor `mason.yaml` file
@@ -57,10 +57,10 @@ class Brick {
   /// Converts [Brick] to [Map]
   Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
 
-  /// The local template path.
+  /// The local brick template path.
   final String path;
 
-  /// Git Template configuration.
+  /// Git brick template path.
   final GitPath git;
 }
 
@@ -79,7 +79,7 @@ class GitPath {
   /// Converts [GitPath] to [Map]
   Map<dynamic, dynamic> toJson() => _$GitPathToJson(this);
 
-  /// The local template path.
+  /// The local brick template path.
   final String url;
 
   /// Path in repository. Defaults to /.
