@@ -9,12 +9,12 @@ import 'package:args/command_runner.dart';
 
 import '../logger.dart';
 
-/// {@template build_command}
-/// `mason build` command which generates code based on a brick template.
+/// {@template make_command}
+/// `mason make` command which generates code based on a brick template.
 /// {@endtemplate}
-class BuildCommand extends Command<dynamic> {
-  /// {@macro build_command}
-  BuildCommand(this._logger) {
+class MakeCommand extends Command<dynamic> {
+  /// {@macro make_command}
+  MakeCommand(this._logger) {
     argParser.addOption(
       'json',
       abbr: 'j',
@@ -28,7 +28,7 @@ class BuildCommand extends Command<dynamic> {
   final String description = 'Generate code using an existing brick template.';
 
   @override
-  final String name = 'build';
+  final String name = 'make';
 
   Directory _cwd;
 
@@ -76,7 +76,7 @@ class BuildCommand extends Command<dynamic> {
       return;
     }
 
-    final fetchDone = _logger.progress('Fetching brick');
+    final fetchDone = _logger.progress('Getting brick');
     Function generateDone;
     try {
       final generator = await MasonGenerator.fromBrick(
@@ -114,10 +114,10 @@ class BuildCommand extends Command<dynamic> {
         }
       }
 
-      generateDone = _logger.progress('Building ${generator.id}');
+      generateDone = _logger.progress('Making ${generator.id}');
       await generator.generate(target, vars: vars);
       generateDone?.call();
-      _logger.success('Built ${generator.id} in ${target.dir.path}');
+      _logger.success('Made ${generator.id} in ${target.dir.path}');
       exit(io.ExitCode.success.code);
     } on Exception catch (e) {
       fetchDone();

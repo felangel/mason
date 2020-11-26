@@ -5,11 +5,13 @@
 
 A template generator which helps teams generate files quickly and consistently.
 
+Mason allows developers to create and consume resuable templates call bricks.
+
+## Activating Mason
+
 `pub global activate mason`
 
 ## Creating Custom Brick Templates
-
-Mason allows developers to create resuable templates call bricks.
 
 ### Create a Brick YAML
 
@@ -19,7 +21,7 @@ The `brick.yaml` contains metadata for a `brick` template.
 
 ```yaml
 name: greetings
-description: A Simple Greetings Brick Template
+description: A Simple Greetings Brick
 vars:
   - name
 ```
@@ -53,7 +55,7 @@ And the following brick template:
 
 `__brick__/<% url %>`
 
-Running `mason build app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
+Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
 
 ## Consuming Brick Templates
 
@@ -64,18 +66,18 @@ Define a `mason.yaml` at the root directory of your project.
 ```yaml
 bricks:
   greetings:
-    path: .
-  widget:
+    path: bricks/greetings
+  todos:
     git:
       url: git@github.com:felangel/mason.git
-      path: bricks/widget
+      path: bricks/todos
 ```
 
-Then you can use `mason build <greetings|widget>`:
+Then you can use `mason make <greetings|todos>`:
 
 ```sh
-mason build greetings
-mason build widget
+mason make greetings
+mason make todos
 ```
 
 ### Command Line Variables
@@ -83,7 +85,7 @@ mason build widget
 Any variables can be passed as command line args.
 
 ```sh
-$ mason build greetings -- --name Felix
+$ mason make greetings -- --name Felix
 ```
 
 ### Variable Prompts
@@ -91,7 +93,7 @@ $ mason build greetings -- --name Felix
 Any variables which aren't specified as command line args will be prompted.
 
 ```sh
-$ mason build greetings
+$ mason make greetings
 name: Felix
 ```
 
@@ -100,7 +102,7 @@ name: Felix
 Any variables can be passed via json file:
 
 ```dart
-$ mason build greetings --json greetings.json
+$ mason make greetings --json greetings.json
 ```
 
 where `greetings.json` is:
@@ -130,5 +132,5 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  build   Generate code using an existing brick template.
+  make   Generate code using an existing brick template.
 ```

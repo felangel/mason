@@ -5,7 +5,7 @@
 Run the following command in the current directory:
 
 ```sh
-mason build greetings -- --name Felix
+mason make greetings -- --name Felix
 ```
 
 `GREETINGS.md` should be created in the current directory with the following contents:
@@ -19,7 +19,7 @@ mason build greetings -- --name Felix
 Run the following command in the current directory:
 
 ```sh
-mason build todos --json todos.json
+mason make todos --json todos.json
 ```
 
 `TODOS.md` should be created in the current directory with the following contents:
