@@ -1,3 +1,7 @@
+# 0.0.1-dev.14
+
+- fix: mason init path resolution
+
 # 0.0.1-dev.13
 
 - feat: improve `mason init` output

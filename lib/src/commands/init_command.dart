@@ -40,11 +40,7 @@ class InitCommand extends Command<dynamic> {
     }
     final fetchDone = _logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd, _logger);
-    final basePath = File(Platform.script.path).parent.parent.path;
-    final brickPath = p.join(basePath, 'lib', 'src', 'bricks', 'mason_init');
-    final generator = await MasonGenerator.fromBrick(
-      Brick(path: File(brickPath).resolveSymbolicLinksSync()),
-    );
+    final generator = _MasonYamlGenerator();
     await generator.generate(target);
     fetchDone('Initialized');
     _logger
@@ -53,4 +49,25 @@ class InitCommand extends Command<dynamic> {
       )
       ..flush(_logger.success);
   }
+}
+
+class _MasonYamlGenerator extends MasonGenerator {
+  _MasonYamlGenerator()
+      : super(
+          '__mason_init__',
+          'Initialize a new ${MasonYaml.file}',
+          files: [TemplateFile(MasonYaml.file, _content)],
+        );
+
+  static const _content =
+      '''# Register bricks which can be consumed via the Mason CLI.
+# https://pub.dev/packages/mason
+bricks:
+  # Sample Greeting Brick
+  # Run `mason make greeting` to try it out.
+  greeting:
+    git:
+      url: git@github.com:felangel/mason.git
+      path: bricks/greeting
+''';
 }
