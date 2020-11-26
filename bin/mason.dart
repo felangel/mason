@@ -15,6 +15,7 @@ void main(List<String> args) async {
           negatable: false,
           help: 'Print the current version.',
         )
+        ..addCommand(InitCommand(logger))
         ..addCommand(MakeCommand(logger));
 
   try {

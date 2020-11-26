@@ -7,22 +7,25 @@ import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 import 'package:mason/src/mason_configuration.dart';
 
+import 'logger.dart';
 import 'manifest.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
-const _brickYaml = 'brick.yaml';
 
 Future<String> _createSystemTempDir() async {
   final tempDir = await Directory.systemTemp.createTemp('mason_');
   return tempDir.resolveSymbolicLinksSync();
 }
 
+/// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
 /// exposes the ability to create a [Generator] from a
 /// [Brick].
+/// {@endtemplate}
 class MasonGenerator extends Generator {
-  MasonGenerator._(
+  /// {@macro mason_generator}
+  MasonGenerator(
     String id,
     String description, {
     List<TemplateFile> files,
@@ -53,7 +56,7 @@ class MasonGenerator extends Generator {
     String brickYamlContent;
 
     if (brick.path != null) {
-      brickYamlFile = File(p.join(workingDirectory, brick.path, _brickYaml));
+      brickYamlFile = File(p.join(workingDirectory, brick.path, Brick.yaml));
       brickYamlContent = await brickYamlFile.readAsString();
     } else if (brick.git != null) {
       final tempDirectory = await _createSystemTempDir();
@@ -69,7 +72,7 @@ class MasonGenerator extends Generator {
           workingDirectory,
           tempDirectory,
           brick.git.path ?? '',
-          _brickYaml,
+          Brick.yaml,
         ),
       );
       brickYamlContent = await brickYamlFile.readAsString();
@@ -95,7 +98,7 @@ class MasonGenerator extends Generator {
         return TemplateFile(relativePath, content);
       }();
     });
-    return MasonGenerator._(
+    return MasonGenerator(
       manifest.name,
       manifest.description,
       files: await Future.wait(futures),
@@ -215,6 +218,32 @@ abstract class Generator implements Comparable<Generator> {
       final response = await http.Client().get(uri);
       await File(target).writeAsBytes(response.bodyBytes, flush: true);
     }
+  }
+}
+
+/// {@template directory_generator_target}
+/// A [GeneratorTarget] based on a provided [Directory].
+/// {@endtemplate}
+class DirectoryGeneratorTarget extends GeneratorTarget {
+  /// {@macro directory_generator_target}
+  DirectoryGeneratorTarget(this.dir, this.logger) {
+    dir.createSync();
+  }
+
+  /// The target [Directory].
+  final Directory dir;
+
+  /// Logger used to output created files.
+  final Logger logger;
+
+  @override
+  Future<File> createFile(String path, List<int> contents) {
+    final file = File(p.join(dir.path, path));
+
+    return file
+        .create(recursive: true)
+        .then<File>((_) => file.writeAsBytes(contents))
+        .whenComplete(() => logger.delayed('  ${file.path} (new)'));
   }
 }
 

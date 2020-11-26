@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'dart:io';
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:io/ansi.dart';
 import 'package:io/io.dart' as io;
 import 'package:mason/src/generator.dart';
 import 'package:mason/src/mason_configuration.dart';
@@ -40,10 +41,12 @@ class MakeCommand extends Command<dynamic> {
 
   @override
   void run() async {
+    final args = argResults.rest;
+    final brickName = args.first;
     final masonConfigFile = MasonConfiguration.findNearest(cwd);
     if (masonConfigFile == null) {
       _logger.err(
-        'Missing mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+        '''Missing ${MasonConfiguration.yaml} at ${path.join(cwd.path, MasonConfiguration.yaml)}.\nRun mason init, add the $brickName brick, and try again.''',
       );
       return;
     }
@@ -53,7 +56,7 @@ class MakeCommand extends Command<dynamic> {
         : null;
     if (masonConfigContent == null || masonConfigContent.isEmpty) {
       _logger.err(
-        'Malformed mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+        '''Malformed ${MasonConfiguration.yaml} at ${path.join(cwd.path, 'mason.yaml')}''',
       );
       return;
     }
@@ -62,28 +65,27 @@ class MakeCommand extends Command<dynamic> {
       masonConfigContent,
       (m) => MasonConfiguration.fromJson(m),
     );
-    final args = argResults.rest;
-    final brick = masonConfig.bricks[args.first];
-    final dir = cwd;
-    final target = _DirectoryGeneratorTarget(_logger, dir);
+    final brick = masonConfig.bricks[brickName];
+    final target = DirectoryGeneratorTarget(cwd, _logger);
 
     if (brick == null) {
-      _logger
-        ..err('Specify a brick')
-        ..info('')
-        ..info(usage);
+      _logger.err(
+        'Missing brick: $brickName.\n'
+        'Add the $brickName brick to the ${MasonConfiguration.yaml} '
+        'and try again.',
+      );
       exitCode = io.ExitCode.usage.code;
       return;
     }
 
-    final fetchDone = _logger.progress('Getting brick');
+    final fetchDone = _logger.progress('Getting brick $brickName');
     Function generateDone;
     try {
       final generator = await MasonGenerator.fromBrick(
         brick,
         workingDirectory: masonConfigFile.parent.path,
       );
-      fetchDone();
+      fetchDone('Got brick $brickName');
 
       final vars = <String, dynamic>{};
       try {
@@ -116,8 +118,12 @@ class MakeCommand extends Command<dynamic> {
 
       generateDone = _logger.progress('Making ${generator.id}');
       await generator.generate(target, vars: vars);
-      generateDone?.call();
-      _logger.success('Made ${generator.id} in ${target.dir.path}');
+      generateDone('Made brick $brickName');
+      _logger
+        ..info(
+          '''${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):''',
+        )
+        ..flush(_logger.success);
       exit(io.ExitCode.success.code);
     } on Exception catch (e) {
       fetchDone();
@@ -139,23 +145,5 @@ class MakeCommand extends Command<dynamic> {
     } catch (_) {
       return value;
     }
-  }
-}
-
-class _DirectoryGeneratorTarget extends GeneratorTarget {
-  _DirectoryGeneratorTarget(this.logger, this.dir) {
-    dir.createSync();
-  }
-
-  final Logger logger;
-  final Directory dir;
-
-  @override
-  Future<File> createFile(String filePath, List<int> contents) {
-    final file = File(path.join(dir.path, filePath));
-
-    return file
-        .create(recursive: true)
-        .then<File>((_) => file.writeAsBytes(contents));
   }
 }

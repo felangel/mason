@@ -61,7 +61,11 @@ Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png`
 
 ### Create a Mason YAML
 
-Define a `mason.yaml` at the root directory of your project.
+```sh
+$ mason init
+```
+
+Add bricks to the newly generated `mason.yaml`:
 
 ```yaml
 bricks:
@@ -132,5 +136,6 @@ Global options:
     --version    Print the current version.
 
 Available commands:
+  init   Initialize a new mason.yaml.
   make   Generate code using an existing brick template.
 ```

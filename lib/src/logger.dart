@@ -18,14 +18,28 @@ class Logger {
     '⠏'
   ];
 
+  final _queue = <String>[];
+
   final _stopwatch = Stopwatch();
   Timer _timer;
   int _index = 0;
 
-  /// Prints basic message.
-  void info(String message) => print(message);
+  /// Flushes internal message queue.
+  void flush([Function(String) print]) {
+    final writeln = print ?? info;
+    for (final message in _queue) {
+      writeln(message);
+    }
+    _queue.clear();
+  }
 
-  /// Prints progress message.
+  /// Writes info message to stdout.
+  void info(String message) => stdout.writeln(message);
+
+  /// Writes delayed message to stdout.
+  void delayed(String message) => _queue.add(message);
+
+  /// Writes progress message to stdout.
   Function progress(String message) {
     _stopwatch
       ..reset()
@@ -38,25 +52,27 @@ class Logger {
         '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}$char')} $message...''',
       );
     });
-    return () {
+    return ([String update]) {
       _stopwatch.stop();
       final time =
           (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
       stdout.write(
-        '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} $message... (${time}ms)\n''',
+        '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} ${update ?? message} (${time}ms)\n''',
       );
       _timer?.cancel();
     };
   }
 
-  /// Prints error message.
-  void err(String message) => print(lightRed.wrap(message));
+  /// Writes error message to stdout.
+  void err(String message) => stdout.writeln(lightRed.wrap(message));
 
-  /// Prints alert message.
-  void alert(String message) => print(lightCyan.wrap(styleBold.wrap(message)));
+  /// Writes alert message to stdout.
+  void alert(String message) {
+    stdout.writeln(lightCyan.wrap(styleBold.wrap(message)));
+  }
 
-  /// Prints success message.
-  void success(String message) => print(lightGreen.wrap(message));
+  /// Writes success message to stdout.
+  void success(String message) => stdout.writeln(lightGreen.wrap(message));
 
   /// Prompts user and returns response.
   String prompt(String message) {

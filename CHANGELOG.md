@@ -1,3 +1,9 @@
+# 0.0.1-dev.12
+
+- feat: add `mason init`
+- feat: improve CLI output and error messages
+- docs: update README documentation
+
 # 0.0.1-dev.11
 
 - **BREAKING**: rename `templates` to `bricks`

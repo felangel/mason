@@ -18,6 +18,10 @@ class MasonConfiguration {
   factory MasonConfiguration.fromJson(Map<dynamic, dynamic> json) =>
       _$MasonConfigurationFromJson(json);
 
+  /// static constant for mason configuration yaml name.
+  /// `mason.yaml`
+  static const yaml = 'mason.yaml';
+
   /// Converts [MasonConfiguration] to [Map]
   Map<dynamic, dynamic> toJson() => _$MasonConfigurationToJson(this);
 
@@ -53,6 +57,10 @@ class Brick {
 
   /// Converts a [Map] to a [Brick].
   factory Brick.fromJson(Map<dynamic, dynamic> json) => _$BrickFromJson(json);
+
+  /// static constant for brick yaml name.
+  /// `brick.yaml`
+  static const yaml = 'brick.yaml';
 
   /// Converts [Brick] to [Map]
   Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
