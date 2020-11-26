@@ -1,1 +1,1 @@
-export 'build_command.dart';
+export 'make_command.dart';

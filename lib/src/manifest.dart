@@ -13,8 +13,8 @@ class Manifest {
     this.name,
     this.description,
     this.vars, {
-    String template,
-  }) : template = template ?? '__template__';
+    String brick,
+  }) : brick = brick ?? '__brick__';
 
   /// Converts [Map] to [Manifest]
   factory Manifest.fromJson(Map<dynamic, dynamic> json) =>
@@ -29,9 +29,9 @@ class Manifest {
   /// Description of the `MasonGenerator`
   final String description;
 
-  /// Optional path to template directory.
-  /// Defaults to `__template__`.
-  final String template;
+  /// Optional path to brick template directory.
+  /// Defaults to `__brick__`.
+  final String brick;
 
   /// List of variables used when templating `MasonGenerator`
   final List<String> vars;

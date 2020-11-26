@@ -7,12 +7,12 @@ part 'mason_configuration.g.dart';
 
 /// {@template mason_configuration}
 /// Mason configuration yaml file which contains metadata
-/// used when interacting with the mason CLI.
+/// used when interacting with the Mason CLI.
 /// {@endtemplate}
 @JsonSerializable()
 class MasonConfiguration {
   /// {@macro mason_configuration}
-  const MasonConfiguration(this.templates);
+  const MasonConfiguration(this.bricks);
 
   /// Converts [Map] to [MasonConfiguration]
   factory MasonConfiguration.fromJson(Map<dynamic, dynamic> json) =>
@@ -21,8 +21,8 @@ class MasonConfiguration {
   /// Converts [MasonConfiguration] to [Map]
   Map<dynamic, dynamic> toJson() => _$MasonConfigurationToJson(this);
 
-  /// [Map] of template alias to [MasonTemplate].
-  final Map<String, MasonTemplate> templates;
+  /// [Map] of [Brick] alias to [Brick] instances.
+  final Map<String, Brick> bricks;
 
   /// Finds nearest ancestor `mason.yaml` file
   /// relative to the [cwd].
@@ -41,27 +41,26 @@ class MasonConfiguration {
   }
 }
 
-/// {@template mason_template}
-/// Mason Template which contains metadata about the template.
+/// {@template brick}
+/// Contains metadata for a reusable brick template.
 ///
 /// Used by [MasonConfiguration].
 /// {@endtemplate}
 @JsonSerializable()
-class MasonTemplate {
-  /// {@macro mason_template}
-  const MasonTemplate({this.path, this.git});
+class Brick {
+  /// {@macro brick}
+  const Brick({this.path, this.git});
 
-  /// Converts [Map] to [MasonConfiguration]
-  factory MasonTemplate.fromJson(Map<dynamic, dynamic> json) =>
-      _$MasonTemplateFromJson(json);
+  /// Converts a [Map] to a [Brick].
+  factory Brick.fromJson(Map<dynamic, dynamic> json) => _$BrickFromJson(json);
 
-  /// Converts [MasonTemplate] to [Map]
-  Map<dynamic, dynamic> toJson() => _$MasonTemplateToJson(this);
+  /// Converts [Brick] to [Map]
+  Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
 
-  /// The local template path.
+  /// The local brick template path.
   final String path;
 
-  /// Git Template configuration.
+  /// Git brick template path.
   final GitPath git;
 }
 
@@ -80,7 +79,7 @@ class GitPath {
   /// Converts [GitPath] to [Map]
   Map<dynamic, dynamic> toJson() => _$GitPathToJson(this);
 
-  /// The local template path.
+  /// The local brick template path.
   final String url;
 
   /// Path in repository. Defaults to /.

@@ -1,3 +1,10 @@
+# 0.0.1-dev.11
+
+- **BREAKING**: rename `templates` to `bricks`
+  - rename `__template__` to `__brick__`
+  - rename `template.yaml` to `brick.yaml`
+- **BREAKING**: rename `mason build` to `mason make`
+
 # 0.0.1-dev.10
 
 - feat: support file resolution from path variable

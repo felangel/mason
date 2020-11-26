@@ -9,12 +9,12 @@ import 'package:args/command_runner.dart';
 
 import '../logger.dart';
 
-/// {@template build_command}
-/// `mason build` command which generates code based on a pre-existing template.
+/// {@template make_command}
+/// `mason make` command which generates code based on a brick template.
 /// {@endtemplate}
-class BuildCommand extends Command<dynamic> {
-  /// {@macro build_command}
-  BuildCommand(this._logger) {
+class MakeCommand extends Command<dynamic> {
+  /// {@macro make_command}
+  MakeCommand(this._logger) {
     argParser.addOption(
       'json',
       abbr: 'j',
@@ -25,10 +25,10 @@ class BuildCommand extends Command<dynamic> {
   final Logger _logger;
 
   @override
-  final String description = 'Generate code using an existing template.';
+  final String description = 'Generate code using an existing brick template.';
 
   @override
-  final String name = 'build';
+  final String name = 'make';
 
   Directory _cwd;
 
@@ -43,7 +43,7 @@ class BuildCommand extends Command<dynamic> {
     final masonConfigFile = MasonConfiguration.findNearest(cwd);
     if (masonConfigFile == null) {
       _logger.err(
-        'missing mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+        'Missing mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
       );
       return;
     }
@@ -53,7 +53,7 @@ class BuildCommand extends Command<dynamic> {
         : null;
     if (masonConfigContent == null || masonConfigContent.isEmpty) {
       _logger.err(
-        'malformed mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
+        'Malformed mason.yaml at ${path.join(cwd.path, 'mason.yaml')}',
       );
       return;
     }
@@ -63,24 +63,24 @@ class BuildCommand extends Command<dynamic> {
       (m) => MasonConfiguration.fromJson(m),
     );
     final args = argResults.rest;
-    final template = masonConfig.templates[args.first];
+    final brick = masonConfig.bricks[args.first];
     final dir = cwd;
     final target = _DirectoryGeneratorTarget(_logger, dir);
 
-    if (template == null) {
+    if (brick == null) {
       _logger
-        ..err('Specify a template')
+        ..err('Specify a brick')
         ..info('')
         ..info(usage);
       exitCode = io.ExitCode.usage.code;
       return;
     }
 
-    final fetchDone = _logger.progress('fetching template');
+    final fetchDone = _logger.progress('Getting brick');
     Function generateDone;
     try {
-      final generator = await MasonGenerator.fromTemplate(
-        template,
+      final generator = await MasonGenerator.fromBrick(
+        brick,
         workingDirectory: masonConfigFile.parent.path,
       );
       fetchDone();
@@ -114,10 +114,10 @@ class BuildCommand extends Command<dynamic> {
         }
       }
 
-      generateDone = _logger.progress('building ${generator.id}');
+      generateDone = _logger.progress('Making ${generator.id}');
       await generator.generate(target, vars: vars);
       generateDone?.call();
-      _logger.success('built ${generator.id} in ${target.dir.path}');
+      _logger.success('Made ${generator.id} in ${target.dir.path}');
       exit(io.ExitCode.success.code);
     } on Exception catch (e) {
       fetchDone();
