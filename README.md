@@ -73,7 +73,7 @@ where `hello.json` is:
 The above commands will all generate `HELLO.md` in the current directory with the following content:
 
 ```md
-# Hello Felix!
+Hello Felix!
 ```
 
 ## Creating New Bricks
