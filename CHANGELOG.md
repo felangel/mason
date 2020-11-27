@@ -1,3 +1,11 @@
+# 0.0.1-dev.15
+
+- feat: add `mason new` to create a new brick
+- feat: `mason init` sets up bricks with sample
+- fix: support bricks without `vars`
+- fix: support bricks with empty `vars`
+- docs: revamp README to include `Quick Start` section
+
 # 0.0.1-dev.14
 
 - fix: mason init path resolution

@@ -16,7 +16,8 @@ void main(List<String> args) async {
           help: 'Print the current version.',
         )
         ..addCommand(InitCommand(logger))
-        ..addCommand(MakeCommand(logger));
+        ..addCommand(MakeCommand(logger))
+        ..addCommand(NewCommand(logger));
 
   try {
     final globalArgs = masonCli.argParser.parse(args);

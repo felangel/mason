@@ -5,7 +5,6 @@ import 'package:io/ansi.dart';
 import 'package:io/io.dart' as io;
 import 'package:mason/src/generator.dart';
 import 'package:mason/src/mason_yaml.dart';
-import 'package:path/path.dart' as path;
 import 'package:args/command_runner.dart';
 
 import '../logger.dart';
@@ -46,21 +45,12 @@ class MakeCommand extends Command<dynamic> {
     final masonConfigFile = MasonYaml.findNearest(cwd);
     if (masonConfigFile == null) {
       _logger.err(
-        '''Missing ${MasonYaml.file} at ${path.join(cwd.path, MasonYaml.file)}.\nRun mason init, add the $brickName brick, and try again.''',
+        '''Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?''',
       );
       return;
     }
 
-    final masonConfigContent = masonConfigFile.existsSync()
-        ? masonConfigFile.readAsStringSync()
-        : null;
-    if (masonConfigContent == null || masonConfigContent.isEmpty) {
-      _logger.err(
-        '''Malformed ${MasonYaml.file} at ${path.join(cwd.path, 'mason.yaml')}''',
-      );
-      return;
-    }
-
+    final masonConfigContent = masonConfigFile.readAsStringSync();
     final masonConfig = checkedYamlDecode(
       masonConfigContent,
       (m) => MasonYaml.fromJson(m),
@@ -100,7 +90,7 @@ class MakeCommand extends Command<dynamic> {
         return;
       }
 
-      for (final variable in generator.vars) {
+      for (final variable in generator.vars ?? const <String>[]) {
         if (vars.containsKey(variable)) continue;
         final index = args.indexOf('--$variable');
         if (index != -1) {

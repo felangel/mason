@@ -5,6 +5,7 @@ import 'package:io/ansi.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 
+import '../brick_yaml.dart';
 import '../logger.dart';
 import '../mason_yaml.dart';
 
@@ -18,7 +19,7 @@ class InitCommand extends Command<dynamic> {
   final Logger _logger;
 
   @override
-  final String description = 'Initialize a new ${MasonYaml.file}.';
+  final String description = 'Initialize mason in the current directory.';
 
   @override
   final String name = 'init';
@@ -41,7 +42,10 @@ class InitCommand extends Command<dynamic> {
     final fetchDone = _logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd, _logger);
     final generator = _MasonYamlGenerator();
-    await generator.generate(target);
+    await generator.generate(
+      target,
+      vars: <String, String>{'name': '{{name}}'},
+    );
     fetchDone('Initialized');
     _logger
       ..info(
@@ -56,18 +60,39 @@ class _MasonYamlGenerator extends MasonGenerator {
       : super(
           '__mason_init__',
           'Initialize a new ${MasonYaml.file}',
-          files: [TemplateFile(MasonYaml.file, _content)],
+          files: [
+            TemplateFile(MasonYaml.file, _masonYamlContent),
+            TemplateFile(
+              p.join('bricks', 'hello', BrickYaml.file),
+              _brickYamlContent,
+            ),
+            TemplateFile(
+              p.join('bricks', 'hello', BrickYaml.dir, 'HELLO.md'),
+              'Hello {{name}}!',
+            ),
+          ],
         );
 
-  static const _content =
+  static const _brickYamlContent = '''name: hello
+description: An example hello brick.
+vars:
+  - name
+''';
+
+  static const _masonYamlContent =
       '''# Register bricks which can be consumed via the Mason CLI.
 # https://pub.dev/packages/mason
 bricks:
-  # Sample Greeting Brick
-  # Run `mason make greeting` to try it out.
-  greeting:
-    git:
-      url: git@github.com:felangel/mason.git
-      path: bricks/greeting
+  # Sample Brick
+  # Run `mason make hello` to try it out.
+  hello:
+    path: bricks/hello
+  # Bricks can also be imported via git url.
+  # Uncomment the following lines to import
+  # a brick from a remote git url.
+  # todos:
+  #   git:
+  #     url: git@github.com:felangel/mason.git
+  #     path: bricks/todos
 ''';
 }

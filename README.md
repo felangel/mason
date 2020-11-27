@@ -7,17 +7,88 @@ A template generator which helps teams generate files quickly and consistently.
 
 Mason allows developers to create and consume resuable templates call bricks.
 
-## Activating Mason
+## Quick Start
 
-`pub global activate mason`
+### Activate Mason
 
-## Creating Custom Brick Templates
+```sh
+$ pub global activate mason
+```
 
-### Create a Brick YAML
+### Initialize Mason
+
+```sh
+$ mason init
+```
+
+`mason init` initializes the Mason CLI in the current directory.
+
+Running `mason init` generates a `mason.yaml` and an example `brick` so that you can get started immediately.
+
+```yaml
+bricks:
+  hello:
+    path: bricks/hello
+```
+
+Then you can use `mason make` to generate your first file:
+
+```sh
+mason make hello
+```
+
+### Command Line Variables
+
+Any variables can be passed as command line args.
+
+```sh
+$ mason make hello -- --name Felix
+```
+
+### Variable Prompts
+
+Any variables which aren't specified as command line args will be prompted.
+
+```sh
+$ mason make hello
+name: Felix
+```
+
+### JSON Input Variables
+
+Any variables can be passed via json file:
+
+```dart
+$ mason make hello --json hello.json
+```
+
+where `hello.json` is:
+
+```json
+{
+  "name": "Felix"
+}
+```
+
+The above commands will all generate `HELLO.md` in the current directory with the following content:
+
+```md
+# Hello Felix!
+```
+
+## Creating New Bricks
+
+Create a new brick using the `mason new` command.
+
+```sh
+$ mason new <BRICK_NAME>
+```
+
+The above command will generate a new brick in the `bricks` directory with an example `brick.yaml` and `__brick__` template directory.
+
+### Brick YAML
 
 The `brick.yaml` contains metadata for a `brick` template.
-
-`brick.yaml`
 
 ```yaml
 name: greetings
@@ -26,9 +97,9 @@ vars:
   - name
 ```
 
-### Create a Brick Template
+### Brick Template
 
-Write your brick template in `__brick__` using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
+Write your brick template in the `__brick__` directory using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
 
 `__brick__/greetings.md`
 
@@ -36,7 +107,7 @@ Write your brick template in `__brick__` using [mustache templates](https://must
 # Greetings {{name}}!
 ```
 
-❗ **Note: bricks can consist of multiple files and subdirectories**
+❗ **Note: `__brick__` can contain multiple files and subdirectories**
 
 #### File Resolution
 
@@ -57,72 +128,6 @@ And the following brick template:
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
 
-## Consuming Brick Templates
-
-### Create a Mason YAML
-
-```sh
-$ mason init
-```
-
-Add bricks to the newly generated `mason.yaml`:
-
-```yaml
-bricks:
-  greetings:
-    path: bricks/greetings
-  todos:
-    git:
-      url: git@github.com:felangel/mason.git
-      path: bricks/todos
-```
-
-Then you can use `mason make <greetings|todos>`:
-
-```sh
-mason make greetings
-mason make todos
-```
-
-### Command Line Variables
-
-Any variables can be passed as command line args.
-
-```sh
-$ mason make greetings -- --name Felix
-```
-
-### Variable Prompts
-
-Any variables which aren't specified as command line args will be prompted.
-
-```sh
-$ mason make greetings
-name: Felix
-```
-
-### JSON Input Variables
-
-Any variables can be passed via json file:
-
-```dart
-$ mason make greetings --json greetings.json
-```
-
-where `greetings.json` is:
-
-```json
-{
-  "name": "Felix"
-}
-```
-
-The above commands should all generate `GREETINGS.md` in the current directory with the following content:
-
-```md
-# Greetings Felix!
-```
-
 ## Usage
 
 ```sh
@@ -136,6 +141,7 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  init   Initialize a new mason.yaml.
+  init   Initialize mason in the current directory.
   make   Generate code using an existing brick template.
+  new    Creates a new brick template.
 ```

@@ -88,14 +88,14 @@ class MasonGenerator extends Generator {
     );
     final parentDirectory = brickYamlFile.parent;
     final brickDirectory = Directory(
-      p.join(parentDirectory.path, manifest.brick),
+      p.join(parentDirectory.path, BrickYaml.dir),
     );
     final futures =
         brickDirectory.listSync(recursive: true).whereType<File>().map((file) {
       return () async {
         final content = await File(file.path).readAsString();
         final relativePath = file.path.substring(
-          file.path.indexOf(manifest.brick) + 1 + manifest.brick.length,
+          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
         );
         return TemplateFile(relativePath, content);
       }();

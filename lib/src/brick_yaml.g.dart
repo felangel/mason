@@ -8,14 +8,12 @@ part of 'brick_yaml.dart';
 
 BrickYaml _$BrickYamlFromJson(Map json) {
   return $checkedNew('BrickYaml', json, () {
-    $checkKeys(json,
-        allowedKeys: const ['name', 'description', 'brick', 'vars']);
+    $checkKeys(json, allowedKeys: const ['name', 'description', 'vars']);
     final val = BrickYaml(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
       $checkedConvert(
           json, 'vars', (v) => (v as List)?.map((e) => e as String)?.toList()),
-      brick: $checkedConvert(json, 'brick', (v) => v as String),
     );
     return val;
   });
@@ -32,7 +30,6 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
 
   writeNotNull('name', instance.name);
   writeNotNull('description', instance.description);
-  writeNotNull('brick', instance.brick);
   writeNotNull('vars', instance.vars);
   return val;
 }

@@ -12,9 +12,8 @@ class BrickYaml {
   const BrickYaml(
     this.name,
     this.description,
-    this.vars, {
-    String brick,
-  }) : brick = brick ?? '__brick__';
+    this.vars,
+  );
 
   /// Converts [Map] to [BrickYaml]
   factory BrickYaml.fromJson(Map<dynamic, dynamic> json) =>
@@ -27,15 +26,15 @@ class BrickYaml {
   /// `brick.yaml`
   static const file = 'brick.yaml';
 
+  /// static constant for brick template directory name.
+  /// `__brick__`
+  static const dir = '__brick__';
+
   /// Name of the brick.
   final String name;
 
   /// Description of the brick.
   final String description;
-
-  /// Optional path to brick template directory.
-  /// Defaults to `__brick__`.
-  final String brick;
 
   /// List of variables used when templating a brick.
   final List<String> vars;
