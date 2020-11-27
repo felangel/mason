@@ -84,15 +84,15 @@ Create a new brick using the `mason new` command.
 $ mason new <BRICK_NAME>
 ```
 
-The above command will generate a new brick in the `bricks` directory with an example `brick.yaml` and `__brick__` template directory.
+The above command will generate a new brick in the `bricks` directory with a `brick.yaml` and `__brick__` template directory.
 
 ### Brick YAML
 
 The `brick.yaml` contains metadata for a `brick` template.
 
 ```yaml
-name: greetings
-description: A Simple Greetings Brick
+name: example
+description: An example brick
 vars:
   - name
 ```
@@ -101,10 +101,10 @@ vars:
 
 Write your brick template in the `__brick__` directory using [mustache templates](https://mustache.github.io/). See the [mustache manual](https://mustache.github.com/mustache.5.html) for detailed usage information.
 
-`__brick__/greetings.md`
+`__brick__/example.md`
 
 ```md
-# Greetings {{name}}!
+# Hello {{name}}!
 ```
 
 ❗ **Note: `__brick__` can contain multiple files and subdirectories**
