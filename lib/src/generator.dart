@@ -42,9 +42,6 @@ class MasonGenerator extends Generator {
   /// ```yaml
   /// name: greetings
   /// description: A Simple Greetings Template
-  /// files:
-  ///   - from: greetings.md
-  ///     to: GREETINGS.md
   /// vars:
   ///   - name
   /// ```
