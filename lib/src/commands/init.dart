@@ -1,57 +1,45 @@
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
+import 'package:io/io.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 
 import '../brick_yaml.dart';
-import '../logger.dart';
+import '../command.dart';
 import '../mason_yaml.dart';
 
 /// {@template init_command}
 /// `mason init` command which initializes a new `mason.yaml`.
 /// {@endtemplate}
-class InitCommand extends Command<dynamic> {
-  /// {@macro init_command}
-  InitCommand(this._logger);
-
-  final Logger _logger;
-
+class InitCommand extends MasonCommand {
   @override
   final String description = 'Initialize mason in the current directory.';
 
   @override
   final String name = 'init';
 
-  Directory _cwd;
-
-  /// Return the current working directory.
-  Directory get cwd => _cwd ?? Directory.current;
-
-  /// An override for the directory to generate into; public for testing.
-  set cwd(Directory value) => _cwd = value;
-
   @override
-  void run() async {
+  Future<int> run() async {
     final masonYaml = File(p.join(cwd.path, MasonYaml.file));
     if (masonYaml.existsSync()) {
-      _logger.err('Existing ${MasonYaml.file} at ${masonYaml.path}');
-      return;
+      logger.err('Existing ${MasonYaml.file} at ${masonYaml.path}');
+      exit(ExitCode.usage.code);
     }
-    final fetchDone = _logger.progress('Initializing');
-    final target = DirectoryGeneratorTarget(cwd, _logger);
+    final fetchDone = logger.progress('Initializing');
+    final target = DirectoryGeneratorTarget(cwd, logger);
     final generator = _MasonYamlGenerator();
     await generator.generate(
       target,
       vars: <String, String>{'name': '{{name}}'},
     );
     fetchDone('Initialized');
-    _logger
+    logger
       ..info(
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
-      ..flush(_logger.success);
+      ..flush(logger.success);
+    exit(ExitCode.success.code);
   }
 }
 

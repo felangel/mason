@@ -1,23 +1,23 @@
 import 'dart:io';
 
-import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/ansi.dart';
+import 'package:io/io.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
 
 import '../brick_yaml.dart';
-import '../logger.dart';
+import '../command.dart';
 import '../mason_yaml.dart';
 import '../yaml_encode.dart';
 
 /// {@template new_command}
 /// `mason new` command which creates a new brick.
 /// {@endtemplate}
-class NewCommand extends Command<dynamic> {
+class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand(this._logger) {
+  NewCommand() {
     argParser.addOption(
       'desc',
       abbr: 'd',
@@ -26,43 +26,33 @@ class NewCommand extends Command<dynamic> {
     );
   }
 
-  final Logger _logger;
-
   @override
   final String description = 'Creates a new brick template.';
 
   @override
   final String name = 'new';
 
-  Directory _cwd;
-
-  /// Return the current working directory.
-  Directory get cwd => _cwd ?? Directory.current;
-
-  /// An override for the directory to generate into; public for testing.
-  set cwd(Directory value) => _cwd = value;
-
   @override
-  void run() async {
+  Future<int> run() async {
     final name = argResults.rest.first.snakeCase;
     final description = argResults['desc'] as String;
     final masonYamlFile = MasonYaml.findNearest(cwd);
     if (masonYamlFile == null) {
-      _logger.err(
+      logger.err(
         '''Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?''',
       );
-      return;
+      exit(ExitCode.usage.code);
     }
     final directory = Directory(p.join(masonYamlFile.parent.path, 'bricks'));
     final brickYaml = File(
       p.join(directory.path, name, BrickYaml.file),
     );
     if (brickYaml.existsSync()) {
-      _logger.err('Existing brick: $name at ${brickYaml.path}');
-      return;
+      logger.err('Existing brick: $name at ${brickYaml.path}');
+      exit(ExitCode.usage.code);
     }
-    final done = _logger.progress('Creating new brick: $name.');
-    final target = DirectoryGeneratorTarget(directory, _logger);
+    final done = logger.progress('Creating new brick: $name.');
+    final target = DirectoryGeneratorTarget(directory, logger);
     final generator = _BrickGenerator(name, description);
     final masonYamlContent = masonYamlFile.readAsStringSync();
     final masonYaml = checkedYamlDecode(
@@ -84,11 +74,12 @@ class NewCommand extends Command<dynamic> {
         masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
     ]);
     done('Created new brick: $name');
-    _logger
+    logger
       ..info(
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
-      ..flush(_logger.success);
+      ..flush(logger.success);
+    exit(ExitCode.success.code);
   }
 }
 
