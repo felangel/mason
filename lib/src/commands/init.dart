@@ -24,7 +24,7 @@ class InitCommand extends MasonCommand {
     final masonYaml = File(p.join(cwd.path, MasonYaml.file));
     if (masonYaml.existsSync()) {
       logger.err('Existing ${MasonYaml.file} at ${masonYaml.path}');
-      exit(ExitCode.usage.code);
+      return ExitCode.usage.code;
     }
     final fetchDone = logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd, logger);
@@ -39,7 +39,7 @@ class InitCommand extends MasonCommand {
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
       ..flush(logger.success);
-    exit(ExitCode.success.code);
+    return ExitCode.success.code;
   }
 }
 

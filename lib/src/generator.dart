@@ -157,10 +157,6 @@ abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
   Generator(this.id, this.description);
 
-  final List<Future<void>> _futures = [];
-
-  Future<void> get _complete => Future.wait<void>(_futures);
-
   /// Unique identifier for the generator.
   final String id;
 
@@ -181,20 +177,16 @@ abstract class Generator implements Comparable<Generator> {
     GeneratorTarget target, {
     Map<String, dynamic> vars,
   }) async {
-    await Future.forEach(files, (TemplateFile file) {
+    await Future.forEach(files, (TemplateFile file) async {
       final match = _fileRegExp.firstMatch(file.path);
       if (match != null) {
-        final completer = Completer<void>();
-        _futures.add(completer.future);
-        _fetch(vars[match[1]] as String)
-            .then(completer.complete)
-            .catchError(completer.completeError);
+        final resultFile = await _fetch(vars[match[1]] as String);
+        return target.createFile(resultFile.path, resultFile.content);
       } else {
         final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
         return target.createFile(resultFile.path, resultFile.content);
       }
     });
-    return _complete;
   }
 
   @override
@@ -204,18 +196,18 @@ abstract class Generator implements Comparable<Generator> {
   @override
   String toString() => '[$id: $description]';
 
-  Future<void> _fetch(String path) async {
+  Future<FileContents> _fetch(String path) async {
     final file = File(path);
     final isLocal = file.existsSync();
     if (isLocal) {
       final target = p.join(Directory.current.path, p.basename(file.path));
       final bytes = await file.readAsBytes();
-      await File(target).writeAsBytes(bytes, flush: true);
+      return FileContents(target, bytes);
     } else {
       final uri = Uri.parse(path);
       final target = p.join(Directory.current.path, p.basename(uri.path));
       final response = await http.Client().get(uri);
-      await File(target).writeAsBytes(response.bodyBytes, flush: true);
+      return FileContents(target, response.bodyBytes);
     }
   }
 }

@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'dart:io';
-import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/src/generator.dart';
@@ -29,22 +28,16 @@ class MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final args = argResults.rest;
-    final brickName = args.first;
-    final masonConfigFile = MasonYaml.findNearest(cwd);
-    if (masonConfigFile == null) {
+    if (masonYamlFile == null) {
       logger.err(
         'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
       );
-      exit(ExitCode.ioError.code);
+      return ExitCode.ioError.code;
     }
 
-    final masonConfigContent = masonConfigFile.readAsStringSync();
-    final masonConfig = checkedYamlDecode(
-      masonConfigContent,
-      (m) => MasonYaml.fromJson(m),
-    );
-    final brick = masonConfig.bricks[brickName];
+    final args = argResults.rest;
+    final brickName = args.first;
+    final brick = masonYaml.bricks[brickName];
     final target = DirectoryGeneratorTarget(cwd, logger);
 
     if (brick == null) {
@@ -53,7 +46,7 @@ class MakeCommand extends MasonCommand {
         'Add the $brickName brick to the ${MasonYaml.file} '
         'and try again.',
       );
-      exit(ExitCode.usage.code);
+      return ExitCode.usage.code;
     }
 
     final fetchDone = logger.progress('Getting brick $brickName');
@@ -61,7 +54,7 @@ class MakeCommand extends MasonCommand {
     try {
       final generator = await MasonGenerator.fromBrick(
         brick,
-        workingDirectory: masonConfigFile.parent.path,
+        workingDirectory: entryPoint.path,
       );
       fetchDone('Got brick $brickName');
 
@@ -70,10 +63,10 @@ class MakeCommand extends MasonCommand {
         vars.addAll(await _decodeFile(argResults['json'] as String));
       } on FormatException catch (error) {
         logger.err('${error}in ${argResults['json']}');
-        exit(ExitCode.usage.code);
+        return ExitCode.usage.code;
       } on Exception catch (error) {
         logger.err('$error');
-        exit(ExitCode.usage.code);
+        return ExitCode.usage.code;
       }
 
       for (final variable in generator.vars ?? const <String>[]) {
@@ -101,12 +94,12 @@ class MakeCommand extends MasonCommand {
           'Generated ${generator.files.length} file(s):',
         )
         ..flush(logger.success);
-      exit(ExitCode.success.code);
+      return ExitCode.success.code;
     } on Exception catch (e) {
       fetchDone();
       generateDone?.call();
       logger.err(e.toString());
-      exit(ExitCode.cantCreate.code);
+      return ExitCode.cantCreate.code;
     }
   }
 

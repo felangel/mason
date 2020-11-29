@@ -1,6 +1,5 @@
 import 'dart:io';
 
-import 'package:checked_yaml/checked_yaml.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/src/generator.dart';
@@ -34,37 +33,34 @@ class NewCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final name = argResults.rest.first.snakeCase;
-    final description = argResults['desc'] as String;
-    final masonYamlFile = MasonYaml.findNearest(cwd);
     if (masonYamlFile == null) {
       logger.err(
         '''Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?''',
       );
-      exit(ExitCode.usage.code);
+      return ExitCode.usage.code;
     }
-    final directory = Directory(p.join(masonYamlFile.parent.path, 'bricks'));
+
+    final name = argResults.rest.first.snakeCase;
+    final description = argResults['desc'] as String;
+    final directory = Directory(p.join(entryPoint.path, 'bricks'));
     final brickYaml = File(
       p.join(directory.path, name, BrickYaml.file),
     );
+
     if (brickYaml.existsSync()) {
       logger.err('Existing brick: $name at ${brickYaml.path}');
-      exit(ExitCode.usage.code);
+      return ExitCode.usage.code;
     }
+
     final done = logger.progress('Creating new brick: $name.');
     final target = DirectoryGeneratorTarget(directory, logger);
     final generator = _BrickGenerator(name, description);
-    final masonYamlContent = masonYamlFile.readAsStringSync();
-    final masonYaml = checkedYamlDecode(
-      masonYamlContent,
-      (m) => MasonYaml.fromJson(m),
-    );
     final bricks = Map.of(masonYaml.bricks)
       ..addAll({
         name: Brick(
           path: p.relative(
             brickYaml.parent.path,
-            from: masonYamlFile.parent.path,
+            from: entryPoint.path,
           ),
         )
       });
@@ -79,7 +75,7 @@ class NewCommand extends MasonCommand {
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
       ..flush(logger.success);
-    exit(ExitCode.success.code);
+    return ExitCode.success.code;
   }
 }
 
