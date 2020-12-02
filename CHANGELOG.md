@@ -1,3 +1,9 @@
+# 0.0.1-dev.17
+
+- feat: support dart execution inside templates
+- docs: add random_number example
+- fix: handle empty or missing vars in `brick.yaml`
+
 # 0.0.1-dev.16
 
 - **BREAKING**: `mason make` creates subcommands for all available bricks

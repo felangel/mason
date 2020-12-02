@@ -13,7 +13,7 @@ BrickYaml _$BrickYamlFromJson(Map json) {
     final val = BrickYaml(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
-      $checkedConvert(
+      vars: $checkedConvert(
           json, 'vars', (v) => (v as List)?.map((e) => e as String)?.toList()),
       path: $checkedConvert(json, 'path', (v) => v as String),
     );
