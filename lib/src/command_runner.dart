@@ -20,7 +20,7 @@ class MasonCommandRunner extends CommandRunner<int> {
       help: 'Print the current version.',
     );
     addCommand(InitCommand());
-    addCommand(InstallCommand());
+    addCommand(GetCommand());
     addCommand(MakeCommand());
     addCommand(NewCommand());
   }
@@ -34,8 +34,19 @@ class MasonCommandRunner extends CommandRunner<int> {
 
   @override
   Future<int> run(Iterable<String> args) async {
+    _argResults = parse(args);
+    return await runCommand(_argResults) ?? ExitCode.success.code;
+  }
+
+  @override
+  Future<int> runCommand(ArgResults topLevelResults) async {
+    if (topLevelResults['version'] == true) {
+      _logger.info('mason version: $packageVersion');
+      return ExitCode.success.code;
+    }
+
     try {
-      _argResults = parse(args);
+      return await super.runCommand(topLevelResults);
     } on FormatException catch (e) {
       _logger
         ..err(e.message)
@@ -49,15 +60,5 @@ class MasonCommandRunner extends CommandRunner<int> {
         ..info(usage);
       return ExitCode.usage.code;
     }
-    return await runCommand(_argResults) ?? ExitCode.success.code;
-  }
-
-  @override
-  Future<int> runCommand(ArgResults topLevelResults) async {
-    if (topLevelResults['version'] == true) {
-      _logger.info('mason version: $packageVersion');
-      return ExitCode.success.code;
-    }
-    return await super.runCommand(topLevelResults);
   }
 }

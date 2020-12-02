@@ -1,22 +1,17 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File, Process, ProcessException, ProcessResult;
+import 'dart:io' show Directory, File;
 
-import 'package:checked_yaml/checked_yaml.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
 import 'logger.dart';
+import 'mason_cache.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
-
-Future<String> _createSystemTempDir() async {
-  final tempDir = await Directory.systemTemp.createTemp('mason_');
-  return tempDir.resolveSymbolicLinksSync();
-}
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -37,7 +32,7 @@ class MasonGenerator extends Generator {
   }
 
   /// Factory which creates a [MasonGenerator] based on
-  /// a configuration file for a [Brick]:
+  /// a configuration file for a [BrickYaml]:
   ///
   /// ```yaml
   /// name: greetings
@@ -45,50 +40,15 @@ class MasonGenerator extends Generator {
   /// vars:
   ///   - name
   /// ```
-  static Future<MasonGenerator> fromBrick(
-    Brick brick, {
-    String workingDirectory = '',
-  }) async {
-    File brickYamlFile;
-    String brickYamlContent;
-
-    if (brick.path != null) {
-      brickYamlFile = File(
-        p.join(workingDirectory, brick.path, BrickYaml.file),
-      );
-      brickYamlContent = await brickYamlFile.readAsString();
-    } else if (brick.git != null) {
-      final tempDirectory = await _createSystemTempDir();
-      await _runGit(['clone', brick.git.url, tempDirectory]);
-      if (brick.git.ref != null) {
-        await _runGit(
-          ['checkout', brick.git.ref],
-          processWorkingDir: tempDirectory,
-        );
-      }
-      brickYamlFile = File(
-        p.join(
-          workingDirectory,
-          tempDirectory,
-          brick.git.path ?? '',
-          BrickYaml.file,
-        ),
-      );
-      brickYamlContent = await brickYamlFile.readAsString();
-    } else {
-      throw const FormatException('Missing brick source');
-    }
-
-    final manifest = checkedYamlDecode(
-      brickYamlContent,
-      (m) => BrickYaml.fromJson(m),
-    );
-    final parentDirectory = brickYamlFile.parent;
-    final brickDirectory = Directory(
-      p.join(parentDirectory.path, BrickYaml.dir),
-    );
-    final futures =
-        brickDirectory.listSync(recursive: true).whereType<File>().map((file) {
+  static Future<MasonGenerator> fromBrickYaml(
+    BrickYaml brick,
+    MasonCache cache,
+    String directory,
+  ) async {
+    final futures = Directory(directory)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) {
       return () async {
         final content = await File(file.path).readAsString();
         final relativePath = file.path.substring(
@@ -98,55 +58,16 @@ class MasonGenerator extends Generator {
       }();
     });
     return MasonGenerator(
-      manifest.name,
-      manifest.description,
+      brick.name,
+      brick.description,
       files: await Future.wait(futures),
-      vars: manifest.vars,
+      vars: brick.vars,
     );
   }
 
   /// Optional list of variables which will be used to populate
   /// the corresponding mustache variables within the template.
   final List<String> vars;
-}
-
-Future<ProcessResult> _runGit(
-  List<String> args, {
-  bool throwOnError = true,
-  String processWorkingDir,
-}) async {
-  final result = await Process.run('git', args,
-      workingDirectory: processWorkingDir, runInShell: true);
-
-  if (throwOnError) {
-    _throwIfProcessFailed(result, 'git', args);
-  }
-  return result;
-}
-
-void _throwIfProcessFailed(
-  ProcessResult pr,
-  String process,
-  List<String> args,
-) {
-  assert(pr != null);
-  if (pr.exitCode != 0) {
-    final values = {
-      'Standard out': pr.stdout.toString().trim(),
-      'Standard error': pr.stderr.toString().trim()
-    }..removeWhere((k, v) => v.isEmpty);
-
-    String message;
-    if (values.isEmpty) {
-      message = 'Unknown error';
-    } else if (values.length == 1) {
-      message = values.values.single;
-    } else {
-      message = values.entries.map((e) => '${e.key}\n${e.value}').join('\n');
-    }
-
-    throw ProcessException(process, args, message, pr.exitCode);
-  }
 }
 
 /// {@template generator}
