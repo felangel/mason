@@ -44,9 +44,8 @@ class GetCommand extends MasonCommand {
     }
 
     await Future.forEach<Brick>(masonYaml.bricks.values, _download);
-    final file = File(p.join(entryPoint.path, '.bricks'));
-    await file.create(recursive: true);
-    await file.writeAsString(cache.encode);
+    await bricksJson.create(recursive: true);
+    await bricksJson.writeAsString(cache.encode);
     getDone();
     return ExitCode.success.code;
   }

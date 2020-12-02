@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
 
 import 'commands/commands.dart';
+import 'exception.dart';
 import 'logger.dart';
 import 'version.dart';
 
@@ -19,10 +22,15 @@ class MasonCommandRunner extends CommandRunner<int> {
       negatable: false,
       help: 'Print the current version.',
     );
-    addCommand(InitCommand());
-    addCommand(GetCommand());
-    addCommand(MakeCommand());
-    addCommand(NewCommand());
+    try {
+      addCommand(InitCommand());
+      addCommand(GetCommand());
+      addCommand(MakeCommand());
+      addCommand(NewCommand());
+    } on MasonException catch (e) {
+      _logger.err(e.message);
+      exit(ExitCode.usage.code);
+    }
   }
 
   final Logger _logger;

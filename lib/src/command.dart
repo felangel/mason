@@ -5,14 +5,49 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
+import 'exception.dart';
 import 'logger.dart';
 import 'mason_cache.dart';
 import 'mason_yaml.dart';
 
+/// {@template brick_not_found_exception}
+/// Thrown when a brick registered in the `mason.yaml` cannot be found locally.
+/// {@endtemplate}
+class BrickNotFoundException extends MasonException {
+  /// {@macro brick_not_found_exception}
+  const BrickNotFoundException(String path)
+      : super('Could not find brick at $path');
+}
+
+/// {@template mason_yaml_not_found_exception}
+/// Thrown when a `mason.yaml` cannot be found locally.
+/// {@endtemplate}
+class MasonYamlNotFoundException extends MasonException {
+  /// {@macro mason_yaml_not_found_exception}
+  const MasonYamlNotFoundException(String path)
+      : super('Could not find ${MasonYaml.file} at $path');
+}
+
+/// {@template mason_yaml_parse_exception}
+/// Thrown when a `mason.yaml` cannot be parsed.
+/// {@endtemplate}
+class MasonYamlParseException extends MasonException {
+  /// {@macro mason_yaml_parse_exception}
+  const MasonYamlParseException(String message) : super(message);
+}
+
+/// {@template brick_yaml_parse_exception}
+/// Thrown when a `brick.yaml` cannot be parsed.
+/// {@endtemplate}
+class BrickYamlParseException extends MasonException {
+  /// {@macro brick_yaml_parse_exception}
+  const BrickYamlParseException(String message) : super(message);
+}
+
 /// The base class for all mason executable commands.
 abstract class MasonCommand extends Command<int> {
   /// [MasonCache] which contains all remote brick templates.
-  MasonCache get cache => _cache ??= MasonCache(entryPoint.path);
+  MasonCache get cache => _cache ??= MasonCache(bricksJson);
 
   MasonCache _cache;
 
@@ -21,6 +56,9 @@ abstract class MasonCommand extends Command<int> {
 
   Directory _entryPoint;
 
+  /// Gets the `bricks.json` file for the current [entryPoint].
+  File get bricksJson => File(p.join(entryPoint.path, '.mason', 'bricks.json'));
+
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   Set<BrickYaml> get bricks {
     if (_bricks != null) return _bricks;
@@ -28,15 +66,25 @@ abstract class MasonCommand extends Command<int> {
     for (final brick in masonYaml.bricks.values) {
       final dirPath = cache.read(brick.path ?? brick.git.url);
       if (dirPath == null) break;
-      final filePath = brick.git?.url != null
-          ? p.join(dirPath, brick.git.path ?? '', BrickYaml.file)
-          : p.join(dirPath, BrickYaml.file);
-      bricks.add(
-        checkedYamlDecode(
-          File(filePath).readAsStringSync(),
-          (m) => BrickYaml.fromJson(m),
-        ).copyWith(path: filePath),
-      );
+      final filePath = brick.path != null
+          ? p.join(dirPath, BrickYaml.file)
+          : p.join(dirPath, brick.git.path ?? '', BrickYaml.file);
+      final file = File(filePath);
+      if (!file.existsSync()) {
+        throw BrickNotFoundException(filePath);
+      }
+      try {
+        bricks.add(
+          checkedYamlDecode(
+            file.readAsStringSync(),
+            (m) => BrickYaml.fromJson(m),
+          ).copyWith(path: filePath),
+        );
+      } on ParsedYamlException catch (e) {
+        throw BrickYamlParseException(
+          'Malformed ${BrickYaml.file} at ${file.path}\n${e.message}',
+        );
+      }
     }
     _bricks = bricks;
     return _bricks;
@@ -45,8 +93,9 @@ abstract class MasonCommand extends Command<int> {
   Set<BrickYaml> _bricks;
 
   /// Gets path to `mason_config.json`.
-  String get masonConfigPath =>
-      p.join(entryPoint.path, '.mason_tool', 'mason_config.json');
+  String get masonConfigPath {
+    return p.join(entryPoint.path, '.mason_tool', 'mason_config.json');
+  }
 
   /// Gets the nearest `mason.yaml` file.
   File get masonYamlFile => File(p.join(entryPoint.path, MasonYaml.file));
@@ -54,14 +103,21 @@ abstract class MasonCommand extends Command<int> {
   /// Gets the nearest [MasonYaml].
   MasonYaml get masonYaml {
     if (_masonYaml != null) return _masonYaml;
-    final masonYamlContent = File(
-      p.join(entryPoint.path, MasonYaml.file),
-    ).readAsStringSync();
-    _masonYaml = checkedYamlDecode(
-      masonYamlContent,
-      (m) => MasonYaml.fromJson(m),
-    );
-    return _masonYaml;
+    if (!masonYamlFile.existsSync()) {
+      throw MasonYamlNotFoundException(masonYamlFile.path);
+    }
+    final masonYamlContent = masonYamlFile.readAsStringSync();
+    try {
+      _masonYaml = checkedYamlDecode(
+        masonYamlContent,
+        (m) => MasonYaml.fromJson(m),
+      );
+      return _masonYaml;
+    } on ParsedYamlException catch (e) {
+      throw MasonYamlParseException(
+        'Malformed ${MasonYaml.file} at ${masonYamlFile.path}\n${e.message}',
+      );
+    }
   }
 
   MasonYaml _masonYaml;

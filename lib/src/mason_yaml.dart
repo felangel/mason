@@ -12,7 +12,8 @@ part 'mason_yaml.g.dart';
 @JsonSerializable()
 class MasonYaml {
   /// {@macro mason_yaml}
-  const MasonYaml(this.bricks);
+  const MasonYaml(Map<String, Brick> bricks)
+      : bricks = bricks ?? const <String, Brick>{};
 
   /// Converts [Map] to [MasonYaml]
   factory MasonYaml.fromJson(Map<dynamic, dynamic> json) =>

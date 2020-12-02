@@ -13,9 +13,9 @@ class MasonCache {
   MasonCache.empty({String rootDir}) : rootDir = rootDir ?? _masonCacheDir();
 
   /// Create a [MasonCache] which is populated with bricks
-  /// from the current directory ([path]).
-  MasonCache(String path) : rootDir = _masonCacheDir() {
-    _fromBricks(path);
+  /// from the current directory ([bricksJson]).
+  MasonCache(File bricksJson) : rootDir = _masonCacheDir() {
+    _fromBricks(bricksJson);
   }
 
   /// Mapping between remote and local brick paths.
@@ -24,11 +24,10 @@ class MasonCache {
   /// Removes all key/value pairs from the cache.
   void clear() => _cache.clear();
 
-  /// hydrates cache based on `.bricks` found in [path]
-  void _fromBricks(String path) {
-    final bricks = File(p.join(path, '.bricks'));
-    if (!bricks.existsSync()) return;
-    final content = bricks.readAsStringSync();
+  /// Populates cache based on `.mason/bricks.json`.
+  void _fromBricks(File bricksJson) {
+    if (!bricksJson.existsSync()) return;
+    final content = bricksJson.readAsStringSync();
     _cache = Map.castFrom<dynamic, dynamic, String, String>(
       json.decode(content) as Map,
     );
