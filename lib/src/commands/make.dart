@@ -2,9 +2,10 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
+import 'package:path/path.dart' as p;
 import 'package:mason/src/generator.dart';
-import 'package:mason/src/mason_yaml.dart';
 
+import '../brick_yaml.dart';
 import '../command.dart';
 
 /// {@template make_command}
@@ -13,11 +14,9 @@ import '../command.dart';
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
   MakeCommand() {
-    argParser.addOption(
-      'json',
-      abbr: 'j',
-      help: 'Path to json file containing variables',
-    );
+    for (final brick in bricks) {
+      addSubcommand(_MakeCommand(brick));
+    }
   }
 
   @override
@@ -25,39 +24,39 @@ class MakeCommand extends MasonCommand {
 
   @override
   final String name = 'make';
+}
+
+class _MakeCommand extends MasonCommand {
+  _MakeCommand(this._brick) {
+    argParser.addOption(
+      'json',
+      abbr: 'j',
+      help: 'Path to json file containing variables',
+    );
+    for (final arg in _brick.vars) {
+      argParser.addOption(arg);
+    }
+  }
+
+  final BrickYaml _brick;
+
+  @override
+  String get description => _brick.description;
+
+  @override
+  String get name => _brick.name;
 
   @override
   Future<int> run() async {
-    if (masonYamlFile == null) {
-      logger.err(
-        'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
-      );
-      return ExitCode.ioError.code;
-    }
-
-    final args = argResults.rest;
-    final brickName = args.first;
-    final brick = masonYaml.bricks[brickName];
     final target = DirectoryGeneratorTarget(cwd, logger);
 
-    if (brick == null) {
-      logger.err(
-        'Missing brick: $brickName.\n'
-        'Add the $brickName brick to the ${MasonYaml.file} '
-        'and try again.',
-      );
-      return ExitCode.usage.code;
-    }
-
-    final fetchDone = logger.progress('Getting brick $brickName');
     Function generateDone;
     try {
-      final generator = await MasonGenerator.fromBrick(
-        brick,
-        workingDirectory: entryPoint.path,
+      final generator = await MasonGenerator.fromBrickYaml(
+        _brick,
+        cache,
+        p.join(File(_brick.path).parent.path, BrickYaml.dir),
       );
-      fetchDone('Got brick $brickName');
-
       final vars = <String, dynamic>{};
       try {
         vars.addAll(await _decodeFile(argResults['json'] as String));
@@ -69,12 +68,12 @@ class MakeCommand extends MasonCommand {
         return ExitCode.usage.code;
       }
 
-      for (final variable in generator.vars ?? const <String>[]) {
+      for (final variable in _brick.vars ?? const <String>[]) {
         if (vars.containsKey(variable)) continue;
-        final index = args.indexOf('--$variable');
-        if (index != -1) {
+        final arg = argResults[variable] as String;
+        if (arg != null) {
           vars.addAll(
-            <String, dynamic>{variable: _maybeDecode(args[index + 1])},
+            <String, dynamic>{variable: _maybeDecode(arg)},
           );
         } else {
           vars.addAll(
@@ -87,7 +86,7 @@ class MakeCommand extends MasonCommand {
 
       generateDone = logger.progress('Making ${generator.id}');
       await generator.generate(target, vars: vars);
-      generateDone('Made brick $brickName');
+      generateDone('Made brick ${_brick.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -96,7 +95,6 @@ class MakeCommand extends MasonCommand {
         ..flush(logger.success);
       return ExitCode.success.code;
     } on Exception catch (e) {
-      fetchDone();
       generateDone?.call();
       logger.err(e.toString());
       return ExitCode.cantCreate.code;

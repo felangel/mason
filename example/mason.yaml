@@ -3,7 +3,7 @@ bricks:
     path: ../bricks/app_icon
   documentation:
     path: ../bricks/documentation
-  greetings:
+  greeting:
     path: ../bricks/greeting
   todos:
     path: ../bricks/todos

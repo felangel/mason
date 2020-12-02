@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/src/generator.dart';
@@ -21,9 +19,8 @@ class InitCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final masonYaml = File(p.join(cwd.path, MasonYaml.file));
-    if (masonYaml.existsSync()) {
-      logger.err('Existing ${MasonYaml.file} at ${masonYaml.path}');
+    if (masonYamlFile.existsSync()) {
+      logger.err('Existing ${MasonYaml.file} at ${masonYamlFile.path}');
       return ExitCode.usage.code;
     }
     final fetchDone = logger.progress('Initializing');

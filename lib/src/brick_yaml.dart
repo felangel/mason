@@ -9,11 +9,7 @@ part 'brick_yaml.g.dart';
 @JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}
-  const BrickYaml(
-    this.name,
-    this.description,
-    this.vars,
-  );
+  const BrickYaml(this.name, this.description, this.vars, {this.path});
 
   /// Converts [Map] to [BrickYaml]
   factory BrickYaml.fromJson(Map<dynamic, dynamic> json) =>
@@ -38,4 +34,13 @@ class BrickYaml {
 
   /// List of variables used when templating a brick.
   final List<String> vars;
+
+  /// Path to the [BrickYaml] file.
+  final String path;
+
+  /// Returns a copy of the current [BrickYaml] with
+  /// an overridden [path].
+  BrickYaml copyWith({String path}) {
+    return BrickYaml(name, description, vars, path: path ?? this.path);
+  }
 }
