@@ -1,3 +1,16 @@
+# 0.0.1-dev.16
+
+- **BREAKING**: `mason make` creates subcommands for all available bricks
+  - `mason make <BRICK_NAME> -- --var1 value1 --var2 value2` -> `mason make <BRICK_NAME> --var1 value1 --var2 value2`
+- feat: `mason make -h` provides a list of available subcommands based on available bricks
+- feat: add `mason get` to get all bricks
+- feat: support for `mason get --force`
+- feat: add local cache all bricks
+- feat: improve error handling and messaging
+- feat: require brick name consistency between `mason.yaml` and `brick.yaml`
+- fix: handle empty or malformed `mason.yaml`
+- fix: handle empty or malformed `brick.yaml`
+
 # 0.0.1-dev.15
 
 - feat: add `mason new` to create a new brick

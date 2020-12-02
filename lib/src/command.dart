@@ -19,13 +19,21 @@ class BrickNotFoundException extends MasonException {
       : super('Could not find brick at $path');
 }
 
+/// {@template mason_yaml_name_mismatch}
+/// Thrown when a brick's name in `mason.yaml` does not match
+/// the name in `brick.yaml`.
+/// {@endtemplate}
+class MasonYamlNameMismatch extends MasonException {
+  /// {@macro mason_yaml_name_mismatch}
+  MasonYamlNameMismatch(String message) : super(message);
+}
+
 /// {@template mason_yaml_not_found_exception}
 /// Thrown when a `mason.yaml` cannot be found locally.
 /// {@endtemplate}
 class MasonYamlNotFoundException extends MasonException {
   /// {@macro mason_yaml_not_found_exception}
-  const MasonYamlNotFoundException(String path)
-      : super('Could not find ${MasonYaml.file} at $path');
+  const MasonYamlNotFoundException(String message) : super(message);
 }
 
 /// {@template mason_yaml_parse_exception}
@@ -52,7 +60,16 @@ abstract class MasonCommand extends Command<int> {
   MasonCache _cache;
 
   /// Gets the directory containing the nearest `mason.yaml`.
-  Directory get entryPoint => _entryPoint ??= MasonYaml.findNearest(cwd).parent;
+  Directory get entryPoint {
+    if (_entryPoint != null) return _entryPoint;
+    final nearestMasonYaml = MasonYaml.findNearest(cwd);
+    if (nearestMasonYaml == null) {
+      throw const MasonYamlNotFoundException(
+        'Could not find ${MasonYaml.file}.\nDid you forget to run mason init?',
+      );
+    }
+    return nearestMasonYaml.parent;
+  }
 
   Directory _entryPoint;
 
@@ -63,7 +80,8 @@ abstract class MasonCommand extends Command<int> {
   Set<BrickYaml> get bricks {
     if (_bricks != null) return _bricks;
     final bricks = <BrickYaml>{};
-    for (final brick in masonYaml.bricks.values) {
+    for (final entry in masonYaml.bricks.entries) {
+      final brick = entry.value;
       final dirPath = cache.read(brick.path ?? brick.git.url);
       if (dirPath == null) break;
       final filePath = brick.path != null
@@ -74,12 +92,17 @@ abstract class MasonCommand extends Command<int> {
         throw BrickNotFoundException(filePath);
       }
       try {
-        bricks.add(
-          checkedYamlDecode(
-            file.readAsStringSync(),
-            (m) => BrickYaml.fromJson(m),
-          ).copyWith(path: filePath),
-        );
+        final brickYaml = checkedYamlDecode(
+          file.readAsStringSync(),
+          (m) => BrickYaml.fromJson(m),
+        ).copyWith(path: filePath);
+        if (brickYaml.name != entry.key) {
+          throw MasonYamlNameMismatch(
+            'brick name "${brickYaml.name}": '
+            'doesn\'t match provided name "${entry.key}" in ${MasonYaml.file}.',
+          );
+        }
+        bricks.add(brickYaml);
       } on ParsedYamlException catch (e) {
         throw BrickYamlParseException(
           'Malformed ${BrickYaml.file} at ${file.path}\n${e.message}',
@@ -104,7 +127,9 @@ abstract class MasonCommand extends Command<int> {
   MasonYaml get masonYaml {
     if (_masonYaml != null) return _masonYaml;
     if (!masonYamlFile.existsSync()) {
-      throw MasonYamlNotFoundException(masonYamlFile.path);
+      throw MasonYamlNotFoundException(
+        'Could not find ${MasonYaml.file} at ${masonYamlFile.path}',
+      );
     }
     final masonYamlContent = masonYamlFile.readAsStringSync();
     try {
