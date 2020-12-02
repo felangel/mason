@@ -8,7 +8,7 @@ import '../git.dart';
 import '../mason_yaml.dart';
 
 /// {@template get_command}
-/// `mason get` command which gets all remote bricks.
+/// `mason get` command which gets all bricks.
 /// {@endtemplate}
 class GetCommand extends MasonCommand {
   /// {@macro get_command}
@@ -22,7 +22,7 @@ class GetCommand extends MasonCommand {
   }
 
   @override
-  final String description = 'Gets all remote bricks';
+  final String description = 'Gets all bricks.';
 
   @override
   final String name = 'get';
@@ -30,14 +30,6 @@ class GetCommand extends MasonCommand {
   @override
   Future<int> run() async {
     final getDone = logger.progress('getting bricks');
-    if (masonYamlFile == null) {
-      getDone();
-      logger.err(
-        '''Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?''',
-      );
-      return ExitCode.usage.code;
-    }
-
     final force = argResults['force'] == true;
     if (force) {
       cache.clear();

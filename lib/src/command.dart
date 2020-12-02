@@ -121,16 +121,19 @@ abstract class MasonCommand extends Command<int> {
   }
 
   /// Gets the nearest `mason.yaml` file.
-  File get masonYamlFile => File(p.join(entryPoint.path, MasonYaml.file));
+  File get masonYamlFile {
+    final file = File(p.join(entryPoint.path, MasonYaml.file));
+    if (!file.existsSync()) {
+      throw const MasonYamlNotFoundException(
+        'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
+      );
+    }
+    return file;
+  }
 
   /// Gets the nearest [MasonYaml].
   MasonYaml get masonYaml {
     if (_masonYaml != null) return _masonYaml;
-    if (!masonYamlFile.existsSync()) {
-      throw MasonYamlNotFoundException(
-        'Could not find ${MasonYaml.file} at ${masonYamlFile.path}',
-      );
-    }
     final masonYamlContent = masonYamlFile.readAsStringSync();
     try {
       _masonYaml = checkedYamlDecode(

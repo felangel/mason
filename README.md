@@ -31,10 +31,16 @@ bricks:
     path: bricks/hello
 ```
 
+To get all bricks registered in `mason.yaml` run:
+
+```sh
+$ mason get
+```
+
 Then you can use `mason make` to generate your first file:
 
 ```sh
-mason make hello
+$ mason make hello
 ```
 
 ### Command Line Variables
@@ -42,7 +48,7 @@ mason make hello
 Any variables can be passed as command line args.
 
 ```sh
-$ mason make hello -- --name Felix
+$ mason make hello --name Felix
 ```
 
 ### Variable Prompts
@@ -141,6 +147,7 @@ Global options:
     --version    Print the current version.
 
 Available commands:
+  get    Gets all bricks.
   init   Initialize mason in the current directory.
   make   Generate code using an existing brick template.
   new    Creates a new brick template.

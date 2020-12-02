@@ -33,13 +33,6 @@ class NewCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    if (masonYamlFile == null) {
-      logger.err(
-        '''Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?''',
-      );
-      return ExitCode.usage.code;
-    }
-
     final name = argResults.rest.first.snakeCase;
     final description = argResults['desc'] as String;
     final directory = Directory(p.join(entryPoint.path, 'bricks'));
@@ -64,11 +57,13 @@ class NewCommand extends MasonCommand {
           ),
         )
       });
+
     await Future.wait([
       generator.generate(target, vars: <String, dynamic>{'name': '{{name}}'}),
       if (!masonYaml.bricks.containsKey(name))
         masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
     ]);
+
     done('Created new brick: $name');
     logger
       ..info(
