@@ -1,7 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File;
-import 'dart:isolate';
 
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
@@ -13,8 +12,6 @@ import 'mason_yaml.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
-final _codeRegExp = RegExp(r'```dart(.*)```', dotAll: true);
-final _codeReplaceRegExp = RegExp(r'(```dart(.*)```)', dotAll: true);
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -108,17 +105,6 @@ abstract class Generator implements Comparable<Generator> {
         return target.createFile(resultFile.path, resultFile.content);
       }
 
-      final codeMatch = _codeRegExp.firstMatch(file.content);
-      if (codeMatch != null) {
-        final result = await _exec(codeMatch[1]);
-        final newFile = TemplateFile(
-          file.path,
-          file.content.replaceFirst(_codeReplaceRegExp, result),
-        );
-        final resultFile = newFile.runSubstitution(vars ?? <String, dynamic>{});
-        return target.createFile(resultFile.path, resultFile.content);
-      }
-
       final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
       return target.createFile(resultFile.path, resultFile.content);
     });
@@ -144,19 +130,6 @@ abstract class Generator implements Comparable<Generator> {
       final response = await http.Client().get(uri);
       return FileContents(target, response.bodyBytes);
     }
-  }
-
-  Future<String> _exec(String source) async {
-    final uri = _toDartDataUri(source);
-    RawReceivePort receivePort;
-    final completer = Completer<String>();
-    receivePort = RawReceivePort((String message) {
-      completer.complete(message);
-      receivePort.close();
-    });
-    await Isolate.spawnUri(uri, [], receivePort.sendPort);
-    final content = await completer.future;
-    return content;
   }
 }
 
@@ -233,9 +206,4 @@ class FileContents {
 
   /// The contents of the file.
   final List<int> content;
-}
-
-Uri _toDartDataUri(String source) {
-  return Uri.parse('data:application/dart;charset=utf-8,'
-      '${Uri.encodeComponent(source)}');
 }
