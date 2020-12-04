@@ -50,11 +50,15 @@ class MasonGenerator extends Generator {
         .whereType<File>()
         .map((file) {
       return () async {
-        final content = await File(file.path).readAsString();
-        final relativePath = file.path.substring(
-          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-        );
-        return TemplateFile(relativePath, content);
+        try {
+          final content = await File(file.path).readAsBytes();
+          final relativePath = file.path.substring(
+            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+          );
+          return TemplateFile.fromBytes(relativePath, content);
+        } on Exception {
+          return null;
+        }
       }();
     });
     return MasonGenerator(
@@ -173,13 +177,17 @@ abstract class GeneratorTarget {
 /// {@endtemplate}
 class TemplateFile {
   /// {@macro template_file}
-  TemplateFile(this.path, this.content);
+  TemplateFile(String path, String content)
+      : this.fromBytes(path, utf8.encode(content));
+
+  /// {@macro template_file}
+  TemplateFile.fromBytes(this.path, this.content);
 
   /// The template file path.
   final String path;
 
   /// The template file content.
-  final String content;
+  final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
   FileContents runSubstitution(Map<String, dynamic> parameters) {
@@ -190,7 +198,11 @@ class TemplateFile {
   }
 
   List<int> _createContent(Map<String, dynamic> vars) {
-    return utf8.encode(content.render(vars));
+    try {
+      return utf8.encode(utf8.decode(content).render(vars));
+    } on Exception {
+      return content;
+    }
   }
 }
 

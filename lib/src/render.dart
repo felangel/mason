@@ -24,7 +24,7 @@ import 'package:recase/recase.dart';
 extension TemplateX on String {
   /// {@macro templateX}
   String render(dynamic values) {
-    final template = Template(this);
+    final template = Template(this, lenient: true);
 
     /// camelCase
     final camelCase = (LambdaContext ctx) => ctx.renderString().camelCase;
