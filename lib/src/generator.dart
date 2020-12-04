@@ -12,6 +12,7 @@ import 'mason_yaml.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
+final _delimeterRegExp = RegExp(r'{{(.*)}}');
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -199,7 +200,9 @@ class TemplateFile {
 
   List<int> _createContent(Map<String, dynamic> vars) {
     try {
-      return utf8.encode(utf8.decode(content).render(vars));
+      final decoded = utf8.decode(content);
+      if (!decoded.contains(_delimeterRegExp)) return content;
+      return utf8.encode(decoded.render(vars));
     } on Exception {
       return content;
     }
