@@ -38,6 +38,9 @@ extension TemplateX on String {
     /// Header-Case
     final headerCase = (LambdaContext ctx) => ctx.renderString().headerCase;
 
+    /// lower case
+    final lowerCase = (LambdaContext ctx) => ctx.renderString().toLowerCase();
+
     /// PascalCase
     final pascalCase = (LambdaContext ctx) => ctx.renderString().pascalCase;
 
@@ -56,17 +59,22 @@ extension TemplateX on String {
     /// Title Case
     final titleCase = (LambdaContext ctx) => ctx.renderString().titleCase;
 
+    /// UPPER CASE
+    final upperCase = (LambdaContext ctx) => ctx.renderString().toUpperCase();
+
     return template.renderString(<String, dynamic>{
       'camelCase': camelCase,
       'constantCase': constantCase,
       'dotCase': dotCase,
       'headerCase': headerCase,
+      'lowerCase': lowerCase,
       'pascalCase': pascalCase,
       'paramCase': paramCase,
       'pathCase': pathCase,
       'sentenceCase': sentenceCase,
       'snakeCase': snakeCase,
       'titleCase': titleCase,
+      'upperCase': upperCase,
       ...values,
     });
   }
