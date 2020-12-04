@@ -1,3 +1,11 @@
+# 0.0.1-dev.18
+
+- **BREAKING** revert: remove dart executable template support
+- feat: add `lowerCase` and `upperCase` lambdas
+- fix: support non utf8 encoded files
+- fix: switch templating engine to be lenient by default
+- refactor: avoid templating content with no delimeters
+
 # 0.0.1-dev.17
 
 - feat: support dart execution inside templates
