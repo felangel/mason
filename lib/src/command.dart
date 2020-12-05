@@ -120,6 +120,16 @@ abstract class MasonCommand extends Command<int> {
     return p.join(entryPoint.path, '.mason_tool', 'mason_config.json');
   }
 
+  /// Returns `true` if a `mason.yaml` file exists.
+  bool get masonInitialized {
+    try {
+      final _ = masonYamlFile;
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   /// Gets the nearest `mason.yaml` file.
   File get masonYamlFile {
     final file = File(p.join(entryPoint.path, MasonYaml.file));

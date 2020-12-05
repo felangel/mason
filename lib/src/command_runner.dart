@@ -22,15 +22,10 @@ class MasonCommandRunner extends CommandRunner<int> {
       negatable: false,
       help: 'Print the current version.',
     );
-    try {
-      addCommand(InitCommand());
-      addCommand(GetCommand());
-      addCommand(MakeCommand());
-      addCommand(NewCommand());
-    } on MasonException catch (e) {
-      _logger.err(e.message);
-      exit(ExitCode.usage.code);
-    }
+    addCommand(InitCommand());
+    addCommand(GetCommand());
+    addCommand(MakeCommand());
+    addCommand(NewCommand());
   }
 
   final Logger _logger;
@@ -57,6 +52,9 @@ class MasonCommandRunner extends CommandRunner<int> {
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
+    } on MasonException catch (e) {
+      _logger.err(e.message);
+      exit(ExitCode.usage.code);
     }
   }
 

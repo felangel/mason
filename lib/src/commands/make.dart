@@ -13,16 +13,28 @@ import '../command.dart';
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
   MakeCommand() {
-    for (final brick in bricks) {
-      addSubcommand(_MakeCommand(brick));
+    try {
+      for (final brick in bricks) {
+        addSubcommand(_MakeCommand(brick));
+      }
+    } catch (e) {
+      _exception = e;
     }
   }
+
+  dynamic _exception;
 
   @override
   final String description = 'Generate code using an existing brick template.';
 
   @override
   final String name = 'make';
+
+  @override
+  Future<int> run() async {
+    if (_exception != null) throw _exception;
+    return ExitCode.success.code;
+  }
 }
 
 class _MakeCommand extends MasonCommand {
