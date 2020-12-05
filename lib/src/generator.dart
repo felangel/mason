@@ -7,7 +7,6 @@ import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
 import 'logger.dart';
-import 'mason_cache.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
@@ -41,12 +40,9 @@ class MasonGenerator extends Generator {
   /// vars:
   ///   - name
   /// ```
-  static Future<MasonGenerator> fromBrickYaml(
-    BrickYaml brick,
-    MasonCache cache,
-    String directory,
-  ) async {
-    final futures = Directory(directory)
+  static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
+    final directory = p.join(File(brick.path).parent.path, BrickYaml.dir);
+    final files = Directory(directory)
         .listSync(recursive: true)
         .whereType<File>()
         .map((file) {
@@ -65,7 +61,7 @@ class MasonGenerator extends Generator {
     return MasonGenerator(
       brick.name,
       brick.description,
-      files: await Future.wait(futures),
+      files: await Future.wait(files),
       vars: brick.vars,
     );
   }

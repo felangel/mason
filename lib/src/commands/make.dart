@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
-import 'package:path/path.dart' as p;
 import 'package:mason/src/generator.dart';
 
 import '../brick_yaml.dart';
@@ -52,18 +51,18 @@ class _MakeCommand extends MasonCommand {
 
     Function generateDone;
     try {
-      final generator = await MasonGenerator.fromBrickYaml(
-        _brick,
-        cache,
-        p.join(File(_brick.path).parent.path, BrickYaml.dir),
-      );
+      final generator = await MasonGenerator.fromBrickYaml(_brick);
       final vars = <String, dynamic>{};
+      generateDone = logger.progress('Making ${generator.id}');
+
       try {
         vars.addAll(await _decodeFile(argResults['json'] as String));
       } on FormatException catch (error) {
+        generateDone();
         logger.err('${error}in ${argResults['json']}');
         return ExitCode.usage.code;
       } on Exception catch (error) {
+        generateDone();
         logger.err('$error');
         return ExitCode.usage.code;
       }
@@ -84,7 +83,6 @@ class _MakeCommand extends MasonCommand {
         }
       }
 
-      generateDone = logger.progress('Making ${generator.id}');
       await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger
