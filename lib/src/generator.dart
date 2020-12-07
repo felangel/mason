@@ -13,8 +13,10 @@ import 'render.dart';
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
 final _delimeterRegExp = RegExp(r'{{(.*?)}}');
 final _loopKeyRegExp = RegExp(r'{{#(.*?)}}');
-final _loopValueRegExp = RegExp(r'{{#.*?}}{{{(.*?)}}}.*?{{\/.*?}}');
-final _loopRegExp = RegExp(r'({{#.*?}}({{{.*?}}}.*?){{\/.*?}})');
+final _loopValueRegExp = RegExp(r'{{#.*?}}.*?{{{(.*?)}}}.*?{{\/.*?}}');
+final _loopRegExp = RegExp(r'({{#.*?}}.*?{{{.*?}}}.*?{{\/.*?}})');
+final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
+final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -200,7 +202,12 @@ class TemplateFile {
       for (final match in matches) {
         final key = match.group(1);
         final value = _loopValueRegExp.firstMatch(filePath)[1];
-        filePath = filePath.replaceFirst(_loopRegExp, '{{$key.$value}}');
+        final inner = _loopInnerRegExp.firstMatch(filePath)[1];
+        final target = inner.replaceFirst(
+          _loopValueReplaceRegExp,
+          '{{$key.$value}}',
+        );
+        filePath = filePath.replaceFirst(_loopRegExp, target);
       }
 
       final fileContents = <FileContents>[];
