@@ -285,7 +285,11 @@ class _Permutations<T> {
 
     for (var i = 0; i < lists[depth].length; i++) {
       _generatePermutations(
-          lists, result, depth + 1, [...current, lists[depth][i]]);
+        lists,
+        result,
+        depth + 1,
+        [...current, lists[depth][i]],
+      );
     }
   }
 }
