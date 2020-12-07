@@ -11,7 +11,12 @@ import 'mason_yaml.dart';
 import 'render.dart';
 
 final _fileRegExp = RegExp(r'<%\s?([a-zA-Z]+)\s?%>');
-final _delimeterRegExp = RegExp(r'{{(.*)}}');
+final _delimeterRegExp = RegExp(r'{{(.*?)}}');
+final _loopKeyRegExp = RegExp(r'{{#(.*?)}}');
+final _loopValueRegExp = RegExp(r'{{#.*?}}.*?{{{(.*?)}}}.*?{{\/.*?}}');
+final _loopRegExp = RegExp(r'({{#.*?}}.*?{{{.*?}}}.*?{{\/.*?}})');
+final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
+final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -106,8 +111,10 @@ abstract class Generator implements Comparable<Generator> {
         return target.createFile(resultFile.path, resultFile.content);
       }
 
-      final resultFile = file.runSubstitution(vars ?? <String, dynamic>{});
-      return target.createFile(resultFile.path, resultFile.content);
+      final resultFiles = file.runSubstitution(vars ?? <String, dynamic>{});
+      for (final file in resultFiles) {
+        await target.createFile(file.path, file.content);
+      }
     });
   }
 
@@ -187,11 +194,47 @@ class TemplateFile {
   final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, dynamic> parameters) {
-    final newPath = path.render(parameters);
-    final newContents = _createContent(parameters);
+  List<FileContents> runSubstitution(Map<String, dynamic> parameters) {
+    if (_loopRegExp.hasMatch(path)) {
+      var filePath = path;
+      final matches = _loopKeyRegExp.allMatches(filePath);
 
-    return FileContents(newPath, newContents);
+      for (final match in matches) {
+        final key = match.group(1);
+        final value = _loopValueRegExp.firstMatch(filePath)[1];
+        final inner = _loopInnerRegExp.firstMatch(filePath)[1];
+        final target = inner.replaceFirst(
+          _loopValueReplaceRegExp,
+          '{{$key.$value}}',
+        );
+        filePath = filePath.replaceFirst(_loopRegExp, target);
+      }
+
+      final fileContents = <FileContents>[];
+      final parameterKeys = parameters.keys.toList();
+      final permutations = _Permutations<dynamic>(
+        [...parameters.entries.map((entry) => entry.value as List)],
+      ).generate();
+
+      for (final permutation in permutations) {
+        final param = <String, dynamic>{};
+        for (var i = 0; i < permutation.length; i++) {
+          param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
+        }
+        final newPath = filePath.render(param);
+        final newContents = TemplateFile(
+          newPath,
+          utf8.decode(content),
+        )._createContent(param);
+        fileContents.add(FileContents(newPath, newContents));
+      }
+
+      return fileContents;
+    } else {
+      final newPath = path.render(parameters);
+      final newContents = _createContent(parameters);
+      return [FileContents(newPath, newContents)];
+    }
   }
 
   List<int> _createContent(Map<String, dynamic> vars) {
@@ -217,4 +260,36 @@ class FileContents {
 
   /// The contents of the file.
   final List<int> content;
+}
+
+class _Permutations<T> {
+  _Permutations(this.elements);
+  final List<List<T>> elements;
+
+  List<List<T>> generate() {
+    final perms = <List<T>>[];
+    _generatePermutations(elements, perms, 0, []);
+    return perms;
+  }
+
+  void _generatePermutations(
+    List<List<T>> lists,
+    List<List<T>> result,
+    int depth,
+    List<T> current,
+  ) {
+    if (depth == lists.length) {
+      result.add(current);
+      return;
+    }
+
+    for (var i = 0; i < lists[depth].length; i++) {
+      _generatePermutations(
+        lists,
+        result,
+        depth + 1,
+        [...current, lists[depth][i]],
+      );
+    }
+  }
 }
