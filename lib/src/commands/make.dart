@@ -95,12 +95,12 @@ class _MakeCommand extends MasonCommand {
         }
       }
 
-      await generator.generate(target, vars: vars);
+      final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
-          'Generated ${generator.files.length} file(s):',
+          'Generated $fileCount file(s):',
         )
         ..flush(logger.success);
       return ExitCode.success.code;

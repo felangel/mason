@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File;
 
+import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
@@ -94,28 +95,33 @@ abstract class Generator implements Comparable<Generator> {
   final List<TemplateFile> files = [];
 
   /// Add a new template file.
-  TemplateFile addTemplateFile(TemplateFile file) {
-    files.add(file);
-    return file;
+  void addTemplateFile(TemplateFile file) {
+    if (file?.path?.isNotEmpty == true) {
+      files.add(file);
+    }
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].
-  Future<void> generate(
+  Future<int> generate(
     GeneratorTarget target, {
     Map<String, dynamic> vars,
   }) async {
-    await Future.forEach(files, (TemplateFile file) async {
+    var fileCount = 0;
+    await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
       final fileMatch = _fileRegExp.firstMatch(file.path);
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
-        return target.createFile(resultFile.path, resultFile.content);
+        await target.createFile(resultFile.path, resultFile.content);
+        fileCount++;
       }
 
       final resultFiles = file.runSubstitution(vars ?? <String, dynamic>{});
       for (final file in resultFiles) {
         await target.createFile(file.path, file.content);
+        fileCount++;
       }
     });
+    return fileCount;
   }
 
   @override
@@ -194,7 +200,7 @@ class TemplateFile {
   final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  List<FileContents> runSubstitution(Map<String, dynamic> parameters) {
+  Set<FileContents> runSubstitution(Map<String, dynamic> parameters) {
     if (_loopRegExp.hasMatch(path)) {
       var filePath = path;
       final matches = _loopKeyRegExp.allMatches(filePath);
@@ -210,14 +216,18 @@ class TemplateFile {
         filePath = filePath.replaceFirst(_loopRegExp, target);
       }
 
-      final fileContents = <FileContents>[];
-      final parameterKeys = parameters.keys.toList();
+      final fileContents = <FileContents>{};
+      final parameterKeys =
+          parameters.keys.where((key) => parameters[key] is List).toList();
       final permutations = _Permutations<dynamic>(
-        [...parameters.entries.map((entry) => entry.value as List)],
+        [
+          ...parameters.entries
+              .where((entry) => entry.value is List)
+              .map((entry) => entry.value as List)
+        ],
       ).generate();
-
       for (final permutation in permutations) {
-        final param = <String, dynamic>{};
+        final param = Map<String, dynamic>.of(parameters);
         for (var i = 0; i < permutation.length; i++) {
           param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
         }
@@ -225,7 +235,7 @@ class TemplateFile {
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
-        )._createContent(param);
+        )._createContent(param..addAll(parameters));
         fileContents.add(FileContents(newPath, newContents));
       }
 
@@ -233,7 +243,7 @@ class TemplateFile {
     } else {
       final newPath = path.render(parameters);
       final newContents = _createContent(parameters);
-      return [FileContents(newPath, newContents)];
+      return {FileContents(newPath, newContents)};
     }
   }
 
@@ -260,6 +270,19 @@ class FileContents {
 
   /// The contents of the file.
   final List<int> content;
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    final listEquals = const DeepCollectionEquality().equals;
+
+    return other is FileContents &&
+        other.path == path &&
+        listEquals(other.content, content);
+  }
+
+  @override
+  int get hashCode => path.hashCode ^ content.length.hashCode;
 }
 
 class _Permutations<T> {
