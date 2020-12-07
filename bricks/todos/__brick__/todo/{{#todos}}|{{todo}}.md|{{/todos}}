@@ -1,2 +1,0 @@
-# {{todo}}
-{{#done}}DONE{{/done}}{{^done}}TODO{{/done}}
