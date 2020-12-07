@@ -1,3 +1,9 @@
+# 0.0.1-dev.19
+
+- feat: file loop support
+- fix: mason init incorrectly throwing MissingMasonYamlException
+- refactor: simplify MasonGenerator.fromBrickYaml
+
 # 0.0.1-dev.18
 
 - **BREAKING** revert: remove dart executable template support
