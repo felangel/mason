@@ -10,6 +10,7 @@ environment:
 dependencies:
   args: ^1.6.0
   checked_yaml: ^1.0.2
+  collection: ^1.14.13
   http: ^0.12.2
   io: ^0.3.4
   json_annotation: ^3.0.1
