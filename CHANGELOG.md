@@ -1,3 +1,7 @@
+# 0.0.1-dev.20
+
+- fix: file loop content template variable resolution
+
 # 0.0.1-dev.19
 
 - feat: file loop support

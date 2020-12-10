@@ -235,7 +235,7 @@ class TemplateFile {
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
-        )._createContent(param..addAll(parameters));
+        )._createContent(parameters..addAll(param));
         fileContents.add(FileContents(newPath, newContents));
       }
 
