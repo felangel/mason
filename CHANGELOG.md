@@ -1,3 +1,8 @@
+# 0.0.1-dev.21
+
+- feat: export `MasonGenerator` and relevant objects to allow `mason` to be consumed as a library
+- feat: expose `fromGitPath` on `MasonGenerator`
+
 # 0.0.1-dev.20
 
 - fix: file loop content template variable resolution

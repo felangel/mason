@@ -3,6 +3,9 @@ import 'dart:io';
 
 import 'package:path/path.dart' as p;
 
+import 'git.dart';
+import 'mason_yaml.dart';
+
 /// {@template mason_cache}
 /// A local cache for mason bricks.
 ///
@@ -60,6 +63,27 @@ class MasonCache {
   /// Returns `null` if the brick has not been cached.
   void write(String remote, String local) {
     _cache[remote] = local;
+  }
+
+  /// Downloads remote brick at [gitPath] to local `.brick-cache`
+  /// and returns the local path to the brick.
+  Future<String> downloadRemoteBrick(GitPath gitPath) async {
+    final dirName =
+        gitPath.ref != null ? '${gitPath.url}-${gitPath.ref}' : gitPath.url;
+    final directory = Directory(p.join(rootDir, 'git', dirName));
+    if (directory.existsSync()) {
+      await directory.delete(recursive: true);
+    }
+    await directory.create(recursive: true);
+    await Git.run(['clone', gitPath.url, directory.path]);
+    if (gitPath.ref != null) {
+      await Git.run(
+        ['checkout', gitPath.ref],
+        processWorkingDir: directory.path,
+      );
+    }
+    write(gitPath.url, directory.path);
+    return directory.path;
   }
 }
 

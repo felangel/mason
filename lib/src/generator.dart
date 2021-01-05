@@ -2,12 +2,14 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File;
 
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
 import 'logger.dart';
+import 'mason_cache.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
@@ -70,6 +72,19 @@ class MasonGenerator extends Generator {
       files: await Future.wait(files),
       vars: brick.vars,
     );
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a [GitPath] for a remote [BrickYaml] file.
+  static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
+    final cache = MasonCache.empty();
+    final directory = await cache.downloadRemoteBrick(gitPath);
+    final file = File(p.join(directory, gitPath.path, BrickYaml.file));
+    final brickYaml = checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m),
+    ).copyWith(path: file.path);
+    return MasonGenerator.fromBrickYaml(brickYaml);
   }
 
   /// Optional list of variables which will be used to populate
