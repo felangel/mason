@@ -4,7 +4,6 @@ import 'package:io/io.dart';
 import 'package:path/path.dart' as p;
 
 import '../command.dart';
-import '../git.dart';
 import '../mason_yaml.dart';
 
 /// {@template get_command}
@@ -51,22 +50,7 @@ class GetCommand extends MasonCommand {
       );
     }
     if (brick.git != null && (cache.read(brick.git.url) == null)) {
-      final dirName = brick.git.ref != null
-          ? '${brick.git.url}-${brick.git.ref}'
-          : brick.git.url;
-      final directory = Directory(p.join(cache.rootDir, 'git', dirName));
-      if (directory.existsSync()) {
-        await directory.delete(recursive: true);
-      }
-      await directory.create(recursive: true);
-      await Git.run(['clone', brick.git.url, directory.path]);
-      if (brick.git.ref != null) {
-        await Git.run(
-          ['checkout', brick.git.ref],
-          processWorkingDir: directory.path,
-        );
-      }
-      return cache.write(brick.git.url, directory.path);
+      await cache.downloadRemoteBrick(brick.git);
     }
   }
 }
