@@ -1,3 +1,7 @@
+# 0.0.1-dev.22
+
+- fix: issue with variable mutation which excluded variables within arrays
+
 # 0.0.1-dev.21
 
 - feat: export `MasonGenerator` and relevant objects to allow `mason` to be consumed as a library

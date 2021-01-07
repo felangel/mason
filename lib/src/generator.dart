@@ -130,7 +130,7 @@ abstract class Generator implements Comparable<Generator> {
         fileCount++;
       }
 
-      final resultFiles = file.runSubstitution(vars ?? <String, dynamic>{});
+      final resultFiles = file.runSubstitution(Map<String, dynamic>.of(vars));
       for (final file in resultFiles) {
         await target.createFile(file.path, file.content);
         fileCount++;
