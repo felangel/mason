@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="120" alt="mason logo" />
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="250" alt="mason logo" />
 </p>
 
 <p align="center">
