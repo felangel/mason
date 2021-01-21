@@ -1,7 +1,13 @@
-# ⛏️ mason
+<p align="center">
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="120" alt="mason logo" />
+</p>
 
-[![pub](https://img.shields.io/pub/v/mason.svg)](https://pub.dev/packages/mason)
-[![mason](https://github.com/felangel/mason/workflows/mason/badge.svg?branch=master)](https://github.com/felangel/mason/actions)
+<p align="center">
+<a href="https://pub.dev/packages/mason"><img src="https://img.shields.io/pub/v/mason.svg" alt="Pub"></a>
+<a href="https://github.com/felangel/mason/actions"><img src="https://github.com/felangel/mason/workflows/mason/badge.svg" alt="mason"></a>
+</p>
+
+---
 
 A template generator which helps teams generate files quickly and consistently.
 
