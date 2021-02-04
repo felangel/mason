@@ -1,3 +1,7 @@
+# 0.0.1-dev.23
+
+- fix: support non-ascii characters in templates
+
 # 0.0.1-dev.22
 
 - fix: issue with variable mutation which excluded variables within arrays
