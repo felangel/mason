@@ -20,6 +20,8 @@ final _loopValueRegExp = RegExp(r'{{#.*?}}.*?{{{(.*?)}}}.*?{{\/.*?}}');
 final _loopRegExp = RegExp(r'({{#.*?}}.*?{{{.*?}}}.*?{{\/.*?}})');
 final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
 final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
+final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
+final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -266,7 +268,15 @@ class TemplateFile {
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      return utf8.encode(decoded.render(vars));
+      final sanitized = decoded.replaceAllMapped(
+        _unicodeOutRegExp,
+        (match) => '\\${match.group(0)}',
+      );
+      final rendered = sanitized.render(vars).replaceAllMapped(
+            _unicodeInRegExp,
+            (match) => match.group(0).substring(1),
+          );
+      return utf8.encode(rendered);
     } on Exception {
       return content;
     }
