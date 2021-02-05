@@ -1,10 +1,11 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="250" alt="mason logo" />
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="200" alt="mason logo" />
 </p>
 
 <p align="center">
 <a href="https://pub.dev/packages/mason"><img src="https://img.shields.io/pub/v/mason.svg" alt="Pub"></a>
 <a href="https://github.com/felangel/mason/actions"><img src="https://github.com/felangel/mason/workflows/mason/badge.svg" alt="mason"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License: MIT"></a>
 </p>
 
 ---
