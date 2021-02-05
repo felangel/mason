@@ -71,9 +71,14 @@ class MasonCache {
     final dirName =
         gitPath.ref != null ? '${gitPath.url}-${gitPath.ref}' : gitPath.url;
     final directory = Directory(p.join(rootDir, 'git', dirName));
-    if (directory.existsSync()) {
-      await directory.delete(recursive: true);
-    }
+    final directoryExists = await directory.exists();
+    final directoryIsNotEmpty = directoryExists
+        ? directory.listSync(recursive: true).isNotEmpty
+        : false;
+
+    if (directoryExists && directoryIsNotEmpty) return directory.path;
+    if (directoryExists) await directory.delete(recursive: true);
+
     await directory.create(recursive: true);
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
