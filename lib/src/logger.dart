@@ -40,7 +40,7 @@ class Logger {
   void delayed(String message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Function progress(String message) {
+  void Function([String update]) progress(String message) {
     _stopwatch
       ..reset()
       ..start();

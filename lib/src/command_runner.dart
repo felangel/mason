@@ -1,5 +1,3 @@
-import 'dart:io';
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
@@ -24,7 +22,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     );
     addCommand(CacheCommand());
     addCommand(InitCommand());
-    addCommand(GetCommand());
+    addCommand(GetCommand(logger: logger));
     addCommand(MakeCommand());
     addCommand(NewCommand());
   }
@@ -32,9 +30,6 @@ class MasonCommandRunner extends CommandRunner<int> {
   final Logger _logger;
 
   ArgResults _argResults;
-
-  /// The top-level options parsed by the command runner.
-  ArgResults get argResults => _argResults;
 
   @override
   Future<int> run(Iterable<String> args) async {
@@ -55,7 +50,7 @@ class MasonCommandRunner extends CommandRunner<int> {
       return ExitCode.usage.code;
     } on MasonException catch (e) {
       _logger.err(e.message);
-      exit(ExitCode.usage.code);
+      return ExitCode.usage.code;
     }
   }
 

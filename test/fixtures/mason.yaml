@@ -1,0 +1,13 @@
+bricks:
+  app_icon:
+    path: ../../bricks/app_icon
+  documentation:
+    path: ../../bricks/documentation
+  greeting:
+    path: ../../bricks/greeting
+  todos:
+    path: ../../bricks/todos
+  widget:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/widget
