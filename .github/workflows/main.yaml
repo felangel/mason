@@ -28,3 +28,6 @@ jobs:
 
       - name: Ensure Build
         run: pub run test --run-skipped -t pull-request-only
+
+      - name: Run Tests
+        run: pub run test -x pull-request-only
