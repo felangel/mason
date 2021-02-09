@@ -1,7 +1,7 @@
 # 0.0.1-dev.24
 
 - feat: add `mason cache clear` command
-- fix: fix `mason get` behavior when `brick.json` is empty/missing
+- fix: `mason get` restores bricks when `brick.json` is empty/missing
 
 # 0.0.1-dev.23
 
