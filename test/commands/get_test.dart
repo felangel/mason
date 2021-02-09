@@ -51,9 +51,12 @@ void main() {
       when(logger.progress(any)).thenReturn(([String _]) {
         doneCallCount++;
       });
+
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
+
       final result = await commandRunner.run(['get']);
       expect(result, equals(ExitCode.success.code));
+
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -61,6 +64,7 @@ void main() {
           '''{"../../bricks/app_icon":"${Directory.current.path}/../../bricks/app_icon","../../bricks/documentation":"${Directory.current.path}/../../bricks/documentation","../../bricks/greeting":"${Directory.current.path}/../../bricks/greeting","../../bricks/todos":"${Directory.current.path}/../../bricks/todos","https://github.com/felangel/mason":"${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason"}''',
         ),
       );
+
       verify(logger.progress('getting bricks')).called(1);
       expect(doneCallCount, equals(1));
     });
@@ -72,8 +76,12 @@ void main() {
         '.mason',
         'bricks.json',
       );
+
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
-      await expectLater(commandRunner.run(['get', '--force']), completes);
+
+      final result = await commandRunner.run(['get', '--force']);
+      expect(result, equals(ExitCode.success.code));
+
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
     });
 
@@ -83,8 +91,13 @@ void main() {
         '.mason',
         'bricks.json',
       );
-      await expectLater(commandRunner.run(['get']), completes);
-      await expectLater(commandRunner.run(['get']), completes);
+
+      final resultA = await commandRunner.run(['get']);
+      expect(resultA, equals(ExitCode.success.code));
+
+      final resultB = await commandRunner.run(['get']);
+      expect(resultB, equals(ExitCode.success.code));
+
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
     });
 

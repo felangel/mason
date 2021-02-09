@@ -31,9 +31,6 @@ class MasonCommandRunner extends CommandRunner<int> {
 
   ArgResults _argResults;
 
-  /// The top-level options parsed by the command runner.
-  ArgResults get argResults => _argResults;
-
   @override
   Future<int> run(Iterable<String> args) async {
     try {
