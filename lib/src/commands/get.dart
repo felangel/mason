@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:io/io.dart';
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 
 import '../command.dart';
@@ -11,7 +12,7 @@ import '../mason_yaml.dart';
 /// {@endtemplate}
 class GetCommand extends MasonCommand {
   /// {@macro get_command}
-  GetCommand() {
+  GetCommand({Logger logger}) : super(logger: logger) {
     argParser.addFlag(
       'force',
       abbr: 'f',

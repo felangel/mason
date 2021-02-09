@@ -52,8 +52,13 @@ class BrickYamlParseException extends MasonException {
   const BrickYamlParseException(String message) : super(message);
 }
 
+/// {@template mason_command}
 /// The base class for all mason executable commands.
+/// {@endtemplate}
 abstract class MasonCommand extends Command<int> {
+  /// {@macro mason_command}
+  MasonCommand({Logger logger}) : _logger = logger;
+
   /// [MasonCache] which contains all remote brick templates.
   MasonCache get cache => _cache ??= MasonCache(bricksJson);
 
