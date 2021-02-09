@@ -27,7 +27,7 @@ jobs:
         run: dart analyze --fatal-infos --fatal-warnings .
 
       - name: Ensure Build
-        run: pub run test --run-skipped -t pull-request-only
+        run: dart test --run-skipped -t pull-request-only
 
       - name: Run Tests
-        run: pub run test -x pull-request-only
+        run: dart test -x pull-request-only --coverage=coverage && pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
