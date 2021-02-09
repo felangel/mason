@@ -1,3 +1,8 @@
+# 0.0.1-dev.24
+
+- feat: add `mason cache clear` command
+- fix: fix `mason get` behavior when `brick.json` is empty/missing
+
 # 0.0.1-dev.23
 
 - fix: support non-ascii characters in templates

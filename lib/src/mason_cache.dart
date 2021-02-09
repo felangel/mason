@@ -25,7 +25,16 @@ class MasonCache {
   var _cache = <String, String>{};
 
   /// Removes all key/value pairs from the cache.
-  void clear() => _cache.clear();
+  /// If [force] is true, all bricks will be removed
+  /// from disk in addition to the in-memory cache.
+  void clear({bool force = false}) async {
+    _cache.clear();
+    if (force) {
+      try {
+        Directory(_masonCacheDir()).deleteSync(recursive: true);
+      } catch (_) {}
+    }
+  }
 
   /// Populates cache based on `.mason/bricks.json`.
   void _fromBricks(File bricksJson) {
@@ -76,7 +85,11 @@ class MasonCache {
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
 
-    if (directoryExists && directoryIsNotEmpty) return directory.path;
+    if (directoryExists && directoryIsNotEmpty) {
+      write(gitPath.url, directory.path);
+      return directory.path;
+    }
+
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);

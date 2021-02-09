@@ -115,11 +115,6 @@ abstract class MasonCommand extends Command<int> {
 
   Set<BrickYaml> _bricks;
 
-  /// Gets path to `mason_config.json`.
-  String get masonConfigPath {
-    return p.join(entryPoint.path, '.mason_tool', 'mason_config.json');
-  }
-
   /// Returns `true` if a `mason.yaml` file exists.
   bool get masonInitialized {
     try {
