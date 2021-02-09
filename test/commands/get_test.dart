@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/mason_cache.dart';
@@ -51,7 +52,8 @@ void main() {
         doneCallCount++;
       });
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
-      await expectLater(commandRunner.run(['get']), completes);
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.success.code));
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -84,6 +86,17 @@ void main() {
       await expectLater(commandRunner.run(['get']), completes);
       await expectLater(commandRunner.run(['get']), completes);
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
+    });
+
+    test('exits with code 64 when mason.yaml does not exist', () async {
+      Directory.current = cwd.path;
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        logger.err(
+          'Could not find mason.yaml.\nDid you forget to run mason init?',
+        ),
+      ).called(1);
     });
   });
 }
