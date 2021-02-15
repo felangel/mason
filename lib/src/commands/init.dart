@@ -1,5 +1,6 @@
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
+import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 
@@ -11,6 +12,9 @@ import '../mason_yaml.dart';
 /// `mason init` command which initializes a new `mason.yaml`.
 /// {@endtemplate}
 class InitCommand extends MasonCommand {
+  /// {@macro init_command}
+  InitCommand({Logger logger}) : super(logger: logger);
+
   @override
   final String description = 'Initialize mason in the current directory.';
 

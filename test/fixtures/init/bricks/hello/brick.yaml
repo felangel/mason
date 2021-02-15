@@ -1,0 +1,4 @@
+name: hello
+description: An example hello brick.
+vars:
+  - name

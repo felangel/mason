@@ -18,3 +18,4 @@ doc/api/
 
 # Test Related Files
 coverage/
+test/fixtures/.*/
