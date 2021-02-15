@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
+import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
@@ -16,7 +17,7 @@ import '../yaml_encode.dart';
 /// {@endtemplate}
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand() {
+  NewCommand({Logger logger}) : super(logger: logger) {
     argParser.addOption(
       'desc',
       abbr: 'd',
