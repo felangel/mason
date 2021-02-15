@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
+import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 
 import '../brick_yaml.dart';
@@ -12,10 +13,10 @@ import '../command.dart';
 /// {@endtemplate}
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
-  MakeCommand() {
+  MakeCommand({Logger logger}) : super(logger: logger) {
     try {
       for (final brick in bricks) {
-        addSubcommand(_MakeCommand(brick));
+        addSubcommand(_MakeCommand(brick, logger: logger));
       }
     } catch (e) {
       _exception = e;
@@ -38,7 +39,7 @@ class MakeCommand extends MasonCommand {
 }
 
 class _MakeCommand extends MasonCommand {
-  _MakeCommand(this._brick) {
+  _MakeCommand(this._brick, {Logger logger}) : super(logger: logger) {
     argParser.addOption(
       'json',
       abbr: 'j',
