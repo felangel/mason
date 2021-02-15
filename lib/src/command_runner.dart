@@ -1,6 +1,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
+import 'package:mason/src/commands/bundle.dart';
 
 import 'commands/commands.dart';
 import 'exception.dart';
@@ -21,6 +22,7 @@ class MasonCommandRunner extends CommandRunner<int> {
       help: 'Print the current version.',
     );
     addCommand(CacheCommand());
+    addCommand(BundleCommand(logger: logger));
     addCommand(InitCommand(logger: logger));
     addCommand(GetCommand(logger: logger));
     addCommand(MakeCommand(logger: logger));
@@ -36,20 +38,22 @@ class MasonCommandRunner extends CommandRunner<int> {
     try {
       _argResults = parse(args);
       return await runCommand(_argResults) ?? ExitCode.success.code;
-    } on FormatException catch (e) {
+    } on FormatException catch (e, stackTrace) {
       _logger
         ..err(e.message)
+        ..err(stackTrace.toString())
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on UsageException catch (e) {
+    } on UsageException catch (e, stackTrace) {
       _logger
         ..err(e.message)
+        ..err(stackTrace.toString())
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on MasonException catch (e) {
-      _logger.err(e.message);
+    } on MasonException catch (e, stackTrace) {
+      _logger..err(e.message)..err(stackTrace.toString());
       return ExitCode.usage.code;
     }
   }

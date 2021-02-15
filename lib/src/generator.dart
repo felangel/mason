@@ -5,9 +5,11 @@ import 'dart:io' show Directory, File;
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
+import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
+import 'bundler.dart';
 import 'logger.dart';
 import 'mason_cache.dart';
 import 'mason_yaml.dart';
@@ -22,6 +24,7 @@ final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
 final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
 final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
+final _whiteSpace = RegExp(r'\s+');
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -73,6 +76,17 @@ class MasonGenerator extends Generator {
       brick.description,
       files: await Future.wait(files),
       vars: brick.vars,
+    );
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a local [MasonBundle].
+  static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
+    return MasonGenerator(
+      bundle.name,
+      bundle.description,
+      vars: bundle.vars,
+      files: _decodeConcatenatedData(bundle.files),
     );
   }
 
@@ -340,4 +354,25 @@ class _Permutations<T> {
       );
     }
   }
+}
+
+List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
+  final results = <TemplateFile>[];
+  for (final file in files) {
+    final path = file.path;
+    final type = file.type;
+    final raw = file.data.replaceAll(_whiteSpace, '');
+
+    final decoded = base64.decode(raw);
+    try {
+      if (type == 'binary') {
+        results.add(TemplateFile.fromBytes(path, decoded));
+      } else {
+        final source = utf8.decode(decoded);
+        results.add(TemplateFile(path, source));
+      }
+    } catch (_) {}
+  }
+
+  return results;
 }

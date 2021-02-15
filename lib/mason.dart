@@ -10,6 +10,7 @@
 /// ```
 library mason;
 
+export 'src/bundler.dart' show MasonBundle;
 export 'src/exception.dart' show MasonException;
 export 'src/generator.dart' show MasonGenerator, DirectoryGeneratorTarget;
 export 'src/logger.dart' show Logger;
