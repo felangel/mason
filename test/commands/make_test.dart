@@ -3,7 +3,6 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mason/src/mason_cache.dart';
 import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -32,14 +31,12 @@ void main() {
   todos:
     path: ../../../bricks/todos
   widget:
-    git:
-      url: https://github.com/felangel/mason
-      path: bricks/widget
+    path: ../../../bricks/widget
 ''');
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
         ..createSync(recursive: true)
         ..writeAsStringSync(
-          '''{"../../../bricks/app_icon":"${Directory.current.path}/../../../bricks/app_icon","../../../bricks/documentation":"${Directory.current.path}/../../../bricks/documentation","../../../bricks/greeting":"${Directory.current.path}/../../../bricks/greeting","../../../bricks/todos":"${Directory.current.path}/../../../bricks/todos","https://github.com/felangel/mason":"${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason"}''',
+          '''{"../../../bricks/app_icon":"${Directory.current.path}/../../../bricks/app_icon","../../../bricks/documentation":"${Directory.current.path}/../../../bricks/documentation","../../../bricks/greeting":"${Directory.current.path}/../../../bricks/greeting","../../../bricks/todos":"${Directory.current.path}/../../../bricks/todos","../../../bricks/widget":"${Directory.current.path}/../../../bricks/widget"}''',
         );
       logger = MockLogger();
       when(logger.progress(any)).thenReturn(([String _]) {});
@@ -50,7 +47,7 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('exists with code 64 when brick does not exist', () async {
+    test('exits with code 64 when brick does not exist', () async {
       final result = await commandRunner.run(['make', 'garbage']);
       expect(result, equals(ExitCode.usage.code));
       verify(logger.err(
@@ -58,7 +55,7 @@ void main() {
       )).called(1);
     });
 
-    test('exists with code 64 when mason.yaml does not exist', () async {
+    test('exits with code 64 when mason.yaml does not exist', () async {
       File(path.join(Directory.current.path, 'mason.yaml'))
           .deleteSync(recursive: true);
       commandRunner = MasonCommandRunner(logger: logger);
@@ -69,7 +66,7 @@ void main() {
       )).called(1);
     });
 
-    test('exists with code 64 when json decode fails', () async {
+    test('exits with code 64 when json decode fails', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'todos'),
       )..createSync(recursive: true);
