@@ -8,20 +8,9 @@ import 'package:mockito/mockito.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-class MockLogger extends Mock implements Logger {}
+import '../helpers/helpers.dart';
 
-void setUpTestingEnvironment(Directory cwd) {
-  try {
-    Directory.current = path.join(
-      cwd.path,
-      'test',
-      'fixtures',
-    );
-    File(
-      path.join(Directory.current.path, '.mason', 'bricks.json'),
-    ).deleteSync();
-  } catch (_) {}
-}
+class MockLogger extends Mock implements Logger {}
 
 void main() {
   final cwd = Directory.current;
@@ -34,7 +23,23 @@ void main() {
       logger = MockLogger();
       commandRunner = MasonCommandRunner(logger: logger);
       when(logger.progress(any)).thenReturn(([String _]) {});
-      setUpTestingEnvironment(cwd);
+      setUpTestingEnvironment(cwd, suffix: '.get');
+
+      File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync('''bricks:
+  app_icon:
+    path: ../../bricks/app_icon
+  documentation:
+    path: ../../bricks/documentation
+  greeting:
+    path: ../../bricks/greeting
+  todos:
+    path: ../../bricks/todos
+  widget:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/widget
+''');
     });
 
     tearDown(() {
