@@ -13,7 +13,7 @@ final _binaryFileTypes = RegExp(
 );
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
-Future<MasonBundle> convertBrickToBundle(Directory brick) async {
+Future<MasonBundle> createBundle(Directory brick) async {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
   final brickYaml = checkedYamlDecode(
     brickYamlFile.readAsStringSync(),

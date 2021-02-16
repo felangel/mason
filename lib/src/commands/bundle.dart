@@ -60,7 +60,7 @@ class BundleCommand extends MasonCommand {
       throw MasonException('could not find brick at ${brick.path}');
     }
 
-    final bundle = await convertBrickToBundle(brick);
+    final bundle = await createBundle(brick);
     final destination = argResults['destination'] as String;
     final bundleType = (argResults['type'] as String).toBundleType();
 
