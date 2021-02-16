@@ -7,9 +7,10 @@ import 'package:path/path.dart' as path;
 import 'brick_yaml.dart';
 import 'mason_bundle.dart';
 
-final RegExp _binaryFileTypes = RegExp(
-    r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2)$',
-    caseSensitive: false);
+final _binaryFileTypes = RegExp(
+  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2)$',
+  caseSensitive: false,
+);
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
 Future<MasonBundle> convertBrickToBundle(Directory brick) async {
