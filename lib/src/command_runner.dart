@@ -1,7 +1,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
-import 'package:mason/src/commands/bundle.dart';
 
 import 'commands/commands.dart';
 import 'exception.dart';
@@ -38,22 +37,20 @@ class MasonCommandRunner extends CommandRunner<int> {
     try {
       _argResults = parse(args);
       return await runCommand(_argResults) ?? ExitCode.success.code;
-    } on FormatException catch (e, stackTrace) {
+    } on FormatException catch (e) {
       _logger
         ..err(e.message)
-        ..err(stackTrace.toString())
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on UsageException catch (e, stackTrace) {
+    } on UsageException catch (e) {
       _logger
         ..err(e.message)
-        ..err(stackTrace.toString())
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on MasonException catch (e, stackTrace) {
-      _logger..err(e.message)..err(stackTrace.toString());
+    } on MasonException catch (e) {
+      _logger.err(e.message);
       return ExitCode.usage.code;
     }
   }

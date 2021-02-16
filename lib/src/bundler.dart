@@ -2,9 +2,9 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
-import 'package:mason/src/brick_yaml.dart';
 import 'package:path/path.dart' as path;
 
+import 'brick_yaml.dart';
 import 'mason_bundle.dart';
 
 final RegExp _binaryFileTypes = RegExp(

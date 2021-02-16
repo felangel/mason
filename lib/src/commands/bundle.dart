@@ -6,8 +6,8 @@ import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
-import 'package:mason/src/bundler.dart';
 
+import '../bundler.dart';
 import '../command.dart';
 
 /// Supported Bundle Types
