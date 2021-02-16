@@ -1,3 +1,9 @@
+# 0.0.1-dev.25
+
+- feat: add `mason bundle` command
+- feat: add `MasonGenerator.fromBundle`
+- fix: asset resolution issues
+
 # 0.0.1-dev.24
 
 - feat: add `mason cache clear` command
