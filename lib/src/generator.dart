@@ -9,8 +9,8 @@ import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
-import 'bundler.dart';
 import 'logger.dart';
+import 'mason_bundle.dart';
 import 'mason_cache.dart';
 import 'mason_yaml.dart';
 import 'render.dart';

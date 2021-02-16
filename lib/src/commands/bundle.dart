@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/command_runner.dart';
@@ -68,13 +69,13 @@ class BundleCommand extends MasonCommand {
         File(path.join(destination, '${bundle.name}_bundle.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            "// GENERATED CODE - DO NOT MODIFY BY HAND\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(${bundle.toJson()});",
+            "// GENERATED CODE - DO NOT MODIFY BY HAND\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(${json.encode(bundle.toJson())});",
           );
         break;
       case BundleType.universal:
         File(path.join(destination, '${bundle.name}.bundle'))
           ..createSync(recursive: true)
-          ..writeAsStringSync(bundle.toJson());
+          ..writeAsStringSync(json.encode(bundle.toJson()));
         break;
     }
 
