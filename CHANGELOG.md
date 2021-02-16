@@ -1,3 +1,7 @@
+# 0.0.1-dev.26
+
+- feat: exclude analyzer warnings from dart bundle
+
 # 0.0.1-dev.25
 
 - feat: add `mason bundle` command
