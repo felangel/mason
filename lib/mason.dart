@@ -13,4 +13,5 @@ library mason;
 export 'src/exception.dart' show MasonException;
 export 'src/generator.dart' show MasonGenerator, DirectoryGeneratorTarget;
 export 'src/logger.dart' show Logger;
+export 'src/mason_bundle.dart' show MasonBundle;
 export 'src/mason_yaml.dart' show GitPath;
