@@ -1,3 +1,7 @@
+# 0.0.1-dev.27
+
+- fix: `mason bundle` path resolution fixes
+
 # 0.0.1-dev.26
 
 - feat: exclude analyzer warnings from dart bundle
