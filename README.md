@@ -16,13 +16,18 @@ Mason allows developers to create and consume resuable templates called bricks.
 
 ## Quick Start
 
-### Activate Mason
+### Installing
 
 ```sh
+# Activate from pub.dev
 $ pub global activate mason
+
+# Or install using Homebrew
+$ brew tap felangel/mason
+$ brew install mason
 ```
 
-### Initialize Mason
+### Initializing
 
 ```sh
 $ mason init
