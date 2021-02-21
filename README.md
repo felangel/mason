@@ -10,9 +10,7 @@
 
 ---
 
-A template generator which helps teams generate files quickly and consistently.
-
-Mason allows developers to create and consume resuable templates called bricks.
+Mason allows developers to create and consume reusable templates called bricks.
 
 ## Quick Start
 
