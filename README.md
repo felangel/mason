@@ -10,19 +10,22 @@
 
 ---
 
-A template generator which helps teams generate files quickly and consistently.
-
-Mason allows developers to create and consume resuable templates called bricks.
+Mason allows developers to create and consume reusable templates called bricks.
 
 ## Quick Start
 
-### Activate Mason
+### Installing
 
 ```sh
+# Activate from pub.dev
 $ pub global activate mason
+
+# Or install using Homebrew
+$ brew tap felangel/mason
+$ brew install mason
 ```
 
-### Initialize Mason
+### Initializing
 
 ```sh
 $ mason init
