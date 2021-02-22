@@ -20,7 +20,7 @@ class MasonCommandRunner extends CommandRunner<int> {
       negatable: false,
       help: 'Print the current version.',
     );
-    addCommand(CacheCommand());
+    addCommand(CacheCommand(logger: logger));
     addCommand(BundleCommand(logger: logger));
     addCommand(InitCommand(logger: logger));
     addCommand(GetCommand(logger: logger));
