@@ -31,7 +31,7 @@ class MasonCache {
     _cache.clear();
     if (force) {
       try {
-        Directory(_masonCacheDir()).deleteSync(recursive: true);
+        Directory(rootDir).deleteSync(recursive: true);
       } catch (_) {}
     }
   }
