@@ -1,4 +1,5 @@
 import 'package:io/io.dart';
+import 'package:mason/mason.dart';
 
 import '../command.dart';
 
@@ -7,8 +8,8 @@ import '../command.dart';
 /// {@endtemplate}
 class CacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  CacheCommand() {
-    addSubcommand(ClearCacheCommand());
+  CacheCommand({Logger logger}) : super(logger: logger) {
+    addSubcommand(ClearCacheCommand(logger: logger));
   }
 
   @override
@@ -23,7 +24,7 @@ class CacheCommand extends MasonCommand {
 /// {@endtemplate}
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  ClearCacheCommand() {
+  ClearCacheCommand({Logger logger}) : super(logger: logger) {
     argParser.addFlag(
       'force',
       abbr: 'f',
