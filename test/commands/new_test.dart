@@ -29,14 +29,9 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('exits with code 64 when mason.yaml does not exist', () async {
+    test('completes successfully when mason.yaml does not exist', () async {
       final result = await commandRunner.run(['new', 'hello world']);
-      expect(result, equals(ExitCode.usage.code));
-      verify(
-        () => logger.err(
-          'Could not find mason.yaml.\nDid you forget to run mason init?',
-        ),
-      ).called(1);
+      expect(result, equals(ExitCode.success.code));
     });
 
     test('creates a new brick when it does not exist', () async {
@@ -51,6 +46,12 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new')),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('exits with code 64 when brick name is missing', () async {
+      final result = await commandRunner.run(['new']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(logger.err('Name of the new brick is required.')).called(1);
     });
 
     test('exits with code 64 when brick already exists', () async {

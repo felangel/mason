@@ -13,11 +13,11 @@ import 'mason_yaml.dart';
 /// {@endtemplate}
 class MasonCache {
   /// {@macro mason_cache}
-  MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? _masonCacheDir();
+  MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? masonCacheDir();
 
   /// Create a [MasonCache] which is populated with bricks
   /// from the current directory ([bricksJson]).
-  MasonCache(File bricksJson) : rootDir = _masonCacheDir() {
+  MasonCache(File bricksJson) : rootDir = masonCacheDir() {
     _fromBricks(bricksJson);
   }
 
@@ -40,9 +40,11 @@ class MasonCache {
   void _fromBricks(File bricksJson) {
     if (!bricksJson.existsSync()) return;
     final content = bricksJson.readAsStringSync();
-    _cache = Map.castFrom<dynamic, dynamic, String, String>(
-      json.decode(content) as Map,
-    );
+    if (content.isNotEmpty) {
+      _cache = Map.castFrom<dynamic, dynamic, String, String>(
+        json.decode(content) as Map,
+      );
+    }
   }
 
   /// Encodes entire cache contents.
@@ -105,7 +107,8 @@ class MasonCache {
   }
 }
 
-String _masonCacheDir() {
+/// Path to the mason cache directory.
+String masonCacheDir() {
   if (Platform.environment.containsKey('MASON_CACHE')) {
     return Platform.environment['MASON_CACHE']!;
   } else if (Platform.isWindows) {

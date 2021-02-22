@@ -26,6 +26,9 @@ class MasonYaml {
   /// `mason.yaml`
   static const file = 'mason.yaml';
 
+  /// static constant for an empty `mason.yaml` file.
+  static const empty = MasonYaml(<String, Brick>{});
+
   /// [Map] of [Brick] alias to [Brick] instances.
   final Map<String, Brick> bricks;
 

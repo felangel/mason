@@ -131,15 +131,10 @@ void main() {
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
     });
 
-    test('exits with code 64 when mason.yaml does not exist', () async {
+    test('does not error when mason.yaml does not exist', () async {
       Directory.current = cwd.path;
       final result = await commandRunner.run(['get']);
-      expect(result, equals(ExitCode.usage.code));
-      verify(
-        () => logger.err(
-          'Could not find mason.yaml.\nDid you forget to run mason init?',
-        ),
-      ).called(1);
+      expect(result, equals(ExitCode.success.code));
     });
   });
 }

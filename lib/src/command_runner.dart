@@ -34,20 +34,22 @@ class MasonCommandRunner extends CommandRunner<int> {
   Future<int> run(Iterable<String> args) async {
     try {
       return await runCommand(parse(args)) ?? ExitCode.success.code;
-    } on FormatException catch (e) {
+    } on FormatException catch (e, stackTrace) {
       _logger
         ..err(e.message)
+        ..err('$stackTrace')
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on UsageException catch (e) {
+    } on UsageException catch (e, stackTrace) {
       _logger
         ..err(e.message)
+        ..err('$stackTrace')
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on MasonException catch (e) {
-      _logger.err(e.message);
+    } on MasonException catch (e, stackTrace) {
+      _logger..err(e.message)..err('$stackTrace');
       return ExitCode.usage.code;
     }
   }

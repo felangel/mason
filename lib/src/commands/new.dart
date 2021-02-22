@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
@@ -34,6 +35,9 @@ class NewCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
+    if (results.rest.isEmpty) {
+      throw UsageException('Name of the new brick is required.', usage);
+    }
     final name = results.rest.first.snakeCase;
     final description = results['desc'] as String;
     final directory = Directory(p.join(entryPoint.path, 'bricks'));
