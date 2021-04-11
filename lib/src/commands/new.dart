@@ -52,10 +52,14 @@ class NewCommand extends MasonCommand {
     final bricks = Map.of(masonYaml.bricks)
       ..addAll({
         name: Brick(
-          path: p.relative(
-            brickYaml.parent.path,
-            from: entryPoint.path,
-          ),
+          path:
+              // TODO: Refactor with a safer method.
+              p
+                  .relative(
+                    brickYaml.parent.path,
+                    from: entryPoint.path,
+                  )
+                  .replaceAll(r'\', r'/'),
         )
       });
 
