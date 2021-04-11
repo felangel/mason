@@ -67,25 +67,25 @@ void main() {
       final appIconPath = path.canonicalize(
         path.join(
           Directory.current.path,
-          '/../../bricks/app_icon',
+          '../../bricks/app_icon',
         ),
       );
       final docPath = path.canonicalize(
         path.join(
           Directory.current.path,
-          '/../../bricks/documentation',
+          '../../bricks/documentation',
         ),
       );
       final greetingPath = path.canonicalize(
         path.join(
           Directory.current.path,
-          '/../../bricks/greeting',
+          '../../bricks/greeting',
         ),
       );
       final todosPath = path.canonicalize(
         path.join(
           Directory.current.path,
-          '/../../bricks/todos',
+          '../../bricks/todos',
         ),
       );
       final masonUrl =
