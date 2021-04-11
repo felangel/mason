@@ -70,19 +70,19 @@ void main() {
           '/../../bricks/app_icon',
         ),
       );
-      final docPath = path.normalize(
+      final docPath = path.canonicalize(
         path.join(
           Directory.current.path,
           '/../../bricks/documentation',
         ),
       );
-      final greetingPath = path.normalize(
+      final greetingPath = path.canonicalize(
         path.join(
           Directory.current.path,
           '/../../bricks/greeting',
         ),
       );
-      final todosPath = path.normalize(
+      final todosPath = path.canonicalize(
         path.join(
           Directory.current.path,
           '/../../bricks/todos',
