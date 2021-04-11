@@ -64,7 +64,7 @@ void main() {
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
-      final appIconPath = path.normalize(
+      final appIconPath = path.canonicalize(
         path.join(
           Directory.current.path,
           '/../../bricks/app_icon',
