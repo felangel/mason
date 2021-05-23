@@ -23,6 +23,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(CacheCommand(logger: _logger));
     addCommand(BundleCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
+    addCommand(InstallCommand(logger: _logger));
     addCommand(GetCommand(logger: _logger));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));

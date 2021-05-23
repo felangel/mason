@@ -57,7 +57,7 @@ void main() {
       ).called(1);
     });
 
-    test('exits with code 64 when brick does not exist and no mason.yaml)',
+    test('exits with code 64 when brick does not exist (no mason.yaml)',
         () async {
       File(path.join(Directory.current.path, 'mason.yaml'))
           .deleteSync(recursive: true);
