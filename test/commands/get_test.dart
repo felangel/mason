@@ -88,8 +88,9 @@ void main() {
           '../../bricks/todos',
         ),
       );
-      final masonUrl =
-          '${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason';
+      final masonUrl = path.canonicalize(
+        '${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason',
+      );
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
