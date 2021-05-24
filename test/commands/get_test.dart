@@ -37,7 +37,7 @@ void main() {
     path: ../../bricks/todos
   widget:
     git:
-      url: https://github.com/felangel/mason
+      url: git@github.com:felangel/mason.git
       path: bricks/widget
 ''');
     });
@@ -81,8 +81,11 @@ void main() {
         path.join(Directory.current.path, '..', '..', 'bricks', 'todos'),
       );
 
-      final masonUrl = path.join(MasonCache.empty().rootDir, 'git',
-          'https://github.com/felangel/mason');
+      final masonUrl = path.join(
+        MasonCache.empty().rootDir,
+        'git',
+        'git@github.com:felangel/mason.git',
+      );
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -92,7 +95,7 @@ void main() {
           '"../../bricks/documentation":"$docPath",'
           '"../../bricks/greeting":"$greetingPath",'
           '"../../bricks/todos":"$todosPath",'
-          '"https://github.com/felangel/mason":"$masonUrl"'
+          '"git@github.com:felangel/mason.git":"$masonUrl"'
           '}',
         ),
       );
