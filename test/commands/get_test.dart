@@ -63,10 +63,35 @@ void main() {
       expect(result, equals(ExitCode.success.code));
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
+
+      final bricksPath = path.join('..', '..', 'bricks');
+
+      final appIconPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'app_icon'),
+      );
+      final docPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'documentation'),
+      );
+      final greetingPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'greeting'),
+      );
+      final todosPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'todos'),
+      );
+
+      final gitUrl = 'https://github.com/felangel/mason';
+      final masonUrl = path.join(MasonCache.empty().rootDir, 'git', gitUrl);
+
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
-          '''{"../../bricks/app_icon":"${Directory.current.path}/../../bricks/app_icon","../../bricks/documentation":"${Directory.current.path}/../../bricks/documentation","../../bricks/greeting":"${Directory.current.path}/../../bricks/greeting","../../bricks/todos":"${Directory.current.path}/../../bricks/todos","https://github.com/felangel/mason":"${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason"}''',
+          '{'
+          '"${path.join(bricksPath, 'app_icon')}":"$appIconPath",'
+          '"${path.join(bricksPath, 'documentation')}":"$docPath",'
+          '"${path.join(bricksPath, 'greeting')}":"$greetingPath",'
+          '"${path.join(bricksPath, 'todos')}":"$todosPath",'
+          '"$gitUrl":"$masonUrl"'
+          '}',
         ),
       );
 

@@ -37,9 +37,7 @@ class NewCommand extends MasonCommand {
     final name = results.rest.first.snakeCase;
     final description = results['desc'] as String;
     final directory = Directory(p.join(entryPoint.path, 'bricks'));
-    final brickYaml = File(
-      p.join(directory.path, name, BrickYaml.file),
-    );
+    final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
 
     if (brickYaml.existsSync()) {
       logger.err('Existing brick: $name at ${brickYaml.path}');
@@ -52,10 +50,10 @@ class NewCommand extends MasonCommand {
     final bricks = Map.of(masonYaml.bricks)
       ..addAll({
         name: Brick(
-          path: p.relative(
+          path: p.normalize(p.relative(
             brickYaml.parent.path,
             from: entryPoint.path,
-          ),
+          )),
         )
       });
 

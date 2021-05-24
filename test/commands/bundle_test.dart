@@ -33,9 +33,9 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'universal'),
       )..createSync(recursive: true);
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
-      final result =
-          await commandRunner.run(['bundle', '../../../../bricks/greeting']);
+      final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
       final actual = Directory(
         path.join(testFixturesPath(cwd, suffix: '.bundle'), 'universal'),
@@ -50,9 +50,11 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'dart'),
       )..createSync(recursive: true);
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
-      final result = await commandRunner
-          .run(['bundle', '../../../../bricks/greeting', '-t', 'dart']);
+      final result = await commandRunner.run(
+        ['bundle', brickPath, '-t', 'dart'],
+      );
       expect(result, equals(ExitCode.success.code));
       final actual = Directory(
         path.join(testFixturesPath(cwd, suffix: '.bundle'), 'dart'),
@@ -72,10 +74,11 @@ void main() {
     });
 
     test('exits with code 64 when no brick exists at path', () async {
-      final result = await commandRunner.run(['bundle', './path/to/brick']);
+      final brickPath = path.join('path', 'to', 'brick');
+      final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        () => logger.err('could not find brick at ./path/to/brick'),
+        () => logger.err('could not find brick at $brickPath'),
       ).called(1);
     });
   });
