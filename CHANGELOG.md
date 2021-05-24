@@ -1,3 +1,7 @@
+# 0.0.1-dev.29
+
+- refactor: update logger api to support nullable strings
+
 # 0.0.1-dev.28
 
 - **BREAKING** feat: migrate to null safety
