@@ -1,6 +1,8 @@
 # 0.0.1-dev.28
 
 - **BREAKING** feat: migrate to null safety
+- **BREAKING** refactor: update file resolution tag to `{{% %}}` for windows compatibility
+- fix: normalize brick paths to avoid escaping issues on windows
 
 # 0.0.1-dev.27
 
