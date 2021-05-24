@@ -44,14 +44,7 @@ class GetCommand extends MasonCommand {
     if (brick.path != null && (cache.read(brick.path!) == null)) {
       return cache.write(
         brick.path!,
-        File(
-          p.normalize(
-            p.join(
-              entryPoint.path,
-              brick.path,
-            ),
-          ),
-        ).absolute.path,
+        File(p.normalize(p.join(entryPoint.path, brick.path))).absolute.path,
       );
     }
     if (brick.git != null && (cache.read(brick.git!.url) == null)) {
