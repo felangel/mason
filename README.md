@@ -127,7 +127,7 @@ Write your brick template in the `__brick__` directory using [mustache templates
 
 #### File Resolution
 
-It is possible to resolve files based on path input variables using the `[% %]` tag.
+It is possible to resolve files based on path input variables using the `{{% %}}` tag.
 
 For example, given the following `brick.yaml`:
 
@@ -140,7 +140,7 @@ vars:
 
 And the following brick template:
 
-`__brick__/[% url %]`
+`__brick__/{{% url %}}`
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
 
