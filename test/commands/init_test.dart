@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -15,13 +15,13 @@ void main() {
   final cwd = Directory.current;
 
   group('mason init', () {
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
       commandRunner = MasonCommandRunner(logger: logger);
-      when(logger.progress(any)).thenReturn(([String _]) {});
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.init');
     });
 
@@ -35,7 +35,7 @@ void main() {
       final result = await commandRunner.run(['init']);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        logger.err('''Existing mason.yaml at ${masonYaml.path}'''),
+        () => logger.err('''Existing mason.yaml at ${masonYaml.path}'''),
       ).called(1);
     });
 

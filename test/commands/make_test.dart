@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -15,8 +15,8 @@ void main() {
   final cwd = Directory.current;
 
   group('mason make', () {
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
@@ -39,7 +39,7 @@ void main() {
           '''{"../../../bricks/app_icon":"${Directory.current.path}/../../../bricks/app_icon","../../../bricks/documentation":"${Directory.current.path}/../../../bricks/documentation","../../../bricks/greeting":"${Directory.current.path}/../../../bricks/greeting","../../../bricks/todos":"${Directory.current.path}/../../../bricks/todos","../../../bricks/widget":"${Directory.current.path}/../../../bricks/widget"}''',
         );
       logger = MockLogger();
-      when(logger.progress(any)).thenReturn(([String _]) {});
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       commandRunner = MasonCommandRunner(logger: logger);
     });
 
@@ -50,9 +50,11 @@ void main() {
     test('exits with code 64 when brick does not exist', () async {
       final result = await commandRunner.run(['make', 'garbage']);
       expect(result, equals(ExitCode.usage.code));
-      verify(logger.err(
-        'Could not find a subcommand named "garbage" for "mason make".',
-      )).called(1);
+      verify(
+        () => logger.err(
+          'Could not find a subcommand named "garbage" for "mason make".',
+        ),
+      ).called(1);
     });
 
     test('exits with code 64 when mason.yaml does not exist', () async {
@@ -61,9 +63,11 @@ void main() {
       commandRunner = MasonCommandRunner(logger: logger);
       final result = await commandRunner.run(['make', 'garbage']);
       expect(result, equals(ExitCode.usage.code));
-      verify(logger.err(
-        'Could not find mason.yaml.\nDid you forget to run mason init?',
-      )).called(1);
+      verify(
+        () => logger.err(
+          'Could not find mason.yaml.\nDid you forget to run mason init?',
+        ),
+      ).called(1);
     });
 
     test('exits with code 64 when json decode fails', () async {
@@ -80,12 +84,14 @@ void main() {
         'todos.json',
       ]);
       expect(result, equals(ExitCode.usage.code));
-      verify(logger.err(
-        '''FormatException: Unexpected character (at character 12)
+      verify(
+        () => logger.err(
+          '''FormatException: Unexpected character (at character 12)
 {"todos": [}
            ^
 in todos.json''',
-      )).called(1);
+        ),
+      ).called(1);
     });
 
     test('generates app_icon', () async {

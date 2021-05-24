@@ -4,7 +4,7 @@ import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/mason_cache.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -16,13 +16,13 @@ void main() {
   final cwd = Directory.current;
 
   group('mason get', () {
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
       commandRunner = MasonCommandRunner(logger: logger);
-      when(logger.progress(any)).thenReturn(([String _]) {});
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.get');
 
       File(path.join(Directory.current.path, 'mason.yaml'))
@@ -53,9 +53,9 @@ void main() {
         'bricks.json',
       );
       var doneCallCount = 0;
-      when(logger.progress(any)).thenReturn(([String _]) {
-        doneCallCount++;
-      });
+      when(() => logger.progress(any())).thenReturn(
+        ([String? _]) => doneCallCount++,
+      );
 
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
 
@@ -103,7 +103,7 @@ void main() {
         ),
       );
 
-      verify(logger.progress('getting bricks')).called(1);
+      verify(() => logger.progress('getting bricks')).called(1);
       expect(doneCallCount, equals(1));
     });
 
@@ -144,7 +144,7 @@ void main() {
       final result = await commandRunner.run(['get']);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        logger.err(
+        () => logger.err(
           'Could not find mason.yaml.\nDid you forget to run mason init?',
         ),
       ).called(1);

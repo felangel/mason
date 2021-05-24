@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path;
 
 const _equality = DeepCollectionEquality();
 
-bool directoriesDeepEqual(Directory a, Directory b) {
+bool directoriesDeepEqual(Directory? a, Directory? b) {
   if (identical(a, b)) return true;
   if (a == null && b == null) return true;
   if (a == null || b == null) return false;

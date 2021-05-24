@@ -12,7 +12,7 @@ part 'mason_yaml.g.dart';
 @JsonSerializable()
 class MasonYaml {
   /// {@macro mason_yaml}
-  const MasonYaml(Map<String, Brick> bricks)
+  const MasonYaml(Map<String, Brick>? bricks)
       : bricks = bricks ?? const <String, Brick>{};
 
   /// Converts [Map] to [MasonYaml]
@@ -31,8 +31,8 @@ class MasonYaml {
 
   /// Finds nearest ancestor `mason.yaml` file
   /// relative to the [cwd].
-  static File findNearest(Directory cwd) {
-    Directory prev;
+  static File? findNearest(Directory cwd) {
+    Directory? prev;
     var dir = cwd;
     while (prev?.path != dir.path) {
       final masonConfig = File(p.join(dir.path, 'mason.yaml'));
@@ -63,10 +63,10 @@ class Brick {
   Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
 
   /// The local brick template path.
-  final String path;
+  final String? path;
 
   /// Git brick template path.
-  final GitPath git;
+  final GitPath? git;
 }
 
 /// {@template git_path}
@@ -88,9 +88,9 @@ class GitPath {
   final String url;
 
   /// Path in repository. Defaults to /.
-  final String path;
+  final String? path;
 
   /// Anything that git can use to identify a commit.
   /// Can be a branch name, tag, or commit hash.
-  final String ref;
+  final String? ref;
 }

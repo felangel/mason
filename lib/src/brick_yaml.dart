@@ -9,8 +9,12 @@ part 'brick_yaml.g.dart';
 @JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}
-  const BrickYaml(this.name, this.description, {List<String> vars, this.path})
-      : vars = vars ?? const <String>[];
+  const BrickYaml(
+    this.name,
+    this.description, {
+    this.vars = const <String>[],
+    this.path,
+  });
 
   /// Converts [Map] to [BrickYaml]
   factory BrickYaml.fromJson(Map<dynamic, dynamic> json) =>
@@ -37,11 +41,11 @@ class BrickYaml {
   final List<String> vars;
 
   /// Path to the [BrickYaml] file.
-  final String path;
+  final String? path;
 
   /// Returns a copy of the current [BrickYaml] with
   /// an overridden [path].
-  BrickYaml copyWith({String path}) {
+  BrickYaml copyWith({String? path}) {
     return BrickYaml(name, description, vars: vars, path: path ?? this.path);
   }
 }

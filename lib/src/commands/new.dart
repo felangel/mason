@@ -17,7 +17,7 @@ import '../yaml_encode.dart';
 /// {@endtemplate}
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand({Logger logger}) : super(logger: logger) {
+  NewCommand({Logger? logger}) : super(logger: logger) {
     argParser.addOption(
       'desc',
       abbr: 'd',
@@ -34,8 +34,8 @@ class NewCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final name = argResults.rest.first.snakeCase;
-    final description = argResults['desc'] as String;
+    final name = results.rest.first.snakeCase;
+    final description = results['desc'] as String;
     final directory = Directory(p.join(entryPoint.path, 'bricks'));
     final brickYaml = File(
       p.join(directory.path, name, BrickYaml.file),
