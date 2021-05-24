@@ -18,14 +18,14 @@ class Logger {
     '⠏'
   ];
 
-  final _queue = <String>[];
+  final _queue = <String?>[];
 
   final _stopwatch = Stopwatch();
   Timer? _timer;
   int _index = 0;
 
   /// Flushes internal message queue.
-  void flush([Function(String)? print]) {
+  void flush([Function(String?)? print]) {
     final writeln = print ?? info;
     for (final message in _queue) {
       writeln(message);
@@ -34,10 +34,10 @@ class Logger {
   }
 
   /// Writes info message to stdout.
-  void info(String message) => stdout.writeln(message);
+  void info(String? message) => stdout.writeln(message);
 
   /// Writes delayed message to stdout.
-  void delayed(String message) => _queue.add(message);
+  void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
   void Function([String? update]) progress(String message) {
@@ -64,23 +64,23 @@ class Logger {
   }
 
   /// Writes error message to stdout.
-  void err(String message) => stdout.writeln(lightRed.wrap(message));
+  void err(String? message) => stdout.writeln(lightRed.wrap(message));
 
   /// Writes alert message to stdout.
-  void alert(String message) {
+  void alert(String? message) {
     stdout.writeln(lightCyan.wrap(styleBold.wrap(message)));
   }
 
   /// Writes warning message to stdout.
-  void warn(String message) {
+  void warn(String? message) {
     stdout.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
   }
 
   /// Writes success message to stdout.
-  void success(String message) => stdout.writeln(lightGreen.wrap(message));
+  void success(String? message) => stdout.writeln(lightGreen.wrap(message));
 
   /// Prompts user and returns response.
-  String prompt(String message) {
+  String prompt(String? message) {
     stdout.write('$message');
     return stdin.readLineSync() ?? '';
   }
