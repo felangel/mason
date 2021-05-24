@@ -37,7 +37,7 @@ void main() {
     path: ../../bricks/todos
   widget:
     git:
-      url: git@github.com:felangel/mason.git
+      url: https://github.com/felangel/mason
       path: bricks/widget
 ''');
     });
@@ -64,38 +64,33 @@ void main() {
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
+      final bricksPath = path.join('..', '..', 'bricks');
+
       final appIconPath = path.canonicalize(
-        path.join(Directory.current.path, '..', '..', 'bricks', 'app_icon'),
+        path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
-
       final docPath = path.canonicalize(
-        path.join(
-            Directory.current.path, '..', '..', 'bricks', 'documentation'),
+        path.join(Directory.current.path, bricksPath, 'documentation'),
       );
-
       final greetingPath = path.canonicalize(
-        path.join(Directory.current.path, '..', '..', 'bricks', 'greeting'),
+        path.join(Directory.current.path, bricksPath, 'greeting'),
       );
-
       final todosPath = path.canonicalize(
-        path.join(Directory.current.path, '..', '..', 'bricks', 'todos'),
+        path.join(Directory.current.path, bricksPath, 'todos'),
       );
 
-      final masonUrl = path.join(
-        MasonCache.empty().rootDir,
-        'git',
-        'git@github.com:felangel/mason.git',
-      );
+      final gitUrl = 'https://github.com/felangel/mason';
+      final masonUrl = path.join(MasonCache.empty().rootDir, 'git', gitUrl);
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
           '{'
-          '"../../bricks/app_icon":"$appIconPath",'
-          '"../../bricks/documentation":"$docPath",'
-          '"../../bricks/greeting":"$greetingPath",'
-          '"../../bricks/todos":"$todosPath",'
-          '"git@github.com:felangel/mason.git":"$masonUrl"'
+          '"${path.join(bricksPath, 'app_icon')}":"$appIconPath",'
+          '"${path.join(bricksPath, 'documentation')}":"$docPath",'
+          '"${path.join(bricksPath, 'greeting')}":"$greetingPath",'
+          '"${path.join(bricksPath, 'todos')}":"$todosPath",'
+          '"$gitUrl":"$masonUrl"'
           '}',
         ),
       );
