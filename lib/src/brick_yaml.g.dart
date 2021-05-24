@@ -13,16 +13,20 @@ BrickYaml _$BrickYamlFromJson(Map json) {
     final val = BrickYaml(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
-      vars: $checkedConvert(
-          json, 'vars', (v) => (v as List)?.map((e) => e as String)?.toList()),
-      path: $checkedConvert(json, 'path', (v) => v as String),
+      vars: $checkedConvert(json, 'vars',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList()),
+      path: $checkedConvert(json, 'path', (v) => v as String?),
     );
     return val;
   });
 }
 
 Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'name': instance.name,
+    'description': instance.description,
+    'vars': instance.vars,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -30,9 +34,6 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
     }
   }
 
-  writeNotNull('name', instance.name);
-  writeNotNull('description', instance.description);
-  writeNotNull('vars', instance.vars);
   writeNotNull('path', instance.path);
   return val;
 }

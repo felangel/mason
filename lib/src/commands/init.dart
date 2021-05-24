@@ -13,7 +13,7 @@ import '../mason_yaml.dart';
 /// {@endtemplate}
 class InitCommand extends MasonCommand {
   /// {@macro init_command}
-  InitCommand({Logger logger}) : super(logger: logger);
+  InitCommand({Logger? logger}) : super(logger: logger);
 
   @override
   final String description = 'Initialize mason in the current directory.';

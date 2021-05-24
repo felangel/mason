@@ -36,7 +36,7 @@ class MasonGenerator extends Generator {
   MasonGenerator(
     String id,
     String description, {
-    List<TemplateFile> files,
+    List<TemplateFile?> files = const <TemplateFile>[],
     this.vars = const <String>[],
   }) : super(id, description) {
     for (final file in files) {
@@ -54,7 +54,7 @@ class MasonGenerator extends Generator {
   ///   - name
   /// ```
   static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
-    final directory = p.join(File(brick.path).parent.path, BrickYaml.dir);
+    final directory = p.join(File(brick.path!).parent.path, BrickYaml.dir);
     final files = Directory(directory)
         .listSync(recursive: true)
         .whereType<File>()
@@ -98,7 +98,7 @@ class MasonGenerator extends Generator {
     final file = File(p.join(directory, gitPath.path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
-      (m) => BrickYaml.fromJson(m),
+      (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
     return MasonGenerator.fromBrickYaml(brickYaml);
   }
@@ -126,16 +126,16 @@ abstract class Generator implements Comparable<Generator> {
   final List<TemplateFile> files = [];
 
   /// Add a new template file.
-  void addTemplateFile(TemplateFile file) {
-    if (file?.path?.isNotEmpty == true) {
-      files.add(file);
+  void addTemplateFile(TemplateFile? file) {
+    if (file?.path.isNotEmpty == true) {
+      files.add(file!);
     }
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].
   Future<int> generate(
     GeneratorTarget target, {
-    Map<String, dynamic> vars,
+    Map<String, dynamic> vars = const <String, dynamic>{},
   }) async {
     var fileCount = 0;
     await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
@@ -238,9 +238,9 @@ class TemplateFile {
 
       for (final match in matches) {
         final key = match.group(1);
-        final value = _loopValueRegExp.firstMatch(filePath)[1];
-        final inner = _loopInnerRegExp.firstMatch(filePath)[1];
-        final target = inner.replaceFirst(
+        final value = _loopValueRegExp.firstMatch(filePath)![1];
+        final inner = _loopInnerRegExp.firstMatch(filePath)![1];
+        final target = inner!.replaceFirst(
           _loopValueReplaceRegExp,
           '{{$key.$value}}',
         );
@@ -288,7 +288,7 @@ class TemplateFile {
       );
       final rendered = sanitized.render(vars).replaceAllMapped(
             _unicodeInRegExp,
-            (match) => match.group(0).substring(1),
+            (match) => match.group(0)!.substring(1),
           );
       return utf8.encode(rendered);
     } on Exception {

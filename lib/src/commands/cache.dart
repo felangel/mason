@@ -8,7 +8,7 @@ import '../command.dart';
 /// {@endtemplate}
 class CacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  CacheCommand({Logger logger}) : super(logger: logger) {
+  CacheCommand({Logger? logger}) : super(logger: logger) {
     addSubcommand(ClearCacheCommand(logger: logger));
   }
 
@@ -24,7 +24,7 @@ class CacheCommand extends MasonCommand {
 /// {@endtemplate}
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  ClearCacheCommand({Logger logger}) : super(logger: logger) {
+  ClearCacheCommand({Logger? logger}) : super(logger: logger) {
     argParser.addFlag(
       'force',
       abbr: 'f',
@@ -42,7 +42,7 @@ class ClearCacheCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final force = argResults['force'] == true;
+    final force = results['force'] == true;
     if (force) {
       logger.warn(
         'using --force\nI sure hope you know what you are doing.',

@@ -13,7 +13,7 @@ jobs:
   build:
     runs-on: ubuntu-latest
     container:
-      image: google/dart:2.10.0
+      image: google/dart:2.12.0
     steps:
       - uses: actions/checkout@v2
 
@@ -30,4 +30,7 @@ jobs:
         run: dart test --run-skipped -t pull-request-only
 
       - name: Run Tests
-        run: dart test -j 1 -x pull-request-only --coverage=coverage && pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+        run: |
+          pub global activate coverage
+          export PATH=$PATH:$HOME/.pub-cache/bin
+          dart test -j 1 -x pull-request-only --coverage=coverage && pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib

@@ -21,11 +21,11 @@ class Logger {
   final _queue = <String>[];
 
   final _stopwatch = Stopwatch();
-  Timer _timer;
+  Timer? _timer;
   int _index = 0;
 
   /// Flushes internal message queue.
-  void flush([Function(String) print]) {
+  void flush([Function(String)? print]) {
     final writeln = print ?? info;
     for (final message in _queue) {
       writeln(message);
@@ -40,7 +40,7 @@ class Logger {
   void delayed(String message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  void Function([String update]) progress(String message) {
+  void Function([String? update]) progress(String message) {
     _stopwatch
       ..reset()
       ..start();
@@ -52,7 +52,7 @@ class Logger {
         '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}$char')} $message...''',
       );
     });
-    return ([String update]) {
+    return ([String? update]) {
       _stopwatch.stop();
       final time =
           (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
@@ -82,6 +82,6 @@ class Logger {
   /// Prompts user and returns response.
   String prompt(String message) {
     stdout.write('$message');
-    return stdin.readLineSync();
+    return stdin.readLineSync() ?? '';
   }
 }

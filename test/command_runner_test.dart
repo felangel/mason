@@ -4,7 +4,7 @@ import 'dart:async';
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/version.dart';
@@ -13,9 +13,9 @@ class MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonCommandRunner', () {
-    List<String> printLogs;
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late List<String> printLogs;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     void Function() overridePrint(void Function() fn) {
       return () {
@@ -41,7 +41,7 @@ void main() {
       test('handles FormatException', () async {
         const exception = FormatException('oops!');
         var isFirstInvocation = true;
-        when(logger.info(any)).thenAnswer((_) {
+        when(() => logger.info(any())).thenAnswer((_) {
           if (isFirstInvocation) {
             isFirstInvocation = false;
             throw exception;
@@ -49,14 +49,14 @@ void main() {
         });
         final result = await commandRunner.run(['--version']);
         expect(result, equals(ExitCode.usage.code));
-        verify(logger.err(exception.message)).called(1);
-        verify(logger.info(commandRunner.usage)).called(1);
+        verify(() => logger.err(exception.message)).called(1);
+        verify(() => logger.info(commandRunner.usage)).called(1);
       });
 
       test('handles UsageException', () async {
         final exception = UsageException('oops!', commandRunner.usage);
         var isFirstInvocation = true;
-        when(logger.info(any)).thenAnswer((_) {
+        when(() => logger.info(any())).thenAnswer((_) {
           if (isFirstInvocation) {
             isFirstInvocation = false;
             throw exception;
@@ -64,8 +64,8 @@ void main() {
         });
         final result = await commandRunner.run(['--version']);
         expect(result, equals(ExitCode.usage.code));
-        verify(logger.err(exception.message)).called(1);
-        verify(logger.info(commandRunner.usage)).called(1);
+        verify(() => logger.err(exception.message)).called(1);
+        verify(() => logger.info(commandRunner.usage)).called(1);
       });
 
       test('handles no command', overridePrint(() async {
@@ -130,7 +130,7 @@ void main() {
         test('outputs current version', () async {
           final result = await commandRunner.run(['--version']);
           expect(result, equals(ExitCode.success.code));
-          verify(logger.info('mason version: $packageVersion'));
+          verify(() => logger.info('mason version: $packageVersion'));
         });
       });
     });

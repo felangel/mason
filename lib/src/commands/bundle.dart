@@ -25,7 +25,7 @@ enum BundleType {
 /// {@endtemplate}
 class BundleCommand extends MasonCommand {
   /// {@macro bundle_command}
-  BundleCommand({Logger logger}) : super(logger: logger) {
+  BundleCommand({Logger? logger}) : super(logger: logger) {
     argParser
       ..addOption(
         'destination',
@@ -49,20 +49,20 @@ class BundleCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    if (argResults.rest.isEmpty) {
+    if (results.rest.isEmpty) {
       throw UsageException(
         'path to the brick template must be provided',
         usage,
       );
     }
-    final brick = Directory(argResults.rest.first);
+    final brick = Directory(results.rest.first);
     if (!brick.existsSync()) {
       throw MasonException('could not find brick at ${brick.path}');
     }
 
     final bundle = await createBundle(brick);
-    final destination = argResults['destination'] as String;
-    final bundleType = (argResults['type'] as String).toBundleType();
+    final destination = results['destination'] as String;
+    final bundleType = (results['type'] as String).toBundleType();
 
     switch (bundleType) {
       case BundleType.dart:
