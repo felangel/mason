@@ -18,6 +18,8 @@ jobs:
         os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
+      - name: Configure Git
+        run: git config core.protectNTFS false
       - uses: actions/checkout@v2.3.4
       - uses: dart-lang/setup-dart@v1
 
