@@ -111,12 +111,10 @@ String _masonCacheDir() {
   } else if (Platform.isWindows) {
     final appData = Platform.environment['APPDATA']!;
     final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
-    if (appDataCacheDir.existsSync()) {
-      return appDataCacheDir.path;
-    }
+    if (appDataCacheDir.existsSync()) return appDataCacheDir.path;
     final localAppData = Platform.environment['LOCALAPPDATA']!;
     return p.join(localAppData, 'Mason', 'Cache');
   } else {
-    return '${Platform.environment['HOME']}/.mason-cache';
+    return p.join(Platform.environment['HOME']!, '.mason-cache');
   }
 }

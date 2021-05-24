@@ -33,7 +33,7 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'universal'),
       )..createSync(recursive: true);
-      final brickPath = path.normalize('../../../../bricks/greeting');
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
@@ -50,7 +50,7 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'dart'),
       )..createSync(recursive: true);
-      final brickPath = path.normalize('../../../../bricks/greeting');
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['bundle', brickPath, '-t', 'dart'],
@@ -74,7 +74,7 @@ void main() {
     });
 
     test('exits with code 64 when no brick exists at path', () async {
-      final brickPath = path.normalize('./path/to/brick');
+      final brickPath = path.join('path', 'to', 'brick');
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.usage.code));
       verify(

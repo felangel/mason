@@ -65,31 +65,24 @@ void main() {
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
       final appIconPath = path.canonicalize(
-        path.join(
-          Directory.current.path,
-          '../../bricks/app_icon',
-        ),
+        path.join(Directory.current.path, '..', '..', 'bricks', 'app_icon'),
       );
+
       final docPath = path.canonicalize(
         path.join(
-          Directory.current.path,
-          '../../bricks/documentation',
-        ),
+            Directory.current.path, '..', '..', 'bricks', 'documentation'),
       );
+
       final greetingPath = path.canonicalize(
-        path.join(
-          Directory.current.path,
-          '../../bricks/greeting',
-        ),
+        path.join(Directory.current.path, '..', '..', 'bricks', 'greeting'),
       );
+
       final todosPath = path.canonicalize(
-        path.join(
-          Directory.current.path,
-          '../../bricks/todos',
-        ),
+        path.join(Directory.current.path, '..', '..', 'bricks', 'todos'),
       );
-      final masonUrl =
-          '${MasonCache.empty().rootDir}/git/https://github.com/felangel/mason';
+
+      final masonUrl = path.join(MasonCache.empty().rootDir, 'git',
+          'https://github.com/felangel/mason');
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
