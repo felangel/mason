@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -15,13 +15,13 @@ void main() {
   final cwd = Directory.current;
 
   group('mason cache', () {
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
       commandRunner = MasonCommandRunner(logger: logger);
-      when(logger.progress(any)).thenReturn(([String _]) {});
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.cache');
 
       File(path.join(Directory.current.path, 'mason.yaml'))
@@ -68,7 +68,9 @@ void main() {
       expect(cacheClearResult, equals(ExitCode.success.code));
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
       verify(
-        logger.warn('using --force\nI sure hope you know what you are doing.'),
+        () => logger.warn(
+          'using --force\nI sure hope you know what you are doing.',
+        ),
       ).called(1);
     });
   });

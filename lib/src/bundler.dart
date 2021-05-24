@@ -17,7 +17,7 @@ Future<MasonBundle> createBundle(Directory brick) async {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
   final brickYaml = checkedYamlDecode(
     brickYamlFile.readAsStringSync(),
-    (m) => BrickYaml.fromJson(m),
+    (m) => BrickYaml.fromJson(m!),
   );
   final files = Directory(path.join(brick.path, BrickYaml.dir))
       .listSync(recursive: true)

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:path/path.dart' as p;
@@ -57,16 +58,16 @@ class BrickYamlParseException extends MasonException {
 /// {@endtemplate}
 abstract class MasonCommand extends Command<int> {
   /// {@macro mason_command}
-  MasonCommand({Logger logger}) : _logger = logger;
+  MasonCommand({Logger? logger}) : _logger = logger;
 
   /// [MasonCache] which contains all remote brick templates.
   MasonCache get cache => _cache ??= MasonCache(bricksJson);
 
-  MasonCache _cache;
+  MasonCache? _cache;
 
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
-    if (_entryPoint != null) return _entryPoint;
+    if (_entryPoint != null) return _entryPoint!;
     final nearestMasonYaml = MasonYaml.findNearest(cwd);
     if (nearestMasonYaml == null) {
       throw const MasonYamlNotFoundException(
@@ -76,22 +77,25 @@ abstract class MasonCommand extends Command<int> {
     return nearestMasonYaml.parent;
   }
 
-  Directory _entryPoint;
+  /// [ArgResults] for the current command.
+  ArgResults get results => argResults!;
+
+  Directory? _entryPoint;
 
   /// Gets the `bricks.json` file for the current [entryPoint].
   File get bricksJson => File(p.join(entryPoint.path, '.mason', 'bricks.json'));
 
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   Set<BrickYaml> get bricks {
-    if (_bricks != null) return _bricks;
+    if (_bricks != null) return _bricks!;
     final bricks = <BrickYaml>{};
     for (final entry in masonYaml.bricks.entries) {
       final brick = entry.value;
-      final dirPath = cache.read(brick.path ?? brick.git.url);
+      final dirPath = cache.read(brick.path ?? brick.git!.url);
       if (dirPath == null) break;
       final filePath = brick.path != null
           ? p.join(dirPath, BrickYaml.file)
-          : p.join(dirPath, brick.git.path ?? '', BrickYaml.file);
+          : p.join(dirPath, brick.git?.path ?? '', BrickYaml.file);
       final file = File(filePath);
       if (!file.existsSync()) {
         throw BrickNotFoundException(filePath);
@@ -99,7 +103,7 @@ abstract class MasonCommand extends Command<int> {
       try {
         final brickYaml = checkedYamlDecode(
           file.readAsStringSync(),
-          (m) => BrickYaml.fromJson(m),
+          (m) => BrickYaml.fromJson(m!),
         ).copyWith(path: filePath);
         if (brickYaml.name != entry.key) {
           throw MasonYamlNameMismatch(
@@ -115,10 +119,10 @@ abstract class MasonCommand extends Command<int> {
       }
     }
     _bricks = bricks;
-    return _bricks;
+    return bricks;
   }
 
-  Set<BrickYaml> _bricks;
+  Set<BrickYaml>? _bricks;
 
   /// Returns `true` if a `mason.yaml` file exists.
   bool get masonInitialized {
@@ -143,14 +147,14 @@ abstract class MasonCommand extends Command<int> {
 
   /// Gets the nearest [MasonYaml].
   MasonYaml get masonYaml {
-    if (_masonYaml != null) return _masonYaml;
+    if (_masonYaml != null) return _masonYaml!;
     final masonYamlContent = masonYamlFile.readAsStringSync();
     try {
       _masonYaml = checkedYamlDecode(
         masonYamlContent,
-        (m) => MasonYaml.fromJson(m),
+        (m) => MasonYaml.fromJson(m!),
       );
-      return _masonYaml;
+      return _masonYaml!;
     } on ParsedYamlException catch (e) {
       throw MasonYamlParseException(
         'Malformed ${MasonYaml.file} at ${masonYamlFile.path}\n${e.message}',
@@ -158,12 +162,12 @@ abstract class MasonCommand extends Command<int> {
     }
   }
 
-  MasonYaml _masonYaml;
+  MasonYaml? _masonYaml;
 
   /// [Logger] instance used to wrap stdout.
   Logger get logger => _logger ??= Logger();
 
-  Logger _logger;
+  Logger? _logger;
 
   /// Return the current working directory.
   Directory get cwd => _cwd ??= Directory.current;
@@ -171,5 +175,5 @@ abstract class MasonCommand extends Command<int> {
   /// An override for the directory to generate into; public for testing.
   set cwd(Directory value) => _cwd = value;
 
-  Directory _cwd;
+  Directory? _cwd;
 }

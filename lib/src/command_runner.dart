@@ -12,7 +12,7 @@ import 'version.dart';
 /// {@endtemplate}
 class MasonCommandRunner extends CommandRunner<int> {
   /// {@macro mason_command_runner}
-  MasonCommandRunner({Logger logger})
+  MasonCommandRunner({Logger? logger})
       : _logger = logger ?? Logger(),
         super('mason', '⛏️  mason \u{2022} lay the foundation!') {
     argParser.addFlag(
@@ -20,23 +20,20 @@ class MasonCommandRunner extends CommandRunner<int> {
       negatable: false,
       help: 'Print the current version.',
     );
-    addCommand(CacheCommand(logger: logger));
-    addCommand(BundleCommand(logger: logger));
-    addCommand(InitCommand(logger: logger));
-    addCommand(GetCommand(logger: logger));
-    addCommand(MakeCommand(logger: logger));
-    addCommand(NewCommand(logger: logger));
+    addCommand(CacheCommand(logger: _logger));
+    addCommand(BundleCommand(logger: _logger));
+    addCommand(InitCommand(logger: _logger));
+    addCommand(GetCommand(logger: _logger));
+    addCommand(MakeCommand(logger: _logger));
+    addCommand(NewCommand(logger: _logger));
   }
 
   final Logger _logger;
 
-  ArgResults _argResults;
-
   @override
   Future<int> run(Iterable<String> args) async {
     try {
-      _argResults = parse(args);
-      return await runCommand(_argResults) ?? ExitCode.success.code;
+      return await runCommand(parse(args)) ?? ExitCode.success.code;
     } on FormatException catch (e) {
       _logger
         ..err(e.message)
@@ -56,7 +53,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   }
 
   @override
-  Future<int> runCommand(ArgResults topLevelResults) async {
+  Future<int?> runCommand(ArgResults topLevelResults) async {
     if (topLevelResults['version'] == true) {
       _logger.info('mason version: $packageVersion');
       return ExitCode.success.code;

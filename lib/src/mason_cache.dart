@@ -13,7 +13,7 @@ import 'mason_yaml.dart';
 /// {@endtemplate}
 class MasonCache {
   /// {@macro mason_cache}
-  MasonCache.empty({String rootDir}) : rootDir = rootDir ?? _masonCacheDir();
+  MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? _masonCacheDir();
 
   /// Create a [MasonCache] which is populated with bricks
   /// from the current directory ([bricksJson]).
@@ -53,7 +53,7 @@ class MasonCache {
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
-  String read(String remote) {
+  String? read(String remote) {
     if (_cache.containsKey(remote)) {
       return _cache[remote];
     }
@@ -96,7 +96,7 @@ class MasonCache {
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
       await Git.run(
-        ['checkout', gitPath.ref],
+        ['checkout', gitPath.ref!],
         processWorkingDir: directory.path,
       );
     }
@@ -107,14 +107,14 @@ class MasonCache {
 
 String _masonCacheDir() {
   if (Platform.environment.containsKey('MASON_CACHE')) {
-    return Platform.environment['MASON_CACHE'];
+    return Platform.environment['MASON_CACHE']!;
   } else if (Platform.isWindows) {
-    final appData = Platform.environment['APPDATA'];
+    final appData = Platform.environment['APPDATA']!;
     final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
     if (appDataCacheDir.existsSync()) {
       return appDataCacheDir.path;
     }
-    final localAppData = Platform.environment['LOCALAPPDATA'];
+    final localAppData = Platform.environment['LOCALAPPDATA']!;
     return p.join(localAppData, 'Mason', 'Cache');
   } else {
     return '${Platform.environment['HOME']}/.mason-cache';

@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mockito/mockito.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
@@ -15,13 +15,13 @@ void main() {
   final cwd = Directory.current;
 
   group('mason new', () {
-    Logger logger;
-    MasonCommandRunner commandRunner;
+    late Logger logger;
+    late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
       commandRunner = MasonCommandRunner(logger: logger);
-      when(logger.progress(any)).thenReturn(([String _]) {});
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.new');
     });
 
@@ -33,7 +33,7 @@ void main() {
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        logger.err(
+        () => logger.err(
           'Could not find mason.yaml.\nDid you forget to run mason init?',
         ),
       ).called(1);
@@ -75,7 +75,9 @@ void main() {
         'brick.yaml',
       );
       verify(
-        logger.err('Existing brick: hello_world at $expectedBrickYamlPath'),
+        () => logger.err(
+          'Existing brick: hello_world at $expectedBrickYamlPath',
+        ),
       ).called(1);
     });
   });

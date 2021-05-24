@@ -13,34 +13,23 @@ MasonYaml _$MasonYamlFromJson(Map json) {
       $checkedConvert(
           json,
           'bricks',
-          (v) => (v as Map)?.map(
-                (k, e) => MapEntry(
-                    k as String, e == null ? null : Brick.fromJson(e as Map)),
+          (v) => (v as Map?)?.map(
+                (k, e) => MapEntry(k as String, Brick.fromJson(e as Map)),
               )),
     );
     return val;
   });
 }
 
-Map<String, dynamic> _$MasonYamlToJson(MasonYaml instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull(
-      'bricks', instance.bricks?.map((k, e) => MapEntry(k, e?.toJson())));
-  return val;
-}
+Map<String, dynamic> _$MasonYamlToJson(MasonYaml instance) => <String, dynamic>{
+      'bricks': instance.bricks.map((k, e) => MapEntry(k, e.toJson())),
+    };
 
 Brick _$BrickFromJson(Map json) {
   return $checkedNew('Brick', json, () {
     $checkKeys(json, allowedKeys: const ['path', 'git']);
     final val = Brick(
-      path: $checkedConvert(json, 'path', (v) => v as String),
+      path: $checkedConvert(json, 'path', (v) => v as String?),
       git: $checkedConvert(
           json, 'git', (v) => v == null ? null : GitPath.fromJson(v as Map)),
     );
@@ -67,15 +56,17 @@ GitPath _$GitPathFromJson(Map json) {
     $checkKeys(json, allowedKeys: const ['url', 'path', 'ref']);
     final val = GitPath(
       $checkedConvert(json, 'url', (v) => v as String),
-      path: $checkedConvert(json, 'path', (v) => v as String),
-      ref: $checkedConvert(json, 'ref', (v) => v as String),
+      path: $checkedConvert(json, 'path', (v) => v as String?),
+      ref: $checkedConvert(json, 'ref', (v) => v as String?),
     );
     return val;
   });
 }
 
 Map<String, dynamic> _$GitPathToJson(GitPath instance) {
-  final val = <String, dynamic>{};
+  final val = <String, dynamic>{
+    'url': instance.url,
+  };
 
   void writeNotNull(String key, dynamic value) {
     if (value != null) {
@@ -83,7 +74,6 @@ Map<String, dynamic> _$GitPathToJson(GitPath instance) {
     }
   }
 
-  writeNotNull('url', instance.url);
   writeNotNull('path', instance.path);
   writeNotNull('ref', instance.ref);
   return val;

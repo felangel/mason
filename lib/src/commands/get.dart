@@ -12,7 +12,7 @@ import '../mason_yaml.dart';
 /// {@endtemplate}
 class GetCommand extends MasonCommand {
   /// {@macro get_command}
-  GetCommand({Logger logger}) : super(logger: logger) {
+  GetCommand({Logger? logger}) : super(logger: logger) {
     argParser.addFlag(
       'force',
       abbr: 'f',
@@ -30,7 +30,7 @@ class GetCommand extends MasonCommand {
   @override
   Future<int> run() async {
     final getDone = logger.progress('getting bricks');
-    final force = argResults['force'] == true;
+    final force = results['force'] == true;
     if (force) cache.clear();
     await Future.forEach(masonYaml.bricks.values, _download);
     await bricksJson.create(recursive: true);
@@ -41,14 +41,14 @@ class GetCommand extends MasonCommand {
 
   /// Downloads remote bricks to `.brick-cache`.
   Future<void> _download(Brick brick) async {
-    if (brick.path != null && (cache.read(brick.path) == null)) {
+    if (brick.path != null && (cache.read(brick.path!) == null)) {
       return cache.write(
-        brick.path,
+        brick.path!,
         File(p.join(entryPoint.path, brick.path)).absolute.path,
       );
     }
-    if (brick.git != null && (cache.read(brick.git.url) == null)) {
-      await cache.downloadRemoteBrick(brick.git);
+    if (brick.git != null && (cache.read(brick.git!.url) == null)) {
+      await cache.downloadRemoteBrick(brick.git!);
     }
   }
 }

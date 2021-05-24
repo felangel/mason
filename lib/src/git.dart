@@ -6,10 +6,14 @@ class Git {
   static Future<ProcessResult> run(
     List<String> args, {
     bool throwOnError = true,
-    String processWorkingDir,
+    String? processWorkingDir,
   }) async {
-    final result = await Process.run('git', args,
-        workingDirectory: processWorkingDir, runInShell: true);
+    final result = await Process.run(
+      'git',
+      args,
+      workingDirectory: processWorkingDir,
+      runInShell: true,
+    );
 
     if (throwOnError) {
       _throwIfProcessFailed(result, 'git', args);
@@ -23,7 +27,6 @@ void _throwIfProcessFailed(
   String process,
   List<String> args,
 ) {
-  assert(pr != null);
   if (pr.exitCode != 0) {
     final values = {
       'Standard out': pr.stdout.toString().trim(),

@@ -1,3 +1,7 @@
+# 0.0.1-dev.28
+
+- **BREAKING** feat: migrate to null safety
+
 # 0.0.1-dev.27
 
 - fix: `mason bundle` path resolution fixes

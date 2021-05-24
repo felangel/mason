@@ -13,7 +13,7 @@ import '../command.dart';
 /// {@endtemplate}
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
-  MakeCommand({Logger logger}) : super(logger: logger) {
+  MakeCommand({Logger? logger}) : super(logger: logger) {
     try {
       for (final brick in bricks) {
         addSubcommand(_MakeCommand(brick, logger: logger));
@@ -23,7 +23,7 @@ class MakeCommand extends MasonCommand {
     }
   }
 
-  dynamic _exception;
+  Object? _exception;
 
   @override
   final String description = 'Generate code using an existing brick template.';
@@ -33,13 +33,14 @@ class MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    if (_exception != null) throw _exception;
+    // ignore: only_throw_errors
+    if (_exception != null) throw _exception!;
     return ExitCode.success.code;
   }
 }
 
 class _MakeCommand extends MasonCommand {
-  _MakeCommand(this._brick, {Logger logger}) : super(logger: logger) {
+  _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
     argParser.addOption(
       'json',
       abbr: 'j',
@@ -62,17 +63,17 @@ class _MakeCommand extends MasonCommand {
   Future<int> run() async {
     final target = DirectoryGeneratorTarget(cwd, logger);
 
-    Function generateDone;
+    Function? generateDone;
     try {
       final generator = await MasonGenerator.fromBrickYaml(_brick);
       final vars = <String, dynamic>{};
       generateDone = logger.progress('Making ${generator.id}');
 
       try {
-        vars.addAll(await _decodeFile(argResults['json'] as String));
+        vars.addAll(await _decodeFile(results['json'] as String?));
       } on FormatException catch (error) {
         generateDone();
-        logger.err('${error}in ${argResults['json']}');
+        logger.err('${error}in ${results['json']}');
         return ExitCode.usage.code;
       } on Exception catch (error) {
         generateDone();
@@ -80,9 +81,9 @@ class _MakeCommand extends MasonCommand {
         return ExitCode.usage.code;
       }
 
-      for (final variable in _brick.vars ?? const <String>[]) {
+      for (final variable in _brick.vars) {
         if (vars.containsKey(variable)) continue;
-        final arg = argResults[variable] as String;
+        final arg = results[variable] as String?;
         if (arg != null) {
           vars.addAll(
             <String, dynamic>{variable: _maybeDecode(arg)},
@@ -95,7 +96,6 @@ class _MakeCommand extends MasonCommand {
           );
         }
       }
-
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger
@@ -112,13 +112,13 @@ class _MakeCommand extends MasonCommand {
     }
   }
 
-  Future<Map<String, dynamic>> _decodeFile(String path) async {
+  Future<Map<String, dynamic>> _decodeFile(String? path) async {
     if (path == null) return <String, dynamic>{};
     final jsonVarsContent = await File(path).readAsString();
     return json.decode(jsonVarsContent) as Map<String, dynamic>;
   }
 
-  Object _maybeDecode(String value) {
+  dynamic _maybeDecode(String value) {
     try {
       return json.decode(value);
     } catch (_) {
