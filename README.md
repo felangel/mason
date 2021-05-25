@@ -1,5 +1,5 @@
 <p align="center">
-<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png" height="200" alt="mason logo" />
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_full.png" height="125" alt="mason logo" />
 </p>
 
 <p align="center">
@@ -143,6 +143,25 @@ And the following brick template:
 `__brick__/{{% url %}}`
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
+
+## Bundling
+
+You can use mason to generate a bundle for an existing template. Bundles are convenient for cases where you want to include your template as part of a standalone CLI. [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli) is a great example.
+
+There are currently two types of bundles:
+
+1. Universal - a platform-agnostic bundle
+2. Dart - a Dart specific bundle
+
+To generate a bundle:
+
+```sh
+# Universal Bundle
+mason bundle ./path/to/brick -d ./path/to/destination
+
+# Dart Bundle
+mason bundle ./path/to/brick -t dart -d ./path/to/destination
+```
 
 ## Usage
 
