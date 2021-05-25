@@ -51,7 +51,7 @@ void main() {
     test('exits with code 64 when brick name is missing', () async {
       final result = await commandRunner.run(['new']);
       expect(result, equals(ExitCode.usage.code));
-      verify(logger.err('Name of the new brick is required.')).called(1);
+      verify(() => logger.err('Name of the new brick is required.')).called(1);
     });
 
     test('exits with code 64 when brick already exists', () async {
