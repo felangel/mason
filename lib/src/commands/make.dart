@@ -16,7 +16,7 @@ class MakeCommand extends MasonCommand {
   /// {@macro make_command}
   MakeCommand({Logger? logger}) : super(logger: logger) {
     try {
-      for (final brick in bricks) {
+      for (final brick in bricks()) {
         addSubcommand(_MakeCommand(brick, logger: logger));
       }
     } catch (e) {

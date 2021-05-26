@@ -1,11 +1,7 @@
-import 'dart:io';
-
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
-import 'package:path/path.dart' as p;
 
 import '../command.dart';
-import '../mason_yaml.dart';
 
 /// {@template get_command}
 /// `mason get` command which gets all bricks.
@@ -32,25 +28,12 @@ class GetCommand extends MasonCommand {
     final getDone = logger.progress('getting bricks');
     final force = results['force'] == true;
     if (force) cache.clear();
-    if (masonYaml.bricks.values.isNotEmpty) {
-      await Future.forEach(masonYaml.bricks.values, _download);
-      await bricksJson.create(recursive: true);
-      await bricksJson.writeAsString(cache.encode);
+    final yaml = masonYaml();
+    if (yaml.bricks.values.isNotEmpty) {
+      await Future.forEach(yaml.bricks.values, cacheBrick);
+      await writeCacheToBricksJson();
     }
     getDone();
     return ExitCode.success.code;
-  }
-
-  /// Downloads remote bricks to `.brick-cache`.
-  Future<void> _download(Brick brick) async {
-    if (brick.path != null && (cache.read(brick.path!) == null)) {
-      return cache.write(
-        brick.path!,
-        File(p.normalize(p.join(entryPoint.path, brick.path))).absolute.path,
-      );
-    }
-    if (brick.git != null && (cache.read(brick.git!.url) == null)) {
-      await cache.downloadRemoteBrick(brick.git!);
-    }
   }
 }

@@ -24,7 +24,7 @@ class InitCommand extends MasonCommand {
   @override
   Future<int> run() async {
     if (masonInitializedLocally) {
-      logger.err('Existing ${MasonYaml.file} at ${masonYamlFile.path}');
+      logger.err('Existing ${MasonYaml.file} at ${masonYamlFile().path}');
       return ExitCode.usage.code;
     }
     final fetchDone = logger.progress('Initializing');

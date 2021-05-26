@@ -16,9 +16,14 @@ class MasonCache {
   MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? masonCacheDir();
 
   /// Create a [MasonCache] which is populated with bricks
-  /// from the current directory ([bricksJson]).
+  /// from the current directory ([bricksJson])
+  /// in addition to any global bricks.
   MasonCache(File bricksJson) : rootDir = masonCacheDir() {
-    _fromBricks(bricksJson);
+    final globalBricks = _fromBricks(
+      File(p.join(masonCacheGlobalDir(), '.mason', 'bricks.json')),
+    );
+    final localBricks = _fromBricks(bricksJson);
+    _cache = {...globalBricks, ...localBricks};
   }
 
   /// Mapping between remote and local brick paths.
@@ -37,14 +42,15 @@ class MasonCache {
   }
 
   /// Populates cache based on `.mason/bricks.json`.
-  void _fromBricks(File bricksJson) {
-    if (!bricksJson.existsSync()) return;
+  Map<String, String> _fromBricks(File bricksJson) {
+    if (!bricksJson.existsSync()) return <String, String>{};
     final content = bricksJson.readAsStringSync();
     if (content.isNotEmpty) {
-      _cache = Map.castFrom<dynamic, dynamic, String, String>(
+      return Map.castFrom<dynamic, dynamic, String, String>(
         json.decode(content) as Map,
       );
     }
+    return <String, String>{};
   }
 
   /// Encodes entire cache contents.
@@ -120,4 +126,9 @@ String masonCacheDir() {
   } else {
     return p.join(Platform.environment['HOME']!, '.mason-cache');
   }
+}
+
+/// Path to the global subdirectory within the mason cache.
+String masonCacheGlobalDir() {
+  return Directory(p.join(masonCacheDir(), 'global')).path;
 }

@@ -58,13 +58,14 @@ abstract class MasonCommand extends Command<int> {
 
   MasonCache? _cache;
 
+  Directory get _globalDirectory => Directory(masonCacheGlobalDir());
+
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
     if (_entryPoint != null) return _entryPoint!;
     final nearestMasonYaml = MasonYaml.findNearest(cwd);
     if (nearestMasonYaml == null) {
-      return _entryPoint = Directory(p.join(masonCacheDir(), 'global'))
-        ..createSync(recursive: true);
+      return _entryPoint = _globalDirectory..createSync(recursive: true);
     }
     return _entryPoint = nearestMasonYaml.parent;
   }
@@ -77,38 +78,37 @@ abstract class MasonCommand extends Command<int> {
   /// Gets the `bricks.json` file for the current [entryPoint].
   File get bricksJson => File(p.join(entryPoint.path, '.mason', 'bricks.json'));
 
+  /// Writes current cache to `brick.json`.
+  Future<void> writeCacheToBricksJson() async {
+    await bricksJson.create(recursive: true);
+    await bricksJson.writeAsString(cache.encode);
+  }
+
+  /// Caches brick (remote or local).
+  /// Remote bricks will be downloaded and the cached.
+  Future<void> cacheBrick(Brick brick) async {
+    if (brick.path != null && (cache.read(brick.path!) == null)) {
+      return cache.write(
+        brick.path!,
+        File(p.normalize(p.join(entryPoint.path, brick.path))).absolute.path,
+      );
+    }
+    if (brick.git != null && (cache.read(brick.git!.url) == null)) {
+      await cache.downloadRemoteBrick(brick.git!);
+    }
+  }
+
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
-  Set<BrickYaml> get bricks {
-    if (_bricks != null) return _bricks!;
-    final bricks = <BrickYaml>{};
-    for (final entry in masonYaml.bricks.entries) {
-      final brick = entry.value;
-      final dirPath = cache.read(brick.path ?? brick.git!.url);
-      if (dirPath == null) break;
-      final filePath = brick.path != null
-          ? p.join(dirPath, BrickYaml.file)
-          : p.join(dirPath, brick.git?.path ?? '', BrickYaml.file);
-      final file = File(filePath);
-      if (!file.existsSync()) {
-        throw BrickNotFoundException(filePath);
-      }
-      try {
-        final brickYaml = checkedYamlDecode(
-          file.readAsStringSync(),
-          (m) => BrickYaml.fromJson(m!),
-        ).copyWith(path: filePath);
-        if (brickYaml.name != entry.key) {
-          throw MasonYamlNameMismatch(
-            'brick name "${brickYaml.name}": '
-            'doesn\'t match provided name "${entry.key}" in ${MasonYaml.file}.',
-          );
-        }
-        bricks.add(brickYaml);
-      } on ParsedYamlException catch (e) {
-        throw BrickYamlParseException(
-          'Malformed ${BrickYaml.file} at ${file.path}\n${e.message}',
-        );
-      }
+  Set<BrickYaml> bricks([MasonYaml? yaml]) {
+    if (yaml == null && _bricks != null) return _bricks!;
+    final masonYaml = yaml ?? this.masonYaml();
+    final localBricks = _getBricks(masonYaml);
+    final bricks = <BrickYaml>{...localBricks};
+    if (masonInitializedLocally) {
+      final globalBricks = _getBricks(
+        this.masonYaml(masonYamlFile(_globalDirectory)),
+      );
+      bricks.addAll(globalBricks);
     }
     _bricks = bricks;
     return bricks;
@@ -120,7 +120,7 @@ abstract class MasonCommand extends Command<int> {
   /// This excludes the global mason configuration.
   bool get masonInitializedLocally {
     try {
-      final file = masonYamlFile;
+      final file = masonYamlFile();
       return p.isWithin(cwd.path, file.path);
     } catch (_) {
       return false;
@@ -128,19 +128,25 @@ abstract class MasonCommand extends Command<int> {
   }
 
   /// Gets the nearest `mason.yaml` file.
-  File get masonYamlFile {
+  File masonYamlFile([Directory? entry]) {
+    if (entry == null && _masonYamlFile != null) return _masonYamlFile!;
+    final entryPoint = entry ?? this.entryPoint;
     final file = File(p.join(entryPoint.path, MasonYaml.file));
     if (!file.existsSync()) {
       file
         ..createSync(recursive: true)
         ..writeAsStringSync(json.encode(MasonYaml.empty.toJson()));
     }
+    _masonYamlFile = file;
     return file;
   }
 
+  File? _masonYamlFile;
+
   /// Gets the nearest [MasonYaml].
-  MasonYaml get masonYaml {
-    if (_masonYaml != null) return _masonYaml!;
+  MasonYaml masonYaml([File? yamlFile]) {
+    if (yamlFile == null && _masonYaml != null) return _masonYaml!;
+    final masonYamlFile = yamlFile ?? this.masonYamlFile();
     final masonYamlContent = masonYamlFile.readAsStringSync();
     try {
       return _masonYaml = checkedYamlDecode(
@@ -168,4 +174,36 @@ abstract class MasonCommand extends Command<int> {
   set cwd(Directory value) => _cwd = value;
 
   Directory? _cwd;
+
+  Set<BrickYaml> _getBricks(MasonYaml masonYaml) {
+    final bricks = <BrickYaml>{};
+    for (final entry in masonYaml.bricks.entries) {
+      final brick = entry.value;
+      final dirPath = cache.read(brick.path ?? brick.git!.url);
+      if (dirPath == null) break;
+      final filePath = brick.path != null
+          ? p.join(dirPath, BrickYaml.file)
+          : p.join(dirPath, brick.git?.path ?? '', BrickYaml.file);
+      final file = File(filePath);
+      if (!file.existsSync()) throw BrickNotFoundException(filePath);
+      try {
+        final brickYaml = checkedYamlDecode(
+          file.readAsStringSync(),
+          (m) => BrickYaml.fromJson(m!),
+        ).copyWith(path: filePath);
+        if (brickYaml.name != entry.key) {
+          throw MasonYamlNameMismatch(
+            'brick name "${brickYaml.name}": '
+            'doesn\'t match provided name "${entry.key}" in ${MasonYaml.file}.',
+          );
+        }
+        bricks.add(brickYaml);
+      } on ParsedYamlException catch (e) {
+        throw BrickYamlParseException(
+          'Malformed ${BrickYaml.file} at ${file.path}\n${e.message}',
+        );
+      }
+    }
+    return bricks;
+  }
 }

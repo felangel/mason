@@ -9,7 +9,9 @@
       "request": "launch",
       "type": "dart",
       "program": "bin/mason.dart",
-      "args": []
+      "args": [
+        "i", "./bricks/greeting"
+      ]
     }
   ]
 }
