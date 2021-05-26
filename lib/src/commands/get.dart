@@ -34,8 +34,7 @@ class GetCommand extends MasonCommand {
     if (force) cache.clear();
     if (masonYaml.bricks.values.isNotEmpty) {
       await Future.forEach(masonYaml.bricks.values, _download);
-      await bricksJson.create(recursive: true);
-      await bricksJson.writeAsString(cache.encode);
+      await flushCache();
     }
     getDone();
     return ExitCode.success.code;
