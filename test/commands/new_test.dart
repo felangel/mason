@@ -51,7 +51,7 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new')),
       );
       expect(
-        directoriesDeepEqual(actual, expected, ignore: 'bricks.json'),
+        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
         isTrue,
       );
     });
@@ -76,7 +76,7 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new')),
       );
       expect(
-        directoriesDeepEqual(actual, expected, ignore: 'bricks.json'),
+        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
         isTrue,
       );
 
