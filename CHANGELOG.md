@@ -1,3 +1,12 @@
+# 0.0.1-dev.30
+
+- fix: improved error handling and error reporting
+  - improve error message when `mason new` is missing a brick name
+  - improve error message when `mason make` is missing a subcommand
+  - `mason get` handle empty brick list in `mason.yaml`
+  - avoid hydrating cache when `bricks.json` is empty.
+- docs: add bundling documentation to `README`
+
 # 0.0.1-dev.29
 
 - refactor: update logger api to support nullable strings
