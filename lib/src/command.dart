@@ -85,6 +85,12 @@ abstract class MasonCommand extends Command<int> {
   /// Gets the `bricks.json` file for the current [entryPoint].
   File get bricksJson => File(p.join(entryPoint.path, '.mason', 'bricks.json'));
 
+  /// Writes current cache to `brick.json`.
+  Future<void> flushCache() async {
+    await bricksJson.create(recursive: true);
+    await bricksJson.writeAsString(cache.encode);
+  }
+
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   Set<BrickYaml> get bricks {
     if (_bricks != null) return _bricks!;
