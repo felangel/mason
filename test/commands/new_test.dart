@@ -58,6 +58,7 @@ void main() {
           .writeAsStringSync('bricks:\n');
       final result = await commandRunner.run(['new']);
       expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('Name of the new brick is required.')).called(1);
     });
 
     test('exits with code 64 when brick already exists', () async {
