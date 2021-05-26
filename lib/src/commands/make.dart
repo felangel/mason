@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
@@ -35,7 +36,11 @@ class MakeCommand extends MasonCommand {
   Future<int> run() async {
     // ignore: only_throw_errors
     if (_exception != null) throw _exception!;
-    return ExitCode.success.code;
+    final subcommand = results.rest.isNotEmpty ? results.rest.first : '';
+    throw UsageException(
+      '''Could not find a subcommand named "$subcommand" for "mason make".''',
+      usage,
+    );
   }
 }
 

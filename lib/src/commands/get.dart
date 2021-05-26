@@ -32,9 +32,11 @@ class GetCommand extends MasonCommand {
     final getDone = logger.progress('getting bricks');
     final force = results['force'] == true;
     if (force) cache.clear();
-    await Future.forEach(masonYaml.bricks.values, _download);
-    await bricksJson.create(recursive: true);
-    await bricksJson.writeAsString(cache.encode);
+    if (masonYaml.bricks.values.isNotEmpty) {
+      await Future.forEach(masonYaml.bricks.values, _download);
+      await bricksJson.create(recursive: true);
+      await bricksJson.writeAsString(cache.encode);
+    }
     getDone();
     return ExitCode.success.code;
   }

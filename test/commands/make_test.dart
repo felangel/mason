@@ -57,6 +57,14 @@ void main() {
       ).called(1);
     });
 
+    test('exits with code 64 when missing subcommand', () async {
+      final result = await commandRunner.run(['make']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err('Missing subcommand for "mason make".'),
+      ).called(1);
+    });
+
     test('exits with code 64 when mason.yaml does not exist', () async {
       File(path.join(Directory.current.path, 'mason.yaml'))
           .deleteSync(recursive: true);

@@ -53,6 +53,13 @@ void main() {
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });
 
+    test('exits with code 64 when name is missing', () async {
+      File(path.join(Directory.current.path, 'mason.yaml'))
+          .writeAsStringSync('bricks:\n');
+      final result = await commandRunner.run(['new']);
+      expect(result, equals(ExitCode.usage.code));
+    });
+
     test('exits with code 64 when brick already exists', () async {
       File(path.join(Directory.current.path, 'mason.yaml'))
           .writeAsStringSync('bricks:\n');
