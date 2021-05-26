@@ -50,7 +50,10 @@ void main() {
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'new')),
       );
-      expect(directoriesDeepEqual(actual, expected), isTrue);
+      expect(
+        directoriesDeepEqual(actual, expected, ignore: 'bricks.json'),
+        isTrue,
+      );
     });
 
     test('exits with code 64 when name is missing', () async {
@@ -72,7 +75,10 @@ void main() {
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'new')),
       );
-      expect(directoriesDeepEqual(actual, expected), isTrue);
+      expect(
+        directoriesDeepEqual(actual, expected, ignore: 'bricks.json'),
+        isTrue,
+      );
 
       final secondResult = await commandRunner.run(['new', 'hello world']);
       expect(secondResult, equals(ExitCode.usage.code));

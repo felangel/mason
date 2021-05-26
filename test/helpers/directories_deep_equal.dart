@@ -4,7 +4,7 @@ import 'package:path/path.dart' as path;
 
 const _equality = DeepCollectionEquality();
 
-bool directoriesDeepEqual(Directory? a, Directory? b) {
+bool directoriesDeepEqual(Directory? a, Directory? b, {String? ignore}) {
   if (identical(a, b)) return true;
   if (a == null && b == null) return true;
   if (a == null || b == null) return false;
@@ -22,6 +22,7 @@ bool directoriesDeepEqual(Directory? a, Directory? b) {
     final fileB = File(fileEntityB.path);
 
     if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
+    if (path.basename(fileA.path) == ignore) continue;
     if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
       return false;
     }
