@@ -40,9 +40,11 @@ class MasonCache {
   void _fromBricks(File bricksJson) {
     if (!bricksJson.existsSync()) return;
     final content = bricksJson.readAsStringSync();
-    _cache = Map.castFrom<dynamic, dynamic, String, String>(
-      json.decode(content) as Map,
-    );
+    if (content.isNotEmpty) {
+      _cache = Map.castFrom<dynamic, dynamic, String, String>(
+        json.decode(content) as Map,
+      );
+    }
   }
 
   /// Encodes entire cache contents.

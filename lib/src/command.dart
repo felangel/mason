@@ -150,11 +150,10 @@ abstract class MasonCommand extends Command<int> {
     if (_masonYaml != null) return _masonYaml!;
     final masonYamlContent = masonYamlFile.readAsStringSync();
     try {
-      _masonYaml = checkedYamlDecode(
+      return _masonYaml = checkedYamlDecode(
         masonYamlContent,
         (m) => MasonYaml.fromJson(m!),
-      );
-      return _masonYaml!;
+      )!;
     } on ParsedYamlException catch (e) {
       throw MasonYamlParseException(
         'Malformed ${MasonYaml.file} at ${masonYamlFile.path}\n${e.message}',
