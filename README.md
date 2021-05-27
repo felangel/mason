@@ -144,6 +144,26 @@ And the following brick template:
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
 
+#### Providing a Path
+
+You can create/point to a folder where the brick will be generated
+
+For example, given the following `brick.yaml`:
+
+```yaml
+name: example
+description: An example brick
+vars:
+  - url
+```
+
+And the following brick template:
+
+`__brick__/{{{url}}}/example.md`
+
+Running `mason make example --url path/to/folder` will generate `example.md` within the already existing/new folder: `path/to/folder/example.md`
+
+
 ## Bundling
 
 You can use mason to generate a bundle for an existing template. Bundles are convenient for cases where you want to include your template as part of a standalone CLI. [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli) is a great example.
