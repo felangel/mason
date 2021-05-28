@@ -32,7 +32,7 @@ jobs:
       - name: Run Tests
         run: dart test -j 1 -x pull-request-only --coverage=coverage && pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
 
-  verify_pub_score:
+  pana:
     runs-on: ubuntu-latest
 
     steps:
