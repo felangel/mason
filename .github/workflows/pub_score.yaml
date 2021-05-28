@@ -15,14 +15,14 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
+      - uses: dart-lang/setup-dart@v1
 
-      - uses: axel-op/dart-package-analyzer@v3
-        id: pub_score
-        with:
-          githubToken: ${{ secrets.GITHUB_TOKEN }}
+      - name: Install Dependencies
+        run: |
+          dart pub get
+          dart pub global activate pana
 
       - name: Verify Pub Score
-        env:
-          TOTAL: ${{ steps.pub_score.outputs.total }}
         run: |
-          if (($TOTAL < 120)) then echo "pub score: $TOTAL is below 120" exit 1
+          SCORE=$(pana . --no-warning | sed -n "s/.*Points: \(\[0-9]+\)*/\1/p")
+          echo "Pub Score: $SCORE"
