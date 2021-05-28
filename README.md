@@ -125,6 +125,8 @@ Write your brick template in the `__brick__` directory using [mustache templates
 
 ❗ **Note: `__brick__` can contain multiple files and subdirectories**
 
+❗ **Note: use `{{{variable}}}` instead of `{{variable}}` when you want the value of `variable` to be unescaped**
+
 #### File Resolution
 
 It is possible to resolve files based on path input variables using the `{{% %}}` tag.
@@ -142,27 +144,7 @@ And the following brick template:
 
 `__brick__/{{% url %}}`
 
-Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path.
-
-#### Providing a Path
-
-You can create/point to a folder where the brick will be generated
-
-For example, given the following `brick.yaml`:
-
-```yaml
-name: example
-description: An example brick
-vars:
-  - url
-```
-
-And the following brick template:
-
-`__brick__/{{{url}}}/example.md`
-
-Running `mason make example --url path/to/folder` will generate `example.md` within the already existing/new folder: `path/to/folder/example.md`
-
+Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
 ## Bundling
 
