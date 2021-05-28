@@ -15,14 +15,15 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: dart-lang/setup-dart@v1
+      - uses: subosito/flutter-action@v1.5.0
 
       - name: Install Dependencies
         run: |
-          dart pub get
-          dart pub global activate pana
+          flutter packages get
+          flutter pub global activate pana
 
       - name: Verify Pub Score
         run: |
-          SCORE=$(pana . --no-warning | sed -n "s/.*Points: \(\[0-9]+\)*/\1/p")
+          PANA=$(pana . --no-warning)
+          SCORE=$(echo $PANA | sed -n "s/.*Points: \(\[0-9]+\)*/\1/p")
           echo "Pub Score: $SCORE"
