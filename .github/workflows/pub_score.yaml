@@ -24,4 +24,5 @@ jobs:
       - name: Verify Pub Score
         env:
           TOTAL: ${{ steps.pub_score.outputs.total }}
-        run: 'if (($TOTAL < 120)) then echo "pub score: $TOTAL is below 120" exit 1'
+        run: |
+          if (($TOTAL < 120)) then echo "pub score: $TOTAL is below 120" exit 1
