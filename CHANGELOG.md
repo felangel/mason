@@ -1,3 +1,9 @@
+# 0.0.1-dev.31
+
+- feat: new templates are readily available
+- docs: update README usage section to include `bundle`
+- docs: update file resolution section and include note about unescaped variables
+
 # 0.0.1-dev.30
 
 - fix: improved error handling and error reporting
