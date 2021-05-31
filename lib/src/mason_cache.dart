@@ -81,7 +81,9 @@ class MasonCache {
   Future<String> downloadRemoteBrick(GitPath gitPath) async {
     final dirName =
         gitPath.ref != null ? '${gitPath.url}-${gitPath.ref}' : gitPath.url;
-    final directory = Directory(p.join(rootDir, 'git', dirName));
+    final directory = Directory(
+      p.join(rootDir, 'git', dirName).replaceAll(r'\', r'/'),
+    );
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
