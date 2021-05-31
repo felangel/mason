@@ -82,7 +82,7 @@ class MasonCache {
     final dirName =
         gitPath.ref != null ? '${gitPath.url}-${gitPath.ref}' : gitPath.url;
     final directory = Directory(
-      p.join(rootDir, 'git', dirName).replaceAll(r'\', r'/'),
+      p.canonicalize(p.join(rootDir, 'git', dirName)),
     );
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
