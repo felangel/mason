@@ -36,7 +36,13 @@ void main() {
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
         ..createSync(recursive: true)
         ..writeAsStringSync(
-          '''{"../../../bricks/app_icon":"${Directory.current.path}/../../../bricks/app_icon","../../../bricks/documentation":"${Directory.current.path}/../../../bricks/documentation","../../../bricks/greeting":"${Directory.current.path}/../../../bricks/greeting","../../../bricks/todos":"${Directory.current.path}/../../../bricks/todos","../../../bricks/widget":"${Directory.current.path}/../../../bricks/widget"}''',
+          '{'
+          '''"app_icon_cfe75d2168207dcf5ee22960c0260e93ee4168306dbeb09348c262bd7c73906e":"${Directory.current.path}/../../../bricks/app_icon",'''
+          '''"documentation_a4bd9a921f7902c67a8ae5918498ce13c8136233c3d11d835207447386ddd650":"${Directory.current.path}/../../../bricks/documentation",'''
+          '''"greeting_81a4ec348561cdd721c3bb79b3d6dc14738bf17f02e18810dad2a6d88732e298":"${Directory.current.path}/../../../bricks/greeting",'''
+          '''"todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740":"${Directory.current.path}/../../../bricks/todos",'''
+          '''"widget_02426be7ece33230d574cb7a76eb7a9a595a79cbf53a1b1c8f2f1de78dfbe23f":"${Directory.current.path}/../../../bricks/widget"'''
+          '}',
         );
       logger = MockLogger();
       when(() => logger.progress(any())).thenReturn(([String? _]) {});

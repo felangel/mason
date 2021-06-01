@@ -97,15 +97,13 @@ abstract class MasonCommand extends Command<int> {
     final bricks = <BrickYaml>{};
     for (final entry in masonYaml.bricks.entries) {
       final brick = entry.value;
-      final dirPath = cache.read(brick.path ?? brick.git!.url);
+      final dirPath = _cacheDirectory(brick);
       if (dirPath == null) break;
       final filePath = brick.path != null
           ? p.join(dirPath, BrickYaml.file)
           : p.join(dirPath, brick.git?.path ?? '', BrickYaml.file);
       final file = File(filePath);
-      if (!file.existsSync()) {
-        throw BrickNotFoundException(filePath);
-      }
+      if (!file.existsSync()) throw BrickNotFoundException(filePath);
       try {
         final brickYaml = checkedYamlDecode(
           file.readAsStringSync(),
@@ -181,4 +179,12 @@ abstract class MasonCommand extends Command<int> {
   set cwd(Directory value) => _cwd = value;
 
   Directory? _cwd;
+
+  /// The path to the cached brick directory if it exists.
+  /// Returns `null` if the brick is not cached.
+  String? _cacheDirectory(Brick brick) {
+    final key = cache.getKey(brick);
+    if (key == null) return null;
+    return cache.read(key);
+  }
 }
