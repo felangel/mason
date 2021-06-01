@@ -28,12 +28,18 @@ bool directoriesDeepEqual(
     if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
     if (ignore.contains(path.basename(fileA.path))) continue;
     try {
-      return _equality.equals(
+      if (!_equality.equals(
         fileA.readAsStringSync(),
         fileB.readAsStringSync(),
-      );
+      )) {
+        print(fileA.readAsStringSync());
+        print(fileB.readAsStringSync());
+        return false;
+      }
     } catch (_) {}
-    return _equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync());
+    if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
+      return false;
+    }
   }
 
   return true;
