@@ -28,9 +28,9 @@ bool directoriesDeepEqual(
     if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
     if (ignore.contains(path.basename(fileA.path))) continue;
     if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
-      print(fileA.readAsBytesSync());
+      print(fileA.readAsStringSync());
       print('-----------------------');
-      print(fileB.readAsBytesSync());
+      print(fileB.readAsStringSync());
       return false;
     }
   }
