@@ -58,7 +58,7 @@ class MasonCache {
   }
 
   /// Encodes entire cache contents.
-  String get encode => json.encode(_cache).replaceAll(r'\\', r'\');
+  String get encode => json.encode(_cache);
 
   /// The root directory where this brick cache is located.
   final String rootDir;
@@ -134,28 +134,26 @@ class MasonCache {
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
     final directory = Directory(p.join(rootDir, 'git', dirName));
+    final dirPath = p.normalize(directory.path);
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
 
     if (directoryExists && directoryIsNotEmpty) {
-      write(dirName, directory.path);
-      return directory.path;
+      write(dirName, dirPath);
+      return dirPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
-    await Git.run(['clone', gitPath.url, directory.path]);
+    await Git.run(['clone', gitPath.url, dirPath]);
     if (gitPath.ref != null) {
-      await Git.run(
-        ['checkout', gitPath.ref!],
-        processWorkingDir: directory.path,
-      );
+      await Git.run(['checkout', gitPath.ref!], processWorkingDir: dirPath);
     }
-    write(dirName, directory.path);
-    return directory.path;
+    write(dirName, dirPath);
+    return dirPath;
   }
 }
 
