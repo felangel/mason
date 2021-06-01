@@ -81,6 +81,8 @@ void main() {
           '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''';
       final masonUrl = path.join(MasonCache.empty().rootDir, 'git', gitUrl);
 
+      print('ACTUAL: ${File(expectedBrickJsonPath).readAsStringSync()}');
+
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
