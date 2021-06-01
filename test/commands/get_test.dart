@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:io/io.dart';
@@ -96,13 +97,17 @@ void main() {
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
-          '{'
-          '''"app_icon_7fe065ff20ef089c36df9d567df1bd7d328c6bb017fdbff4733cdd3783a0e591":"$appIconPath",'''
-          '''"documentation_df43721ae5bfb5f7b07117d7fdf4eb70de9048652b8dfed2ea7492d34010664a":"$docPath",'''
-          '''"greeting_a4652001e26be10014b29359c36b1e52c04faf4ef12c0d9560e73d2f0c2641f8":"$greetingPath",'''
-          '''"todos_73b2e1ae179e296b318703953a86f28a792e94bed4a9adec9f8ee5893c4527a7":"$todosPath",'''
-          '"$gitUrl":"$masonUrl"'
-          '}',
+          json.encode({
+            '''app_icon_7fe065ff20ef089c36df9d567df1bd7d328c6bb017fdbff4733cdd3783a0e591''':
+                appIconPath,
+            '''documentation_df43721ae5bfb5f7b07117d7fdf4eb70de9048652b8dfed2ea7492d34010664a''':
+                docPath,
+            '''greeting_a4652001e26be10014b29359c36b1e52c04faf4ef12c0d9560e73d2f0c2641f8''':
+                greetingPath,
+            '''todos_73b2e1ae179e296b318703953a86f28a792e94bed4a9adec9f8ee5893c4527a7''':
+                todosPath,
+            gitUrl: masonUrl,
+          }),
         ),
       );
 
