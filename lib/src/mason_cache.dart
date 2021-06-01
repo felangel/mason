@@ -58,7 +58,7 @@ class MasonCache {
   }
 
   /// Encodes entire cache contents.
-  String get encode => json.encode(_cache).replaceAll(r'\\', r'\');
+  String get encode => json.encode(_cache);
 
   /// The root directory where this brick cache is located.
   final String rootDir;
