@@ -232,8 +232,8 @@ class TemplateFile {
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
   Set<FileContents> runSubstitution(Map<String, dynamic> parameters) {
-    if (_loopRegExp.hasMatch(path)) {
-      var filePath = path.replaceAll(r'\', r'/');
+    var filePath = path.replaceAll(r'\', r'/');
+    if (_loopRegExp.hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
 
       for (final match in matches) {
