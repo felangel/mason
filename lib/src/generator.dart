@@ -272,7 +272,7 @@ class TemplateFile {
 
       return fileContents;
     } else {
-      final newPath = path.render(parameters);
+      final newPath = path.replaceAll(r'\', r'/').render(parameters);
       final newContents = _createContent(parameters);
       return {FileContents(newPath, newContents)};
     }
