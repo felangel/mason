@@ -25,20 +25,15 @@ bool directoriesDeepEqual(
     final fileA = File(fileEntityA.path);
     final fileB = File(fileEntityB.path);
 
-    if (path.basename(fileA.path) != path.basename(fileB.path)) {
-      print(path.basename(fileA.path));
-      print(path.basename(fileB.path));
-      return false;
-    }
+    if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
     if (ignore.contains(path.basename(fileA.path))) continue;
-    if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
-      print('-----------------------');
-      print(fileA.readAsStringSync());
-      print('-----------------------');
-      print(fileB.readAsStringSync());
-      print('-----------------------');
-      return false;
-    }
+    try {
+      return _equality.equals(
+        fileA.readAsStringSync(),
+        fileB.readAsStringSync(),
+      );
+    } catch (_) {}
+    return _equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync());
   }
 
   return true;
