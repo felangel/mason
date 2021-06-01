@@ -289,11 +289,13 @@ class TemplateFile {
       );
       print('sanitized: $sanitized');
       print('vars: $vars');
-      final rendered = sanitized.render(vars).replaceAllMapped(
-            _unicodeInRegExp,
-            (match) => match.group(0)?.substring(1) ?? match.input,
-          );
-      return utf8.encode(rendered);
+      final rendered = sanitized.render(vars);
+      print('rendered: $rendered');
+      final updated = rendered.replaceAllMapped(
+        _unicodeInRegExp,
+        (match) => match.group(0)?.substring(1) ?? match.input,
+      );
+      return utf8.encode(updated);
     } on Exception {
       return content;
     }
