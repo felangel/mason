@@ -58,6 +58,7 @@ bool directoriesDeepEqual(
       }
     } catch (_) {}
     if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
+      print('difference in bytes!');
       return false;
     }
   }
