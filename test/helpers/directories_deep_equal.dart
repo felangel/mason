@@ -29,11 +29,11 @@ bool directoriesDeepEqual(
     if (ignore.contains(path.basename(fileA.path))) continue;
     try {
       if (!_equality.equals(
-        fileA.readAsStringSync().trim(),
-        fileB.readAsStringSync().trim(),
+        fileA.readAsStringSync().replaceAll('\r', ''),
+        fileB.readAsStringSync().replaceAll('\r', ''),
       )) {
-        print(fileA.readAsStringSync().trim());
-        print(fileB.readAsStringSync().trim());
+        print(fileA.readAsStringSync());
+        print(fileB.readAsStringSync());
         return false;
       }
     } catch (_) {}
