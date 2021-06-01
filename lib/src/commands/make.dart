@@ -19,9 +19,8 @@ class MakeCommand extends MasonCommand {
       for (final brick in bricks) {
         addSubcommand(_MakeCommand(brick, logger: logger));
       }
-    } catch (e, stackTrace) {
+    } catch (e) {
       _exception = e;
-      print(stackTrace.toString());
     }
   }
 
