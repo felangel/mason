@@ -124,9 +124,7 @@ class MasonCache {
   /// Writes local brick at [path] to cache
   /// and returns the local path to the brick.
   String _writeLocalBrick(String path) {
-    print('path: $path');
     final localPath = p.canonicalize(path);
-    print('canonicalized: $localPath');
     write(getKey(Brick(path: path))!, localPath);
     return localPath;
   }
