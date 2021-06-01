@@ -112,6 +112,8 @@ class _MakeCommand extends MasonCommand {
       return ExitCode.success.code;
     } on Exception catch (error, stackTrace) {
       generateDone?.call();
+      print('$error');
+      print('$stackTrace');
       logger..err('$error')..err('$stackTrace');
       return ExitCode.cantCreate.code;
     }
