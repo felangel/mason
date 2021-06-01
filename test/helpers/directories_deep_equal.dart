@@ -58,10 +58,10 @@ bool directoriesDeepEqual(
       }
     } catch (_) {
       print('exception during string comparison $_');
-    }
-    if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
-      print('difference in bytes!');
-      return false;
+      if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
+        print('difference in bytes!');
+        return false;
+      }
     }
   }
 
