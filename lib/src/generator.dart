@@ -272,7 +272,7 @@ class TemplateFile {
 
       return fileContents;
     } else {
-      final newPath = path.replaceAll(r'{{\', r'{{/').render(parameters);
+      final newPath = path.render(parameters);
       final newContents = _createContent(parameters);
       return {FileContents(newPath, newContents)};
     }
@@ -284,11 +284,11 @@ class TemplateFile {
       if (!decoded.contains(_delimeterRegExp)) return content;
       final sanitized = decoded.replaceAllMapped(
         _unicodeOutRegExp,
-        (match) => '\\${match.group(0)}',
+        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
       final rendered = sanitized.render(vars).replaceAllMapped(
             _unicodeInRegExp,
-            (match) => match.group(0)!.substring(1),
+            (match) => match.group(0)?.substring(1) ?? match.input,
           );
       return utf8.encode(rendered);
     } on Exception {

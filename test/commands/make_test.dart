@@ -35,21 +35,27 @@ void main() {
     path: ../../../bricks/widget
 ''');
       final bricksPath = path.join('..', '..', '..', 'bricks');
-      final appIconPath = path.canonicalize(
-        path.join(Directory.current.path, bricksPath, 'app_icon'),
-      );
-      final docPath = path.canonicalize(
-        path.join(Directory.current.path, bricksPath, 'documentation'),
-      );
-      final greetingPath = path.canonicalize(
-        path.join(Directory.current.path, bricksPath, 'greeting'),
-      );
-      final todosPath = path.canonicalize(
-        path.join(Directory.current.path, bricksPath, 'todos'),
-      );
-      final widgetPath = path.canonicalize(
-        path.join(Directory.current.path, bricksPath, 'widget'),
-      );
+      final appIconPath = path
+          .canonicalize(
+            path.join(Directory.current.path, bricksPath, 'app_icon'),
+          )
+          .replaceAll(r'\', r'/');
+      final docPath = path
+          .canonicalize(
+            path.join(Directory.current.path, bricksPath, 'documentation'),
+          )
+          .replaceAll(r'\', r'/');
+      final greetingPath = path
+          .canonicalize(
+            path.join(Directory.current.path, bricksPath, 'greeting'),
+          )
+          .replaceAll(r'\', r'/');
+      final todosPath = path
+          .canonicalize(path.join(Directory.current.path, bricksPath, 'todos'))
+          .replaceAll(r'\', r'/');
+      final widgetPath = path
+          .canonicalize(path.join(Directory.current.path, bricksPath, 'widget'))
+          .replaceAll(r'\', r'/');
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
         ..createSync(recursive: true)
         ..writeAsStringSync(json.encode({
