@@ -37,13 +37,13 @@ void main() {
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
-      final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.bundle'), 'universal'),
-      );
-      final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'bundle'), 'universal'),
-      );
-      expect(directoriesDeepEqual(actual, expected), isTrue);
+      final actual = File(
+        path.join(testFixturesPath(cwd, suffix: '.bundle'), 'universal',
+            'greeting.bundle'),
+      ).readAsStringSync();
+      final expected =
+          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]}''';
+      expect(actual, equals(expected));
     });
 
     test('creates a new dart bundle', () async {
@@ -56,13 +56,26 @@ void main() {
         ['bundle', brickPath, '-t', 'dart'],
       );
       expect(result, equals(ExitCode.success.code));
-      final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.bundle'), 'dart'),
+      final actual = File(
+        path.join(
+          testFixturesPath(cwd, suffix: '.bundle'),
+          'dart',
+          'greeting_bundle.dart',
+        ),
+      ).readAsStringSync();
+      expect(
+        actual,
+        contains(
+          '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars',
+        ),
       );
-      final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'bundle'), 'dart'),
+      expect(actual, contains("import 'package:mason/mason.dart'"));
+      expect(
+        actual,
+        contains(
+          '''final greetingBundle = MasonBundle.fromJson({"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
+        ),
       );
-      expect(directoriesDeepEqual(actual, expected), isTrue);
     });
 
     test('exits with code 64 when no brick path is provided', () async {
