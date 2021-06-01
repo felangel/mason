@@ -272,7 +272,8 @@ class TemplateFile {
 
       return fileContents;
     } else {
-      final newPath = path.render(parameters);
+      // Update closing tags on windows before rendering to comply with spec.
+      final newPath = path.replaceAll(r'{{\', r'{{/').render(parameters);
       final newContents = _createContent(parameters);
       return {FileContents(newPath, newContents)};
     }

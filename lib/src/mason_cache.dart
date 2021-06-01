@@ -134,26 +134,28 @@ class MasonCache {
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
     final directory = Directory(p.join(rootDir, 'git', dirName));
-    final dirPath = directory.path.replaceAll(r'\', r'/');
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
 
     if (directoryExists && directoryIsNotEmpty) {
-      write(dirName, dirPath);
-      return dirPath;
+      write(dirName, directory.path);
+      return directory.path;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
-    await Git.run(['clone', gitPath.url, dirPath]);
+    await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
-      await Git.run(['checkout', gitPath.ref!], processWorkingDir: dirPath);
+      await Git.run(
+        ['checkout', gitPath.ref!],
+        processWorkingDir: directory.path,
+      );
     }
-    write(dirName, dirPath);
-    return dirPath;
+    write(dirName, directory.path);
+    return directory.path;
   }
 }
 
