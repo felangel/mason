@@ -35,9 +35,7 @@ Future<MasonBundle> createBundle(Directory brick) async {
 MasonBundledFile _bundleFile(File file) {
   final fileType =
       _binaryFileTypes.hasMatch(path.basename(file.path)) ? 'binary' : 'text';
-  final data = base64.encode(fileType == 'text'
-      ? utf8.encode(file.readAsStringSync().replaceAll(r'\r', ''))
-      : file.readAsBytesSync());
+  final data = base64.encode(file.readAsBytesSync());
   final filePath = path.joinAll(
     path.split(file.path).skipWhile((value) => value != BrickYaml.dir).skip(1),
   );
