@@ -44,15 +44,31 @@ bool directoriesDeepEqual(
     if (ignore.contains(path.basename(fileA.path))) continue;
     try {
       if (!_equality.equals(
-        fileA.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
-        fileB.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
+        fileA
+            .readAsStringSync()
+            .replaceAll('\r', '')
+            .replaceAll('\n', '')
+            .replaceAll(r'\', r'/'),
+        fileB
+            .readAsStringSync()
+            .replaceAll('\r', '')
+            .replaceAll('\n', '')
+            .replaceAll(r'\', r'/'),
       )) {
         print('file content mismatch!');
         print(
-          fileA.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
+          fileA
+              .readAsStringSync()
+              .replaceAll('\r', '')
+              .replaceAll('\n', '')
+              .replaceAll(r'\', r'/'),
         );
         print(
-          fileB.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
+          fileB
+              .readAsStringSync()
+              .replaceAll('\r', '')
+              .replaceAll('\n', '')
+              .replaceAll(r'\', r'/'),
         );
         return false;
       }
