@@ -287,6 +287,8 @@ class TemplateFile {
         _unicodeOutRegExp,
         (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
+      print('sanitized: $sanitized');
+      print('vars: $vars');
       final rendered = sanitized.render(vars).replaceAllMapped(
             _unicodeInRegExp,
             (match) => match.group(0)?.substring(1) ?? match.input,
