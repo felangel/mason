@@ -4,7 +4,7 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
-import '../mason.dart';
+import 'exception.dart';
 import 'git.dart';
 import 'mason_yaml.dart';
 
