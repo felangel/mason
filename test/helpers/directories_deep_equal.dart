@@ -16,7 +16,12 @@ bool directoriesDeepEqual(
   final dirAContents = a.listSync(recursive: true).whereType<File>();
   final dirBContents = b.listSync(recursive: true).whereType<File>();
 
-  if (dirAContents.length != dirBContents.length) return false;
+  if (dirAContents.length != dirBContents.length) {
+    print('length mismatch');
+    print(dirAContents.length);
+    print(dirBContents.length);
+    return false;
+  }
 
   for (var i = 0; i < dirAContents.length; i++) {
     final fileEntityA = (dirAContents.elementAt(i));
@@ -25,13 +30,19 @@ bool directoriesDeepEqual(
     final fileA = File(fileEntityA.path);
     final fileB = File(fileEntityB.path);
 
-    if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
+    if (path.basename(fileA.path) != path.basename(fileB.path)) {
+      print('basename mismatch!');
+      print(path.basename(fileA.path));
+      print(path.basename(fileB.path));
+      return false;
+    }
     if (ignore.contains(path.basename(fileA.path))) continue;
     try {
       if (!_equality.equals(
         fileA.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
         fileB.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
       )) {
+        print('file content mismatch!');
         print(
           fileA.readAsStringSync().replaceAll('\r', '').replaceAll('\n', ''),
         );
