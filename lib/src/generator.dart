@@ -233,7 +233,7 @@ class TemplateFile {
   /// Performs a substitution on the [path] based on the incoming [parameters].
   Set<FileContents> runSubstitution(Map<String, dynamic> parameters) {
     if (_loopRegExp.hasMatch(path)) {
-      var filePath = path;
+      var filePath = path.replaceAll(r'\', r'/');
       final matches = _loopKeyRegExp.allMatches(filePath);
 
       for (final match in matches) {
@@ -289,13 +289,11 @@ class TemplateFile {
       );
       print('sanitized: $sanitized');
       print('vars: $vars');
-      final rendered = sanitized.render(vars);
-      print('rendered: $rendered');
-      final updated = rendered.replaceAllMapped(
-        _unicodeInRegExp,
-        (match) => match.group(0)?.substring(1) ?? match.input,
-      );
-      return utf8.encode(updated);
+      final rendered = sanitized.render(vars).replaceAllMapped(
+            _unicodeInRegExp,
+            (match) => match.group(0)?.substring(1) ?? match.input,
+          );
+      return utf8.encode(rendered);
     } on Exception {
       return content;
     }
