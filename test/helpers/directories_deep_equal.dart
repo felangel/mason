@@ -11,7 +11,12 @@ bool directoriesDeepEqual(
 }) {
   if (identical(a, b)) return true;
   if (a == null && b == null) return true;
-  if (a == null || b == null) return false;
+  if (a == null || b == null) {
+    print('null directory');
+    print(a?.path);
+    print(b?.path);
+    return false;
+  }
 
   final dirAContents = a.listSync(recursive: true).whereType<File>();
   final dirBContents = b.listSync(recursive: true).whereType<File>();
