@@ -11,22 +11,12 @@ bool directoriesDeepEqual(
 }) {
   if (identical(a, b)) return true;
   if (a == null && b == null) return true;
-  if (a == null || b == null) {
-    print('null directory');
-    print(a?.path);
-    print(b?.path);
-    return false;
-  }
+  if (a == null || b == null) return false;
 
   final dirAContents = a.listSync(recursive: true).whereType<File>();
   final dirBContents = b.listSync(recursive: true).whereType<File>();
 
-  if (dirAContents.length != dirBContents.length) {
-    print('length mismatch');
-    print(dirAContents.length);
-    print(dirBContents.length);
-    return false;
-  }
+  if (dirAContents.length != dirBContents.length) return false;
 
   for (var i = 0; i < dirAContents.length; i++) {
     final fileEntityA = (dirAContents.elementAt(i));
@@ -35,47 +25,22 @@ bool directoriesDeepEqual(
     final fileA = File(fileEntityA.path);
     final fileB = File(fileEntityB.path);
 
-    if (path.basename(fileA.path) != path.basename(fileB.path)) {
-      print('basename mismatch!');
-      print(path.basename(fileA.path));
-      print(path.basename(fileB.path));
-      return false;
-    }
+    if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
     if (ignore.contains(path.basename(fileA.path))) continue;
     try {
-      if (!_equality.equals(
-        fileA
-            .readAsStringSync()
-            .replaceAll('\r', '')
-            .replaceAll('\n', '')
-            .replaceAll(r'\', r'/'),
-        fileB
-            .readAsStringSync()
-            .replaceAll('\r', '')
-            .replaceAll('\n', '')
-            .replaceAll(r'\', r'/'),
-      )) {
-        print('file content mismatch!');
-        print(
-          fileA
-              .readAsStringSync()
-              .replaceAll('\r', '')
-              .replaceAll('\n', '')
-              .replaceAll(r'\', r'/'),
-        );
-        print(
-          fileB
-              .readAsStringSync()
-              .replaceAll('\r', '')
-              .replaceAll('\n', '')
-              .replaceAll(r'\', r'/'),
-        );
-        return false;
-      }
+      final normalizedA = fileA
+          .readAsStringSync()
+          .replaceAll('\r', '')
+          .replaceAll('\n', '')
+          .replaceAll(r'\', r'/');
+      final normalizedB = fileB
+          .readAsStringSync()
+          .replaceAll('\r', '')
+          .replaceAll('\n', '')
+          .replaceAll(r'\', r'/');
+      if (!_equality.equals(normalizedA, normalizedB)) return false;
     } catch (_) {
-      print('exception during string comparison $_');
       if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
-        print('difference in bytes!');
         return false;
       }
     }

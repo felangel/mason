@@ -272,8 +272,7 @@ class TemplateFile {
 
       return fileContents;
     } else {
-      // Update closing tags on windows before rendering to comply with spec.
-      final newPath = path.replaceAll(r'{{\', r'{{/').render(parameters);
+      final newPath = filePath.render(parameters);
       final newContents = _createContent(parameters);
       return {FileContents(newPath, newContents)};
     }
@@ -287,8 +286,6 @@ class TemplateFile {
         _unicodeOutRegExp,
         (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
-      print('sanitized: $sanitized');
-      print('vars: $vars');
       final rendered = sanitized.render(vars).replaceAllMapped(
             _unicodeInRegExp,
             (match) => match.group(0)?.substring(1) ?? match.input,

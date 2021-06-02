@@ -80,9 +80,9 @@ class _MakeCommand extends MasonCommand {
         generateDone();
         logger.err('${error}in ${results['json']}');
         return ExitCode.usage.code;
-      } on Exception catch (error, stackTrace) {
+      } on Exception catch (error) {
         generateDone();
-        logger..err('$error')..err('$stackTrace');
+        logger.err('$error');
         return ExitCode.usage.code;
       }
 
@@ -110,11 +110,9 @@ class _MakeCommand extends MasonCommand {
         )
         ..flush(logger.success);
       return ExitCode.success.code;
-    } on Exception catch (error, stackTrace) {
+    } on Exception catch (error) {
       generateDone?.call();
-      print('$error');
-      print('$stackTrace');
-      logger..err('$error')..err('$stackTrace');
+      logger.err('$error');
       return ExitCode.cantCreate.code;
     }
   }
