@@ -110,9 +110,9 @@ class _MakeCommand extends MasonCommand {
         )
         ..flush(logger.success);
       return ExitCode.success.code;
-    } on Exception catch (e) {
+    } on Exception catch (error) {
       generateDone?.call();
-      logger.err(e.toString());
+      logger.err('$error');
       return ExitCode.cantCreate.code;
     }
   }
