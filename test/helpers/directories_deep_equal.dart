@@ -27,8 +27,22 @@ bool directoriesDeepEqual(
 
     if (path.basename(fileA.path) != path.basename(fileB.path)) return false;
     if (ignore.contains(path.basename(fileA.path))) continue;
-    if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
-      return false;
+    try {
+      final normalizedA = fileA
+          .readAsStringSync()
+          .replaceAll('\r', '')
+          .replaceAll('\n', '')
+          .replaceAll(r'\', r'/');
+      final normalizedB = fileB
+          .readAsStringSync()
+          .replaceAll('\r', '')
+          .replaceAll('\n', '')
+          .replaceAll(r'\', r'/');
+      if (!_equality.equals(normalizedA, normalizedB)) return false;
+    } catch (_) {
+      if (!_equality.equals(fileA.readAsBytesSync(), fileB.readAsBytesSync())) {
+        return false;
+      }
     }
   }
 

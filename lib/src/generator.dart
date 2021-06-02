@@ -94,7 +94,7 @@ class MasonGenerator extends Generator {
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
     final cache = MasonCache.empty();
-    final directory = await cache.downloadRemoteBrick(gitPath);
+    final directory = await cache.writeBrick(Brick(git: gitPath));
     final file = File(p.join(directory, gitPath.path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
@@ -232,8 +232,8 @@ class TemplateFile {
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
   Set<FileContents> runSubstitution(Map<String, dynamic> parameters) {
-    if (_loopRegExp.hasMatch(path)) {
-      var filePath = path;
+    var filePath = path.replaceAll(r'\', r'/');
+    if (_loopRegExp.hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
 
       for (final match in matches) {
@@ -272,7 +272,7 @@ class TemplateFile {
 
       return fileContents;
     } else {
-      final newPath = path.render(parameters);
+      final newPath = filePath.render(parameters);
       final newContents = _createContent(parameters);
       return {FileContents(newPath, newContents)};
     }
@@ -284,11 +284,11 @@ class TemplateFile {
       if (!decoded.contains(_delimeterRegExp)) return content;
       final sanitized = decoded.replaceAllMapped(
         _unicodeOutRegExp,
-        (match) => '\\${match.group(0)}',
+        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
       final rendered = sanitized.render(vars).replaceAllMapped(
             _unicodeInRegExp,
-            (match) => match.group(0)!.substring(1),
+            (match) => match.group(0)?.substring(1) ?? match.input,
           );
       return utf8.encode(rendered);
     } on Exception {

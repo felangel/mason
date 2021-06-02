@@ -51,4 +51,4 @@ bool _containsFloatingPointPattern(String s) =>
 bool _containsSpecialCharacters(String s) =>
     _specialCharacters.any((c) => s.contains(c));
 
-final _specialCharacters = ':{}[],&*#?|-<>=!%@\\'.split('');
+final _specialCharacters = ':{}[],&*#?|-<>=!%@'.split('');

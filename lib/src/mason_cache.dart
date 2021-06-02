@@ -1,10 +1,20 @@
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
+import 'exception.dart';
 import 'git.dart';
 import 'mason_yaml.dart';
+
+/// {@template write_brick_exception}
+/// Thrown when an error occurs while writing a brick to cache.
+/// {@endtemplate}
+class WriteBrickException extends MasonException {
+  /// {@macro write_brick_exception}
+  const WriteBrickException(String message) : super(message);
+}
 
 /// {@template mason_cache}
 /// A local cache for mason bricks.
@@ -76,11 +86,53 @@ class MasonCache {
     _cache[remote] = local;
   }
 
-  /// Downloads remote brick at [gitPath] to local `.brick-cache`
+  /// Returns the cache key for the given [brick].
+  /// Return `null` if the [brick] does not have a valid path.
+  String? getKey(Brick brick) {
+    if (brick.path != null) {
+      final name = p.basenameWithoutExtension(brick.path!);
+      final hash = sha256.convert(utf8.encode(brick.path!));
+      final key = '${name}_$hash';
+      return key;
+    }
+    if (brick.git != null) {
+      final name = p.basenameWithoutExtension(brick.git!.url);
+      final hash = sha256.convert(utf8.encode(brick.git!.url));
+      final key = brick.git!.ref != null
+          ? '${name}_${brick.git!.ref}_$hash'
+          : '${name}_$hash';
+      return key;
+    }
+    return null;
+  }
+
+  /// Caches brick if necessary and updates `bricks.json`.
+  Future<String> writeBrick(Brick brick) async {
+    final key = getKey(brick);
+    if (key == null) {
+      throw const WriteBrickException(
+        'Brick must contain either a path or a git url',
+      );
+    }
+    final remoteDir = read(key);
+    if (remoteDir != null) return remoteDir;
+    return brick.path != null
+        ? _writeLocalBrick(brick.path!)
+        : await _writeRemoteBrick(brick.git!);
+  }
+
+  /// Writes local brick at [path] to cache
   /// and returns the local path to the brick.
-  Future<String> downloadRemoteBrick(GitPath gitPath) async {
-    final dirName =
-        gitPath.ref != null ? '${gitPath.url}-${gitPath.ref}' : gitPath.url;
+  String _writeLocalBrick(String path) {
+    final localPath = p.canonicalize(path);
+    write(getKey(Brick(path: path))!, localPath);
+    return localPath;
+  }
+
+  /// Writes remote brick at [gitPath] to cache
+  /// and returns the local path to the brick.
+  Future<String> _writeRemoteBrick(GitPath gitPath) async {
+    final dirName = getKey(Brick(git: gitPath))!;
     final directory = Directory(p.join(rootDir, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
@@ -88,7 +140,7 @@ class MasonCache {
         : false;
 
     if (directoryExists && directoryIsNotEmpty) {
-      write(gitPath.url, directory.path);
+      write(dirName, directory.path);
       return directory.path;
     }
 
@@ -102,7 +154,7 @@ class MasonCache {
         processWorkingDir: directory.path,
       );
     }
-    write(gitPath.url, directory.path);
+    write(dirName, directory.path);
     return directory.path;
   }
 }
