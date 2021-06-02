@@ -38,8 +38,11 @@ void main() {
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
       final actual = File(
-        path.join(testFixturesPath(cwd, suffix: '.bundle'), 'universal',
-            'greeting.bundle'),
+        path.join(
+          testFixturesPath(cwd, suffix: '.bundle'),
+          'universal',
+          'greeting.bundle',
+        ),
       ).readAsStringSync();
       final expected =
           '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]}''';
