@@ -1,3 +1,9 @@
+# 0.0.1-dev.32
+
+- feat!: windows compatibility fixes
+  - 100% compatibility across macos, linux, and windows
+  - if you are experiencing issues after upgrading, try force re-fetching all templates via `mason get --force`
+
 # 0.0.1-dev.31
 
 - feat: new templates are readily available
