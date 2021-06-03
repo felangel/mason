@@ -22,32 +22,34 @@ class WriteBrickException extends MasonException {
 /// This cache contains local paths to all bricks.
 /// {@endtemplate}
 class MasonCache {
-  /// {@macro mason_cache}
-  MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? _masonCacheDir();
-
-  /// Create a [MasonCache] which is populated with bricks
-  /// from the current directory ([bricksJson]).
-  MasonCache(File bricksJson) : rootDir = _masonCacheDir() {
-    _fromBricks(bricksJson);
+  /// Creates a [MasonCache] instance from the [directory].
+  MasonCache({Directory? directory}) : rootDir = directory ?? _rootDir {
+    _bricksJson = File(p.join(rootDir.path, '.mason', 'bricks.json'));
+    _fromBricksJson(_bricksJson!);
   }
+
+  /// Creates a [MasonCache] which is populated with bricks from the global
+  /// cache directory.
+  MasonCache.global() : this(directory: MasonCache.globalDir);
 
   /// Mapping between remote and local brick paths.
   var _cache = <String, String>{};
+
+  File? _bricksJson;
 
   /// Removes all key/value pairs from the cache.
   /// If [force] is true, all bricks will be removed
   /// from disk in addition to the in-memory cache.
   void clear({bool force = false}) async {
     _cache.clear();
-    if (force) {
-      try {
-        Directory(rootDir).deleteSync(recursive: true);
-      } catch (_) {}
-    }
+    try {
+      _bricksJson!.deleteSync();
+      if (force) rootDir.deleteSync(recursive: true);
+    } catch (_) {}
   }
 
   /// Populates cache based on `.mason/bricks.json`.
-  void _fromBricks(File bricksJson) {
+  void _fromBricksJson(File bricksJson) {
     if (!bricksJson.existsSync()) return;
     final content = bricksJson.readAsStringSync();
     if (content.isNotEmpty) {
@@ -61,7 +63,7 @@ class MasonCache {
   String get encode => json.encode(_cache);
 
   /// The root directory where this brick cache is located.
-  final String rootDir;
+  final Directory rootDir;
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
@@ -133,7 +135,7 @@ class MasonCache {
   /// and returns the local path to the brick.
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
-    final directory = Directory(p.join(rootDir, 'git', dirName));
+    final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
@@ -157,18 +159,23 @@ class MasonCache {
     write(dirName, directory.path);
     return directory.path;
   }
-}
 
-String _masonCacheDir() {
-  if (Platform.environment.containsKey('MASON_CACHE')) {
-    return Platform.environment['MASON_CACHE']!;
-  } else if (Platform.isWindows) {
-    final appData = Platform.environment['APPDATA']!;
-    final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
-    if (appDataCacheDir.existsSync()) return appDataCacheDir.path;
-    final localAppData = Platform.environment['LOCALAPPDATA']!;
-    return p.join(localAppData, 'Mason', 'Cache');
-  } else {
-    return p.join(Platform.environment['HOME']!, '.mason-cache');
+  /// Global subdirectory within the mason cache.
+  static Directory get globalDir {
+    return Directory(p.join(_rootDir.path, 'global'));
+  }
+
+  static Directory get _rootDir {
+    if (Platform.environment.containsKey('MASON_CACHE')) {
+      return Directory(Platform.environment['MASON_CACHE']!);
+    } else if (Platform.isWindows) {
+      final appData = Platform.environment['APPDATA']!;
+      final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
+      if (appDataCacheDir.existsSync()) return Directory(appDataCacheDir.path);
+      final localAppData = Platform.environment['LOCALAPPDATA']!;
+      return Directory(p.join(localAppData, 'Mason', 'Cache'));
+    } else {
+      return Directory(p.join(Platform.environment['HOME']!, '.mason-cache'));
+    }
   }
 }

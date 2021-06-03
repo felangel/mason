@@ -49,10 +49,7 @@ class ClearCacheCommand extends MasonCommand {
       );
     }
     final clearDone = logger.progress('clearing cache');
-    cache.clear(force: force);
-    try {
-      bricksJson.deleteSync();
-    } catch (_) {}
+    clearCache(force: force);
     clearDone();
     return ExitCode.success.code;
   }

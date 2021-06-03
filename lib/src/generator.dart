@@ -93,7 +93,7 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
-    final cache = MasonCache.empty();
+    final cache = MasonCache();
     final directory = await cache.writeBrick(Brick(git: gitPath));
     final file = File(p.join(directory, gitPath.path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
