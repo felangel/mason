@@ -30,6 +30,14 @@ class MasonYamlNameMismatch extends MasonException {
   MasonYamlNameMismatch(String message) : super(message);
 }
 
+/// {@template mason_yaml_not_found_exception}
+/// Thrown when a `mason.yaml` cannot be found locally.
+/// {@endtemplate}
+class MasonYamlNotFoundException extends MasonException {
+  /// {@macro mason_yaml_not_found_exception}
+  const MasonYamlNotFoundException(String message) : super(message);
+}
+
 /// {@template mason_yaml_parse_exception}
 /// Thrown when a `mason.yaml` cannot be parsed.
 /// {@endtemplate}
@@ -57,64 +65,44 @@ abstract class MasonCommand extends Command<int> {
   ArgResults get results => argResults!;
 
   /// [MasonCache] which contains all local brick templates.
-  late final _cache = MasonCache(directory: _entryPoint);
+  MasonCache get cache => _cache;
 
-  /// [MasonCache] which contains all global brick templates.
-  late final _globalCache = MasonCache.global();
+  static final MasonCache _cache = MasonCache(directory: _entryPoint);
 
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
     if (_entryPoint != null) return _entryPoint!;
     final nearestMasonYaml = MasonYaml.findNearest(cwd);
     if (nearestMasonYaml == null) {
-      return _entryPoint = MasonCache.globalDir..createSync(recursive: true);
+      throw const MasonYamlNotFoundException(
+        'Could not find ${MasonYaml.file}.\nDid you forget to run mason init?',
+      );
     }
     return _entryPoint = nearestMasonYaml.parent;
   }
 
-  Directory? _entryPoint;
-
-  /// Writes [brick] to cache.
-  Future<String> writeBrick(Brick brick) => _cache.writeBrick(brick);
-
-  /// Clear all cached bricks.
-  void clearCache({bool force = false}) {
-    _cache.clear(force: force);
-    if (isLocalConfiguration) _globalCache.clear(force: force);
-  }
-
-  /// Writes current cache to `brick.json`.
-  Future<void> flushCache() async {
-    final bricksJson = _bricksJson();
-    await bricksJson.create(recursive: true);
-    await bricksJson.writeAsString(_cache.encode);
-    if (isLocalConfiguration) {
-      final globalBricks = _bricksJson(MasonCache.globalDir.path);
-      await globalBricks.create(recursive: true);
-      await globalBricks.writeAsString(_cache.encode);
-    }
-  }
+  static Directory? _entryPoint;
 
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   /// Includes globally registered bricks.
   Set<BrickYaml> get bricks {
     if (_bricks != null) return _bricks!;
-    final bricks = _getBricks(masonYaml);
-    if (isLocalConfiguration) {
-      bricks.addAll(
-        _getBricks(_getMasonYaml(_getMasonYamlFile(MasonCache.globalDir.path))),
-      );
-    }
-    return _bricks = bricks;
+    return _bricks = {
+      if (masonInitialized) ..._getBricks(masonYaml),
+      ..._getBricks(
+        _getMasonYaml(_getMasonYamlFile(MasonCache.globalDir.path)),
+      ),
+    };
   }
 
   Set<BrickYaml>? _bricks;
 
   /// Returns `true` if a `mason.yaml` file exists locally.
   /// This excludes the global mason configuration.
-  bool get isLocalConfiguration {
+  bool get masonInitialized {
     try {
-      return entryPoint.path != MasonCache.globalDir.path;
+      masonYamlFile;
+      return true;
     } catch (_) {
       return false;
     }
@@ -127,6 +115,22 @@ abstract class MasonCommand extends Command<int> {
   }
 
   File? _masonYamlFile;
+
+  /// Gets the global `mason.yaml` file.
+  File get globalMasonYamlFile {
+    if (_globalMasonYamlFile != null) return _globalMasonYamlFile!;
+    return _globalMasonYamlFile = _getMasonYamlFile(MasonCache.globalDir.path);
+  }
+
+  File? _globalMasonYamlFile;
+
+  /// Gets the global [MasonYaml].
+  MasonYaml get globalMasonYaml {
+    if (_globalMasonYaml != null) return _globalMasonYaml!;
+    return _globalMasonYaml = _getMasonYaml(globalMasonYamlFile);
+  }
+
+  MasonYaml? _globalMasonYaml;
 
   File _getMasonYamlFile(String entryPointPath) {
     final file = File(p.join(entryPointPath, MasonYaml.file));
@@ -173,19 +177,12 @@ abstract class MasonCommand extends Command<int> {
 
   Directory? _cwd;
 
-  /// Gets the `bricks.json` file for the current [path].
-  /// Default to the [entryPoint] if no path is provided.
-  File _bricksJson([String? path]) {
-    final entryPointPath = path ?? entryPoint.path;
-    return File(p.join(entryPointPath, '.mason', 'bricks.json'));
-  }
-
   /// The path to the cached brick directory if it exists.
   /// Returns `null` if the brick is not cached.
   String? _cacheDirectory(Brick brick) {
-    final key = _cache.getKey(brick) ?? _globalCache.getKey(brick);
+    final key = cache.getKey(brick);
     if (key == null) return null;
-    return _cache.read(key) ?? _globalCache.read(key);
+    return cache.read(key);
   }
 
   /// Gets all [BrickYaml] instances for the provided [masonYaml].

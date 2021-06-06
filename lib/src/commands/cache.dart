@@ -49,7 +49,7 @@ class ClearCacheCommand extends MasonCommand {
       );
     }
     final clearDone = logger.progress('clearing cache');
-    clearCache(force: force);
+    cache.clear(force: force);
     clearDone();
     return ExitCode.success.code;
   }

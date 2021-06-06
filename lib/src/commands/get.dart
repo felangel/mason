@@ -27,10 +27,10 @@ class GetCommand extends MasonCommand {
   Future<int> run() async {
     final getDone = logger.progress('getting bricks');
     final force = results['force'] == true;
-    if (force) clearCache();
+    if (force) cache.clear();
     if (masonYaml.bricks.values.isNotEmpty) {
-      await Future.forEach(masonYaml.bricks.values, writeBrick);
-      await flushCache();
+      await Future.forEach(masonYaml.bricks.values, cache.writeBrick);
+      await cache.flush();
     }
     getDone();
     return ExitCode.success.code;

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mason/src/mason_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -80,7 +79,7 @@ void main() {
       );
       final gitUrl =
           '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''';
-      final masonUrl = path.join(MasonCache().rootDir.path, 'git', gitUrl);
+      final masonUrl = path.join(Directory.current.path, 'git', gitUrl);
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
