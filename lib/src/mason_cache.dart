@@ -22,68 +22,92 @@ class WriteBrickException extends MasonException {
 /// This cache contains local paths to all bricks.
 /// {@endtemplate}
 class MasonCache {
-  /// {@macro mason_cache}
-  MasonCache.empty({String? rootDir}) : rootDir = rootDir ?? _masonCacheDir();
-
-  /// Create a [MasonCache] which is populated with bricks
-  /// from the current directory ([bricksJson]).
-  MasonCache(File bricksJson) : rootDir = _masonCacheDir() {
-    _fromBricks(bricksJson);
+  /// Creates a [MasonCache] instance from the [directory].
+  MasonCache({Directory? directory}) : _localDir = directory {
+    if (directory != null && directory.path != globalDir.path) {
+      _localBricksJson = File(p.join(directory.path, '.mason', 'bricks.json'));
+      _localCache = _fromBricksJson(_localBricksJson!);
+    }
+    if (!globalDir.existsSync()) globalDir..createSync(recursive: true);
+    _globalBricksJson = File(p.join(globalDir.path, '.mason', 'bricks.json'));
+    _globalCache = _fromBricksJson(_globalBricksJson);
   }
 
-  /// Mapping between remote and local brick paths.
-  var _cache = <String, String>{};
+  /// Brick to local path from local bricks.
+  Map<String, String>? _localCache;
+
+  /// Brick to local path from global bricks.
+  late Map<String, String> _globalCache;
+
+  /// The current cache.
+  /// This is the local cache if it exists
+  /// otherwise it is the global cache.
+  Map<String, String> get _cache => _localCache ?? _globalCache;
+
+  /// Local `bricks.json` file.
+  /// This can be null if mason is run from a context
+  /// which does not include a `mason.yaml` file.
+  File? _localBricksJson;
+
+  /// Global `bricks.json` file.
+  late File _globalBricksJson;
+
+  /// The current `bricks.json` file.
+  /// This is the local bricks.json file if it exists
+  /// otherwise it is the global `bricks.json` file.
+  File get _bricksJson => _localBricksJson ?? _globalBricksJson;
 
   /// Removes all key/value pairs from the cache.
   /// If [force] is true, all bricks will be removed
   /// from disk in addition to the in-memory cache.
   void clear({bool force = false}) async {
     _cache.clear();
-    if (force) {
-      try {
-        Directory(rootDir).deleteSync(recursive: true);
-      } catch (_) {}
-    }
+    try {
+      _bricksJson.deleteSync();
+    } catch (_) {}
+    try {
+      if (force) _cacheDir.deleteSync(recursive: true);
+    } catch (_) {}
   }
 
   /// Populates cache based on `.mason/bricks.json`.
-  void _fromBricks(File bricksJson) {
-    if (!bricksJson.existsSync()) return;
+  Map<String, String> _fromBricksJson(File bricksJson) {
+    if (!bricksJson.existsSync()) return <String, String>{};
     final content = bricksJson.readAsStringSync();
-    if (content.isNotEmpty) {
-      _cache = Map.castFrom<dynamic, dynamic, String, String>(
-        json.decode(content) as Map,
-      );
-    }
+    if (content.isEmpty) return <String, String>{};
+    return Map.castFrom<dynamic, dynamic, String, String>(
+      json.decode(content) as Map,
+    );
   }
 
   /// Encodes entire cache contents.
   String get encode => json.encode(_cache);
 
-  /// The root directory where this brick cache is located.
-  final String rootDir;
+  /// The local directory where this brick cache is located.
+  final Directory? _localDir;
+
+  /// Current cache directory.
+  /// `_localDir` if available otherwise `_rootDir`.
+  Directory get _cacheDir => _localDir ?? _rootDir;
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
   String? read(String remote) {
-    if (_cache.containsKey(remote)) {
-      return _cache[remote];
-    }
+    if (_cache.containsKey(remote)) return _cache[remote];
     return null;
   }
 
-  /// Returns all cache keys.
-  Iterable<String> get keys => _cache.keys;
-
   /// Removes key/value pair for key [remote].
-  void remove(String remote) {
-    _cache.remove(remote);
-  }
+  void remove(String remote) => _cache.remove(remote);
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
-  void write(String remote, String local) {
-    _cache[remote] = local;
+  void write(String remote, String local) => _cache[remote] = local;
+
+  /// Flushes cache contents to `brick.json`.
+  Future<void> flush() async {
+    await _bricksJson.create(recursive: true);
+    await _bricksJson.writeAsString(encode);
   }
 
   /// Returns the cache key for the given [brick].
@@ -133,7 +157,7 @@ class MasonCache {
   /// and returns the local path to the brick.
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
-    final directory = Directory(p.join(rootDir, 'git', dirName));
+    final directory = Directory(p.join(_cacheDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
@@ -157,18 +181,21 @@ class MasonCache {
     write(dirName, directory.path);
     return directory.path;
   }
-}
 
-String _masonCacheDir() {
-  if (Platform.environment.containsKey('MASON_CACHE')) {
-    return Platform.environment['MASON_CACHE']!;
-  } else if (Platform.isWindows) {
-    final appData = Platform.environment['APPDATA']!;
-    final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
-    if (appDataCacheDir.existsSync()) return appDataCacheDir.path;
-    final localAppData = Platform.environment['LOCALAPPDATA']!;
-    return p.join(localAppData, 'Mason', 'Cache');
-  } else {
-    return p.join(Platform.environment['HOME']!, '.mason-cache');
+  /// Global subdirectory within the mason cache.
+  static Directory get globalDir => Directory(p.join(_rootDir.path, 'global'));
+
+  static Directory get _rootDir {
+    if (Platform.environment.containsKey('MASON_CACHE')) {
+      return Directory(Platform.environment['MASON_CACHE']!);
+    } else if (Platform.isWindows) {
+      final appData = Platform.environment['APPDATA']!;
+      final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
+      if (appDataCacheDir.existsSync()) return Directory(appDataCacheDir.path);
+      final localAppData = Platform.environment['LOCALAPPDATA']!;
+      return Directory(p.join(localAppData, 'Mason', 'Cache'));
+    } else {
+      return Directory(p.join(Platform.environment['HOME']!, '.mason-cache'));
+    }
   }
 }

@@ -30,7 +30,7 @@ class GetCommand extends MasonCommand {
     if (force) cache.clear();
     if (masonYaml.bricks.values.isNotEmpty) {
       await Future.forEach(masonYaml.bricks.values, cache.writeBrick);
-      await flushCache();
+      await cache.flush();
     }
     getDone();
     return ExitCode.success.code;
