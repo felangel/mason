@@ -1,3 +1,9 @@
+# 0.0.1-dev.33
+
+- feat: mason install command for global brick templates
+- docs: update mustache manual link
+- docs: update mason.yaml from init to use https for git
+
 # 0.0.1-dev.32
 
 - feat!: windows compatibility fixes
