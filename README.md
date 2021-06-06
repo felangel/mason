@@ -146,6 +146,36 @@ And the following brick template:
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
+## Installing Brick Templates Globally
+
+The `install` command allows developers to install brick templates globally on their machines from either a local path or git url. Then developers can use globally installed brick templates anywhere (regardless of whether there is an existing `mason.yaml`).
+
+### Install Usage
+
+```sh
+# install from path
+$ mason install --source path ./path/to/brick
+
+# install from git url
+$ mason install --source git https://github.com/user/repo
+
+# install from git url with path
+$ mason install --source git https://github.com/user/repo --path path/to/brick
+
+# install from git url with path and ref
+$ mason install --source git https://github.com/user/repo --path path/to/brick --ref tag-name
+
+# use alias "i" instead of "install" for a shorthand syntax
+# since git is the default source we don't need to specify a source.
+$ mason i https://github.com/user/repo
+```
+
+Once a brick is installed globally it can be used from anywhere via the `mason make` command:
+
+```sh
+$ mason make <NAME-OF-GLOBAL-BRICK>
+```
+
 ## Bundling
 
 You can use mason to generate a bundle for an existing template. Bundles are convenient for cases where you want to include your template as part of a standalone CLI. [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli) is a great example.
