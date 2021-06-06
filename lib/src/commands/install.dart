@@ -67,8 +67,12 @@ class InstallCommand extends MasonCommand {
         ref: results['ref'] as String?,
       );
       brick = Brick(git: gitPath);
-      final directory = await cache.writeBrick(brick);
-      file = File(p.join(directory, gitPath.path, BrickYaml.file));
+      try {
+        final directory = await cache.writeBrick(brick);
+        file = File(p.join(directory, gitPath.path, BrickYaml.file));
+      } catch (_) {
+        throw UsageException('brick not found at url $location', usage);
+      }
     }
 
     final brickYaml = checkedYamlDecode(

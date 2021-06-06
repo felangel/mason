@@ -66,7 +66,7 @@ abstract class MasonCommand extends Command<int> {
   /// [MasonCache] which contains all local brick templates.
   MasonCache get cache => _cache;
 
-  late final MasonCache _cache = MasonCache(directory: entryPoint);
+  late final MasonCache _cache = MasonCache(directory: _cacheEntryPoint);
 
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
@@ -78,6 +78,13 @@ abstract class MasonCommand extends Command<int> {
       );
     }
     return _entryPoint = nearestMasonYaml.parent;
+  }
+
+  Directory get _cacheEntryPoint {
+    try {
+      return entryPoint;
+    } catch (_) {}
+    return MasonCache.globalDir;
   }
 
   Directory? _entryPoint;
