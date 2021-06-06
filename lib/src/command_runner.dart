@@ -47,7 +47,9 @@ class MasonCommandRunner extends CommandRunner<int> {
         ..info('')
         ..info(usage);
       return ExitCode.usage.code;
-    } on MasonException catch (e) {
+    } on MasonException catch (e, stackTrace) {
+      print(e.message);
+      print('$stackTrace');
       _logger.err(e.message);
       return ExitCode.usage.code;
     }
