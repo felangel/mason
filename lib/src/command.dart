@@ -107,17 +107,22 @@ abstract class MasonCommand extends Command<int> {
   /// This excludes the global mason configuration.
   bool get masonInitialized {
     try {
-      return masonYamlFile.existsSync() &&
-          p.isWithin(cwd.path, masonYamlFile.path);
-    } catch (_) {
-      return false;
-    }
+      final _ = masonYamlFile;
+      return true;
+    } catch (_) {}
+    return false;
   }
 
   /// Gets the nearest `mason.yaml` file.
   File get masonYamlFile {
     if (_masonYamlFile != null) return _masonYamlFile!;
-    return _masonYamlFile = _getMasonYamlFile(entryPoint.path);
+    final file = File(p.join(entryPoint.path, MasonYaml.file));
+    if (!file.existsSync()) {
+      throw const MasonYamlNotFoundException(
+        'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
+      );
+    }
+    return _masonYamlFile = file;
   }
 
   File? _masonYamlFile;
