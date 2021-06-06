@@ -56,8 +56,9 @@ void main() {
           path.join(Directory.current.path, 'greeting'),
         )..createSync(recursive: true);
         Directory.current = testDir.path;
-        final makeResult =
-            await commandRunner.run(['make', 'greeting', '--name', 'Dash']);
+        final makeResult = await MasonCommandRunner(logger: logger).run(
+          ['make', 'greeting', '--name', 'Dash'],
+        );
         expect(makeResult, equals(ExitCode.success.code));
 
         final actual = Directory(
@@ -88,8 +89,9 @@ void main() {
           path.join(Directory.current.path, 'widget'),
         )..createSync(recursive: true);
         Directory.current = testDir.path;
-        final makeResult =
-            await commandRunner.run(['make', 'widget', '--name', 'cat']);
+        final makeResult = await MasonCommandRunner(logger: logger).run(
+          ['make', 'widget', '--name', 'cat'],
+        );
         expect(makeResult, equals(ExitCode.success.code));
 
         final actual = Directory(
