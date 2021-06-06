@@ -183,9 +183,7 @@ class MasonCache {
   }
 
   /// Global subdirectory within the mason cache.
-  static Directory get globalDir {
-    return Directory(p.join(_rootDir.path, 'global'));
-  }
+  static Directory get globalDir => Directory(p.join(_rootDir.path, 'global'));
 
   static Directory get _rootDir {
     if (Platform.environment.containsKey('MASON_CACHE')) {
