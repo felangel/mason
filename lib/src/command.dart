@@ -68,6 +68,13 @@ abstract class MasonCommand extends Command<int> {
 
   late final MasonCache _cache = MasonCache(directory: _cacheEntryPoint);
 
+  Directory? get _cacheEntryPoint {
+    try {
+      return entryPoint;
+    } catch (_) {}
+    return null;
+  }
+
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
     if (_entryPoint != null) return _entryPoint!;
@@ -78,13 +85,6 @@ abstract class MasonCommand extends Command<int> {
       );
     }
     return _entryPoint = nearestMasonYaml.parent;
-  }
-
-  Directory get _cacheEntryPoint {
-    try {
-      return entryPoint;
-    } catch (_) {}
-    return MasonCache.globalDir;
   }
 
   Directory? _entryPoint;
