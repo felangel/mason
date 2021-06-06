@@ -178,10 +178,11 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  bundle   Generates a bundle from a brick template
-  cache    Interact with mason cache
-  get      Gets all bricks.
-  init     Initialize mason in the current directory.
-  make     Generate code using an existing brick template.
-  new      Creates a new brick template.
+  bundle    Generates a bundle from a brick template
+  cache     Interact with mason cache
+  get       Gets all bricks.
+  init      Initialize mason in the current directory.
+  install   Installs a brick globally
+  make      Generate code using an existing brick template.
+  new       Creates a new brick template.
 ```

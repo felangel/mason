@@ -1,4 +1,3 @@
-import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
@@ -67,7 +66,7 @@ abstract class MasonCommand extends Command<int> {
   /// [MasonCache] which contains all local brick templates.
   MasonCache get cache => _cache;
 
-  static final MasonCache _cache = MasonCache(directory: _entryPoint);
+  late final MasonCache _cache = MasonCache(directory: entryPoint);
 
   /// Gets the directory containing the nearest `mason.yaml`.
   Directory get entryPoint {
@@ -81,7 +80,7 @@ abstract class MasonCommand extends Command<int> {
     return _entryPoint = nearestMasonYaml.parent;
   }
 
-  static Directory? _entryPoint;
+  Directory? _entryPoint;
 
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   /// Includes globally registered bricks.
@@ -101,8 +100,8 @@ abstract class MasonCommand extends Command<int> {
   /// This excludes the global mason configuration.
   bool get masonInitialized {
     try {
-      masonYamlFile;
-      return true;
+      return masonYamlFile.existsSync() &&
+          p.isWithin(cwd.path, masonYamlFile.path);
     } catch (_) {
       return false;
     }
@@ -124,6 +123,10 @@ abstract class MasonCommand extends Command<int> {
 
   File? _globalMasonYamlFile;
 
+  File _getMasonYamlFile(String entryPointPath) {
+    return File(p.join(entryPointPath, MasonYaml.file));
+  }
+
   /// Gets the global [MasonYaml].
   MasonYaml get globalMasonYaml {
     if (_globalMasonYaml != null) return _globalMasonYaml!;
@@ -131,16 +134,6 @@ abstract class MasonCommand extends Command<int> {
   }
 
   MasonYaml? _globalMasonYaml;
-
-  File _getMasonYamlFile(String entryPointPath) {
-    final file = File(p.join(entryPointPath, MasonYaml.file));
-    if (!file.existsSync()) {
-      file
-        ..createSync(recursive: true)
-        ..writeAsStringSync(json.encode(MasonYaml.empty.toJson()));
-    }
-    return file;
-  }
 
   /// Gets the nearest [MasonYaml].
   MasonYaml get masonYaml {
@@ -151,6 +144,7 @@ abstract class MasonCommand extends Command<int> {
   MasonYaml? _masonYaml;
 
   MasonYaml _getMasonYaml(File file) {
+    if (!file.existsSync()) return MasonYaml.empty;
     final masonYamlContent = file.readAsStringSync();
     try {
       return _masonYaml = checkedYamlDecode(
