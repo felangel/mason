@@ -67,6 +67,10 @@ void main() {
       );
       expect(cacheClearResult, equals(ExitCode.success.code));
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
+      expect(
+        File(path.join(Directory.current.path, 'mason.yaml')).existsSync(),
+        isTrue,
+      );
       verify(
         () => logger.warn(
           'using --force\nI sure hope you know what you are doing.',
