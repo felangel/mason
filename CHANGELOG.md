@@ -1,3 +1,7 @@
+# 0.0.1-dev.35
+
+- fix: adjust `mason cache clear --force` target directory to avoid deleting local files
+
 # 0.0.1-dev.34
 
 - fix: local mason get installation location for remote bricks
