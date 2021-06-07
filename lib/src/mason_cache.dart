@@ -87,8 +87,8 @@ class MasonCache {
   final Directory? _localDir;
 
   /// Current cache directory.
-  /// `_localDir` if available otherwise `_rootDir`.
-  Directory get _cacheDir => _localDir ?? _rootDir;
+  /// `_localDir` if available otherwise `rootDir`.
+  Directory get _cacheDir => _localDir ?? rootDir;
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
@@ -138,11 +138,14 @@ class MasonCache {
         'Brick must contain either a path or a git url',
       );
     }
-    final remoteDir = read(key);
-    if (remoteDir != null) return remoteDir;
-    return brick.path != null
-        ? _writeLocalBrick(brick.path!)
-        : await _writeRemoteBrick(brick.git!);
+
+    if (brick.path != null) {
+      final remoteDir = read(key);
+      if (remoteDir != null) return remoteDir;
+      return _writeLocalBrick(brick.path!);
+    }
+
+    return _writeRemoteBrick(brick.git!);
   }
 
   /// Writes local brick at [path] to cache
@@ -157,13 +160,21 @@ class MasonCache {
   /// and returns the local path to the brick.
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
-    final directory = Directory(p.join(_cacheDir.path, 'git', dirName));
+    final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
 
+    /// Even if a cached version exists, still try to update.
+    /// Fall-back to cached version if update fails.
     if (directoryExists && directoryIsNotEmpty) {
+      try {
+        final tempDirectory = Directory.systemTemp.createTempSync();
+        await _clone(gitPath, tempDirectory);
+        await directory.delete(recursive: true);
+        await tempDirectory.rename(directory.path);
+      } catch (_) {}
       write(dirName, directory.path);
       return directory.path;
     }
@@ -171,6 +182,12 @@ class MasonCache {
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
+    await _clone(gitPath, directory);
+    write(dirName, directory.path);
+    return directory.path;
+  }
+
+  Future<void> _clone(GitPath gitPath, Directory directory) async {
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
       await Git.run(
@@ -178,14 +195,13 @@ class MasonCache {
         processWorkingDir: directory.path,
       );
     }
-    write(dirName, directory.path);
-    return directory.path;
   }
 
   /// Global subdirectory within the mason cache.
-  static Directory get globalDir => Directory(p.join(_rootDir.path, 'global'));
+  static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
 
-  static Directory get _rootDir {
+  /// Root mason cache directory
+  static Directory get rootDir {
     if (Platform.environment.containsKey('MASON_CACHE')) {
       return Directory(Platform.environment['MASON_CACHE']!);
     } else if (Platform.isWindows) {
