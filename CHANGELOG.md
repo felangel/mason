@@ -1,3 +1,9 @@
+# 0.0.1-dev.34
+
+- fix: local mason get installation location for remote bricks
+- fix!: always attempt to fetch latest remote brick
+  - `mason get` no longer supports `--force` since it is handled automatically
+
 # 0.0.1-dev.33
 
 - feat: mason install command for global brick templates
