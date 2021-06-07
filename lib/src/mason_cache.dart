@@ -23,7 +23,7 @@ class WriteBrickException extends MasonException {
 /// {@endtemplate}
 class MasonCache {
   /// Creates a [MasonCache] instance from the [directory].
-  MasonCache({Directory? directory}) : _localDir = directory {
+  MasonCache({Directory? directory}) {
     if (directory != null && directory.path != globalDir.path) {
       _localBricksJson = File(p.join(directory.path, '.mason', 'bricks.json'));
       _localCache = _fromBricksJson(_localBricksJson!);
@@ -66,7 +66,7 @@ class MasonCache {
       _bricksJson.deleteSync();
     } catch (_) {}
     try {
-      if (force) _cacheDir.deleteSync(recursive: true);
+      if (force) rootDir.deleteSync(recursive: true);
     } catch (_) {}
   }
 
@@ -82,13 +82,6 @@ class MasonCache {
 
   /// Encodes entire cache contents.
   String get encode => json.encode(_cache);
-
-  /// The local directory where this brick cache is located.
-  final Directory? _localDir;
-
-  /// Current cache directory.
-  /// `_localDir` if available otherwise `rootDir`.
-  Directory get _cacheDir => _localDir ?? rootDir;
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
