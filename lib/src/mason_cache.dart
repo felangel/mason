@@ -87,8 +87,8 @@ class MasonCache {
   final Directory? _localDir;
 
   /// Current cache directory.
-  /// `_localDir` if available otherwise `_rootDir`.
-  Directory get _cacheDir => _localDir ?? _rootDir;
+  /// `_localDir` if available otherwise `rootDir`.
+  Directory get _cacheDir => _localDir ?? rootDir;
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
@@ -160,7 +160,7 @@ class MasonCache {
   /// and returns the local path to the brick.
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
     final dirName = getKey(Brick(git: gitPath))!;
-    final directory = Directory(p.join(_rootDir.path, 'git', dirName));
+    final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
@@ -198,9 +198,10 @@ class MasonCache {
   }
 
   /// Global subdirectory within the mason cache.
-  static Directory get globalDir => Directory(p.join(_rootDir.path, 'global'));
+  static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
 
-  static Directory get _rootDir {
+  /// Root mason cache directory
+  static Directory get rootDir {
     if (Platform.environment.containsKey('MASON_CACHE')) {
       return Directory(Platform.environment['MASON_CACHE']!);
     } else if (Platform.isWindows) {
