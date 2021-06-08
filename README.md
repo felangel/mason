@@ -176,6 +176,20 @@ Once a brick is installed globally it can be used from anywhere via the `mason m
 $ mason make <NAME-OF-GLOBAL-BRICK>
 ```
 
+## Uninstall Brick Templates
+
+Bricks can be uninstalled by using the `uninstall` command (`un` for short).
+
+### Uninstall Usage
+
+```sh
+# uninstall brick
+$ mason uninstall <BRICK_NAME>
+
+# use alias "un" instead of "uninstall" for a shorthand syntax
+$ mason un <BRICK_NAME>
+```
+
 ## Bundling
 
 You can use mason to generate a bundle for an existing template. Bundles are convenient for cases where you want to include your template as part of a standalone CLI. [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli) is a great example.
@@ -198,7 +212,7 @@ mason bundle ./path/to/brick -t dart -d ./path/to/destination
 ## Usage
 
 ```sh
-$ mason --help
+$ mason
 ⛏️  mason • lay the foundation!
 
 Usage: mason <command> [arguments]
@@ -208,11 +222,14 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  bundle    Generates a bundle from a brick template
-  cache     Interact with mason cache
-  get       Gets all bricks.
-  init      Initialize mason in the current directory.
-  install   Installs a brick globally
-  make      Generate code using an existing brick template.
-  new       Creates a new brick template.
+  bundle      Generates a bundle from a brick template
+  cache       Interact with mason cache
+  get         Gets all bricks.
+  init        Initialize mason in the current directory.
+  install     Installs a brick globally
+  make        Generate code using an existing brick template.
+  new         Creates a new brick template.
+  uninstall   Uninstalls a brick globally
+
+Run "mason help <command>" for more information about a command.
 ```

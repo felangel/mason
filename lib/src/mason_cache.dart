@@ -107,14 +107,17 @@ class MasonCache {
   /// Return `null` if the [brick] does not have a valid path.
   String? getKey(Brick brick) {
     if (brick.path != null) {
-      final name = p.basenameWithoutExtension(brick.path!);
-      final hash = sha256.convert(utf8.encode(brick.path!));
+      final path = brick.path!;
+      final name = p.basenameWithoutExtension(path);
+      final hash = sha256.convert(utf8.encode(path));
       final key = '${name}_$hash';
       return key;
     }
     if (brick.git != null) {
-      final name = p.basenameWithoutExtension(brick.git!.url);
-      final hash = sha256.convert(utf8.encode(brick.git!.url));
+      final path =
+          p.join(brick.git!.url, brick.git!.path).replaceAll(r'\', r'/');
+      final name = p.basenameWithoutExtension(path);
+      final hash = sha256.convert(utf8.encode(path));
       final key = brick.git!.ref != null
           ? '${name}_${brick.git!.ref}_$hash'
           : '${name}_$hash';
@@ -152,7 +155,8 @@ class MasonCache {
   /// Writes remote brick at [gitPath] to cache
   /// and returns the local path to the brick.
   Future<String> _writeRemoteBrick(GitPath gitPath) async {
-    final dirName = getKey(Brick(git: gitPath))!;
+    final key = getKey(Brick(git: gitPath))!;
+    final dirName = getKey(Brick(git: GitPath(gitPath.url, ref: gitPath.ref)))!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
@@ -168,7 +172,7 @@ class MasonCache {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
-      write(dirName, directory.path);
+      write(key, directory.path);
       return directory.path;
     }
 
@@ -176,7 +180,7 @@ class MasonCache {
 
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
-    write(dirName, directory.path);
+    write(key, directory.path);
     return directory.path;
   }
 
