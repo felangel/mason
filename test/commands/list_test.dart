@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
@@ -44,9 +45,7 @@ void main() {
     test(
         'exits successfully and lists all bricks '
         'when local and global bricks are available', () async {
-      const url = 'https://github.com/felangel/mason';
       final greetingPath = p.join('..', '..', '..', 'bricks', 'greeting');
-      final appIconPath = p.join('bricks', 'app_icon');
       File(p.join(Directory.current.path, 'mason.yaml'))
         ..writeAsStringSync('''bricks:
   documentation:
@@ -59,19 +58,13 @@ void main() {
       path: bricks/widget
 ''');
       await expectLater(
-        MasonCommandRunner().run(['cache', 'clear', '--force']),
+        MasonCommandRunner(logger: logger).run(['get']),
         completion(ExitCode.success.code),
       );
       await expectLater(
-        MasonCommandRunner().run(['get']),
-        completion(ExitCode.success.code),
-      );
-      await expectLater(
-        MasonCommandRunner().run(['install', url, '--path', appIconPath]),
-        completion(ExitCode.success.code),
-      );
-      await expectLater(
-        MasonCommandRunner().run(['install', '--source', 'path', greetingPath]),
+        MasonCommandRunner(logger: logger).run(
+          ['install', '--source', 'path', greetingPath],
+        ),
         completion(ExitCode.success.code),
       );
       await expectLater(
@@ -79,21 +72,23 @@ void main() {
         completion(ExitCode.success.code),
       );
       verify(
-        () => logger.info('greeting - A Simple Greeting Template'),
+        () => logger.info(
+          '${styleBold.wrap('greeting')} - A Simple Greeting Template',
+        ),
       ).called(1);
-      verify(
-        () => logger.info('app_icon - Create an app_icon file from a URL'),
-      ).called(1);
+
       verify(
         () => logger.info(
-          'documentation - Create Documentation Markdown Files',
+          '''${styleBold.wrap('documentation')} - Create Documentation Markdown Files''',
         ),
       ).called(1);
       verify(
-        () => logger.info('todos - A Todos Template'),
+        () => logger.info('${styleBold.wrap('todos')} - A Todos Template'),
       ).called(1);
       verify(
-        () => logger.info('widget - Create a Simple Flutter Widget'),
+        () => logger.info(
+          '${styleBold.wrap('widget')} - Create a Simple Flutter Widget',
+        ),
       ).called(1);
     });
   });
