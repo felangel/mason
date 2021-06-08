@@ -66,9 +66,7 @@ void main() {
           bricksJson.readAsStringSync().replaceAll(r'\\', r'\');
       expect(bricksJsonContent, contains('"$key":"$value"'));
 
-      final uninstallResult = await MasonCommandRunner(logger: logger).run(
-        ['uninstall', 'widget'],
-      );
+      final uninstallResult = await commandRunner.run(['uninstall', 'widget']);
       expect(uninstallResult, equals(ExitCode.success.code));
       verify(() => logger.progress('Uninstalling widget')).called(1);
 
