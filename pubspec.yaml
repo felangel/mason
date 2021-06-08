@@ -1,7 +1,7 @@
 name: mason
 description: >
   A Dart template generator which helps teams generate files quickly and consistently.
-version: 0.0.1-dev.35
+version: 0.0.1-dev.36
 homepage: https://github.com/felangel/mason
 
 environment:
