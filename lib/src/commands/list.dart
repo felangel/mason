@@ -25,7 +25,6 @@ class ListCommand extends MasonCommand {
     for (final brick in bricks) {
       logger.info('${styleBold.wrap(brick.name)} - ${brick.description}');
     }
-    logger.flush();
     return ExitCode.success.code;
   }
 }
