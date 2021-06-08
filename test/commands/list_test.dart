@@ -4,6 +4,7 @@ import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
+import 'package:mason/src/mason_cache.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -24,6 +25,7 @@ void main() {
       commandRunner = MasonCommandRunner(logger: logger);
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.list');
+      MasonCache().clear(force: true);
     });
 
     tearDown(() {
