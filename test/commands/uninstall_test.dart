@@ -54,15 +54,11 @@ void main() {
 
       const key =
           '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
-      final value = p
-          .canonicalize(
-            p.join(
-              MasonCache.rootDir.path,
-              'git',
-              '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
-            ),
-          )
-          .toLowerCase();
+      final value = p.join(
+        MasonCache.rootDir.path,
+        'git',
+        '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+      ).toLowerCase();
       final bricksJson = File(
         p.join(MasonCache.globalDir.path, '.mason', 'bricks.json'),
       );
@@ -70,6 +66,9 @@ void main() {
           .readAsStringSync()
           .toLowerCase()
           .replaceAll(r'\\\\', r'\\');
+
+      print('actual: $bricksJsonContent');
+      print('expected: "$key":"$value"');
       expect(bricksJsonContent, contains('"$key":"$value"'));
 
       final uninstallResult = await MasonCommandRunner(logger: logger).run(
