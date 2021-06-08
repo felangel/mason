@@ -18,7 +18,7 @@ Mason allows developers to create and consume reusable templates called bricks.
 
 ```sh
 # Activate from pub.dev
-$ pub global activate mason
+$ dart pub global activate mason
 
 # Or install using Homebrew
 $ brew tap felangel/mason
@@ -146,7 +146,7 @@ And the following brick template:
 
 Running `mason make app_icon -- --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
-## Installing Brick Templates Globally
+## Install Brick Templates Globally
 
 The `install` command allows developers to install brick templates globally on their machines from either a local path or git url. Then developers can use globally installed brick templates anywhere (regardless of whether there is an existing `mason.yaml`).
 
@@ -178,7 +178,7 @@ $ mason make <NAME-OF-GLOBAL-BRICK>
 
 ## Uninstall Brick Templates
 
-Bricks can be uninstalled by using the `uninstall` command (`un` for short).
+Bricks can be uninstalled by using the `uninstall` (`un` for short) command.
 
 ### Uninstall Usage
 
@@ -188,6 +188,18 @@ $ mason uninstall <BRICK_NAME>
 
 # use alias "un" instead of "uninstall" for a shorthand syntax
 $ mason un <BRICK_NAME>
+```
+
+## List all available Brick Templates
+
+All available brick templates (local and global) can be seen via the `list` (`ls` for short) command.
+
+```sh
+# list all available bricks
+$ mason list
+
+# use alias "ls" instead of "list" for a shorthand syntax
+$ mason ls
 ```
 
 ## Bundling
@@ -222,14 +234,15 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  bundle      Generates a bundle from a brick template
-  cache       Interact with mason cache
+  bundle      Generates a bundle from a brick template.
+  cache       Interact with mason cache.
   get         Gets all bricks.
   init        Initialize mason in the current directory.
-  install     Installs a brick globally
+  install     Installs a brick globally.
+  list        Lists all available bricks.
   make        Generate code using an existing brick template.
   new         Creates a new brick template.
-  uninstall   Uninstalls a brick globally
+  uninstall   Uninstalls a brick globally.
 
 Run "mason help <command>" for more information about a command.
 ```

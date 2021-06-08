@@ -79,14 +79,15 @@ void main() {
               '    --version    Print the current version.\n'
               '\n'
               'Available commands:\n'
-              '  bundle      Generates a bundle from a brick template\n'
-              '  cache       Interact with mason cache\n'
+              '  bundle      Generates a bundle from a brick template.\n'
+              '  cache       Interact with mason cache.\n'
               '  get         Gets all bricks.\n'
               '  init        Initialize mason in the current directory.\n'
-              '  install     Installs a brick globally\n'
+              '  install     Installs a brick globally.\n'
+              '  list        Lists all available bricks.\n'
               '  make        Generate code using an existing brick template.\n'
               '  new         Creates a new brick template.\n'
-              '  uninstall   Uninstalls a brick globally\n'
+              '  uninstall   Uninstalls a brick globally.\n'
               '\n'
               'Run "mason help <command>" for more information about a command.'
         ];
@@ -107,14 +108,15 @@ void main() {
                 '    --version    Print the current version.\n'
                 '\n'
                 'Available commands:\n'
-                '  bundle      Generates a bundle from a brick template\n'
-                '  cache       Interact with mason cache\n'
+                '  bundle      Generates a bundle from a brick template.\n'
+                '  cache       Interact with mason cache.\n'
                 '  get         Gets all bricks.\n'
                 '  init        Initialize mason in the current directory.\n'
-                '  install     Installs a brick globally\n'
+                '  install     Installs a brick globally.\n'
+                '  list        Lists all available bricks.\n'
                 '''  make        Generate code using an existing brick template.\n'''
                 '  new         Creates a new brick template.\n'
-                '  uninstall   Uninstalls a brick globally\n'
+                '  uninstall   Uninstalls a brick globally.\n'
                 '\n'
                 '''Run "mason help <command>" for more information about a command.'''
           ];
@@ -134,7 +136,7 @@ void main() {
         test('outputs current version', () async {
           final result = await commandRunner.run(['--version']);
           expect(result, equals(ExitCode.success.code));
-          verify(() => logger.info('mason version: $packageVersion'));
+          verify(() => logger.info('Mason $packageVersion'));
         });
       });
     });

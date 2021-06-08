@@ -60,7 +60,7 @@ class MasonCache {
   /// Removes all key/value pairs from the cache.
   /// If [force] is true, all bricks will be removed
   /// from disk in addition to the in-memory cache.
-  void clear({bool force = false}) async {
+  void clear({bool force = false}) {
     _cache.clear();
     try {
       _bricksJson.deleteSync();

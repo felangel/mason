@@ -24,6 +24,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(BundleCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
     addCommand(InstallCommand(logger: _logger));
+    addCommand(ListCommand(logger: _logger));
     addCommand(GetCommand(logger: _logger));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
@@ -57,7 +58,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
     if (topLevelResults['version'] == true) {
-      _logger.info('mason version: $packageVersion');
+      _logger.info('Mason $packageVersion');
       return ExitCode.success.code;
     }
     return super.runCommand(topLevelResults);

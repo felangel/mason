@@ -42,7 +42,7 @@ class BundleCommand extends MasonCommand {
   }
 
   @override
-  final String description = 'Generates a bundle from a brick template';
+  final String description = 'Generates a bundle from a brick template.';
 
   @override
   final String name = 'bundle';
