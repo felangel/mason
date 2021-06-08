@@ -1,9 +1,0 @@
-bricks:
-  documentation:
-    path: ../../../bricks/documentation
-  todos:
-    path: ../../../bricks/todos
-  widget:
-    git:
-      url: https://github.com/felangel/mason
-      path: bricks/widget
