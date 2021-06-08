@@ -64,9 +64,6 @@ void main() {
       );
       final bricksJsonContent =
           bricksJson.readAsStringSync().replaceAll(r'\\', r'\');
-
-      print('actual: $bricksJsonContent');
-      print('expected: "$key":"$value"');
       expect(bricksJsonContent, contains('"$key":"$value"'));
 
       final uninstallResult = await MasonCommandRunner(logger: logger).run(
