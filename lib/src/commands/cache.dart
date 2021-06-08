@@ -13,7 +13,7 @@ class CacheCommand extends MasonCommand {
   }
 
   @override
-  final String description = 'Interact with mason cache';
+  final String description = 'Interact with mason cache.';
 
   @override
   final String name = 'cache';
@@ -30,12 +30,12 @@ class ClearCacheCommand extends MasonCommand {
       abbr: 'f',
       defaultsTo: false,
       help: 'removes all bricks from disk and clears '
-          'the in-memory cache',
+          'the in-memory cache.',
     );
   }
 
   @override
-  final String description = 'Clears the mason cache';
+  final String description = 'Clears the mason cache.';
 
   @override
   final String name = 'clear';

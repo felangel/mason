@@ -14,7 +14,7 @@ class UninstallCommand extends MasonCommand {
   UninstallCommand({Logger? logger}) : super(logger: logger);
 
   @override
-  final String description = 'Uninstalls a brick globally';
+  final String description = 'Uninstalls a brick globally.';
 
   @override
   final String name = 'uninstall';

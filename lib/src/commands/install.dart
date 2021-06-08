@@ -27,14 +27,14 @@ class InstallCommand extends MasonCommand {
           'git': 'git url for remote brick template',
           'path': 'path to local brick template'
         },
-        help: 'Installs a brick globally',
+        help: 'Installs a brick globally.',
       )
       ..addOption('path', help: 'Optional git path')
       ..addOption('ref', help: 'Optional git ref (commit hash, tag, etc.)');
   }
 
   @override
-  final String description = 'Installs a brick globally';
+  final String description = 'Installs a brick globally.';
 
   @override
   final String name = 'install';

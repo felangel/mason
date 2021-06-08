@@ -222,14 +222,15 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  bundle      Generates a bundle from a brick template
-  cache       Interact with mason cache
+  bundle      Generates a bundle from a brick template.
+  cache       Interact with mason cache.
   get         Gets all bricks.
   init        Initialize mason in the current directory.
-  install     Installs a brick globally
+  install     Installs a brick globally.
+  list        Lists all available bricks.
   make        Generate code using an existing brick template.
   new         Creates a new brick template.
-  uninstall   Uninstalls a brick globally
+  uninstall   Uninstalls a brick globally.
 
 Run "mason help <command>" for more information about a command.
 ```
