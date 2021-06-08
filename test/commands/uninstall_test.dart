@@ -63,7 +63,7 @@ void main() {
         p.join(MasonCache.globalDir.path, '.mason', 'bricks.json'),
       );
       final bricksJsonContent =
-          bricksJson.readAsStringSync().replaceAll(r'\\\\', r'\');
+          bricksJson.readAsStringSync().replaceAll(r'\\', r'\');
 
       print('actual: $bricksJsonContent');
       print('expected: "$key":"$value"');
