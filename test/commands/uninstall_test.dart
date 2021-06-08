@@ -58,14 +58,12 @@ void main() {
         MasonCache.rootDir.path,
         'git',
         '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
-      ).toLowerCase();
+      );
       final bricksJson = File(
         p.join(MasonCache.globalDir.path, '.mason', 'bricks.json'),
       );
-      final bricksJsonContent = bricksJson
-          .readAsStringSync()
-          .toLowerCase()
-          .replaceAll(r'\\\\', r'\\');
+      final bricksJsonContent =
+          bricksJson.readAsStringSync().replaceAll(r'\\\\', r'\');
 
       print('actual: $bricksJsonContent');
       print('expected: "$key":"$value"');
