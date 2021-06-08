@@ -114,7 +114,8 @@ class MasonCache {
       return key;
     }
     if (brick.git != null) {
-      final path = p.join(brick.git!.url, brick.git!.path);
+      final path =
+          p.join(brick.git!.url, brick.git!.path).replaceAll(r'\', r'/');
       final name = p.basenameWithoutExtension(path);
       final hash = sha256.convert(utf8.encode(path));
       final key = brick.git!.ref != null
