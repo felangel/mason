@@ -1,3 +1,8 @@
+# 0.0.1-dev.37
+
+- feat: add `mason list` command
+- docs: update command descriptions for consistency
+
 # 0.0.1-dev.36
 
 - feat: add `mason uninstall` command
