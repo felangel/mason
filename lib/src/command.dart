@@ -6,9 +6,9 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
+import 'bricks_json.dart';
 import 'exception.dart';
 import 'logger.dart';
-import 'mason_cache.dart';
 import 'mason_yaml.dart';
 
 /// {@template brick_not_found_exception}
@@ -34,7 +34,10 @@ class MasonYamlNameMismatch extends MasonException {
 /// {@endtemplate}
 class MasonYamlNotFoundException extends MasonException {
   /// {@macro mason_yaml_not_found_exception}
-  const MasonYamlNotFoundException(String message) : super(message);
+  const MasonYamlNotFoundException()
+      : super(
+          'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
+        );
 }
 
 /// {@template mason_yaml_parse_exception}
@@ -63,12 +66,18 @@ abstract class MasonCommand extends Command<int> {
   /// [ArgResults] for the current command.
   ArgResults get results => argResults!;
 
-  /// [MasonCache] which contains all local brick templates.
-  MasonCache get cache => _cache;
+  /// [BricksJson] which contains all local bricks.
+  BricksJson? get localBricksJson => _localBricksJson;
 
-  late final MasonCache _cache = MasonCache(directory: _cacheEntryPoint);
+  /// [BricksJson] which contains all global bricks.
+  BricksJson get globalBricksJson => _globalBricksJson;
 
-  Directory? get _cacheEntryPoint {
+  late final BricksJson _globalBricksJson = BricksJson.global();
+
+  late final BricksJson? _localBricksJson =
+      __entryPoint != null ? BricksJson(directory: __entryPoint!) : null;
+
+  Directory? get __entryPoint {
     try {
       return entryPoint;
     } catch (_) {}
@@ -79,10 +88,9 @@ abstract class MasonCommand extends Command<int> {
   Directory get entryPoint {
     if (_entryPoint != null) return _entryPoint!;
     final nearestMasonYaml = MasonYaml.findNearest(cwd);
-    if (nearestMasonYaml == null) {
-      throw const MasonYamlNotFoundException(
-        'Could not find ${MasonYaml.file}.\nDid you forget to run mason init?',
-      );
+    if (nearestMasonYaml == null ||
+        nearestMasonYaml.parent.path == BricksJson.globalDir.path) {
+      throw const MasonYamlNotFoundException();
     }
     return _entryPoint = nearestMasonYaml.parent;
   }
@@ -96,7 +104,7 @@ abstract class MasonCommand extends Command<int> {
     return _bricks = {
       if (masonInitialized) ..._getBricks(masonYaml),
       ..._getBricks(
-        _getMasonYaml(_getMasonYamlFile(MasonCache.globalDir.path)),
+        _getMasonYaml(_getMasonYamlFile(BricksJson.globalDir.path)),
       ),
     };
   }
@@ -117,11 +125,7 @@ abstract class MasonCommand extends Command<int> {
   File get masonYamlFile {
     if (_masonYamlFile != null) return _masonYamlFile!;
     final file = File(p.join(entryPoint.path, MasonYaml.file));
-    if (!file.existsSync()) {
-      throw const MasonYamlNotFoundException(
-        'Cannot find ${MasonYaml.file}.\nDid you forget to run mason init?',
-      );
-    }
+    if (!file.existsSync()) throw const MasonYamlNotFoundException();
     return _masonYamlFile = file;
   }
 
@@ -130,7 +134,7 @@ abstract class MasonCommand extends Command<int> {
   /// Gets the global `mason.yaml` file.
   File get globalMasonYamlFile {
     if (_globalMasonYamlFile != null) return _globalMasonYamlFile!;
-    return _globalMasonYamlFile = _getMasonYamlFile(MasonCache.globalDir.path);
+    return _globalMasonYamlFile = _getMasonYamlFile(BricksJson.globalDir.path);
   }
 
   File? _globalMasonYamlFile;
@@ -186,9 +190,11 @@ abstract class MasonCommand extends Command<int> {
   /// The path to the cached brick directory if it exists.
   /// Returns `null` if the brick is not cached.
   String? _cacheDirectory(Brick brick) {
-    final key = cache.getKey(brick);
-    if (key == null) return null;
-    return cache.read(key);
+    if (localBricksJson != null) {
+      final path = localBricksJson!.getPath(brick);
+      if (path != null) return path;
+    }
+    return globalBricksJson.getPath(brick);
   }
 
   /// Gets all [BrickYaml] instances for the provided [masonYaml].

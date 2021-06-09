@@ -18,10 +18,12 @@ class GetCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
+    final bricksJson = localBricksJson;
+    if (bricksJson == null) throw const MasonYamlNotFoundException();
     final getDone = logger.progress('getting bricks');
     if (masonYaml.bricks.values.isNotEmpty) {
-      await Future.forEach(masonYaml.bricks.values, cache.writeBrick);
-      await cache.flush();
+      await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+      await bricksJson.flush();
     }
     getDone();
     return ExitCode.success.code;

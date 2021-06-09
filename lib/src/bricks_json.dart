@@ -16,62 +16,43 @@ class WriteBrickException extends MasonException {
   const WriteBrickException(String message) : super(message);
 }
 
-/// {@template mason_cache}
+/// {@template bricks_json}
 /// A local cache for mason bricks.
 ///
 /// This cache contains local paths to all bricks.
 /// {@endtemplate}
-class MasonCache {
-  /// Creates a [MasonCache] instance from the [directory].
-  MasonCache({Directory? directory}) {
-    if (directory != null && directory.path != globalDir.path) {
-      _localBricksJson = File(p.join(directory.path, '.mason', 'bricks.json'));
-      _localCache = _fromBricksJson(_localBricksJson!);
+class BricksJson {
+  /// Creates a [BricksJson] instance from the [directory].
+  BricksJson({required Directory directory}) {
+    _bricksJsonFile = File(p.join(directory.path, '.mason', 'bricks.json'));
+    if (directory.path == BricksJson.globalDir.path) {
+      _bricksJsonFile.createSync(recursive: true);
     }
-    if (!globalDir.existsSync()) globalDir..createSync(recursive: true);
-    _globalBricksJson = File(p.join(globalDir.path, '.mason', 'bricks.json'));
-    _globalCache = _fromBricksJson(_globalBricksJson);
+    _cache = _fromFile(_bricksJsonFile);
   }
 
-  /// Brick to local path from local bricks.
-  Map<String, String>? _localCache;
+  /// Creates a [BricksJson] instance from the global bricks.json file.
+  BricksJson.global() : this(directory: BricksJson.globalDir);
 
-  /// Brick to local path from global bricks.
-  late Map<String, String> _globalCache;
+  /// Creates a [BricksJson] instance from a temporary directory.
+  BricksJson.temp() : this(directory: Directory.systemTemp.createTempSync());
 
-  /// The current cache.
-  /// This is the local cache if it exists
-  /// otherwise it is the global cache.
-  Map<String, String> get _cache => _localCache ?? _globalCache;
+  /// Map of Brick to local path for bricks.
+  late Map<String, String> _cache;
 
-  /// Local `bricks.json` file.
-  /// This can be null if mason is run from a context
-  /// which does not include a `mason.yaml` file.
-  File? _localBricksJson;
-
-  /// Global `bricks.json` file.
-  late File _globalBricksJson;
-
-  /// The current `bricks.json` file.
-  /// This is the local bricks.json file if it exists
-  /// otherwise it is the global `bricks.json` file.
-  File get _bricksJson => _localBricksJson ?? _globalBricksJson;
+  /// Associated bricks.json file
+  late File _bricksJsonFile;
 
   /// Removes all key/value pairs from the cache.
-  /// If [force] is true, all bricks will be removed
-  /// from disk in addition to the in-memory cache.
-  void clear({bool force = false}) {
+  void clear() {
     _cache.clear();
     try {
-      _bricksJson.deleteSync();
-    } catch (_) {}
-    try {
-      if (force) rootDir.deleteSync(recursive: true);
+      _bricksJsonFile.deleteSync();
     } catch (_) {}
   }
 
   /// Populates cache based on `.mason/bricks.json`.
-  Map<String, String> _fromBricksJson(File bricksJson) {
+  Map<String, String> _fromFile(File bricksJson) {
     if (!bricksJson.existsSync()) return <String, String>{};
     final content = bricksJson.readAsStringSync();
     if (content.isEmpty) return <String, String>{};
@@ -83,29 +64,21 @@ class MasonCache {
   /// Encodes entire cache contents.
   String get encode => json.encode(_cache);
 
-  /// Returns the local path to the brick if it is included in the cache.
-  /// Returns `null` if the brick has not been cached.
-  String? read(String remote) {
-    if (_cache.containsKey(remote)) return _cache[remote];
-    return null;
+  /// Removes current [brick] from `bricks.json`.
+  void remove(Brick brick) {
+    final cacheKey = _getKey(brick);
+    if (cacheKey != null) _cache.remove(cacheKey);
   }
 
-  /// Removes key/value pair for key [remote].
-  void remove(String remote) => _cache.remove(remote);
-
-  /// Returns the local path to the brick if it is included in the cache.
-  /// Returns `null` if the brick has not been cached.
-  void write(String remote, String local) => _cache[remote] = local;
-
-  /// Flushes cache contents to `brick.json`.
+  /// Flushes cache contents to `bricks.json`.
   Future<void> flush() async {
-    await _bricksJson.create(recursive: true);
-    await _bricksJson.writeAsString(encode);
+    await _bricksJsonFile.create(recursive: true);
+    await _bricksJsonFile.writeAsString(encode);
   }
 
   /// Returns the cache key for the given [brick].
   /// Return `null` if the [brick] does not have a valid path.
-  String? getKey(Brick brick) {
+  String? _getKey(Brick brick) {
     if (brick.path != null) {
       final path = brick.path!;
       final name = p.basenameWithoutExtension(path);
@@ -126,9 +99,14 @@ class MasonCache {
     return null;
   }
 
+  /// Returns the local path to the brick if it is included in the cache.
+  /// Returns `null` if the brick has not been cached.
+  String? getPath(Brick brick) => _cache[_getKey(brick)];
+
   /// Caches brick if necessary and updates `bricks.json`.
-  Future<String> writeBrick(Brick brick) async {
-    final key = getKey(brick);
+  /// Returns the local path to the brick.
+  Future<String> add(Brick brick) async {
+    final key = _getKey(brick);
     if (key == null) {
       throw const WriteBrickException(
         'Brick must contain either a path or a git url',
@@ -136,27 +114,29 @@ class MasonCache {
     }
 
     if (brick.path != null) {
-      final remoteDir = read(key);
+      final remoteDir = getPath(brick);
       if (remoteDir != null) return remoteDir;
-      return _writeLocalBrick(brick.path!);
+      return _addLocalBrick(brick.path!);
     }
 
-    return _writeRemoteBrick(brick.git!);
+    return _addRemoteBrick(brick.git!);
   }
 
   /// Writes local brick at [path] to cache
   /// and returns the local path to the brick.
-  String _writeLocalBrick(String path) {
+  String _addLocalBrick(String path) {
     final localPath = p.canonicalize(path);
-    write(getKey(Brick(path: path))!, localPath);
+    _cache[_getKey(Brick(path: path))!] = localPath;
     return localPath;
   }
 
   /// Writes remote brick at [gitPath] to cache
   /// and returns the local path to the brick.
-  Future<String> _writeRemoteBrick(GitPath gitPath) async {
-    final key = getKey(Brick(git: gitPath))!;
-    final dirName = getKey(Brick(git: GitPath(gitPath.url, ref: gitPath.ref)))!;
+  Future<String> _addRemoteBrick(GitPath gitPath) async {
+    final key = _getKey(Brick(git: gitPath))!;
+    final dirName = _getKey(
+      Brick(git: GitPath(gitPath.url, ref: gitPath.ref)),
+    )!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = await directory.exists();
     final directoryIsNotEmpty = directoryExists
@@ -172,7 +152,7 @@ class MasonCache {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
-      write(key, directory.path);
+      _cache[key] = directory.path;
       return directory.path;
     }
 
@@ -180,7 +160,7 @@ class MasonCache {
 
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
-    write(key, directory.path);
+    _cache[key] = directory.path;
     return directory.path;
   }
 

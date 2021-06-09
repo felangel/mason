@@ -48,4 +48,13 @@ class BrickYaml {
   BrickYaml copyWith({String? path}) {
     return BrickYaml(name, description, vars: vars, path: path ?? this.path);
   }
+
+  @override
+  bool operator ==(Object other) {
+    if (identical(this, other)) return true;
+    return other is BrickYaml && other.name == name;
+  }
+
+  @override
+  int get hashCode => name.hashCode;
 }

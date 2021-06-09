@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
+import 'package:mason/src/command.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
@@ -33,9 +34,7 @@ void main() {
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        () => logger.err(
-          'Could not find mason.yaml.\nDid you forget to run mason init?',
-        ),
+        () => logger.err(const MasonYamlNotFoundException().message),
       ).called(1);
     });
 

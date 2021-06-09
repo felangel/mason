@@ -47,7 +47,9 @@ class InstallCommand extends MasonCommand {
     if (results.rest.isEmpty) {
       throw UsageException('path to the brick is required.', usage);
     }
+
     final location = results.rest.first;
+    final bricksJson = globalBricksJson;
     final downloadDone = logger.progress('Downloading brick at $location');
 
     late final Brick brick;
@@ -59,7 +61,7 @@ class InstallCommand extends MasonCommand {
         throw UsageException('brick not found at path $location', usage);
       }
       brick = Brick(path: file.parent.path);
-      await cache.writeBrick(brick);
+      await bricksJson.add(brick);
     } else {
       final gitPath = GitPath(
         location,
@@ -68,7 +70,7 @@ class InstallCommand extends MasonCommand {
       );
       brick = Brick(git: gitPath);
       try {
-        final directory = await cache.writeBrick(brick);
+        final directory = await bricksJson.add(brick);
         file = File(p.join(directory, gitPath.path, BrickYaml.file));
       } catch (_) {
         throw UsageException('brick not found at url $location', usage);
@@ -89,7 +91,7 @@ class InstallCommand extends MasonCommand {
         Yaml.encode(MasonYaml(bricks).toJson()),
       );
     }
-    await cache.flush();
+    await bricksJson.flush();
     installDone();
     return ExitCode.success.code;
   }

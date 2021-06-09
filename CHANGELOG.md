@@ -1,3 +1,13 @@
+# 0.0.1-dev.38
+
+- feat!: remove `--force` from `mason cache clear`
+  - `mason cache clear` will remove all local bricks so `--force` is not necessary
+- fix: `mason cache clear` behavior to always clear local and global brick caches
+- fix: local and global brick installation conflicts
+- fix: `mason list` duplicate bricks
+- refactor: `MasonCache` to `BricksJson`
+  - simplification of internal APIs and cache implementation
+
 # 0.0.1-dev.37
 
 - feat: add `mason list` command
