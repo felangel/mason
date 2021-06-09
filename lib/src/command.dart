@@ -191,10 +191,10 @@ abstract class MasonCommand extends Command<int> {
   /// Returns `null` if the brick is not cached.
   String? _cacheDirectory(Brick brick) {
     if (localBricksJson != null) {
-      final value = localBricksJson!.getValue(brick);
-      if (value != null) return value;
+      final path = localBricksJson!.getPath(brick);
+      if (path != null) return path;
     }
-    return globalBricksJson.getValue(brick);
+    return globalBricksJson.getPath(brick);
   }
 
   /// Gets all [BrickYaml] instances for the provided [masonYaml].
