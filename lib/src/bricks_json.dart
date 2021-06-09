@@ -16,62 +16,47 @@ class WriteBrickException extends MasonException {
   const WriteBrickException(String message) : super(message);
 }
 
-/// {@template mason_cache}
+/// {@template bricks_json}
 /// A local cache for mason bricks.
 ///
 /// This cache contains local paths to all bricks.
 /// {@endtemplate}
-class MasonCache {
-  /// Creates a [MasonCache] instance from the [directory].
-  MasonCache({Directory? directory}) {
-    if (directory != null && directory.path != globalDir.path) {
-      _localBricksJson = File(p.join(directory.path, '.mason', 'bricks.json'));
-      _localCache = _fromBricksJson(_localBricksJson!);
+class BricksJson {
+  /// Creates a [BricksJson] instance from the [directory].
+  BricksJson({required Directory directory}) {
+    _bricksJsonFile = File(p.join(directory.path, '.mason', 'bricks.json'));
+    if (directory.path == BricksJson.globalDir.path) {
+      _bricksJsonFile.createSync(recursive: true);
     }
-    if (!globalDir.existsSync()) globalDir..createSync(recursive: true);
-    _globalBricksJson = File(p.join(globalDir.path, '.mason', 'bricks.json'));
-    _globalCache = _fromBricksJson(_globalBricksJson);
+    _cache = _fromFile(_bricksJsonFile);
   }
 
-  /// Brick to local path from local bricks.
-  Map<String, String>? _localCache;
+  /// Creates a [BricksJson] instance from the global bricks.json file.
+  BricksJson.global() : this(directory: BricksJson.globalDir);
 
-  /// Brick to local path from global bricks.
-  late Map<String, String> _globalCache;
+  /// Creates a [BricksJson] instance from a temporary directory.
+  BricksJson.temp() : this(directory: Directory.systemTemp.createTempSync());
 
-  /// The current cache.
-  /// This is the local cache if it exists
-  /// otherwise it is the global cache.
-  Map<String, String> get _cache => _localCache ?? _globalCache;
+  /// Map of Brick to local path for bricks.
+  late Map<String, String> _cache;
 
-  /// Local `bricks.json` file.
-  /// This can be null if mason is run from a context
-  /// which does not include a `mason.yaml` file.
-  File? _localBricksJson;
-
-  /// Global `bricks.json` file.
-  late File _globalBricksJson;
-
-  /// The current `bricks.json` file.
-  /// This is the local bricks.json file if it exists
-  /// otherwise it is the global `bricks.json` file.
-  File get _bricksJson => _localBricksJson ?? _globalBricksJson;
+  /// Associated bricks.json file
+  late File _bricksJsonFile;
 
   /// Removes all key/value pairs from the cache.
   /// If [force] is true, all bricks will be removed
   /// from disk in addition to the in-memory cache.
   void clear({bool force = false}) {
     _cache.clear();
-    try {
-      _bricksJson.deleteSync();
-    } catch (_) {}
-    try {
-      if (force) rootDir.deleteSync(recursive: true);
-    } catch (_) {}
+    if (force) {
+      try {
+        _bricksJsonFile.deleteSync();
+      } catch (_) {}
+    }
   }
 
   /// Populates cache based on `.mason/bricks.json`.
-  Map<String, String> _fromBricksJson(File bricksJson) {
+  Map<String, String> _fromFile(File bricksJson) {
     if (!bricksJson.existsSync()) return <String, String>{};
     final content = bricksJson.readAsStringSync();
     if (content.isEmpty) return <String, String>{};
@@ -99,8 +84,8 @@ class MasonCache {
 
   /// Flushes cache contents to `brick.json`.
   Future<void> flush() async {
-    await _bricksJson.create(recursive: true);
-    await _bricksJson.writeAsString(encode);
+    await _bricksJsonFile.create(recursive: true);
+    await _bricksJsonFile.writeAsString(encode);
   }
 
   /// Returns the cache key for the given [brick].

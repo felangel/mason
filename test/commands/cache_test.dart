@@ -35,7 +35,7 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('clear removes .mason/brick.json', () async {
+    test('clear does not remove .mason/brick.json', () async {
       final expectedBrickJsonPath = path.join(
         Directory.current.path,
         '.mason',
@@ -48,7 +48,7 @@ void main() {
 
       final cacheClearResult = await commandRunner.run(['cache', 'clear']);
       expect(cacheClearResult, equals(ExitCode.success.code));
-      expect(File(expectedBrickJsonPath).existsSync(), isFalse);
+      expect(File(expectedBrickJsonPath).existsSync(), isTrue);
     });
 
     test('clear --force removes .mason/brick.json and warns user', () async {

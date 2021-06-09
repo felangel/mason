@@ -9,9 +9,9 @@ import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 
 import 'brick_yaml.dart';
+import 'bricks_json.dart';
 import 'logger.dart';
 import 'mason_bundle.dart';
-import 'mason_cache.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
@@ -93,8 +93,7 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
-    final cache = MasonCache();
-    final directory = await cache.writeBrick(Brick(git: gitPath));
+    final directory = await BricksJson.temp().writeBrick(Brick(git: gitPath));
     final file = File(p.join(directory, gitPath.path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),

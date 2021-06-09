@@ -1,6 +1,7 @@
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 
+import '../bricks_json.dart';
 import '../command.dart';
 
 /// {@template cache_command}
@@ -25,13 +26,21 @@ class CacheCommand extends MasonCommand {
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
   ClearCacheCommand({Logger? logger}) : super(logger: logger) {
-    argParser.addFlag(
-      'force',
-      abbr: 'f',
-      defaultsTo: false,
-      help: 'removes all bricks from disk and clears '
-          'the in-memory cache.',
-    );
+    argParser
+      ..addFlag(
+        'force',
+        abbr: 'f',
+        defaultsTo: false,
+        help: 'removes all local bricks from disk and clears '
+            'the in-memory cache.',
+      )
+      ..addFlag(
+        'global',
+        abbr: 'g',
+        defaultsTo: false,
+        help: 'removes all global bricks from disk and clears '
+            'the in-memory cache.',
+      );
   }
 
   @override
@@ -48,8 +57,18 @@ class ClearCacheCommand extends MasonCommand {
         'using --force\nI sure hope you know what you are doing.',
       );
     }
+    final isGlobal = results['global'] == true;
     final clearDone = logger.progress('clearing cache');
-    cache.clear(force: force);
+    isGlobal
+        ? globalBricksJson.clear(force: force)
+        : localBricksJson?.clear(force: force);
+
+    if (isGlobal && force) {
+      try {
+        BricksJson.rootDir.deleteSync(recursive: true);
+      } catch (_) {}
+    }
+
     clearDone();
     return ExitCode.success.code;
   }

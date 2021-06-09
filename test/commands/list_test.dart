@@ -4,7 +4,7 @@ import 'package:io/ansi.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
-import 'package:mason/src/mason_cache.dart';
+import 'package:mason/src/bricks_json.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -25,7 +25,7 @@ void main() {
       commandRunner = MasonCommandRunner(logger: logger);
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.list');
-      MasonCache().clear(force: true);
+      BricksJson.global().clear(force: true);
     });
 
     tearDown(() {
@@ -38,7 +38,7 @@ void main() {
       verifyNever(() => logger.info(any()));
     });
 
-    test('ls is available as an alis', () async {
+    test('ls is available as an alias', () async {
       final result = await commandRunner.run(['ls']);
       expect(result, equals(ExitCode.success.code));
       verifyNever(() => logger.info(any()));
@@ -65,7 +65,7 @@ void main() {
       );
       await expectLater(
         MasonCommandRunner(logger: logger).run(
-          ['install', '--source', 'path', greetingPath],
+          ['i', '--source', 'path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );

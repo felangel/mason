@@ -38,6 +38,8 @@ class NewCommand extends MasonCommand {
     if (results.rest.isEmpty) {
       throw UsageException('Name of the new brick is required.', usage);
     }
+    final bricksJson = localBricksJson;
+    if (bricksJson == null) throw const MasonYamlNotFoundException();
     final name = results.rest.first.snakeCase;
     final description = results['desc'] as String;
     final directory = Directory(p.join(entryPoint.path, 'bricks'));
@@ -64,8 +66,8 @@ class NewCommand extends MasonCommand {
       if (!masonYaml.bricks.containsKey(name))
         masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
     ]);
-    await cache.writeBrick(newBrick);
-    await cache.flush();
+    await bricksJson.writeBrick(newBrick);
+    await bricksJson.flush();
 
     done('Created new brick: $name');
     logger

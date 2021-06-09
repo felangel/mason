@@ -39,9 +39,7 @@ class MasonYaml {
     var dir = cwd;
     while (prev?.path != dir.path) {
       final masonConfig = File(p.join(dir.path, 'mason.yaml'));
-      if (masonConfig.existsSync()) {
-        return masonConfig;
-      }
+      if (masonConfig.existsSync()) return masonConfig;
       prev = dir;
       dir = dir.parent;
     }

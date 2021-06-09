@@ -28,6 +28,7 @@ class UninstallCommand extends MasonCommand {
       throw UsageException('name of the brick is required.', usage);
     }
 
+    final bricksJson = globalBricksJson;
     final brickName = results.rest.first;
     final brick = globalMasonYaml.bricks[brickName];
     if (brick == null) {
@@ -35,8 +36,8 @@ class UninstallCommand extends MasonCommand {
     }
 
     final uninstallDone = logger.progress('Uninstalling $brickName');
-    final cacheKey = cache.getKey(brick);
-    if (cacheKey != null) cache.remove(cacheKey);
+    final cacheKey = bricksJson.getKey(brick);
+    if (cacheKey != null) bricksJson.remove(cacheKey);
 
     final bricks = Map.of(globalMasonYaml.bricks)
       ..removeWhere((key, value) => key == brickName);
@@ -44,7 +45,7 @@ class UninstallCommand extends MasonCommand {
       Yaml.encode(MasonYaml(bricks).toJson()),
     );
 
-    await cache.flush();
+    await bricksJson.flush();
     uninstallDone();
     return ExitCode.success.code;
   }
