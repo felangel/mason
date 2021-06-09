@@ -61,7 +61,7 @@ class InstallCommand extends MasonCommand {
         throw UsageException('brick not found at path $location', usage);
       }
       brick = Brick(path: file.parent.path);
-      await bricksJson.writeBrick(brick);
+      await bricksJson.add(brick);
     } else {
       final gitPath = GitPath(
         location,
@@ -70,7 +70,7 @@ class InstallCommand extends MasonCommand {
       );
       brick = Brick(git: gitPath);
       try {
-        final directory = await bricksJson.writeBrick(brick);
+        final directory = await bricksJson.add(brick);
         file = File(p.join(directory, gitPath.path, BrickYaml.file));
       } catch (_) {
         throw UsageException('brick not found at url $location', usage);

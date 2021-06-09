@@ -68,21 +68,13 @@ class BricksJson {
   /// Encodes entire cache contents.
   String get encode => json.encode(_cache);
 
-  /// Returns the local path to the brick if it is included in the cache.
-  /// Returns `null` if the brick has not been cached.
-  String? read(String remote) {
-    if (_cache.containsKey(remote)) return _cache[remote];
-    return null;
+  /// Removes current [brick] from `bricks.json`.
+  void remove(Brick brick) {
+    final cacheKey = getKey(brick);
+    if (cacheKey != null) _cache.remove(cacheKey);
   }
 
-  /// Removes key/value pair for key [remote].
-  void remove(String remote) => _cache.remove(remote);
-
-  /// Returns the local path to the brick if it is included in the cache.
-  /// Returns `null` if the brick has not been cached.
-  void write(String remote, String local) => _cache[remote] = local;
-
-  /// Flushes cache contents to `brick.json`.
+  /// Flushes cache contents to `bricks.json`.
   Future<void> flush() async {
     await _bricksJsonFile.create(recursive: true);
     await _bricksJsonFile.writeAsString(encode);
@@ -111,8 +103,13 @@ class BricksJson {
     return null;
   }
 
+  /// Returns the local path to the brick if it is included in the cache.
+  /// Returns `null` if the brick has not been cached.
+  String? getValue(Brick brick) => _cache[getKey(brick)];
+
   /// Caches brick if necessary and updates `bricks.json`.
-  Future<String> writeBrick(Brick brick) async {
+  /// Returns the local path to the brick.
+  Future<String> add(Brick brick) async {
     final key = getKey(brick);
     if (key == null) {
       throw const WriteBrickException(
@@ -121,25 +118,25 @@ class BricksJson {
     }
 
     if (brick.path != null) {
-      final remoteDir = read(key);
+      final remoteDir = getValue(brick);
       if (remoteDir != null) return remoteDir;
-      return _writeLocalBrick(brick.path!);
+      return _addLocalBrick(brick.path!);
     }
 
-    return _writeRemoteBrick(brick.git!);
+    return _addRemoteBrick(brick.git!);
   }
 
   /// Writes local brick at [path] to cache
   /// and returns the local path to the brick.
-  String _writeLocalBrick(String path) {
+  String _addLocalBrick(String path) {
     final localPath = p.canonicalize(path);
-    write(getKey(Brick(path: path))!, localPath);
+    _write(getKey(Brick(path: path))!, localPath);
     return localPath;
   }
 
   /// Writes remote brick at [gitPath] to cache
   /// and returns the local path to the brick.
-  Future<String> _writeRemoteBrick(GitPath gitPath) async {
+  Future<String> _addRemoteBrick(GitPath gitPath) async {
     final key = getKey(Brick(git: gitPath))!;
     final dirName = getKey(Brick(git: GitPath(gitPath.url, ref: gitPath.ref)))!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
@@ -157,7 +154,7 @@ class BricksJson {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
-      write(key, directory.path);
+      _write(key, directory.path);
       return directory.path;
     }
 
@@ -165,9 +162,13 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
-    write(key, directory.path);
+    _write(key, directory.path);
     return directory.path;
   }
+
+  /// Returns the local path to the brick if it is included in the cache.
+  /// Returns `null` if the brick has not been cached.
+  void _write(String remote, String local) => _cache[remote] = local;
 
   Future<void> _clone(GitPath gitPath, Directory directory) async {
     await Git.run(['clone', gitPath.url, directory.path]);

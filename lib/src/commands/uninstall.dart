@@ -36,9 +36,7 @@ class UninstallCommand extends MasonCommand {
     }
 
     final uninstallDone = logger.progress('Uninstalling $brickName');
-    final cacheKey = bricksJson.getKey(brick);
-    if (cacheKey != null) bricksJson.remove(cacheKey);
-
+    bricksJson.remove(brick);
     final bricks = Map.of(globalMasonYaml.bricks)
       ..removeWhere((key, value) => key == brickName);
     globalMasonYamlFile.writeAsStringSync(

@@ -66,7 +66,7 @@ class NewCommand extends MasonCommand {
       if (!masonYaml.bricks.containsKey(name))
         masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
     ]);
-    await bricksJson.writeBrick(newBrick);
+    await bricksJson.add(newBrick);
     await bricksJson.flush();
 
     done('Created new brick: $name');
