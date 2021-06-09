@@ -44,15 +44,11 @@ class BricksJson {
   late File _bricksJsonFile;
 
   /// Removes all key/value pairs from the cache.
-  /// If [force] is true, all bricks will be removed
-  /// from disk in addition to the in-memory cache.
-  void clear({bool force = false}) {
+  void clear() {
     _cache.clear();
-    if (force) {
-      try {
-        _bricksJsonFile.deleteSync();
-      } catch (_) {}
-    }
+    try {
+      _bricksJsonFile.deleteSync();
+    } catch (_) {}
   }
 
   /// Populates cache based on `.mason/bricks.json`.

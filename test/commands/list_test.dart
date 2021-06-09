@@ -25,7 +25,7 @@ void main() {
       commandRunner = MasonCommandRunner(logger: logger);
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
       setUpTestingEnvironment(cwd, suffix: '.list');
-      BricksJson.global().clear(force: true);
+      BricksJson.global().clear();
     });
 
     tearDown(() {

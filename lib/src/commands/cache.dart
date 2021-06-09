@@ -59,11 +59,9 @@ class ClearCacheCommand extends MasonCommand {
     }
     final isGlobal = results['global'] == true;
     final clearDone = logger.progress('clearing cache');
-    isGlobal
-        ? globalBricksJson.clear(force: force)
-        : localBricksJson?.clear(force: force);
+    isGlobal ? globalBricksJson.clear() : localBricksJson?.clear();
 
-    if (isGlobal && force) {
+    if (force) {
       try {
         BricksJson.rootDir.deleteSync(recursive: true);
       } catch (_) {}
