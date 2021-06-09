@@ -26,21 +26,12 @@ class CacheCommand extends MasonCommand {
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
   ClearCacheCommand({Logger? logger}) : super(logger: logger) {
-    argParser
-      ..addFlag(
-        'force',
-        abbr: 'f',
-        defaultsTo: false,
-        help: 'removes all local bricks from disk and clears '
-            'the in-memory cache.',
-      )
-      ..addFlag(
-        'global',
-        abbr: 'g',
-        defaultsTo: false,
-        help: 'removes all global bricks from disk and clears '
-            'the in-memory cache.',
-      );
+    argParser.addFlag(
+      'force',
+      abbr: 'f',
+      defaultsTo: false,
+      help: 'removes all bricks from disk.',
+    );
   }
 
   @override
@@ -57,9 +48,9 @@ class ClearCacheCommand extends MasonCommand {
         'using --force\nI sure hope you know what you are doing.',
       );
     }
-    final isGlobal = results['global'] == true;
     final clearDone = logger.progress('clearing cache');
-    isGlobal ? globalBricksJson.clear() : localBricksJson?.clear();
+    globalBricksJson.clear();
+    localBricksJson?.clear();
 
     if (force) {
       try {

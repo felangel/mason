@@ -52,7 +52,7 @@ void main() {
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
     });
 
-    test('clear -g removes global .mason/bricks.json', () async {
+    test('clear removes global .mason/bricks.json', () async {
       final expectedBrickJsonFile = File(
         path.join(
           BricksJson.globalDir.path,
@@ -67,9 +67,7 @@ void main() {
 
       expect(expectedBrickJsonFile.existsSync(), isTrue);
 
-      final result = await commandRunner.run(
-        ['cache', 'clear', '-g'],
-      );
+      final result = await commandRunner.run(['cache', 'clear']);
       expect(result, equals(ExitCode.success.code));
       expect(expectedBrickJsonFile.existsSync(), isFalse);
     });
