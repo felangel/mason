@@ -21,18 +21,11 @@ class CacheCommand extends MasonCommand {
 }
 
 /// {@template cache_command}
-/// `mason cache clear` command which wipes the local mason cache.
+/// `mason cache clear` command which clears all local bricks.
 /// {@endtemplate}
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  ClearCacheCommand({Logger? logger}) : super(logger: logger) {
-    argParser.addFlag(
-      'force',
-      abbr: 'f',
-      defaultsTo: false,
-      help: 'removes all bricks from disk.',
-    );
-  }
+  ClearCacheCommand({Logger? logger}) : super(logger: logger);
 
   @override
   final String description = 'Clears the mason cache.';
@@ -42,21 +35,12 @@ class ClearCacheCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final force = results['force'] == true;
-    if (force) {
-      logger.warn(
-        'using --force\nI sure hope you know what you are doing.',
-      );
-    }
     final clearDone = logger.progress('clearing cache');
-    globalBricksJson.clear();
-    localBricksJson?.clear();
 
-    if (force) {
-      try {
-        BricksJson.rootDir.deleteSync(recursive: true);
-      } catch (_) {}
-    }
+    localBricksJson?.clear();
+    try {
+      BricksJson.rootDir.deleteSync(recursive: true);
+    } catch (_) {}
 
     clearDone();
     return ExitCode.success.code;

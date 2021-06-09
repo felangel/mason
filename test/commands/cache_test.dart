@@ -72,7 +72,7 @@ void main() {
       expect(expectedBrickJsonFile.existsSync(), isFalse);
     });
 
-    test('clear --force removes .mason/bricks.json and warns user', () async {
+    test('clear removes .mason/bricks.json', () async {
       final expectedBrickJsonPath = path.join(
         Directory.current.path,
         '.mason',
@@ -87,9 +87,7 @@ void main() {
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
       expect(BricksJson.globalDir.existsSync(), isTrue);
 
-      final cacheClearResult = await commandRunner.run(
-        ['cache', 'clear', '--force'],
-      );
+      final cacheClearResult = await commandRunner.run(['cache', 'clear']);
       expect(cacheClearResult, equals(ExitCode.success.code));
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
       expect(
@@ -97,11 +95,6 @@ void main() {
         isTrue,
       );
       expect(BricksJson.globalDir.existsSync(), isFalse);
-      verify(
-        () => logger.warn(
-          'using --force\nI sure hope you know what you are doing.',
-        ),
-      ).called(1);
     });
   });
 }
