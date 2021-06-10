@@ -173,7 +173,7 @@ $ mason i https://github.com/user/repo
 Once a brick is installed globally it can be used from anywhere via the `mason make` command:
 
 ```sh
-$ mason make <NAME-OF-GLOBAL-BRICK>
+$ mason make <BRICK_NAME>
 ```
 
 ## Uninstall Brick Templates
@@ -215,10 +215,10 @@ To generate a bundle:
 
 ```sh
 # Universal Bundle
-mason bundle ./path/to/brick -d ./path/to/destination
+mason bundle ./path/to/brick -o ./path/to/destination
 
 # Dart Bundle
-mason bundle ./path/to/brick -t dart -d ./path/to/destination
+mason bundle ./path/to/brick -t dart -o ./path/to/destination
 ```
 
 ## Usage
