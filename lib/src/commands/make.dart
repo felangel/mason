@@ -56,7 +56,7 @@ class _MakeCommand extends MasonCommand {
       ..addOption(
         'output-dir',
         abbr: 'o',
-        help: 'Directory where to output the generated bundle.',
+        help: 'Directory where to output the generated code.',
         defaultsTo: '.',
       );
     for (final arg in _brick.vars) {
