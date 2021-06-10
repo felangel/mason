@@ -30,13 +30,14 @@ class BundleCommand extends MasonCommand {
       ..addOption(
         'output-dir',
         abbr: 'o',
-        help: 'directory where to output the generated bundle',
+        help: 'Directory where to output the generated bundle.',
         defaultsTo: '.',
       )
       ..addOption(
         'type',
         abbr: 't',
-        help: 'type of bundle to generate (universal or dart)',
+        help: 'Type of bundle to generate.',
+        allowed: ['universal', 'dart'],
         defaultsTo: 'universal',
       );
   }
