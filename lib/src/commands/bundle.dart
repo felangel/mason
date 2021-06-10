@@ -28,9 +28,9 @@ class BundleCommand extends MasonCommand {
   BundleCommand({Logger? logger}) : super(logger: logger) {
     argParser
       ..addOption(
-        'destination',
-        abbr: 'd',
-        help: 'destination where to write the generated bundle',
+        'output-dir',
+        abbr: 'o',
+        help: 'directory where to output the generated bundle',
         defaultsTo: '.',
       )
       ..addOption(
@@ -61,19 +61,19 @@ class BundleCommand extends MasonCommand {
     }
 
     final bundle = await createBundle(brick);
-    final destination = results['destination'] as String;
+    final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
 
     switch (bundleType) {
       case BundleType.dart:
-        File(path.join(destination, '${bundle.name}_bundle.dart'))
+        File(path.join(outputDir, '${bundle.name}_bundle.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync(
             "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(${json.encode(bundle.toJson())});",
           );
         break;
       case BundleType.universal:
-        File(path.join(destination, '${bundle.name}.bundle'))
+        File(path.join(outputDir, '${bundle.name}.bundle'))
           ..createSync(recursive: true)
           ..writeAsStringSync(json.encode(bundle.toJson()));
         break;
