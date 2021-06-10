@@ -116,7 +116,7 @@ void main() {
       final result = await commandRunner.run([
         'make',
         'todos',
-        '--json',
+        '--config-path',
         'todos.json',
       ]);
       expect(result, equals(ExitCode.usage.code));
@@ -217,7 +217,7 @@ in todos.json''',
       final result = await commandRunner.run([
         'make',
         'todos',
-        '--json',
+        '-c',
         'todos.json',
       ]);
       expect(result, equals(ExitCode.success.code));
@@ -249,6 +249,25 @@ in todos.json''',
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'widget'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates greeting with custom output directory', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'output_dir', 'dir'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name', '-o', 'dir'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'output_dir'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'output_dir'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

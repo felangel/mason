@@ -21,7 +21,7 @@ Run the following command in the current directory:
 
 ```sh
 mason get # only first time
-mason make todos --json todos.json
+mason make todos -c todos.json
 ```
 
 `TODOS.md` should be created in the current directory with the following contents:

@@ -70,15 +70,15 @@ $ mason make hello
 name: Felix
 ```
 
-### JSON Input Variables
+### Config File for Input Variables
 
-Any variables can be passed via json file:
+Any variables can be passed via a config file:
 
 ```dart
-$ mason make hello --json hello.json
+$ mason make hello -c config.json
 ```
 
-where `hello.json` is:
+where `config.json` is:
 
 ```json
 {
@@ -90,6 +90,14 @@ The above commands will all generate `HELLO.md` in the current directory with th
 
 ```md
 Hello Felix!
+```
+
+### Custom Output Directory
+
+By default `mason make` will generate the template in the current working directory but a custom output directory can be specified via the `-o` option:
+
+```sh
+$ mason make hello --name Felix -o ./path/to/directory
 ```
 
 ## Creating New Bricks

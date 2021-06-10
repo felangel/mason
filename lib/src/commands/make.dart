@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
+import 'package:path/path.dart' as p;
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 
@@ -46,11 +47,18 @@ class MakeCommand extends MasonCommand {
 
 class _MakeCommand extends MasonCommand {
   _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
-    argParser.addOption(
-      'json',
-      abbr: 'j',
-      help: 'Path to json file containing variables',
-    );
+    argParser
+      ..addOption(
+        'config-path',
+        abbr: 'c',
+        help: 'Path to config json file containing variables.',
+      )
+      ..addOption(
+        'output-dir',
+        abbr: 'o',
+        help: 'Directory where to output the generated code.',
+        defaultsTo: '.',
+      );
     for (final arg in _brick.vars) {
       argParser.addOption(arg);
     }
@@ -66,7 +74,11 @@ class _MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final target = DirectoryGeneratorTarget(cwd, logger);
+    final outputDir = p.canonicalize(
+      p.join(cwd.path, results['output-dir'] as String),
+    );
+    final configPath = results['config-path'] as String?;
+    final target = DirectoryGeneratorTarget(Directory(outputDir), logger);
 
     Function? generateDone;
     try {
@@ -75,10 +87,10 @@ class _MakeCommand extends MasonCommand {
       generateDone = logger.progress('Making ${generator.id}');
 
       try {
-        vars.addAll(await _decodeFile(results['json'] as String?));
+        vars.addAll(await _decodeFile(configPath));
       } on FormatException catch (error) {
         generateDone();
-        logger.err('${error}in ${results['json']}');
+        logger.err('${error}in $configPath');
         return ExitCode.usage.code;
       } on Exception catch (error) {
         generateDone();
@@ -90,15 +102,11 @@ class _MakeCommand extends MasonCommand {
         if (vars.containsKey(variable)) continue;
         final arg = results[variable] as String?;
         if (arg != null) {
-          vars.addAll(
-            <String, dynamic>{variable: _maybeDecode(arg)},
-          );
+          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
         } else {
-          vars.addAll(
-            <String, dynamic>{
-              variable: _maybeDecode(logger.prompt('$variable: '))
-            },
-          );
+          vars.addAll(<String, dynamic>{
+            variable: _maybeDecode(logger.prompt('$variable: '))
+          });
         }
       }
       final fileCount = await generator.generate(target, vars: vars);
@@ -119,8 +127,8 @@ class _MakeCommand extends MasonCommand {
 
   Future<Map<String, dynamic>> _decodeFile(String? path) async {
     if (path == null) return <String, dynamic>{};
-    final jsonVarsContent = await File(path).readAsString();
-    return json.decode(jsonVarsContent) as Map<String, dynamic>;
+    final content = await File(path).readAsString();
+    return json.decode(content) as Map<String, dynamic>;
   }
 
   dynamic _maybeDecode(String value) {
