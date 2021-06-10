@@ -97,7 +97,7 @@ Hello Felix!
 By default `mason make` will generate the template in the current working directory but a custom output directory can be specified via the `-o` option:
 
 ```sh
-$ mason make hello --name Felix -c ./path/to/directory
+$ mason make hello --name Felix -o ./path/to/directory
 ```
 
 ## Creating New Bricks
