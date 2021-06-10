@@ -1,3 +1,9 @@
+# 0.0.1-dev.39
+
+- refactor!: rename `mason make --json` (`-j`) to `mason make --config-path` (`-c`)
+- refactor!: rename `mason bundle --directory` (`-d`) to `mason bundle --output-dir` (`-o`)
+- feat!: update `mason make` to support custom output directory via `--output-dir` (`-o`)
+
 # 0.0.1-dev.38
 
 - feat!: remove `--force` from `mason cache clear`
