@@ -1,3 +1,7 @@
+# 0.0.1-dev.40
+
+fix: create target directory if it does not exist
+
 # 0.0.1-dev.39
 
 - feat!: update `mason make` to support custom output directory via `--output-dir` (`-o`)
