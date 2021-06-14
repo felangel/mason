@@ -254,20 +254,23 @@ in todos.json''',
     });
 
     test('generates greeting with custom output directory', () async {
-      final testDir = Directory(
-        path.join(Directory.current.path, 'output_dir', 'dir'),
-      )..createSync(recursive: true);
-      Directory.current = testDir.path;
       final result = await commandRunner.run(
-        ['make', 'greeting', '--name', 'test-name', '-o', 'dir'],
+        [
+          'make',
+          'greeting',
+          '--name',
+          'test-name',
+          '-o',
+          path.join('output_dir', 'dir')
+        ],
       );
       expect(result, equals(ExitCode.success.code));
 
       final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.make'), 'output_dir'),
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'output_dir', 'dir'),
       );
       final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'make'), 'output_dir'),
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'output_dir', 'dir'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

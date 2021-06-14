@@ -183,7 +183,7 @@ abstract class Generator implements Comparable<Generator> {
 class DirectoryGeneratorTarget extends GeneratorTarget {
   /// {@macro directory_generator_target}
   DirectoryGeneratorTarget(this.dir, this.logger) {
-    dir.createSync();
+    dir.createSync(recursive: true);
   }
 
   /// The target [Directory].
