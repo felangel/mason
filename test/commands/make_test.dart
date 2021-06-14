@@ -255,7 +255,7 @@ in todos.json''',
 
     test('generates greeting with custom output directory', () async {
       final testDir = Directory(
-        path.join(Directory.current.path, 'output_dir', 'dir'),
+        path.join(Directory.current.path, 'output_dir'),
       )..createSync(recursive: true);
       Directory.current = testDir.path;
       final result = await commandRunner.run(
