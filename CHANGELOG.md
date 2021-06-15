@@ -1,3 +1,10 @@
+# 0.0.1-dev.41
+
+- feat: add `OverwriteRule` for file conflict resolution (`Yna`)
+  - `Y` - overwrite (default)
+  - `n` - do not overwrite
+  - `a` - overwrite this an all others
+
 # 0.0.1-dev.40
 
 - fix: create target directory if it does not exist
