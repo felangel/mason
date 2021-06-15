@@ -116,7 +116,7 @@ class _MakeCommand extends MasonCommand {
           '${lightGreen.wrap('✓')} '
           'Generated $fileCount file(s):',
         )
-        ..flush(logger.success);
+        ..flush(logger.detail);
       return ExitCode.success.code;
     } on Exception catch (error) {
       generateDone?.call();

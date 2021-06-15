@@ -5,6 +5,7 @@ import 'dart:io' show Directory, File;
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
+import 'package:io/ansi.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 
@@ -25,6 +26,18 @@ final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
 final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
 final _whiteSpace = RegExp(r'\s+');
+
+/// The overwrite rule when generating code and a conflict occurs.
+enum OverwriteRule {
+  /// Always overwrite the existing file.
+  alwaysYes,
+
+  /// Overwrite one time.
+  yes,
+
+  /// Do not overwrite one time.
+  no,
+}
 
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
@@ -192,14 +205,51 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   /// Logger used to output created files.
   final Logger logger;
 
-  @override
-  Future<File> createFile(String path, List<int> contents) {
-    final file = File(p.join(dir.path, path));
+  /// The rule used to handle file conflicts.
+  /// Determines whether to overwrite existing file or skip.
+  OverwriteRule? _overwriteRule;
 
-    return file
-        .create(recursive: true)
-        .then<File>((_) => file.writeAsBytes(contents))
-        .whenComplete(() => logger.delayed('  ${file.path} (new)'));
+  @override
+  Future<File> createFile(String path, List<int> contents) async {
+    final file = File(p.join(dir.path, path));
+    final fileExists = file.existsSync();
+
+    if (fileExists) {
+      final existingContents = file.readAsBytesSync();
+
+      if (const ListEquality<int>().equals(existingContents, contents)) {
+        logger.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+        return file;
+      }
+
+      if (_overwriteRule != OverwriteRule.alwaysYes) {
+        logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+        _overwriteRule = logger
+            .prompt(
+              yellow.wrap(
+                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yna) '),
+              ),
+            )
+            .toOverwriteRule();
+      }
+    }
+
+    switch (_overwriteRule) {
+      case OverwriteRule.no:
+        logger.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        return file;
+      case OverwriteRule.alwaysYes:
+      case OverwriteRule.yes:
+      default:
+        return file
+            .create(recursive: true)
+            .then<File>((_) => file.writeAsBytes(contents))
+            .whenComplete(
+              () => logger.delayed(
+                '  ${file.path} ${lightGreen.wrap('(new)')}',
+              ),
+            );
+    }
   }
 }
 
@@ -374,4 +424,18 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
   }
 
   return results;
+}
+
+extension on String {
+  OverwriteRule toOverwriteRule() {
+    switch (this) {
+      case 'n':
+        return OverwriteRule.no;
+      case 'a':
+        return OverwriteRule.alwaysYes;
+      case 'Y':
+      default:
+        return OverwriteRule.yes;
+    }
+  }
 }
