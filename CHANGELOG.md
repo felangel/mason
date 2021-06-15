@@ -3,7 +3,7 @@
 - feat: add `OverwriteRule` for file conflict resolution (`Yna`)
   - `Y` - overwrite (default)
   - `n` - do not overwrite
-  - `a` - overwrite this an all others
+  - `a` - overwrite this and all others
 
 # 0.0.1-dev.40
 
