@@ -1,3 +1,19 @@
+# 0.0.1-dev.42
+
+- fix: improve `mason make --help` to show complete usage information
+
+  ```sh
+  Generate code using an existing brick template.
+
+  Usage: mason make [arguments]
+  -h, --help           Print this usage information.
+  -c, --config-path    Path to config json file containing variables.
+  -o, --output-dir     Directory where to output the generated code.
+                      (defaults to ".")
+
+  Run "mason help" to see global options.
+  ```
+
 # 0.0.1-dev.41
 
 - feat: add `OverwriteRule` for file conflict resolution (`Yna`)
