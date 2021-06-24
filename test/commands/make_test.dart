@@ -1,3 +1,4 @@
+// ignore_for_file: no_adjacent_strings_in_list
 import 'dart:convert';
 import 'dart:io';
 
@@ -64,6 +65,7 @@ void main() {
           '''widget_02426be7ece33230d574cb7a76eb7a9a595a79cbf53a1b1c8f2f1de78dfbe23f''':
               widgetPath,
         }));
+      printLogs = [];
       logger = MockLogger();
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
       commandRunner = MasonCommandRunner(logger: logger);
@@ -72,6 +74,53 @@ void main() {
     tearDown(() {
       Directory.current = cwd;
     });
+
+    test('--help shows correct help information', overridePrint(() async {
+      const expectedPrintLogs = <String>[
+        'Generate code using an existing brick template.\n'
+            '\n'
+            'Usage: mason make <subcommand> [arguments]\n'
+            '-h, --help           Print this usage information.\n'
+            '''-c, --config-path    Path to config json file containing variables.\n'''
+            '''-o, --output-dir     Directory where to output the generated code.\n'''
+            '                     (defaults to ".")\n'
+            '\n'
+            'Available subcommands:\n'
+            '  app_icon        Create an app_icon file from a URL\n'
+            '  documentation   Create Documentation Markdown Files\n'
+            '  greeting        A Simple Greeting Template\n'
+            '  todos           A Todos Template\n'
+            '  widget          Create a Simple Flutter Widget\n'
+            '\n'
+            'Run "mason help" to see global options.'
+      ];
+      final result = await commandRunner.run(['make', '-h']);
+      expect(result, equals(ExitCode.success.code));
+      expect(printLogs, equals(expectedPrintLogs));
+    }));
+
+    test('<subcommand> --help shows correct help information',
+        overridePrint(() async {
+      const expectedPrintLogs = <String>[
+        'A Simple Greeting Template\n'
+            '\n'
+            'Usage: mason make greeting [arguments]\n'
+            '-h, --help           Print this usage information.\n'
+            '''-c, --config-path    Path to config json file containing variables.\n'''
+            '''-o, --output-dir     Directory where to output the generated code.\n'''
+            '                     (defaults to ".")\n'
+            '    --name           \n'
+            '\n'
+            'Run "mason help" to see global options.'
+      ];
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['make', 'greeting', '--help']);
+      expect(result, equals(ExitCode.success.code));
+      expect(printLogs, equals(expectedPrintLogs));
+    }));
 
     test('exits with code 64 when brick does not exist', () async {
       final result = await commandRunner.run(['make', 'garbage']);

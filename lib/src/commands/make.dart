@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:io/ansi.dart';
 import 'package:io/io.dart';
@@ -16,6 +17,7 @@ import '../command.dart';
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
   MakeCommand({Logger? logger}) : super(logger: logger) {
+    argParser.addOptions();
     try {
       for (final brick in bricks) {
         addSubcommand(_MakeCommand(brick, logger: logger));
@@ -47,18 +49,7 @@ class MakeCommand extends MasonCommand {
 
 class _MakeCommand extends MasonCommand {
   _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
-    argParser
-      ..addOption(
-        'config-path',
-        abbr: 'c',
-        help: 'Path to config json file containing variables.',
-      )
-      ..addOption(
-        'output-dir',
-        abbr: 'o',
-        help: 'Directory where to output the generated code.',
-        defaultsTo: '.',
-      );
+    argParser.addOptions();
     for (final arg in _brick.vars) {
       argParser.addOption(arg);
     }
@@ -137,5 +128,21 @@ class _MakeCommand extends MasonCommand {
     } catch (_) {
       return value;
     }
+  }
+}
+
+extension on ArgParser {
+  void addOptions() {
+    addOption(
+      'config-path',
+      abbr: 'c',
+      help: 'Path to config json file containing variables.',
+    );
+    addOption(
+      'output-dir',
+      abbr: 'o',
+      help: 'Directory where to output the generated code.',
+      defaultsTo: '.',
+    );
   }
 }

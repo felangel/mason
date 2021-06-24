@@ -1,6 +1,4 @@
 // ignore_for_file: no_adjacent_strings_in_list
-import 'dart:async';
-
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
@@ -9,22 +7,14 @@ import 'package:test/test.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/version.dart';
 
+import 'helpers/helpers.dart';
+
 class MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonCommandRunner', () {
-    late List<String> printLogs;
     late Logger logger;
     late MasonCommandRunner commandRunner;
-
-    void Function() overridePrint(void Function() fn) {
-      return () {
-        final spec = ZoneSpecification(print: (_, __, ___, String msg) {
-          printLogs.add(msg);
-        });
-        return Zone.current.fork(specification: spec).run<void>(fn);
-      };
-    }
 
     setUp(() {
       printLogs = [];
