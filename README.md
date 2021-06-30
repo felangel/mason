@@ -300,3 +300,9 @@ Available commands:
 
 Run "mason help <command>" for more information about a command.
 ```
+
+## Video Tutorial
+
+[![Mason Video Tutorial](https://img.youtube.com/vi/SnrHoN632NU/0.jpg)](https://www.youtube.com/watch?v=SnrHoN632NU)
+
+**Say HI to Mason Package! - The Top Tier Code Generation Tool | Complete Tutorial** by [_Flutterly_](https://www.youtube.com/channel/UC5PYcSe3to4mtm3SPCUmjvw)

@@ -1,3 +1,49 @@
+# 0.0.1-dev.43
+
+- feat: support partials
+
+  Example:
+
+  ```
+  ├── HELLO.md
+  ├── {{~ footer.md }}
+  └── {{~ header.md }}
+  ```
+
+  `{{~ header.md }}`
+
+  ```md
+  # 🧱 {{name}}
+  ```
+
+  `{{~ footer.md }}`
+
+  ```md
+  _made with 💖 by mason_
+  ```
+
+  `HELLO.md`
+
+  ```md
+  {{> header.md }}
+
+  Hello {{name}}!
+
+  {{> footer.md }}
+  ```
+
+  `$ mason make hello --name Dash`
+  
+  `HELLO.md`
+
+  ```md
+  # 🧱 Dash
+
+  Hello Dash!
+
+  _made with 💖 by mason_
+  ```
+
 # 0.0.1-dev.42
 
 - fix: improve `mason make --help` to show complete usage information
