@@ -169,13 +169,7 @@ Hello {{name}}!
 {{> footer.md }}
 ```
 
-we can use `mason make hello --name Felix` to generate the following:
-
-```
-└── HELLO.md
-```
-
-Where the generated `HELLO.md` file looks like:
+We can use `mason make hello --name Felix` to generate `HELLO.md`:
 
 ```md
 # 🧱 Felix
