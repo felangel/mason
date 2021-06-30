@@ -16,6 +16,7 @@ import 'mason_bundle.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
+final _partialRegExp = RegExp(r'\{\{~\s([a-zA-Z\s.]+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp(r'{{(.*?)}}');
 final _loopKeyRegExp = RegExp(r'{{#(.*?)}}');
@@ -23,6 +24,8 @@ final _loopValueRegExp = RegExp(r'{{#.*?}}.*?{{{(.*?)}}}.*?{{\/.*?}}');
 final _loopRegExp = RegExp(r'({{#.*?}}.*?{{{.*?}}}.*?{{\/.*?}})');
 final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
 final _loopInnerRegExp = RegExp(r'{{#.*?}}(.*?{{{.*?}}}.*?){{\/.*?}}');
+final _newlineOutRegExp = RegExp(r'\n');
+final _newlineInRegExp = RegExp(r'\\\n');
 final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
 final _whiteSpace = RegExp(r'\s+');
@@ -137,11 +140,17 @@ abstract class Generator implements Comparable<Generator> {
   /// List of [TemplateFile] which will be used to generate files.
   final List<TemplateFile> files = [];
 
+  /// Map of partial files which will be used as includes.
+  ///
+  /// Contains a Map of partial file path to partial file content.
+  final Map<String, List<int>> partials = {};
+
   /// Add a new template file.
   void addTemplateFile(TemplateFile? file) {
-    if (file?.path.isNotEmpty == true) {
-      files.add(file!);
-    }
+    if (file == null) return;
+    _partialRegExp.hasMatch(file.path)
+        ? partials.addAll({file.path: file.content})
+        : files.add(file);
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].
@@ -157,7 +166,10 @@ abstract class Generator implements Comparable<Generator> {
         await target.createFile(resultFile.path, resultFile.content);
         fileCount++;
       } else {
-        final resultFiles = file.runSubstitution(Map<String, dynamic>.of(vars));
+        final resultFiles = file.runSubstitution(
+          Map<String, dynamic>.of(vars),
+          Map<String, List<int>>.of(partials),
+        );
         for (final file in resultFiles) {
           await target.createFile(file.path, file.content);
           fileCount++;
@@ -280,7 +292,10 @@ class TemplateFile {
   final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  Set<FileContents> runSubstitution(Map<String, dynamic> parameters) {
+  Set<FileContents> runSubstitution(
+    Map<String, dynamic> parameters,
+    Map<String, List<int>> partials,
+  ) {
     var filePath = path.replaceAll(r'\', r'/');
     if (_loopRegExp.hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
@@ -315,27 +330,47 @@ class TemplateFile {
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
-        )._createContent(parameters..addAll(param));
+        )._createContent(parameters..addAll(param), partials);
         fileContents.add(FileContents(newPath, newContents));
       }
 
       return fileContents;
     } else {
       final newPath = filePath.render(parameters);
-      final newContents = _createContent(parameters);
+      final newContents = _createContent(parameters, partials);
       return {FileContents(newPath, newContents)};
     }
   }
 
-  List<int> _createContent(Map<String, dynamic> vars) {
+  List<int> _createContent(
+    Map<String, dynamic> vars,
+    Map<String, List<int>> partials,
+  ) {
+    String sanitize(String input) {
+      return input
+          .replaceAllMapped(
+            _newlineOutRegExp,
+            (match) =>
+                match.group(0) != null ? '\\${match.group(0)}' : match.input,
+          )
+          .replaceAllMapped(
+            _unicodeOutRegExp,
+            (match) =>
+                match.group(0) != null ? '\\${match.group(0)}' : match.input,
+          );
+    }
+
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final sanitized = decoded.replaceAllMapped(
-        _unicodeOutRegExp,
-        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
-      );
-      final rendered = sanitized.render(vars).replaceAllMapped(
+      final sanitized = sanitize(decoded);
+      final rendered = sanitized
+          .render(vars, (name) => partialResolver(name, partials, sanitize))
+          .replaceAllMapped(
+            _newlineInRegExp,
+            (match) => match.group(0)?.substring(1) ?? match.input,
+          )
+          .replaceAllMapped(
             _unicodeInRegExp,
             (match) => match.group(0)?.substring(1) ?? match.input,
           );

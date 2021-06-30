@@ -5,6 +5,8 @@ bricks:
     path: ../bricks/documentation
   greeting:
     path: ../bricks/greeting
+  hello_world:
+    path: ../bricks/hello_world
   todos:
     path: ../bricks/todos
   widget:

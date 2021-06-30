@@ -30,6 +30,8 @@ void main() {
     path: ../../../bricks/documentation
   greeting:
     path: ../../../bricks/greeting
+  hello_world:
+    path: ../bricks/hello_world
   todos:
     path: ../../../bricks/todos
   widget:
@@ -44,6 +46,9 @@ void main() {
       );
       final greetingPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
+      );
+      final helloWorldPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'hello_world'),
       );
       final todosPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
@@ -60,6 +65,8 @@ void main() {
               docPath,
           '''greeting_81a4ec348561cdd721c3bb79b3d6dc14738bf17f02e18810dad2a6d88732e298''':
               greetingPath,
+          '''hello_world_6bb398ce3cd00f53423469ca6f0fbe8e6ee49a7351c5bf45de7faff464d31333''':
+              helloWorldPath,
           '''todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740''':
               todosPath,
           '''widget_02426be7ece33230d574cb7a76eb7a9a595a79cbf53a1b1c8f2f1de78dfbe23f''':
@@ -89,6 +96,7 @@ void main() {
             '  app_icon        Create an app_icon file from a URL\n'
             '  documentation   Create Documentation Markdown Files\n'
             '  greeting        A Simple Greeting Template\n'
+            '  hello_world     A Simple Hello World Template\n'
             '  todos           A Todos Template\n'
             '  widget          Create a Simple Flutter Widget\n'
             '\n'
@@ -245,6 +253,28 @@ in todos.json''',
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'greeting'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates hello_world', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hello_world'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'hello_world',
+        '--name',
+        'dash',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hello_world'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

@@ -1,0 +1,4 @@
+name: hello_world
+description: A Simple Hello World Template
+vars:
+  - name

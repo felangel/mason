@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:mustache_template/mustache.dart';
 import 'package:recase/recase.dart';
 
@@ -23,8 +25,12 @@ import 'package:recase/recase.dart';
 /// {@endtemplate}
 extension TemplateX on String {
   /// {@macro templateX}
-  String render(dynamic values) {
-    final template = Template(this, lenient: true);
+  String render(dynamic values, [PartialResolver? partialResolver]) {
+    final template = Template(
+      this,
+      lenient: true,
+      partialResolver: partialResolver,
+    );
 
     /// camelCase
     final camelCase = (LambdaContext ctx) => ctx.renderString().camelCase;
@@ -78,4 +84,18 @@ extension TemplateX on String {
       ...values,
     });
   }
+}
+
+/// A resolver function which given a partial [name] and
+/// a map of registered partials, attempts to return a new [Template].
+Template? partialResolver(
+  String name,
+  Map<String, List<int>> partials, [
+  String Function(String)? sanitize,
+]) {
+  final content = partials['{{~ $name }}'];
+  if (content == null) return null;
+  final decoded = utf8.decode(content);
+  final sanitized = sanitize?.call(decoded) ?? decoded;
+  return Template(sanitized, name: name, lenient: true);
 }

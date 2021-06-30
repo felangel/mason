@@ -135,6 +135,58 @@ Write your brick template in the `__brick__` directory using [mustache templates
 
 ❗ **Note: use `{{{variable}}}` instead of `{{variable}}` when you want the value of `variable` to be unescaped**
 
+#### Nested Templates (partials)
+
+It is possible to have templates nested within other templates. For example, given the follow structure:
+
+```
+├── HELLO.md
+├── {{~ footer.md }}
+└── {{~ header.md }}
+```
+
+The `{{~ header.md }}` and `{{~ footer.md }}` are partials (partial brick templates). Partials will not be generated but can be included as part of an existing template.
+
+For example given the contents of `{{~ header.md }}` and `{{~ footer.md }}` respectively
+
+```md
+# 🧱 {{name}}
+```
+
+```md
+_made with 💖 by mason_
+```
+
+we can include the partials as part of a template via `{{> header.md }}` and `{{> footer.md }}`.
+
+In this example, given `HELLO.md`:
+
+```md
+{{> header.md }}
+
+Hello {{name}}!
+
+{{> footer.md }}
+```
+
+we can use `mason make hello --name Felix` to generate the following:
+
+```
+└── HELLO.md
+```
+
+Where the generated `HELLO.md` file looks like:
+
+```md
+# 🧱 Felix
+
+Hello Felix!
+
+_made with 💖 by mason_
+```
+
+❗ **Note: Partials can contain variables just like regular templates**
+
 #### File Resolution
 
 It is possible to resolve files based on path input variables using the `{{% %}}` tag.
