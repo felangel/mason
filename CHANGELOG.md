@@ -33,6 +33,8 @@
   ```
 
   `$ mason make hello --name Dash`
+  
+  `HELLO.md`
 
   ```md
   # 🧱 Dash
