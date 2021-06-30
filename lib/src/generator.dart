@@ -347,17 +347,10 @@ class TemplateFile {
     Map<String, List<int>> partials,
   ) {
     String sanitize(String input) {
-      return input
-          .replaceAllMapped(
-            _newlineOutRegExp,
-            (match) =>
-                match.group(0) != null ? '\\${match.group(0)}' : match.input,
-          )
-          .replaceAllMapped(
-            _unicodeOutRegExp,
-            (match) =>
-                match.group(0) != null ? '\\${match.group(0)}' : match.input,
-          );
+      return input.replaceAllMapped(
+        RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
+        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
+      );
     }
 
     try {
@@ -367,11 +360,7 @@ class TemplateFile {
       final rendered = sanitized
           .render(vars, (name) => partialResolver(name, partials, sanitize))
           .replaceAllMapped(
-            _newlineInRegExp,
-            (match) => match.group(0)?.substring(1) ?? match.input,
-          )
-          .replaceAllMapped(
-            _unicodeInRegExp,
+            RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
             (match) => match.group(0)?.substring(1) ?? match.input,
           );
       return utf8.encode(rendered);
