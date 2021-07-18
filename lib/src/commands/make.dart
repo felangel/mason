@@ -69,7 +69,13 @@ class _MakeCommand extends MasonCommand {
       p.join(cwd.path, results['output-dir'] as String),
     );
     final configPath = results['config-path'] as String?;
-    final target = DirectoryGeneratorTarget(Directory(outputDir), logger);
+    final fileConflictResolution =
+        (results['on-conflict'] as String).toFileConflictResolution();
+    final target = DirectoryGeneratorTarget(
+      Directory(outputDir),
+      logger,
+      fileConflictResolution,
+    );
 
     Function? generateDone;
     try {
@@ -144,5 +150,29 @@ extension on ArgParser {
       help: 'Directory where to output the generated code.',
       defaultsTo: '.',
     );
+    addOption(
+      'on-conflict',
+      allowed: ['prompt', 'overwrite', 'skip'],
+      defaultsTo: 'prompt',
+      allowedHelp: {
+        'prompt': 'Always prompt the user for each file conflict.',
+        'overwrite': 'Always overwrite conflicting files.',
+        'skip': 'Always skip conflicting files.'
+      },
+      help: 'File conflict resolution strategy.',
+    );
+  }
+}
+
+extension on String {
+  FileConflictResolution toFileConflictResolution() {
+    switch (this) {
+      case 'skip':
+        return FileConflictResolution.skip;
+      case 'overwrite':
+        return FileConflictResolution.overwrite;
+      default:
+        return FileConflictResolution.prompt;
+    }
   }
 }

@@ -87,10 +87,15 @@ void main() {
         'Generate code using an existing brick template.\n'
             '\n'
             'Usage: mason make <subcommand> [arguments]\n'
-            '-h, --help           Print this usage information.\n'
-            '''-c, --config-path    Path to config json file containing variables.\n'''
-            '''-o, --output-dir     Directory where to output the generated code.\n'''
-            '                     (defaults to ".")\n'
+            '-h, --help                      Print this usage information.\n'
+            '''-c, --config-path               Path to config json file containing variables.\n'''
+            '''-o, --output-dir                Directory where to output the generated code.\n'''
+            '                                (defaults to ".")\n'
+            '''    --on-conflict               File conflict resolution strategy.\n'''
+            '\n'
+            '''          [overwrite]           Always overwrite conflicting files.\n'''
+            '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
+            '          [skip]                Always skip conflicting files.\n'
             '\n'
             'Available subcommands:\n'
             '  app_icon        Create an app_icon file from a URL\n'
@@ -113,11 +118,17 @@ void main() {
         'A Simple Greeting Template\n'
             '\n'
             'Usage: mason make greeting [arguments]\n'
-            '-h, --help           Print this usage information.\n'
-            '''-c, --config-path    Path to config json file containing variables.\n'''
-            '''-o, --output-dir     Directory where to output the generated code.\n'''
-            '                     (defaults to ".")\n'
-            '    --name           \n'
+            '-h, --help                      Print this usage information.\n'
+            '''-c, --config-path               Path to config json file containing variables.\n'''
+            '''-o, --output-dir                Directory where to output the generated code.\n'''
+            '                                (defaults to ".")\n'
+            '''    --on-conflict               File conflict resolution strategy.\n'''
+            '\n'
+            '''          [overwrite]           Always overwrite conflicting files.\n'''
+            '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
+            '          [skip]                Always skip conflicting files.\n'
+            '\n'
+            '    --name                      \n'
             '\n'
             'Run "mason help" to see global options.'
       ];
@@ -352,6 +363,86 @@ in todos.json''',
         path.join(testFixturesPath(cwd, suffix: 'make'), 'output_dir', 'dir'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates greeting and skips conflicts', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-skip'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name2',
+        '--on-conflict',
+        'skip',
+      ]);
+
+      expect(result, equals(ExitCode.success.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(skip)'))),
+      ).called(1);
+    });
+
+    test('generates greeting and overwrites conflicts', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-overwrite'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name2',
+        '--on-conflict',
+        'overwrite',
+      ]);
+
+      expect(result, equals(ExitCode.success.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name2!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
     });
   });
 }
