@@ -226,8 +226,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   DirectoryGeneratorTarget(
     this.dir,
     this.logger, [
-    FileConflictResolution onConflict = FileConflictResolution.prompt,
-  ]) : _overwriteRule = onConflict.toOverwriteRule() {
+    FileConflictResolution? fileConflictResolution,
+  ]) : _overwriteRule = fileConflictResolution?.toOverwriteRule() {
     dir.createSync(recursive: true);
   }
 
