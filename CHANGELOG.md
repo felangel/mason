@@ -1,3 +1,7 @@
+# 0.0.1-dev.44
+
+- feat: custom file conflict resolution via `mason make --on-conflict`
+
 # 0.0.1-dev.43
 
 - feat: support partials
@@ -33,7 +37,7 @@
   ```
 
   `$ mason make hello --name Dash`
-  
+
   `HELLO.md`
 
   ```md
