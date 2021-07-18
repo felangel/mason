@@ -74,7 +74,7 @@ class _MakeCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(
       Directory(outputDir),
       logger,
-      fileConflictResolution: fileConflictResolution,
+      fileConflictResolution,
     );
 
     Function? generateDone;

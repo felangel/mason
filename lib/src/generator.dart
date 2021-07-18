@@ -225,10 +225,9 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   /// {@macro directory_generator_target}
   DirectoryGeneratorTarget(
     this.dir,
-    this.logger, {
-    FileConflictResolution fileConflictResolution =
-        FileConflictResolution.prompt,
-  }) : _overwriteRule = fileConflictResolution.toOverwriteRule() {
+    this.logger, [
+    FileConflictResolution onConflict = FileConflictResolution.prompt,
+  ]) : _overwriteRule = onConflict.toOverwriteRule() {
     dir.createSync(recursive: true);
   }
 
