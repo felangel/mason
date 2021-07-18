@@ -100,6 +100,29 @@ By default `mason make` will generate the template in the current working direct
 $ mason make hello --name Felix -o ./path/to/directory
 ```
 
+### File Conflict Resolution
+
+By default, `mason make` will prompt on each file conflict and will allow users to specify how the conflict should be resolved via `Yna`:
+
+```txt
+Y - overwrite (default)
+n - do not overwrite
+a - overwrite this and all others
+```
+
+A custom file conflict resolution strategy can be specified via the `--on-conflict` option:
+
+```sh
+# Always prompt when there is a file conflict (default)
+$ mason make hello --name Felix --on-conflict prompt
+
+# Always overwrite when there is a file conflict
+$ mason make hello --name Felix --on-conflict overwrite
+
+# Always skip when there is a file conflict
+$ mason make hello --name Felix --on-conflict skip
+```
+
 ## Creating New Bricks
 
 Create a new brick using the `mason new` command.

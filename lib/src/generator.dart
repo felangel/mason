@@ -30,18 +30,6 @@ final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
 final _whiteSpace = RegExp(r'\s+');
 
-/// The overwrite rule when generating code and a conflict occurs.
-enum OverwriteRule {
-  /// Always overwrite the existing file.
-  alwaysYes,
-
-  /// Overwrite one time.
-  yes,
-
-  /// Do not overwrite one time.
-  no,
-}
-
 /// {@template mason_generator}
 /// A [MasonGenerator] which extends [Generator] and
 /// exposes the ability to create a [Generator] from a
@@ -202,12 +190,45 @@ abstract class Generator implements Comparable<Generator> {
   }
 }
 
+/// File conflict resolution strategies used during
+/// the generation process.
+enum FileConflictResolution {
+  /// Always prompt the user for each file conflict.
+  prompt,
+
+  /// Always overwrite conflicting files.
+  overwrite,
+
+  /// Always skip conflicting files.
+  skip,
+}
+
+/// The overwrite rule when generating code and a conflict occurs.
+enum OverwriteRule {
+  /// Always overwrite the existing file.
+  alwaysOverwrite,
+
+  /// Always skip overwriting the existing file.
+  alwaysSkip,
+
+  /// Overwrite one time.
+  overwriteOnce,
+
+  /// Do not overwrite one time.
+  skipOnce,
+}
+
 /// {@template directory_generator_target}
 /// A [GeneratorTarget] based on a provided [Directory].
 /// {@endtemplate}
 class DirectoryGeneratorTarget extends GeneratorTarget {
   /// {@macro directory_generator_target}
-  DirectoryGeneratorTarget(this.dir, this.logger) {
+  DirectoryGeneratorTarget(
+    this.dir,
+    this.logger, {
+    FileConflictResolution fileConflictResolution =
+        FileConflictResolution.prompt,
+  }) : _overwriteRule = fileConflictResolution.toOverwriteRule() {
     dir.createSync(recursive: true);
   }
 
@@ -234,7 +255,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
         return file;
       }
 
-      if (_overwriteRule != OverwriteRule.alwaysYes) {
+      final shouldPrompt = _overwriteRule != OverwriteRule.alwaysOverwrite &&
+          _overwriteRule != OverwriteRule.alwaysSkip;
+
+      if (shouldPrompt) {
         logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
         _overwriteRule = logger
             .prompt(
@@ -247,11 +271,12 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     }
 
     switch (_overwriteRule) {
-      case OverwriteRule.no:
+      case OverwriteRule.alwaysSkip:
+      case OverwriteRule.skipOnce:
         logger.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
         return file;
-      case OverwriteRule.alwaysYes:
-      case OverwriteRule.yes:
+      case OverwriteRule.alwaysOverwrite:
+      case OverwriteRule.overwriteOnce:
       default:
         return file
             .create(recursive: true)
@@ -450,16 +475,29 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
   return results;
 }
 
+extension on FileConflictResolution {
+  OverwriteRule? toOverwriteRule() {
+    switch (this) {
+      case FileConflictResolution.overwrite:
+        return OverwriteRule.alwaysOverwrite;
+      case FileConflictResolution.skip:
+        return OverwriteRule.alwaysSkip;
+      case FileConflictResolution.prompt:
+        return null;
+    }
+  }
+}
+
 extension on String {
   OverwriteRule toOverwriteRule() {
     switch (this) {
       case 'n':
-        return OverwriteRule.no;
+        return OverwriteRule.skipOnce;
       case 'a':
-        return OverwriteRule.alwaysYes;
+        return OverwriteRule.alwaysOverwrite;
       case 'Y':
       default:
-        return OverwriteRule.yes;
+        return OverwriteRule.overwriteOnce;
     }
   }
 }
