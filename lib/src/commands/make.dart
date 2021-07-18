@@ -159,10 +159,7 @@ extension on ArgParser {
         'overwrite': 'Always overwrite conflicting files.',
         'skip': 'Always skip conflicting files.'
       },
-      help: 'By default, the user will be prompted to specify '
-          'how file conflicts should be resolved. '
-          'Enabling this flag allows the user to customize '
-          'how file conflicts are resolved.',
+      help: 'File conflict resolution strategy.',
     );
   }
 }
