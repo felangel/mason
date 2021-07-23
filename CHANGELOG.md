@@ -1,3 +1,7 @@
+# 0.0.1-dev.45
+
+- fix: `mason bundle` add `.otf` support.
+
 # 0.0.1-dev.44
 
 - feat: custom file conflict resolution via `mason make --on-conflict`
