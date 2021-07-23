@@ -8,7 +8,7 @@ import 'brick_yaml.dart';
 import 'mason_bundle.dart';
 
 final _binaryFileTypes = RegExp(
-  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2)$',
+  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf)$',
   caseSensitive: false,
 );
 
