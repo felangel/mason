@@ -298,6 +298,16 @@ mason bundle ./path/to/brick -o ./path/to/destination
 mason bundle ./path/to/brick -t dart -o ./path/to/destination
 ```
 
+A bundle can then be used to generate code from a brick programatically:
+
+```dart
+// Create a MasonGenerator from the existing bundle.
+final generator = MasonGenerator.fromBundle(...);
+
+// Generate code based on the bundled brick.
+await generator.generate(...);
+```
+
 ## Usage
 
 ```sh
