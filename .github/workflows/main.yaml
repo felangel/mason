@@ -54,12 +54,12 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2.3.4
-      - uses: subosito/flutter-action@v1
+      - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
         run: |
-          flutter packages get
-          flutter pub global activate pana
+          dart pub get
+          dart pub global activate pana 0.18.2
 
       - name: Verify Pub Score
         run: |
