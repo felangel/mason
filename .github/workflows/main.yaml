@@ -59,7 +59,7 @@ jobs:
       - name: Install Dependencies
         run: |
           dart pub get
-          dart pub global activate pana 0.18.2
+          dart pub global activate pana 0.19.1
 
       - name: Verify Pub Score
         run: |
