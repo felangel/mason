@@ -1,6 +1,11 @@
+# 0.0.1-dev.46
+
+- fix: `mason bundle` resolves `implicit_dynamic_map_literal` in generated Dart bundle
+- docs: add bundle usage to README
+
 # 0.0.1-dev.45
 
-- fix: `mason bundle` add `.otf` support.
+- fix: `mason bundle` add `.otf` support
 
 # 0.0.1-dev.44
 
