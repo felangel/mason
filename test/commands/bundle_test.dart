@@ -76,7 +76,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''final greetingBundle = MasonBundle.fromJson({"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
+          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
         ),
       );
     });
