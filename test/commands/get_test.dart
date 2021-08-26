@@ -35,6 +35,8 @@ void main() {
     path: ../../bricks/documentation
   greeting:
     path: ../../bricks/greeting
+  simple:
+    path: ../../bricks/simple
   todos:
     path: ../../bricks/todos
   widget:
@@ -76,6 +78,9 @@ void main() {
       final greetingPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
+      final simplePath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'simple'),
+      );
       final todosPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
@@ -97,6 +102,8 @@ void main() {
                 docPath,
             '''greeting_a4652001e26be10014b29359c36b1e52c04faf4ef12c0d9560e73d2f0c2641f8''':
                 greetingPath,
+            '''simple_f693a3ce2317548ff338ea9905d5e60c6b25da961520f77d0282094da778acc5''':
+                simplePath,
             '''todos_73b2e1ae179e296b318703953a86f28a792e94bed4a9adec9f8ee5893c4527a7''':
                 todosPath,
             widgetPath: masonUrl,

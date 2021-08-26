@@ -31,7 +31,9 @@ void main() {
   greeting:
     path: ../../../bricks/greeting
   hello_world:
-    path: ../bricks/hello_world
+    path: ../../../bricks/hello_world
+  simple:
+    path: ../../../bricks/simple
   todos:
     path: ../../../bricks/todos
   widget:
@@ -50,6 +52,9 @@ void main() {
       final helloWorldPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
       );
+      final simplePath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'simple'),
+      );
       final todosPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
@@ -65,8 +70,10 @@ void main() {
               docPath,
           '''greeting_81a4ec348561cdd721c3bb79b3d6dc14738bf17f02e18810dad2a6d88732e298''':
               greetingPath,
-          '''hello_world_6bb398ce3cd00f53423469ca6f0fbe8e6ee49a7351c5bf45de7faff464d31333''':
+          '''hello_world_fd66b903d5885651238b50e1205b0cf05f30573cc3b4a7a4f2d1f495edd33630''':
               helloWorldPath,
+          '''simple_3bbc2ade88745ef690063c8f652631a4870ee6af619a327e297084251aebe232''':
+              simplePath,
           '''todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740''':
               todosPath,
           '''widget_02426be7ece33230d574cb7a76eb7a9a595a79cbf53a1b1c8f2f1de78dfbe23f''':
@@ -102,6 +109,7 @@ void main() {
             '  documentation   Create Documentation Markdown Files\n'
             '  greeting        A Simple Greeting Template\n'
             '  hello_world     A Simple Hello World Template\n'
+            '  simple          A Simple Static Template\n'
             '  todos           A Todos Template\n'
             '  widget          Create a Simple Flutter Widget\n'
             '\n'
@@ -286,6 +294,23 @@ in todos.json''',
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates simple', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'simple'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['make', 'simple']);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'simple'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'simple'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });
