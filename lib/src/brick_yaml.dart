@@ -38,6 +38,7 @@ class BrickYaml {
   final String description;
 
   /// List of variables used when templating a brick.
+  @JsonKey(defaultValue: <String>[])
   final List<String> vars;
 
   /// Path to the [BrickYaml] file.

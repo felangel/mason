@@ -14,7 +14,8 @@ BrickYaml _$BrickYamlFromJson(Map json) {
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
       vars: $checkedConvert(json, 'vars',
-          (v) => (v as List<dynamic>).map((e) => e as String).toList()),
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()) ??
+          [],
       path: $checkedConvert(json, 'path', (v) => v as String?),
     );
     return val;
