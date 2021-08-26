@@ -1,3 +1,7 @@
+# 0.0.1-dev.47
+
+- fix: `vars` in `brick.yaml` are not required
+
 # 0.0.1-dev.46
 
 - fix: `mason bundle` resolves `implicit_dynamic_map_literal` in generated Dart bundle
