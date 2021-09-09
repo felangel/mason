@@ -223,6 +223,58 @@ And the following brick template:
 
 Running `mason make app_icon --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
+#### Customize Your Variable Case and Format
+
+Mason supports updating your casing for variables and paths.
+
+Support Cases:
+
+| Generated Style | Syntax                                             |
+| --------------: | -------------------------------------------------- |
+|    `snake_case` | `{{#snakeCase}}{{myVariable}}{{/snakeCase}}`       |
+|      `dot.case` | `{{#dotCase}}{{myVariable}}{{/dotCase}}`           |
+|     `path/case` | `{{#pathCase}}{{myVariable}}{{/pathCase}}`         |
+|    `param-case` | `{{#paramCase}}{{myVariable}}{{/paramCase}}`       |
+|    `PascalCase` | `{{#pascalCase}}{{myVariable}}{{/pascalCase}}`     |
+|   `Header-Case` | `{{#headerCase}}{{myVariable}}{{/headerCase}}`     |
+|    `Title Case` | `{{#titleCase}}{{myVariable}}{{/titleCase}}`       |
+|     `camelCase` | `{{#camelCase}}{{myVariable}}{{/camelCase}}`       |
+| `Sentence case` | `{{#sentenceCase}}{{myVariable}}{{/sentenceCase}}` |
+| `CONSTANT_CASE` | `{{#constantCase}}{{myVariable}}{{/constantCase}}` |
+
+
+**Example Brick**:
+
+```
+feature
+└── __brick__
+   ├── {{#snakeCase}}{{feature}}{{/snakeCase}}.md
+   └── {{#pascalCase}}{{feature}}{{/pascalCase}}.java
+```
+
+`brick.yaml`:
+
+```yaml
+name: feature
+description: A new feature generator.
+vars:
+  - feature
+```
+
+Generate your files:
+
+```shell
+mason make feature --feature my-new-feature
+```
+
+Your new files with the new casing style.:
+
+```
+├── my_new_feature.md
+└── MyNewFeature.java
+```
+
+
 ## Install Brick Templates Globally
 
 The `install` command allows developers to install brick templates globally on their machines from either a local path or git url. Then developers can use globally installed brick templates anywhere (regardless of whether there is an existing `mason.yaml`).
