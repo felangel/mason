@@ -350,7 +350,7 @@ mason bundle ./path/to/brick -o ./path/to/destination
 mason bundle ./path/to/brick -t dart -o ./path/to/destination
 ```
 
-A bundle can then be used to generate code from a brick programatically:
+A bundle can then be used to generate code from a brick programmatically:
 
 ```dart
 // Create a MasonGenerator from the existing bundle.
