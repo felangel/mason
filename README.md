@@ -223,6 +223,57 @@ And the following brick template:
 
 Running `mason make app_icon --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
+#### Built-in Lambdas
+
+Mason supports a handful of built-in lambdas that can help with customizing generated code:
+
+| Name           | Example       | Usage                                            |
+| -------------- | ------------- | ------------------------------------------------ |
+| `camelCase`    | `helloWorld`  | `{{#camelCase}}{{variable}}{{/camelCase}}`       |
+| `constantCase` | `HELLO_WORLD` | `{{#constantCase}}{{variable}}{{/constantCase}}` |
+| `dotCase`      | `hello.world` | `{{#dotCase}}{{variable}}{{/dotCase}}`           |
+| `headerCase`   | `Hello-World` | `{{#headerCase}}{{variable}}{{/headerCase}}`     |
+| `lowerCase`    | `hello world` | `{{#lowerCase}}{{variable}}{{/lowerCase}}`       |
+| `pascalCase`   | `HelloWorld`  | `{{#pascalCase}}{{variable}}{{/pascalCase}}`     |
+| `paramCase`    | `hello-world` | `{{#paramCase}}{{variable}}{{/paramCase}}`       |
+| `pathCase`     | `hello/world` | `{{#pathCase}}{{variable}}{{/pathCase}}`         |
+| `sentenceCase` | `Hello world` | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}` |
+| `snakeCase`    | `hello_world` | `{{#snakeCase}}{{variable}}{{/snakeCase}}`       |
+| `titleCase`    | `Hello World` | `{{#titleCase}}{{variable}}{{/titleCase}}`       |
+| `upperCase`    | `HELLO WORLD` | `{{#upperCase}}{{variable}}{{/upperCase}}`       |
+
+_Example Usage_
+
+Given the following example brick:
+
+```
+__brick__
+  ├── {{#snakeCase}}{{name}}{{/snakeCase}}.md
+  └── {{#pascalCase}}{{name}}{{/pascalCase}}.java
+```
+
+`brick.yaml`:
+
+```yaml
+name: example
+description: An example brick.
+vars:
+  - name
+```
+
+We can generate code via:
+
+```sh
+$ mason make example --name my-name
+```
+
+The output will be:
+
+```
+├── my_name.md
+└── MyName.java
+```
+
 ## Install Brick Templates Globally
 
 The `install` command allows developers to install brick templates globally on their machines from either a local path or git url. Then developers can use globally installed brick templates anywhere (regardless of whether there is an existing `mason.yaml`).
@@ -298,7 +349,7 @@ mason bundle ./path/to/brick -o ./path/to/destination
 mason bundle ./path/to/brick -t dart -o ./path/to/destination
 ```
 
-A bundle can then be used to generate code from a brick programatically:
+A bundle can then be used to generate code from a brick programmatically:
 
 ```dart
 // Create a MasonGenerator from the existing bundle.
