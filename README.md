@@ -270,6 +270,7 @@ mason make feature --feature my-new-feature
 Your new files with the new casing style.:
 
 ```
+.
 ├── my_new_feature.md
 └── MyNewFeature.java
 ```
