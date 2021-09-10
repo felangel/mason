@@ -223,58 +223,56 @@ And the following brick template:
 
 Running `mason make app_icon --url path/to/icon.png` will generate `icon.png` with the contents of `path/to/icon.png` where the `path/to/icon.png` can be either a local or remote path. Check out the [app icon example brick](bricks/app_icon) to try it out.
 
-#### Customize Your Variable Case and Format
+#### Built-in Lambdas
 
-Mason supports updating your casing for variables and paths.
+Mason supports a handful of built-in lambdas that can help with customizing generated code:
 
-Support Cases:
+| Name           | Example       | Usage                                            |
+| -------------- | ------------- | ------------------------------------------------ |
+| `camelCase`    | `helloWorld`  | `{{#camelCase}}{{variable}}{{/camelCase}}`       |
+| `constantCase` | `HELLO_WORLD` | `{{#constantCase}}{{variable}}{{/constantCase}}` |
+| `dotCase`      | `hello.world` | `{{#dotCase}}{{variable}}{{/dotCase}}`           |
+| `headerCase`   | `Hello-World` | `{{#headerCase}}{{variable}}{{/headerCase}}`     |
+| `lowerCase`    | `hello world` | `{{#lowerCase}}{{variable}}{{/lowerCase}}`       |
+| `pascalCase`   | `HelloWorld`  | `{{#pascalCase}}{{variable}}{{/pascalCase}}`     |
+| `paramCase`    | `hello-world` | `{{#paramCase}}{{variable}}{{/paramCase}}`       |
+| `pathCase`     | `hello/world` | `{{#pathCase}}{{variable}}{{/pathCase}}`         |
+| `sentenceCase` | `Hello world` | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}` |
+| `snakeCase`    | `hello_world` | `{{#snakeCase}}{{variable}}{{/snakeCase}}`       |
+| `titleCase`    | `Hello World` | `{{#titleCase}}{{variable}}{{/titleCase}}`       |
+| `upperCase`    | `HELLO WORLD` | `{{#upperCase}}{{variable}}{{/upperCase}}`       |
 
-| Generated Style | Syntax                                             |
-| --------------: | -------------------------------------------------- |
-|    `snake_case` | `{{#snakeCase}}{{myVariable}}{{/snakeCase}}`       |
-|      `dot.case` | `{{#dotCase}}{{myVariable}}{{/dotCase}}`           |
-|     `path/case` | `{{#pathCase}}{{myVariable}}{{/pathCase}}`         |
-|    `param-case` | `{{#paramCase}}{{myVariable}}{{/paramCase}}`       |
-|    `PascalCase` | `{{#pascalCase}}{{myVariable}}{{/pascalCase}}`     |
-|   `Header-Case` | `{{#headerCase}}{{myVariable}}{{/headerCase}}`     |
-|    `Title Case` | `{{#titleCase}}{{myVariable}}{{/titleCase}}`       |
-|     `camelCase` | `{{#camelCase}}{{myVariable}}{{/camelCase}}`       |
-| `Sentence case` | `{{#sentenceCase}}{{myVariable}}{{/sentenceCase}}` |
-| `CONSTANT_CASE` | `{{#constantCase}}{{myVariable}}{{/constantCase}}` |
+_Example Usage_
 
-
-**Example Brick**:
+Given the following example brick:
 
 ```
-feature
-└── __brick__
-   ├── {{#snakeCase}}{{feature}}{{/snakeCase}}.md
-   └── {{#pascalCase}}{{feature}}{{/pascalCase}}.java
+__brick__
+  ├── {{#snakeCase}}{{name}}{{/snakeCase}}.md
+  └── {{#pascalCase}}{{name}}{{/pascalCase}}.java
 ```
 
 `brick.yaml`:
 
 ```yaml
-name: feature
-description: A new feature generator.
+name: example
+description: An example brick.
 vars:
-  - feature
+  - name
 ```
 
-Generate your files:
+We can generate code via:
 
-```shell
-mason make feature --feature my-new-feature
+```sh
+$ mason make example --name my-name
 ```
 
-Your new files with the new casing style.:
+The output will be:
 
 ```
-.
-├── my_new_feature.md
-└── MyNewFeature.java
+├── my_name.md
+└── MyName.java
 ```
-
 
 ## Install Brick Templates Globally
 
