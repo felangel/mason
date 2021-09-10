@@ -2,10 +2,10 @@
 import 'package:args/command_runner.dart';
 import 'package:io/io.dart';
 import 'package:mason/mason.dart';
-import 'package:mocktail/mocktail.dart';
-import 'package:test/test.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/version.dart';
+import 'package:mocktail/mocktail.dart';
+import 'package:test/test.dart';
 
 import 'helpers/helpers.dart';
 
