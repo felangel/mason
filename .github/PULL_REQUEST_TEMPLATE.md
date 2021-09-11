@@ -10,10 +10,6 @@
 
 **READY/IN DEVELOPMENT/HOLD**
 
-## Breaking Changes
-
-YES | NO
-
 ## Description
 
 <!--- Describe your changes in detail -->
