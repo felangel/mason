@@ -201,6 +201,9 @@ enum FileConflictResolution {
 
   /// Always skip conflicting files.
   skip,
+
+  /// Always append conflicting files.
+  append,
 }
 
 /// The overwrite rule when generating code and a conflict occurs.
@@ -211,11 +214,17 @@ enum OverwriteRule {
   /// Always skip overwriting the existing file.
   alwaysSkip,
 
+  /// Always append the existing file.
+  alwaysAppend,
+
   /// Overwrite one time.
   overwriteOnce,
 
   /// Do not overwrite one time.
   skipOnce,
+
+  /// Append One time
+  appendOnce,
 }
 
 /// {@template directory_generator_target}
@@ -481,6 +490,8 @@ extension on FileConflictResolution {
         return OverwriteRule.alwaysOverwrite;
       case FileConflictResolution.skip:
         return OverwriteRule.alwaysSkip;
+      case FileConflictResolution.append:
+        return OverwriteRule.alwaysAppend;
       case FileConflictResolution.prompt:
         return null;
     }
