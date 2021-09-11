@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File;
+import 'dart:io' show Directory, File, FileMode;
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
@@ -286,10 +286,15 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
         return file;
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
-      default:
+      case OverwriteRule.appendOnce:
+      case OverwriteRule.alwaysAppend:
+      case null:
+        final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
+            _overwriteRule == OverwriteRule.alwaysAppend;
         return file
             .create(recursive: true)
-            .then<File>((_) => file.writeAsBytes(contents))
+            .then<File>((_) => file.writeAsBytes(contents,
+                mode: shouldAppend ? FileMode.append : FileMode.write))
             .whenComplete(
               () => logger.delayed(
                 '  ${file.path} ${lightGreen.wrap('(new)')}',
