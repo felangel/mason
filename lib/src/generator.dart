@@ -297,7 +297,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
                 mode: shouldAppend ? FileMode.append : FileMode.write))
             .whenComplete(
               () => logger.delayed(
-                '  ${file.path} ${lightGreen.wrap('(new)')}',
+                '''  ${file.path} ${lightGreen.wrap(shouldAppend ? '(append)' : '(new)')}''',
               ),
             );
     }
