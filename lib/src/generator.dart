@@ -264,14 +264,15 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       }
 
       final shouldPrompt = _overwriteRule != OverwriteRule.alwaysOverwrite &&
-          _overwriteRule != OverwriteRule.alwaysSkip;
+          _overwriteRule != OverwriteRule.alwaysSkip &&
+          _overwriteRule != OverwriteRule.alwaysAppend;
 
       if (shouldPrompt) {
         logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
         _overwriteRule = logger
             .prompt(
               yellow.wrap(
-                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yna) '),
+                styleBold.wrap('Overwrite ${p.basename(file.path)}? (YnaYA) '),
               ),
             )
             .toOverwriteRule();
@@ -504,6 +505,9 @@ extension on String {
       case 'n':
         return OverwriteRule.skipOnce;
       case 'a':
+        return OverwriteRule.appendOnce;
+      case 'ya':
+      case 'YA':
         return OverwriteRule.alwaysOverwrite;
       case 'Y':
       default:
