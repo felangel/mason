@@ -102,13 +102,13 @@ $ mason make hello --name Felix -o ./path/to/directory
 
 ### File Conflict Resolution
 
-By default, `mason make` will prompt on each file conflict and will allow users to specify how the conflict should be resolved via `YnaYA`:
+By default, `mason make` will prompt on each file conflict and will allow users to specify how the conflict should be resolved via `Yyna`:
 
 ```txt
-Y(Yes) - overwrite (default)
-n(no) - do not overwrite
-a(append) - append to existing file
-YA(Yes Always) - overwrite this and all others
+y - yes, overwrite (default)
+Y - yes, overwrite this and all others
+n - no, do not overwrite
+a - append to existing file
 ```
 
 A custom file conflict resolution strategy can be specified via the `--on-conflict` option:

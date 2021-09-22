@@ -472,7 +472,7 @@ in todos.json''',
       ).called(1);
     });
 
-    test('generates greeting and append to existing file', () async {
+    test('generates greeting and appends to existing file', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'greeting-append'),
       )..createSync(recursive: true);

@@ -272,7 +272,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
         _overwriteRule = logger
             .prompt(
               yellow.wrap(
-                styleBold.wrap('Overwrite ${p.basename(file.path)}? (YnaYA) '),
+                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
               ),
             )
             .toOverwriteRule();
@@ -511,10 +511,9 @@ extension on String {
         return OverwriteRule.skipOnce;
       case 'a':
         return OverwriteRule.appendOnce;
-      case 'ya':
-      case 'YA':
-        return OverwriteRule.alwaysOverwrite;
       case 'Y':
+        return OverwriteRule.alwaysOverwrite;
+      case 'y':
       default:
         return OverwriteRule.overwriteOnce;
     }
