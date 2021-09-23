@@ -28,7 +28,7 @@ void main() {
       File(path.join(Directory.current.path, 'mason.yaml'))
         ..writeAsStringSync('''bricks:
   app_icon:
-    path: ../../bricks/app_icon
+    path: ../../../bricks/app_icon
 ''');
     });
 

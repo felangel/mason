@@ -30,15 +30,15 @@ void main() {
       File(path.join(Directory.current.path, 'mason.yaml'))
         ..writeAsStringSync('''bricks:
   app_icon:
-    path: ../../bricks/app_icon
+    path: ../../../bricks/app_icon
   documentation:
-    path: ../../bricks/documentation
+    path: ../../../bricks/documentation
   greeting:
-    path: ../../bricks/greeting
+    path: ../../../bricks/greeting
   simple:
-    path: ../../bricks/simple
+    path: ../../../bricks/simple
   todos:
-    path: ../../bricks/todos
+    path: ../../../bricks/todos
   widget:
     git:
       url: https://github.com/felangel/mason
@@ -68,7 +68,7 @@ void main() {
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
-      final bricksPath = path.join('..', '..', 'bricks');
+      final bricksPath = path.join('..', '..', '..', 'bricks');
       final appIconPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
@@ -96,15 +96,15 @@ void main() {
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
           json.encode({
-            '''app_icon_7fe065ff20ef089c36df9d567df1bd7d328c6bb017fdbff4733cdd3783a0e591''':
+            '''app_icon_cfe75d2168207dcf5ee22960c0260e93ee4168306dbeb09348c262bd7c73906e''':
                 appIconPath,
-            '''documentation_df43721ae5bfb5f7b07117d7fdf4eb70de9048652b8dfed2ea7492d34010664a''':
+            '''documentation_a4bd9a921f7902c67a8ae5918498ce13c8136233c3d11d835207447386ddd650''':
                 docPath,
-            '''greeting_a4652001e26be10014b29359c36b1e52c04faf4ef12c0d9560e73d2f0c2641f8''':
+            '''greeting_81a4ec348561cdd721c3bb79b3d6dc14738bf17f02e18810dad2a6d88732e298''':
                 greetingPath,
-            '''simple_f693a3ce2317548ff338ea9905d5e60c6b25da961520f77d0282094da778acc5''':
+            '''simple_3bbc2ade88745ef690063c8f652631a4870ee6af619a327e297084251aebe232''':
                 simplePath,
-            '''todos_73b2e1ae179e296b318703953a86f28a792e94bed4a9adec9f8ee5893c4527a7''':
+            '''todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740''':
                 todosPath,
             widgetPath: masonUrl,
           }),
