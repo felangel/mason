@@ -122,6 +122,9 @@ $ mason make hello --name Felix --on-conflict overwrite
 
 # Always skip when there is a file conflict
 $ mason make hello --name Felix --on-conflict skip
+
+# Always append when there is a file conflict
+$ mason make hello --name Felix --on-conflict append
 ```
 
 ## Creating New Bricks
