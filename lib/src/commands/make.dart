@@ -153,12 +153,13 @@ extension on ArgParser {
     );
     addOption(
       'on-conflict',
-      allowed: ['prompt', 'overwrite', 'skip'],
+      allowed: ['prompt', 'overwrite', 'append', 'skip'],
       defaultsTo: 'prompt',
       allowedHelp: {
         'prompt': 'Always prompt the user for each file conflict.',
         'overwrite': 'Always overwrite conflicting files.',
-        'skip': 'Always skip conflicting files.'
+        'append': 'Always append conflicting files.',
+        'skip': 'Always skip conflicting files.',
       },
       help: 'File conflict resolution strategy.',
     );
@@ -172,6 +173,8 @@ extension on String {
         return FileConflictResolution.skip;
       case 'overwrite':
         return FileConflictResolution.overwrite;
+      case 'append':
+        return FileConflictResolution.append;
       default:
         return FileConflictResolution.prompt;
     }

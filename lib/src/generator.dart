@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File;
+import 'dart:io' show Directory, File, FileMode;
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
@@ -201,6 +201,9 @@ enum FileConflictResolution {
 
   /// Always skip conflicting files.
   skip,
+
+  /// Always append conflicting files.
+  append,
 }
 
 /// The overwrite rule when generating code and a conflict occurs.
@@ -211,11 +214,17 @@ enum OverwriteRule {
   /// Always skip overwriting the existing file.
   alwaysSkip,
 
+  /// Always append the existing file.
+  alwaysAppend,
+
   /// Overwrite one time.
   overwriteOnce,
 
   /// Do not overwrite one time.
   skipOnce,
+
+  /// Append one time
+  appendOnce,
 }
 
 /// {@template directory_generator_target}
@@ -255,14 +264,15 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       }
 
       final shouldPrompt = _overwriteRule != OverwriteRule.alwaysOverwrite &&
-          _overwriteRule != OverwriteRule.alwaysSkip;
+          _overwriteRule != OverwriteRule.alwaysSkip &&
+          _overwriteRule != OverwriteRule.alwaysAppend;
 
       if (shouldPrompt) {
         logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
         _overwriteRule = logger
             .prompt(
               yellow.wrap(
-                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yna) '),
+                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
               ),
             )
             .toOverwriteRule();
@@ -276,13 +286,18 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
         return file;
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
+      case OverwriteRule.appendOnce:
+      case OverwriteRule.alwaysAppend:
       default:
+        final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
+            _overwriteRule == OverwriteRule.alwaysAppend;
         return file
             .create(recursive: true)
-            .then<File>((_) => file.writeAsBytes(contents))
+            .then<File>((_) => file.writeAsBytes(contents,
+                mode: shouldAppend ? FileMode.append : FileMode.write))
             .whenComplete(
               () => logger.delayed(
-                '  ${file.path} ${lightGreen.wrap('(new)')}',
+                '''  ${file.path} ${lightGreen.wrap(shouldAppend ? '(append)' : '(new)')}''',
               ),
             );
     }
@@ -481,6 +496,8 @@ extension on FileConflictResolution {
         return OverwriteRule.alwaysOverwrite;
       case FileConflictResolution.skip:
         return OverwriteRule.alwaysSkip;
+      case FileConflictResolution.append:
+        return OverwriteRule.alwaysAppend;
       case FileConflictResolution.prompt:
         return null;
     }
@@ -493,8 +510,10 @@ extension on String {
       case 'n':
         return OverwriteRule.skipOnce;
       case 'a':
-        return OverwriteRule.alwaysOverwrite;
+        return OverwriteRule.appendOnce;
       case 'Y':
+        return OverwriteRule.alwaysOverwrite;
+      case 'y':
       default:
         return OverwriteRule.overwriteOnce;
     }

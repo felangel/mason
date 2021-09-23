@@ -100,6 +100,7 @@ void main() {
             '                                (defaults to ".")\n'
             '''    --on-conflict               File conflict resolution strategy.\n'''
             '\n'
+            '''          [append]              Always append conflicting files.\n'''
             '''          [overwrite]           Always overwrite conflicting files.\n'''
             '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
             '          [skip]                Always skip conflicting files.\n'
@@ -132,6 +133,7 @@ void main() {
             '                                (defaults to ".")\n'
             '''    --on-conflict               File conflict resolution strategy.\n'''
             '\n'
+            '''          [append]              Always append conflicting files.\n'''
             '''          [overwrite]           Always overwrite conflicting files.\n'''
             '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
             '          [skip]                Always skip conflicting files.\n'
@@ -467,6 +469,46 @@ in todos.json''',
       expect(fileB.readAsStringSync(), contains('Hi test-name2!'));
       verify(
         () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+    });
+
+    test('generates greeting and appends to existing file', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-append'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name2',
+        '--on-conflict',
+        'append',
+      ]);
+
+      expect(result, equals(ExitCode.success.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name2!'));
+      verify(
+        () => logger.delayed(any(that: contains('(append)'))),
       ).called(1);
     });
   });
