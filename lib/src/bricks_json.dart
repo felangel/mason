@@ -145,7 +145,7 @@ class BricksJson {
       Brick(git: GitPath(gitPath.url, ref: gitPath.ref)),
     )!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
-    final directoryExists = await directory.exists();
+    final directoryExists = directory.existsSync();
     final directoryIsNotEmpty = directoryExists
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
