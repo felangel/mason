@@ -223,7 +223,7 @@ enum OverwriteRule {
   /// Do not overwrite one time.
   skipOnce,
 
-  /// Append One time
+  /// Append one time
   appendOnce,
 }
 
@@ -288,7 +288,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.overwriteOnce:
       case OverwriteRule.appendOnce:
       case OverwriteRule.alwaysAppend:
-      case null:
+      default:
         final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
             _overwriteRule == OverwriteRule.alwaysAppend;
         return file
