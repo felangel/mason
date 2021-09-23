@@ -508,7 +508,7 @@ in todos.json''',
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name2!'));
       verify(
-        () => logger.delayed(any(that: contains('(append)'))),
+        () => logger.delayed(any(that: contains('(modified)'))),
       ).called(1);
     });
   });
