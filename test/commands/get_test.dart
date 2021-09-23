@@ -154,5 +154,53 @@ void main() {
         () => logger.err(const MasonYamlNotFoundException().message),
       ).called(1);
     });
+
+    test('throws BrickNotFoundException when path does not exist', () async {
+      File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync('''bricks:
+  app_icon:
+    path: ../../wrong/path  
+''');
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err(
+          BrickNotFoundException(path.canonicalize('../../wrong/path')).message,
+        ),
+      ).called(1);
+    });
+
+    test('throws BrickNotFoundException when git path does not exist',
+        () async {
+      File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync('''bricks:
+  widget:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/invalid
+''');
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err(
+          const BrickNotFoundException(
+            'https://github.com/felangel/mason/bricks/invalid',
+          ).message,
+        ),
+      ).called(1);
+    });
+
+    test('throws ProcessException when remote does not exist', () async {
+      File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync('''bricks:
+  widget:
+    git:
+      url: https://github.com/felangel/mason1
+      path: bricks/invalid
+''');
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.unavailable.code));
+      verify(() => logger.err(any(that: contains('fatal:')))).called(1);
+    });
   });
 }

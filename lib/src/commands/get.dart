@@ -21,11 +21,14 @@ class GetCommand extends MasonCommand {
     final bricksJson = localBricksJson;
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final getDone = logger.progress('getting bricks');
-    if (masonYaml.bricks.values.isNotEmpty) {
-      await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+    try {
+      if (masonYaml.bricks.values.isNotEmpty) {
+        await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+      }
+    } finally {
       await bricksJson.flush();
+      getDone();
     }
-    getDone();
     return ExitCode.success.code;
   }
 }
