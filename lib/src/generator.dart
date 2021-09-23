@@ -296,9 +296,13 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             .then<File>((_) => file.writeAsBytes(contents,
                 mode: shouldAppend ? FileMode.append : FileMode.write))
             .whenComplete(
-              () => logger.delayed(
-                '''  ${file.path} ${lightGreen.wrap(shouldAppend ? '(append)' : '(new)')}''',
-              ),
+              () => shouldAppend
+                  ? logger.delayed(
+                      '  ${file.path} ${lightBlue.wrap('(modified)')}',
+                    )
+                  : logger.delayed(
+                      '  ${file.path} ${lightGreen.wrap('(new)')}',
+                    ),
             );
     }
   }
