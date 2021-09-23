@@ -1,3 +1,9 @@
+# 0.0.1-dev.48
+
+- feat: add append conflict resolution strategy
+- fix: mason get ensures brick exists
+- docs: add built-in lambdas section to README
+
 # 0.0.1-dev.47
 
 - fix: `vars` in `brick.yaml` are not required
