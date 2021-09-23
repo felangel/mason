@@ -4,6 +4,8 @@ import 'dart:io';
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
 
+import 'brick_yaml.dart';
+import 'command.dart';
 import 'exception.dart';
 import 'git.dart';
 import 'mason_yaml.dart';
@@ -113,10 +115,15 @@ class BricksJson {
       );
     }
 
-    if (brick.path != null) {
+    final path = brick.path;
+    if (path != null) {
+      final brickYaml = File(p.join(path, BrickYaml.file));
+      if (!brickYaml.existsSync()) {
+        throw BrickNotFoundException(p.canonicalize(path));
+      }
       final remoteDir = getPath(brick);
       if (remoteDir != null) return remoteDir;
-      return _addLocalBrick(brick.path!);
+      return _addLocalBrick(path);
     }
 
     return _addRemoteBrick(brick.git!);
@@ -143,6 +150,16 @@ class BricksJson {
         ? directory.listSync(recursive: true).isNotEmpty
         : false;
 
+    void _ensureRemoteBrickExists(Directory directory, GitPath gitPath) {
+      final brickYaml = File(
+        p.join(directory.path, gitPath.path, BrickYaml.file),
+      );
+      if (!brickYaml.existsSync()) {
+        directory.deleteSync(recursive: true);
+        throw BrickNotFoundException('${gitPath.url}/${gitPath.path}');
+      }
+    }
+
     /// Even if a cached version exists, still try to update.
     /// Fall-back to cached version if update fails.
     if (directoryExists && directoryIsNotEmpty) {
@@ -152,6 +169,7 @@ class BricksJson {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
+      _ensureRemoteBrickExists(directory, gitPath);
       _cache[key] = directory.path;
       return directory.path;
     }
@@ -160,6 +178,7 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
+    _ensureRemoteBrickExists(directory, gitPath);
     _cache[key] = directory.path;
     return directory.path;
   }
