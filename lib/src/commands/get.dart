@@ -11,7 +11,7 @@ class GetCommand extends MasonCommand {
   GetCommand({Logger? logger}) : super(logger: logger);
 
   @override
-  final String description = 'Gets all bricks.';
+  final String description = 'Gets all bricks in the nearest mason.yaml.';
 
   @override
   final String name = 'get';
@@ -20,7 +20,7 @@ class GetCommand extends MasonCommand {
   Future<int> run() async {
     final bricksJson = localBricksJson;
     if (bricksJson == null) throw const MasonYamlNotFoundException();
-    final getDone = logger.progress('getting bricks');
+    final getDone = logger.progress('Getting bricks');
     try {
       if (masonYaml.bricks.values.isNotEmpty) {
         await Future.forEach(masonYaml.bricks.values, bricksJson.add);
