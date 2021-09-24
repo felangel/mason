@@ -33,12 +33,27 @@ class InitCommand extends MasonCommand {
       target,
       vars: <String, String>{'name': '{{name}}'},
     );
-    fetchDone('Initialized');
+    fetchDone();
+
+    final getDone = logger.progress('Getting brick');
+    final bricksJson = localBricksJson;
+    if (bricksJson == null) throw const MasonYamlNotFoundException();
+    try {
+      if (masonYaml.bricks.values.isNotEmpty) {
+        await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+      }
+    } finally {
+      await bricksJson.flush();
+      getDone();
+    }
+
     logger
       ..info(
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
-      ..flush(logger.success);
+      ..flush(logger.detail)
+      ..info('')
+      ..info('Run "mason make hello" to use your first brick.');
     return ExitCode.success.code;
   }
 }
