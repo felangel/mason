@@ -343,7 +343,7 @@ $ mason add --source git https://github.com/user/repo --path path/to/brick
 $ mason add --source git https://github.com/user/repo --path path/to/brick --ref tag-name
 ```
 
-The above command will add the specified brick to the `mason.yaml` and install it so you can use it right away via `mason make`.
+Once a brick is added it can be used locally via the `mason make` command.
 
 ## Install Brick Templates Globally
 
