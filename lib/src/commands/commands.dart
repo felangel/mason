@@ -1,3 +1,4 @@
+export 'add.dart';
 export 'bundle.dart';
 export 'cache.dart';
 export 'get.dart';

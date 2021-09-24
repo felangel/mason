@@ -14,13 +14,57 @@ Mason allows developers to create and consume reusable templates called bricks.
 
 ## Quick Start
 
-### Installing
-
 ```sh
-# Activate from pub.dev
+# 🎯 Activate from https://pub.dev
 $ dart pub global activate mason
 
-# Or install using Homebrew
+# 🍺 Or install using Homebrew
+$ brew tap felangel/mason && brew install mason
+
+# 🚀 Initialize mason
+$ mason init
+
+# 🧱 Use your first brick
+$ mason make hello
+```
+
+---
+
+## Table Of Contents
+
+- [Overview](#overview)
+  - [Installing](#installing)
+  - [Initializing](#initializing)
+  - [Command Line Variables](#command-line-variables)
+  - [Variable Prompts](#variable-prompts)
+  - [Config File for Input Variables](#config-file-for-input-variables)
+  - [Custom Output Directory](#custom-output-directory)
+  - [File Conflict Resolution](#file-conflict-resolution)
+- [Creating New Bricks](#creating-new-bricks)
+  - [Brick YAML](#brick-yaml)
+  - [Brick Template](#brick-template)
+    - [Nested Templates (partials)](#nested-templates--partials-)
+    - [File Resolution](#file-resolution)
+    - [Built-in Lambdas](#built-in-lambdas)
+- [Adding Existing Bricks](#adding-existing-bricks)
+- [Install Brick Templates Globally](#install-brick-templates-globally)
+  - [Install Usage](#install-usage)
+- [Uninstall Brick Templates](#uninstall-brick-templates)
+  - [Uninstall Usage](#uninstall-usage)
+- [List all available Brick Templates](#list-all-available-brick-templates)
+- [Bundling](#bundling)
+- [Usage](#usage)
+- [Video Tutorial](#video-tutorial)
+
+## Overview
+
+### Installation
+
+```sh
+# 🎯 Activate from https://pub.dev
+$ dart pub global activate mason
+
+# 🍺 Or install using Homebrew
 $ brew tap felangel/mason
 $ brew install mason
 ```
@@ -278,6 +322,29 @@ The output will be:
 └── MyName.java
 ```
 
+## Adding Existing Bricks
+
+Add an existing brick to the `mason.yaml` using the `mason add` command. Bricks can be added either via a local path or git url.
+
+```sh
+# add from path
+$ mason add --source path ./path/to/brick
+
+# add from path shorthand syntax
+$ mason add ./path/to/brick
+
+# add from git url
+$ mason add --source git https://github.com/user/repo
+
+# add from git url with path
+$ mason add --source git https://github.com/user/repo --path path/to/brick
+
+# add from git url with path and ref
+$ mason add --source git https://github.com/user/repo --path path/to/brick --ref tag-name
+```
+
+The above command will add the specified brick to the `mason.yaml` and install it so you can use it right away via `mason make`.
+
 ## Install Brick Templates Globally
 
 The `install` command allows developers to install brick templates globally on their machines from either a local path or git url. Then developers can use globally installed brick templates anywhere (regardless of whether there is an existing `mason.yaml`).
@@ -376,9 +443,10 @@ Global options:
     --version    Print the current version.
 
 Available commands:
+  add         Adds a brick to the mason.yaml.
   bundle      Generates a bundle from a brick template.
   cache       Interact with mason cache.
-  get         Gets all bricks.
+  get         Gets all bricks in the nearest mason.yaml.
   init        Initialize mason in the current directory.
   install     Installs a brick globally.
   list        Lists all available bricks.
