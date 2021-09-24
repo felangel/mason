@@ -5,8 +5,8 @@
 Run the following command in the current directory:
 
 ```sh
-mason get # only first time
-mason make greeting --name Felix
+$ mason get # only first time
+$ mason make greeting --name Felix
 ```
 
 `GREETINGS.md` should be created in the current directory with the following contents:
@@ -20,8 +20,8 @@ mason make greeting --name Felix
 Run the following command in the current directory:
 
 ```sh
-mason get # only first time
-mason make todos -c todos.json
+$ mason get # only first time
+$ mason make todos -c todos.json
 ```
 
 `TODOS.md` should be created in the current directory with the following contents:
@@ -29,7 +29,7 @@ mason make todos -c todos.json
 ```md
 # TODOS
 
--  [X]  Eat
--  [X]  Code
--  [ ]  Sleep
+- [x] Eat
+- [x] Code
+- [ ] Sleep
 ```
