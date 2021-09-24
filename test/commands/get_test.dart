@@ -111,23 +111,8 @@ void main() {
         ),
       );
 
-      verify(() => logger.progress('getting bricks')).called(1);
+      verify(() => logger.progress('Getting bricks')).called(1);
       expect(doneCallCount, equals(1));
-    });
-
-    test('creates .mason/brick.json when mason.yaml exists', () async {
-      final expectedBrickJsonPath = path.join(
-        Directory.current.path,
-        '.mason',
-        'bricks.json',
-      );
-
-      expect(File(expectedBrickJsonPath).existsSync(), isFalse);
-
-      final result = await commandRunner.run(['get']);
-      expect(result, equals(ExitCode.success.code));
-
-      expect(File(expectedBrickJsonPath).existsSync(), isTrue);
     });
 
     test('does not error when brick.json already exists', () async {
