@@ -1,8 +1,8 @@
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 
 import '../bricks_json.dart';
 import '../command.dart';
+import '../io.dart';
 
 /// {@template cache_command}
 /// `mason cache` command includes several subcommands.

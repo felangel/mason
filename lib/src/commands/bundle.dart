@@ -1,14 +1,14 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
+import 'package:universal_io/io.dart';
 
 import '../bundler.dart';
 import '../command.dart';
+import '../io.dart';
 
 /// Supported Bundle Types
 enum BundleType {

@@ -1,8 +1,8 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
+import 'package:mason/src/io.dart';
 import 'package:mason/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';

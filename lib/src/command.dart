@@ -1,9 +1,8 @@
-import 'dart:io';
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:path/path.dart' as p;
+import 'package:universal_io/io.dart';
 
 import 'brick_yaml.dart';
 import 'bricks_json.dart';

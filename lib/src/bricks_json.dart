@@ -1,8 +1,8 @@
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:crypto/crypto.dart';
 import 'package:path/path.dart' as p;
+import 'package:universal_io/io.dart';
 
 import 'brick_yaml.dart';
 import 'command.dart';
