@@ -1,16 +1,16 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File, FileMode;
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
-import 'package:io/ansi.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
+import 'package:universal_io/io.dart' show Directory, File, FileMode;
 
 import 'brick_yaml.dart';
 import 'bricks_json.dart';
+import 'io.dart';
 import 'logger.dart';
 import 'mason_bundle.dart';
 import 'mason_yaml.dart';

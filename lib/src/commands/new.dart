@@ -1,15 +1,14 @@
-import 'dart:io';
-
 import 'package:args/command_runner.dart';
-import 'package:io/ansi.dart';
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
+import 'package:universal_io/io.dart';
 
 import '../brick_yaml.dart';
 import '../command.dart';
+import '../io.dart';
+import '../logger.dart';
 import '../mason_yaml.dart';
 import '../yaml_encode.dart';
 

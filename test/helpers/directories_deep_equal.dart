@@ -1,6 +1,6 @@
-import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:path/path.dart' as path;
+import 'package:universal_io/io.dart';
 
 const _equality = DeepCollectionEquality();
 

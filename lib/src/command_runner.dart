@@ -1,11 +1,10 @@
-import 'dart:io';
-
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
-import 'package:io/io.dart';
+import 'package:universal_io/io.dart';
 
 import 'commands/commands.dart';
 import 'exception.dart';
+import 'io.dart';
 import 'logger.dart';
 import 'version.dart';
 

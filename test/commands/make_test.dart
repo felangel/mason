@@ -1,13 +1,13 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'dart:convert';
-import 'dart:io';
 
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
+import 'package:mason/src/io.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
+import 'package:universal_io/io.dart';
 
 import '../helpers/helpers.dart';
 

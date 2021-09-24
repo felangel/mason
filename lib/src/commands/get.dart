@@ -1,7 +1,7 @@
-import 'package:io/io.dart';
 import 'package:mason/mason.dart';
 
 import '../command.dart';
+import '../io.dart';
 
 /// {@template get_command}
 /// `mason get` command which gets all bricks.
