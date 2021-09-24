@@ -47,7 +47,19 @@ void main() {
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'init')),
       );
-      expect(directoriesDeepEqual(actual, expected), isTrue);
+      expect(
+        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
+        isTrue,
+      );
+      expect(
+        File(path.join(actual.path, '.mason', 'bricks.json')).existsSync(),
+        isTrue,
+      );
+      verify(() => logger.progress('Initializing')).called(1);
+      verify(() => logger.progress('Getting brick')).called(1);
+      verify(
+        () => logger.info('Run "mason make hello" to use your first brick.'),
+      ).called(1);
     });
   });
 }
