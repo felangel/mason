@@ -1,3 +1,7 @@
+# 0.0.1-dev.49
+
+- refactor: remove `dart:io` platform dependency
+
 # 0.0.1-dev.48
 
 - feat: add append conflict resolution strategy
