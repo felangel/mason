@@ -5,7 +5,6 @@ import 'package:path/path.dart' as p;
 import '../brick_yaml.dart';
 import '../command.dart';
 import '../io.dart';
-import '../logger.dart';
 import '../mason_yaml.dart';
 
 /// {@template init_command}

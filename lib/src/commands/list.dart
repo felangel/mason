@@ -2,7 +2,6 @@ import 'package:mason/mason.dart';
 
 import '../command.dart';
 import '../io.dart';
-import '../logger.dart';
 
 /// {@template list_command}
 /// `mason list` command which lists all available bricks.

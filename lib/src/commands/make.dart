@@ -10,7 +10,6 @@ import 'package:universal_io/io.dart';
 import '../brick_yaml.dart';
 import '../command.dart';
 import '../io.dart';
-import '../logger.dart';
 
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.

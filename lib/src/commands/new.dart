@@ -8,7 +8,6 @@ import 'package:universal_io/io.dart';
 import '../brick_yaml.dart';
 import '../command.dart';
 import '../io.dart';
-import '../logger.dart';
 import '../mason_yaml.dart';
 import '../yaml_encode.dart';
 
