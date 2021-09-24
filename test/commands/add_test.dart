@@ -119,10 +119,10 @@ void main() {
         expect(makeResult, equals(ExitCode.success.code));
 
         final actual = Directory(
-          path.join(testFixturesPath(cwd, suffix: '.install'), 'widget'),
+          path.join(testFixturesPath(cwd, suffix: '.add'), 'widget'),
         );
         final expected = Directory(
-          path.join(testFixturesPath(cwd, suffix: 'install'), 'widget'),
+          path.join(testFixturesPath(cwd, suffix: 'add'), 'widget'),
         );
         expect(directoriesDeepEqual(actual, expected), isTrue);
       });
