@@ -21,6 +21,7 @@ const expectedUsage = [
       '    --version    Print the current version.\n'
       '\n'
       'Available commands:\n'
+      '  add         Adds a brick to the mason.yaml.\n'
       '  bundle      Generates a bundle from a brick template.\n'
       '  cache       Interact with mason cache.\n'
       '  get         Gets all bricks in the nearest mason.yaml.\n'

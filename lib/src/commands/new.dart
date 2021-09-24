@@ -59,13 +59,18 @@ class NewCommand extends MasonCommand {
     );
     final bricks = Map.of(masonYaml.bricks)..addAll({name: newBrick});
 
-    await Future.wait([
-      generator.generate(target, vars: <String, dynamic>{'name': '{{name}}'}),
-      if (!masonYaml.bricks.containsKey(name))
-        masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
-    ]);
-    await bricksJson.add(newBrick);
-    await bricksJson.flush();
+    try {
+      await Future.wait([
+        generator.generate(target, vars: <String, dynamic>{'name': '{{name}}'}),
+        if (!masonYaml.bricks.containsKey(name))
+          masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
+      ]);
+      await bricksJson.add(newBrick);
+      await bricksJson.flush();
+    } catch (_) {
+      done();
+      rethrow;
+    }
 
     done('Created new brick: $name');
     logger
