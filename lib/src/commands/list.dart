@@ -21,6 +21,11 @@ class ListCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
+    if (bricks.isEmpty) {
+      logger.info('(empty)');
+      return ExitCode.success.code;
+    }
+
     for (final brick in bricks) {
       logger.info('${styleBold.wrap(brick.name)} - ${brick.description}');
     }
