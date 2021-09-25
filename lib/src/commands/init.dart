@@ -84,7 +84,7 @@ vars:
 
   static const _masonYamlContent =
       '''# Register bricks which can be consumed via the Mason CLI.
-# https://pub.dev/packages/mason
+# https://github.com/felangel/mason
 bricks:
   # Sample Brick
   # Run `mason make hello` to try it out.
