@@ -34,7 +34,7 @@ void main() {
     test('exits successfully when no bricks are available', () async {
       final result = await commandRunner.run(['list']);
       expect(result, equals(ExitCode.success.code));
-      verifyNever(() => logger.info(any()));
+      verify(() => logger.info('(empty)')).called(1);
     });
 
     test('ls is available as an alias', () async {
@@ -64,7 +64,7 @@ void main() {
       );
       await expectLater(
         MasonCommandRunner(logger: logger).run(
-          ['i', '--source', 'path', greetingPath],
+          ['add', '-g', '--source', 'path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
