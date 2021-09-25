@@ -40,7 +40,7 @@ void main() {
     test('ls is available as an alias', () async {
       final result = await commandRunner.run(['ls']);
       expect(result, equals(ExitCode.success.code));
-      verifyNever(() => logger.info(any()));
+      verify(() => logger.info('(empty)')).called(1);
     });
 
     test(
