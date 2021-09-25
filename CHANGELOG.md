@@ -1,3 +1,17 @@
+# 0.0.1-dev.50
+
+- **BREAKING** refactor: remove `mason install` and `mason uninstall`
+  - `mason install` -> `mason add -g`
+  - `mason uninstall` -> `mason remove -g`
+- feat: adjust `mason init` generated `mason.yaml`
+- feat: improve `mason list` empty output
+- feat: create `mason remove` command
+- feat: create `mason add` command
+- feat: `mason init` command automatically gets first brick
+- feat: improve output and description for `mason get` command
+- fix: logger stopwatch units
+- docs: update example/README
+
 # 0.0.1-dev.49
 
 - refactor: remove `dart:io` platform dependency
