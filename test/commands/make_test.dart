@@ -20,7 +20,11 @@ void main() {
     late Logger logger;
     late MasonCommandRunner commandRunner;
 
-    setUp(() {
+    setUpAll(() async {
+      await MasonCommandRunner().run(['cache', 'clear']);
+    });
+
+    setUp(() async {
       setUpTestingEnvironment(cwd, suffix: '.make');
       File(path.join(Directory.current.path, 'mason.yaml'))
         ..writeAsStringSync('''bricks:
