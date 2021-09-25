@@ -64,7 +64,7 @@ void main() {
       );
       await expectLater(
         MasonCommandRunner(logger: logger).run(
-          ['add', '-g', '--source', 'path', greetingPath],
+          ['i', '--source', 'path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
