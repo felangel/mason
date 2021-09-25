@@ -89,7 +89,7 @@ class _MakeCommand extends MasonCommand {
         generateDone();
         logger.err('${error}in $configPath');
         return ExitCode.usage.code;
-      } on Exception catch (error) {
+      } catch (error) {
         generateDone();
         logger.err('$error');
         return ExitCode.usage.code;
@@ -115,7 +115,7 @@ class _MakeCommand extends MasonCommand {
         )
         ..flush(logger.detail);
       return ExitCode.success.code;
-    } on Exception catch (error) {
+    } catch (error) {
       generateDone?.call();
       logger.err('$error');
       return ExitCode.cantCreate.code;
