@@ -36,6 +36,8 @@ void main() {
     path: ../../../bricks/greeting
   hello_world:
     path: ../../../bricks/hello_world
+  plugin:
+    path: ../../../bricks/plugin
   simple:
     path: ../../../bricks/simple
   todos:
@@ -55,6 +57,9 @@ void main() {
       );
       final helloWorldPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
+      );
+      final pluginPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'plugin'),
       );
       final simplePath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
@@ -76,6 +81,8 @@ void main() {
               greetingPath,
           '''hello_world_fd66b903d5885651238b50e1205b0cf05f30573cc3b4a7a4f2d1f495edd33630''':
               helloWorldPath,
+          '''plugin_de4be97b1f4014112763f13689b00186175e5116db6bec26ee494b46f3ad8756''':
+              pluginPath,
           '''simple_3bbc2ade88745ef690063c8f652631a4870ee6af619a327e297084251aebe232''':
               simplePath,
           '''todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740''':
@@ -114,6 +121,7 @@ void main() {
             '  documentation   Create Documentation Markdown Files\n'
             '  greeting        A Simple Greeting Template\n'
             '  hello_world     A Simple Hello World Template\n'
+            '  plugin          An example plugin template\n'
             '  simple          A Simple Static Template\n'
             '  todos           A Todos Template\n'
             '  widget          Create a Simple Flutter Widget\n'
@@ -300,6 +308,90 @@ in todos.json''',
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates plugin (empty)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'plugin', 'empty'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'plugin', '--ios', 'false', '--android', 'false'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'plugin', 'empty'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'plugin', 'empty'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates plugin (android)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'plugin', 'android'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'plugin', '--ios', 'false', '--android', 'true'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'plugin', 'android'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'plugin', 'android'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates plugin (ios)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'plugin', 'ios'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'plugin', '--ios', 'true', '--android', 'false'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'plugin', 'ios'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'plugin', 'ios'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates plugin (android + ios)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'plugin', 'android_ios'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'plugin', '--ios', 'true', '--android', 'true'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(
+          testFixturesPath(cwd, suffix: '.make'),
+          'plugin',
+          'android_ios',
+        ),
+      );
+      final expected = Directory(
+        path.join(
+          testFixturesPath(cwd, suffix: 'make'),
+          'plugin',
+          'android_ios',
+        ),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

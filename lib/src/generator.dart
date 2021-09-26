@@ -151,6 +151,7 @@ abstract class Generator implements Comparable<Generator> {
       final fileMatch = _fileRegExp.firstMatch(file.path);
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
+        if (resultFile.path.isEmpty) return;
         await target.createFile(resultFile.path, resultFile.content);
         fileCount++;
       } else {
@@ -158,7 +159,12 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
+        final isRoot = file.path.startsWith(p.separator);
         for (final file in resultFiles) {
+          final _isRoot = file.path.startsWith(p.separator);
+          if (!isRoot && _isRoot) continue;
+          if (file.path.isEmpty) continue;
+          if (file.path.split(p.separator).contains('')) continue;
           await target.createFile(file.path, file.content);
           fileCount++;
         }

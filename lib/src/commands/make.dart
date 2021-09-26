@@ -108,12 +108,7 @@ class _MakeCommand extends MasonCommand {
       }
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
-      logger
-        ..info(
-          '${lightGreen.wrap('✓')} '
-          'Generated $fileCount file(s):',
-        )
-        ..flush(logger.detail);
+      logger.logFiles(fileCount);
       return ExitCode.success.code;
     } catch (error) {
       generateDone?.call();
@@ -176,6 +171,31 @@ extension on String {
         return FileConflictResolution.append;
       default:
         return FileConflictResolution.prompt;
+    }
+  }
+}
+
+extension on Logger {
+  void logFiles(int fileCount) {
+    if (fileCount == 0) {
+      info(
+        '${lightGreen.wrap('✓')} '
+        'Generated $fileCount files',
+      );
+    } else if (fileCount == 1) {
+      this
+        ..info(
+          '${lightGreen.wrap('✓')} '
+          'Generated $fileCount file:',
+        )
+        ..flush(detail);
+    } else {
+      this
+        ..info(
+          '${lightGreen.wrap('✓')} '
+          'Generated $fileCount file(s):',
+        )
+        ..flush(detail);
     }
   }
 }
