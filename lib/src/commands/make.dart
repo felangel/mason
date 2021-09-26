@@ -110,9 +110,11 @@ class _MakeCommand extends MasonCommand {
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
       return ExitCode.success.code;
-    } catch (error) {
+    } catch (error, stackTrace) {
       generateDone?.call();
       logger.err('$error');
+      print(error);
+      print(stackTrace.toString());
       return ExitCode.cantCreate.code;
     }
   }
