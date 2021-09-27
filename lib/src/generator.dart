@@ -161,8 +161,12 @@ abstract class Generator implements Comparable<Generator> {
         );
         final rootRegExp = RegExp(r'\/|\\');
         final wasRoot = file.path.startsWith(rootRegExp);
+        print('wasRoot: $wasRoot');
+        print('raw path: ${file.path}');
         for (final file in resultFiles) {
           final isRoot = file.path.startsWith(rootRegExp);
+          print('isRoot: $isRoot');
+          print('substituted path: ${file.path}');
           if (!wasRoot && isRoot) continue;
           if (file.path.isEmpty) continue;
           if (file.path.split(p.separator).contains('')) continue;
