@@ -151,7 +151,7 @@ abstract class Generator implements Comparable<Generator> {
       final fileMatch = _fileRegExp.firstMatch(file.path);
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
-        if (resultFile.isNotValid()) return;
+        if (resultFile.path.isEmpty) return;
         await target.createFile(resultFile.path, resultFile.content);
         fileCount++;
       } else {
@@ -159,9 +159,13 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
+        final rootRegExp = RegExp(r'\/|\\');
+        final wasRoot = file.path.startsWith(rootRegExp);
         for (final file in resultFiles) {
-          print(file.path);
-          if (file.isNotValid()) continue;
+          final isRoot = file.path.startsWith(rootRegExp);
+          if (!wasRoot && isRoot) continue;
+          if (file.path.isEmpty) continue;
+          if (file.path.split(p.separator).contains('')) continue;
           await target.createFile(file.path, file.content);
           fileCount++;
         }
@@ -524,14 +528,5 @@ extension on String {
       default:
         return OverwriteRule.overwriteOnce;
     }
-  }
-}
-
-extension on FileContents {
-  bool isNotValid() {
-    if (path.endsWith(p.separator)) return true;
-    if (path.isEmpty) return true;
-    if (path.split(p.separator).contains('')) return true;
-    return false;
   }
 }
