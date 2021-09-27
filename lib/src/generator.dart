@@ -159,17 +159,17 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
-        final rootRegExp = RegExp(r'\/|\\');
-        final wasRoot = file.path.startsWith(rootRegExp);
+        final separator = RegExp(r'\/|\\');
+        final wasRoot = file.path.startsWith(separator);
         print('wasRoot: $wasRoot');
         print('raw path: ${file.path}');
         for (final file in resultFiles) {
-          final isRoot = file.path.startsWith(rootRegExp);
+          final isRoot = file.path.startsWith(separator);
           print('isRoot: $isRoot');
           print('substituted path: ${file.path}');
           if (!wasRoot && isRoot) continue;
           if (file.path.isEmpty) continue;
-          if (file.path.split(p.separator).contains('')) continue;
+          if (file.path.split(separator).contains('')) continue;
           await target.createFile(file.path, file.content);
           fileCount++;
         }
