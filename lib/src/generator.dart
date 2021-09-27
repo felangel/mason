@@ -160,6 +160,7 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, List<int>>.of(partials),
         );
         for (final file in resultFiles) {
+          print(file.path);
           if (file.isNotValid()) continue;
           await target.createFile(file.path, file.content);
           fileCount++;
