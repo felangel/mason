@@ -1,3 +1,7 @@
+# 0.0.1-dev.51
+
+- feat: conditional file and directory creation support
+
 # 0.0.1-dev.50
 
 - **BREAKING** refactor: remove `mason install` and `mason uninstall`
