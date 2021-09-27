@@ -159,6 +159,7 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
+        print(file.path);
         final isRoot = file.path.startsWith(p.separator);
         for (final file in resultFiles) {
           final _isRoot = file.path.startsWith(p.separator);
