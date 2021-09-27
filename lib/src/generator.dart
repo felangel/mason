@@ -159,10 +159,12 @@ abstract class Generator implements Comparable<Generator> {
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
+        final root = RegExp(r'\w:\\|\w:\/');
         final separator = RegExp(r'\/|\\');
-        final wasRoot = file.path.startsWith(separator);
+        final rootOrSeparator = RegExp('$root|$separator');
+        final wasRoot = file.path.startsWith(rootOrSeparator);
         for (final file in resultFiles) {
-          final isRoot = file.path.startsWith(separator);
+          final isRoot = file.path.startsWith(rootOrSeparator);
           if (!wasRoot && isRoot) continue;
           if (file.path.isEmpty) continue;
           if (file.path.split(separator).contains('')) continue;
