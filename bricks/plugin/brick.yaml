@@ -1,0 +1,5 @@
+name: plugin
+description: An example plugin template
+vars:
+  - android
+  - ios
