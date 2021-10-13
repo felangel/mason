@@ -4,8 +4,10 @@ import 'dart:convert';
 import 'package:mason/mason.dart';
 import 'package:mason/src/command_runner.dart';
 import 'package:mason/src/io.dart';
+import 'package:mason/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
@@ -13,15 +15,29 @@ import '../helpers/helpers.dart';
 
 class MockLogger extends Mock implements Logger {}
 
+class MockPubUpdater extends Mock implements PubUpdater {}
+
+class FakeProcessResult extends Fake implements ProcessResult {}
+
 void main() {
   final cwd = Directory.current;
 
   group('mason make', () {
     late Logger logger;
     late MasonCommandRunner commandRunner;
+    late PubUpdater pubUpdater;
 
     setUpAll(() async {
-      await MasonCommandRunner().run(['cache', 'clear']);
+      pubUpdater = MockPubUpdater();
+      logger = MockLogger();
+
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+      when(
+        () => pubUpdater.update(packageName: packageName),
+      ).thenAnswer((_) => Future.value(FakeProcessResult()));
+      await MasonCommandRunner(pubUpdater: pubUpdater).run(['cache', 'clear']);
     });
 
     setUp(() async {
@@ -91,9 +107,21 @@ void main() {
               widgetPath,
         }));
       printLogs = [];
+      pubUpdater = MockPubUpdater();
       logger = MockLogger();
+
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+      when(
+        () => pubUpdater.update(packageName: packageName),
+      ).thenAnswer((_) => Future.value(FakeProcessResult()));
+
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
-      commandRunner = MasonCommandRunner(logger: logger);
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
     });
 
     tearDown(() {
@@ -186,7 +214,10 @@ void main() {
         File(path.join(Directory.current.path, 'mason.yaml'))
             .deleteSync(recursive: true);
       } catch (_) {}
-      commandRunner = MasonCommandRunner(logger: logger);
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
       final result = await commandRunner.run(['make', 'garbage']);
       expect(result, equals(ExitCode.usage.code));
       verify(

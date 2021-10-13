@@ -16,6 +16,7 @@ dependencies:
   json_annotation: ^4.0.1
   mustache_template: ^2.0.0
   path: ^1.8.0
+  pub_updater: ^0.2.1
   recase: ^4.0.0
   universal_io: ^2.0.4
   yaml: ^3.1.0
