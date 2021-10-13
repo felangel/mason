@@ -1,3 +1,7 @@
+# 0.0.1-dev.52
+
+- feat: add automatic update support
+
 # 0.0.1-dev.51
 
 - feat: conditional file and directory creation support
