@@ -1,3 +1,7 @@
+# 0.0.1-dev.53
+
+- feat: improve automatic update prompt style
+
 # 0.0.1-dev.52
 
 - feat: add automatic update support
