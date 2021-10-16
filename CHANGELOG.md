@@ -1,3 +1,7 @@
+# 0.0.1-dev.54
+
+- fix: nested lambdas within loops
+
 # 0.0.1-dev.53
 
 - feat: improve automatic update prompt style
