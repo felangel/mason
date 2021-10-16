@@ -1,5 +1,6 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:pub_updater/pub_updater.dart';
 import 'package:universal_io/io.dart';
 
 import 'commands/commands.dart';
@@ -8,14 +9,18 @@ import 'io.dart';
 import 'logger.dart';
 import 'version.dart';
 
+/// The package name.
+const packageName = 'mason';
+
 /// {@template mason_command_runner}
 /// A [CommandRunner] for the Mason CLI.
 /// {@endtemplate}
 class MasonCommandRunner extends CommandRunner<int> {
   /// {@macro mason_command_runner}
-  MasonCommandRunner({Logger? logger})
+  MasonCommandRunner({Logger? logger, PubUpdater? pubUpdater})
       : _logger = logger ?? Logger(),
-        super('mason', '⛏️  mason \u{2022} lay the foundation!') {
+        _pubUpdater = pubUpdater ?? PubUpdater(),
+        super(packageName, '⛏️  mason \u{2022} lay the foundation!') {
     argParser.addFlag(
       'version',
       negatable: false,
@@ -33,6 +38,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   }
 
   final Logger _logger;
+  final PubUpdater _pubUpdater;
 
   @override
   Future<int> run(Iterable<String> args) async {
@@ -61,10 +67,46 @@ class MasonCommandRunner extends CommandRunner<int> {
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
+    int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
-      _logger.info('Mason $packageVersion');
-      return ExitCode.success.code;
+      _logger.info(packageVersion);
+      exitCode = ExitCode.success.code;
+    } else {
+      exitCode = await super.runCommand(topLevelResults);
     }
-    return super.runCommand(topLevelResults);
+    await _checkForUpdates();
+    return exitCode;
+  }
+
+  Future<void> _checkForUpdates() async {
+    try {
+      final latestVersion = await _pubUpdater.getLatestVersion(packageName);
+      final isUpToDate = packageVersion == latestVersion;
+      if (!isUpToDate) {
+        _logger
+          ..info('')
+          ..info('''
++------------------------------------------------------------------------------------+
+|                                                                                    |
+|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                    |
+|       ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/v$latestVersion')}      |
+|                                                                                    |
++------------------------------------------------------------------------------------+
+''');
+        final response = _logger.prompt('Would you like to update? (y/n) ');
+        if (response.isYes()) {
+          final updateDone = _logger.progress('Updating to $latestVersion');
+          await _pubUpdater.update(packageName: packageName);
+          updateDone('Updated to $latestVersion');
+        }
+      }
+    } catch (_) {}
+  }
+}
+
+extension on String {
+  bool isYes() {
+    final normalized = toLowerCase().trim();
+    return normalized == 'y' || normalized == 'yes';
   }
 }
