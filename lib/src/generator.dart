@@ -16,7 +16,7 @@ import 'mason_bundle.dart';
 import 'mason_yaml.dart';
 import 'render.dart';
 
-final _partialRegExp = RegExp(r'\{\{~\s([a-zA-Z\s.]+)\s\}\}');
+final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp(r'{{(.*?)}}');
 final _loopKeyRegExp = RegExp(r'{{#(.*?)}}');

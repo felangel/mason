@@ -1,5 +1,5 @@
-{{> header.md }}
+{{> common_header.md }}
 
 Hello {{name}}!
 
-{{> footer.md }}
+{{> common_footer.md }}
