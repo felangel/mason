@@ -1,3 +1,7 @@
+# 0.0.1-dev.55
+
+- fix: partials file name resolution
+
 # 0.0.1-dev.54
 
 - fix: nested lambdas within loops
