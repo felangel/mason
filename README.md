@@ -16,17 +16,17 @@ Mason allows developers to create and consume reusable templates called bricks.
 
 ```sh
 # 🎯 Activate from https://pub.dev
-$ dart pub global activate mason
+dart pub global activate mason
 
 # 🍺 Or install from https://brew.sh
-$ brew tap felangel/mason
-$ brew install mason
+brew tap felangel/mason
+brew install mason
 
 # 🚀 Initialize mason
-$ mason init
+mason init
 
 # 🧱 Use your first brick
-$ mason make hello
+mason make hello
 ```
 
 ---
@@ -64,17 +64,17 @@ $ mason make hello
 
 ```sh
 # 🎯 Activate from https://pub.dev
-$ dart pub global activate mason
+dart pub global activate mason
 
 # 🍺 Or install from https://brew.sh
-$ brew tap felangel/mason
-$ brew install mason
+brew tap felangel/mason
+brew install mason
 ```
 
 ### Initializing
 
 ```sh
-$ mason init
+mason init
 ```
 
 `mason init` initializes the Mason CLI in the current directory.
@@ -90,13 +90,13 @@ bricks:
 To get all bricks registered in `mason.yaml` run:
 
 ```sh
-$ mason get
+mason get
 ```
 
 Then you can use `mason make` to generate your first file:
 
 ```sh
-$ mason make hello
+mason make hello
 ```
 
 ### Command Line Variables
@@ -104,7 +104,7 @@ $ mason make hello
 Any variables can be passed as command line args.
 
 ```sh
-$ mason make hello --name Felix
+mason make hello --name Felix
 ```
 
 ### Variable Prompts
@@ -112,7 +112,7 @@ $ mason make hello --name Felix
 Any variables which aren't specified as command line args will be prompted.
 
 ```sh
-$ mason make hello
+mason make hello
 name: Felix
 ```
 
@@ -121,7 +121,7 @@ name: Felix
 Any variables can be passed via a config file:
 
 ```dart
-$ mason make hello -c config.json
+mason make hello -c config.json
 ```
 
 where `config.json` is:
@@ -143,7 +143,7 @@ Hello Felix!
 By default `mason make` will generate the template in the current working directory but a custom output directory can be specified via the `-o` option:
 
 ```sh
-$ mason make hello --name Felix -o ./path/to/directory
+mason make hello --name Felix -o ./path/to/directory
 ```
 
 ### File Conflict Resolution
@@ -161,16 +161,16 @@ A custom file conflict resolution strategy can be specified via the `--on-confli
 
 ```sh
 # Always prompt when there is a file conflict (default)
-$ mason make hello --name Felix --on-conflict prompt
+mason make hello --name Felix --on-conflict prompt
 
 # Always overwrite when there is a file conflict
-$ mason make hello --name Felix --on-conflict overwrite
+mason make hello --name Felix --on-conflict overwrite
 
 # Always skip when there is a file conflict
-$ mason make hello --name Felix --on-conflict skip
+mason make hello --name Felix --on-conflict skip
 
 # Always append when there is a file conflict
-$ mason make hello --name Felix --on-conflict append
+mason make hello --name Felix --on-conflict append
 ```
 
 ## Creating New Bricks
@@ -178,7 +178,7 @@ $ mason make hello --name Felix --on-conflict append
 Create a new brick using the `mason new` command.
 
 ```sh
-$ mason new <BRICK_NAME>
+mason new <BRICK_NAME>
 ```
 
 The above command will generate a new brick in the `bricks` directory with a `brick.yaml` and `__brick__` template directory.
@@ -314,7 +314,7 @@ vars:
 We can generate code via:
 
 ```sh
-$ mason make example --name my-name
+mason make example --name my-name
 ```
 
 The output will be:
@@ -332,34 +332,34 @@ The `add` command allows developers to add brick templates locally or globally o
 
 ```sh
 # add from path
-$ mason add --source path ./path/to/brick
+mason add --source path ./path/to/brick
 
 # add from path (global)
-$ mason add --global --source path ./path/to/brick
+mason add --global --source path ./path/to/brick
 
 # add from path shorthand syntax
-$ mason add ./path/to/brick
+mason add ./path/to/brick
 
 # add from path shorthand syntax (global)
-$ mason add -g ./path/to/brick
+mason add -g ./path/to/brick
 
 # add from git url
-$ mason add --source git https://github.com/user/repo
+mason add --source git https://github.com/user/repo
 
 # add from git url (global)
-$ mason add -g --source git https://github.com/user/repo
+mason add -g --source git https://github.com/user/repo
 
 # add from git url with path
-$ mason add --source git https://github.com/user/repo --path path/to/brick
+mason add --source git https://github.com/user/repo --path path/to/brick
 
 # add from git url with path and ref
-$ mason add --source git https://github.com/user/repo --path path/to/brick --ref tag-name
+mason add --source git https://github.com/user/repo --path path/to/brick --ref tag-name
 ```
 
 Once a brick is added it can be used via the `mason make` command:
 
 ```sh
-$ mason make <BRICK_NAME>
+mason make <BRICK_NAME>
 ```
 
 ## Removing Bricks
@@ -370,10 +370,10 @@ Bricks can be removed by using the `remove` command. Use the `--global` (`-g`) f
 
 ```sh
 # remove brick
-$ mason remove <BRICK_NAME>
+mason remove <BRICK_NAME>
 
 # remove brick (global)
-$ mason remove -g <BRICK_NAME>
+mason remove -g <BRICK_NAME>
 ```
 
 ## List all available Brick Templates
@@ -384,10 +384,10 @@ All available brick templates (local and global) can be seen via the `list` (`ls
 
 ```sh
 # list all available bricks
-$ mason list
+mason list
 
 # use alias "ls" instead of "list" for a shorthand syntax
-$ mason ls
+mason ls
 ```
 
 ## Bundling
@@ -424,7 +424,7 @@ await generator.generate(...);
 ## Complete Usage
 
 ```sh
-$ mason
+mason
 ⛏️  mason • lay the foundation!
 
 Usage: mason <command> [arguments]

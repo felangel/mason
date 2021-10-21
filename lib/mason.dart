@@ -3,10 +3,10 @@
 ///
 /// ```sh
 /// # Activate mason
-/// $ dart pub global activate mason
+/// dart pub global activate mason
 ///
 /// # See usage
-/// $ mason --help
+/// mason --help
 /// ```
 library mason;
 
