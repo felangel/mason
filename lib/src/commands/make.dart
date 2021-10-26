@@ -109,6 +109,10 @@ class _MakeCommand extends MasonCommand {
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
+
+      final postGenScript = generator.postGenScript;
+      if (postGenScript != null) return postGenScript.run(vars, logger);
+
       return ExitCode.success.code;
     } catch (error) {
       generateDone?.call();
@@ -197,5 +201,20 @@ extension on Logger {
         )
         ..flush(detail);
     }
+  }
+}
+
+extension on ScriptFile {
+  Future<int> run(Map<String, dynamic> vars, Logger logger) async {
+    final tempDir = Directory.systemTemp.createTempSync();
+    final script = File(p.join(tempDir.path, p.basename(path)))
+      ..writeAsBytesSync(runSubstitution(vars).content);
+    final result = await Process.run('dart', [script.path]);
+    if (result.exitCode != ExitCode.success.code) {
+      logger.err(result.stderr as String?);
+      return result.exitCode;
+    }
+    logger.info(result.stdout as String?);
+    return ExitCode.success.code;
   }
 }

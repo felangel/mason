@@ -4,7 +4,6 @@ import 'dart:convert';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
-import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode;
 
@@ -53,10 +52,14 @@ class MasonGenerator extends Generator {
     String id,
     String description, {
     List<TemplateFile?> files = const <TemplateFile>[],
+    List<ScriptFile?> scripts = const <ScriptFile>[],
     this.vars = const <String>[],
   }) : super(id, description) {
     for (final file in files) {
       addTemplateFile(file);
+    }
+    for (final script in scripts) {
+      addScriptFile(script);
     }
   }
 
@@ -70,8 +73,9 @@ class MasonGenerator extends Generator {
   ///   - name
   /// ```
   static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
-    final directory = p.join(File(brick.path!).parent.path, BrickYaml.dir);
-    final files = Directory(directory)
+    final brickRoot = File(brick.path!).parent.path;
+    final brickDirectory = p.join(brickRoot, BrickYaml.dir);
+    final brickFiles = Directory(brickDirectory)
         .listSync(recursive: true)
         .whereType<File>()
         .map((file) {
@@ -87,11 +91,29 @@ class MasonGenerator extends Generator {
         }
       }();
     });
+    final scriptsDirectory = p.join(brickRoot, BrickYaml.scripts);
+    final scriptFiles = Directory(scriptsDirectory)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) {
+      return () async {
+        try {
+          final content = await File(file.path).readAsBytes();
+          final relativePath = file.path.substring(
+            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+          );
+          return ScriptFile.fromBytes(relativePath, content);
+        } on Exception {
+          return null;
+        }
+      }();
+    });
     return MasonGenerator(
       brick.name,
       brick.description,
-      files: await Future.wait(files),
       vars: brick.vars,
+      files: await Future.wait(brickFiles),
+      scripts: await Future.wait(scriptFiles),
     );
   }
 
@@ -145,12 +167,28 @@ abstract class Generator implements Comparable<Generator> {
   /// Contains a Map of partial file path to partial file content.
   final Map<String, List<int>> partials = {};
 
+  /// Optional list of scripts to be used as part of the generation process.
+  final List<ScriptFile> scripts = [];
+
+  /// Optional post-gen script executed at the end of the generation process.
+  ScriptFile? get postGenScript {
+    return scripts.firstWhereOrNull(
+      (script) => p.basenameWithoutExtension(script.path) == 'post_gen',
+    );
+  }
+
   /// Add a new template file.
   void addTemplateFile(TemplateFile? file) {
     if (file == null) return;
     _partialRegExp.hasMatch(file.path)
         ? partials.addAll({file.path: file.content})
         : files.add(file);
+  }
+
+  /// Adds a new script file.
+  void addScriptFile(ScriptFile? script) {
+    if (script == null) return;
+    scripts.add(script);
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].
@@ -336,6 +374,52 @@ abstract class GeneratorTarget {
   Future createFile(String path, List<int> contents);
 }
 
+/// {@template script_file}
+/// This class represents a script file in a generator.
+/// The contents should be text and may contain mustache
+/// {@endtemplate}
+class ScriptFile {
+  /// {@macro script_file}
+  ScriptFile.fromBytes(this.path, this.content);
+
+  /// The template file path.
+  final String path;
+
+  /// The template file content.
+  final List<int> content;
+
+  /// Performs a substitution on the [path] based on the incoming [parameters].
+  FileContents runSubstitution(Map<String, dynamic> parameters) {
+    return FileContents(path, _createContent(parameters));
+  }
+
+  List<int> _createContent(Map<String, dynamic> vars) {
+    String sanitizeInput(String input) {
+      return input.replaceAllMapped(
+        RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
+        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
+      );
+    }
+
+    String sanitizeOutput(String output) {
+      return output.replaceAllMapped(
+        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+        (match) => match.group(0)?.substring(1) ?? match.input,
+      );
+    }
+
+    try {
+      final decoded = utf8.decode(content);
+      if (!decoded.contains(_delimeterRegExp)) return content;
+      final sanitized = sanitizeInput(decoded);
+      final rendered = sanitizeOutput(sanitized.render(vars));
+      return utf8.encode(rendered);
+    } on Exception {
+      return content;
+    }
+  }
+}
+
 /// {@template template_file}
 /// This class represents a file in a generator template.
 /// The contents should be text and may contain mustache
@@ -411,23 +495,28 @@ class TemplateFile {
     Map<String, dynamic> vars,
     Map<String, List<int>> partials,
   ) {
-    String sanitize(String input) {
+    String sanitizeInput(String input) {
       return input.replaceAllMapped(
         RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
         (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
     }
 
+    String sanitizeOutput(String output) {
+      return output.replaceAllMapped(
+        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+        (match) => match.group(0)?.substring(1) ?? match.input,
+      );
+    }
+
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final sanitized = sanitize(decoded);
-      final rendered = sanitized
-          .render(vars, (name) => partialResolver(name, partials, sanitize))
-          .replaceAllMapped(
-            RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
-            (match) => match.group(0)?.substring(1) ?? match.input,
-          );
+      final rendered = sanitizeOutput(
+        sanitizeInput(decoded).render(vars, (name) {
+          return partialResolver(name, partials, sanitizeInput);
+        }),
+      );
       return utf8.encode(rendered);
     } on Exception {
       return content;

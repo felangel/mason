@@ -31,6 +31,10 @@ class BrickYaml {
   /// `__brick__`
   static const dir = '__brick__';
 
+  /// static constant for brick scripts directory name.
+  /// `scripts`
+  static const scripts = 'scripts';
+
   /// Name of the brick.
   final String name;
 
