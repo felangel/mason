@@ -1,3 +1,8 @@
+# 0.0.1-dev.56
+
+- fix: `mason new` output format improvements
+  - use `logger.detail` instead of `logger.success` color for consistency
+
 # 0.0.1-dev.55
 
 - fix: partials file name resolution
