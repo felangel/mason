@@ -52,6 +52,7 @@ void main() {
         directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
         isTrue,
       );
+      verify(() => logger.flush(logger.detail)).called(1);
     });
 
     test('exits with code 64 when name is missing', () async {
