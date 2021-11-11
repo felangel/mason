@@ -52,14 +52,11 @@ class MasonGenerator extends Generator {
     String id,
     String description, {
     List<TemplateFile?> files = const <TemplateFile>[],
-    List<ScriptFile?> scripts = const <ScriptFile>[],
+    GeneratorHooks hooks = const GeneratorHooks(),
     this.vars = const <String>[],
-  }) : super(id, description) {
+  }) : super(id, description, hooks) {
     for (final file in files) {
       addTemplateFile(file);
-    }
-    for (final script in scripts) {
-      addScriptFile(script);
     }
   }
 
@@ -91,29 +88,13 @@ class MasonGenerator extends Generator {
         }
       }();
     });
-    final scriptsDirectory = p.join(brickRoot, BrickYaml.scripts);
-    final scriptFiles = Directory(scriptsDirectory)
-        .listSync(recursive: true)
-        .whereType<File>()
-        .map((file) {
-      return () async {
-        try {
-          final content = await File(file.path).readAsBytes();
-          final relativePath = file.path.substring(
-            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-          );
-          return ScriptFile.fromBytes(relativePath, content);
-        } on Exception {
-          return null;
-        }
-      }();
-    });
+
     return MasonGenerator(
       brick.name,
       brick.description,
       vars: brick.vars,
       files: await Future.wait(brickFiles),
-      scripts: await Future.wait(scriptFiles),
+      hooks: await GeneratorHooks.fromBrickYaml(brick),
     );
   }
 
@@ -145,19 +126,88 @@ class MasonGenerator extends Generator {
   final List<String> vars;
 }
 
+/// Supported types of [GeneratorHooks].
+enum GeneratorHook {
+  /// Script run immediately before the `generate` method is invoked.
+  preGen,
+
+  /// Script run immediately after the `generate` method is invoked.
+  postGen,
+}
+
+extension on GeneratorHook {
+  String toFileName() {
+    switch (this) {
+      case GeneratorHook.preGen:
+        return 'pre_gen';
+      case GeneratorHook.postGen:
+        return 'post_gen';
+    }
+  }
+}
+
+/// {@template generator_hooks}
+/// Scripts that run automatically whenever a particular event occurs
+/// in a [Generator].
+/// {@endtemplate}
+class GeneratorHooks {
+  /// {@macro generator_hooks}
+  const GeneratorHooks({this.preGen, this.postGen});
+
+  /// Creates [GeneratorHooks] from a provided [BrickYaml].
+  static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
+    Future<ScriptFile?> getHookScript(GeneratorHook hook) async {
+      try {
+        final brickRoot = File(brick.path!).parent.path;
+        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+        final file = hooksDirectory
+            .listSync()
+            .whereType<File>()
+            .firstWhereOrNull((element) =>
+                p.basenameWithoutExtension(element.path) == hook.toFileName());
+
+        if (file == null) return null;
+        final extension = p.extension(file.path);
+        if (extension != '.dart' && extension != '.sh') return null;
+        final content = await file.readAsBytes();
+        final relativePath = file.path.substring(
+          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+        );
+        return ScriptFile.fromBytes(relativePath, content);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return GeneratorHooks(
+      preGen: await getHookScript(GeneratorHook.preGen),
+      postGen: await getHookScript(GeneratorHook.postGen),
+    );
+  }
+
+  /// Script run immediately before the `generate` method is invoked.
+  final ScriptFile? preGen;
+
+  /// Script run immediately after the `generate` method is invoked.
+  final ScriptFile? postGen;
+}
+
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
 /// user project based on this template.
 /// {@endtemplate}
 abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
-  Generator(this.id, this.description);
+  Generator(this.id, this.description, [this.hooks = const GeneratorHooks()]);
 
   /// Unique identifier for the generator.
   final String id;
 
   /// Description of the generator.
   final String description;
+
+  /// Hooks associated with the generator.
+  final GeneratorHooks hooks;
 
   /// List of [TemplateFile] which will be used to generate files.
   final List<TemplateFile> files = [];
@@ -167,28 +217,12 @@ abstract class Generator implements Comparable<Generator> {
   /// Contains a Map of partial file path to partial file content.
   final Map<String, List<int>> partials = {};
 
-  /// Optional list of scripts to be used as part of the generation process.
-  final List<ScriptFile> scripts = [];
-
-  /// Optional post-gen script executed at the end of the generation process.
-  ScriptFile? get postGenScript {
-    return scripts.firstWhereOrNull(
-      (script) => p.basenameWithoutExtension(script.path) == 'post_gen',
-    );
-  }
-
   /// Add a new template file.
   void addTemplateFile(TemplateFile? file) {
     if (file == null) return;
     _partialRegExp.hasMatch(file.path)
         ? partials.addAll({file.path: file.content})
         : files.add(file);
-  }
-
-  /// Adds a new script file.
-  void addScriptFile(ScriptFile? script) {
-    if (script == null) return;
-    scripts.add(script);
   }
 
   /// Generates files based on the provided [GeneratorTarget] and [vars].

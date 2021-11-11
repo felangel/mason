@@ -1,6 +1,6 @@
 import 'dart:io';
 
 void main() {
-  print('hello {{name}}!');
+  print('pre_gen {{name}}!');
   print(Directory.current.path);
 }

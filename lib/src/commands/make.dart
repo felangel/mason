@@ -78,19 +78,17 @@ class _MakeCommand extends MasonCommand {
     );
 
     Function? generateDone;
+
     try {
       final generator = await MasonGenerator.fromBrickYaml(_brick);
       final vars = <String, dynamic>{};
-      generateDone = logger.progress('Making ${generator.id}');
 
       try {
         vars.addAll(await _decodeFile(configPath));
       } on FormatException catch (error) {
-        generateDone();
         logger.err('${error}in $configPath');
         return ExitCode.usage.code;
       } catch (error) {
-        generateDone();
         logger.err('$error');
         return ExitCode.usage.code;
       }
@@ -106,12 +104,23 @@ class _MakeCommand extends MasonCommand {
           });
         }
       }
+
+      final preGenScript = generator.hooks.preGen;
+      if (preGenScript != null) {
+        final exitCode = await preGenScript.run(vars, logger);
+        if (exitCode != ExitCode.success.code) return exitCode;
+      }
+
+      generateDone = logger.progress('Making ${generator.id}');
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
 
-      final postGenScript = generator.postGenScript;
-      if (postGenScript != null) return postGenScript.run(vars, logger);
+      final postGenScript = generator.hooks.postGen;
+      if (postGenScript != null) {
+        final exitCode = await postGenScript.run(vars, logger);
+        if (exitCode != ExitCode.success.code) return exitCode;
+      }
 
       return ExitCode.success.code;
     } catch (error) {
@@ -209,12 +218,17 @@ extension on ScriptFile {
     final tempDir = Directory.systemTemp.createTempSync();
     final script = File(p.join(tempDir.path, p.basename(path)))
       ..writeAsBytesSync(runSubstitution(vars).content);
-    final result = await Process.run('dart', [script.path]);
-    if (result.exitCode != ExitCode.success.code) {
-      logger.err(result.stderr as String?);
-      return result.exitCode;
-    }
-    logger.info(result.stdout as String?);
-    return ExitCode.success.code;
+    final isDart = p.extension(path) == '.dart';
+    final result = isDart
+        ? await Process.run('dart', [script.path])
+        : await Process.run('bash', [script.path]);
+
+    final stdout = result.stdout as String?;
+    if (stdout != null && stdout.isNotEmpty) logger.info(stdout.trim());
+
+    final stderr = result.stderr as String?;
+    if (stderr != null && stderr.isNotEmpty) logger.err(stderr.trim());
+
+    return result.exitCode;
   }
 }
