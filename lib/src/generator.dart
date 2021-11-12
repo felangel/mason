@@ -505,6 +505,10 @@ class ScriptFile {
     final stderr = result.stderr as String?;
     if (stderr != null && stderr.isNotEmpty) logger?.err(stderr.trim());
 
+    try {
+      await tempDir.delete(recursive: true);
+    } catch (_) {}
+
     return result.exitCode;
   }
 }
