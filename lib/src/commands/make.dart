@@ -76,21 +76,20 @@ class _MakeCommand extends MasonCommand {
       logger,
       fileConflictResolution,
     );
+    final disableHooks = results['no-hooks'] as bool;
 
     Function? generateDone;
+
     try {
       final generator = await MasonGenerator.fromBrickYaml(_brick);
       final vars = <String, dynamic>{};
-      generateDone = logger.progress('Making ${generator.id}');
 
       try {
         vars.addAll(await _decodeFile(configPath));
       } on FormatException catch (error) {
-        generateDone();
         logger.err('${error}in $configPath');
         return ExitCode.usage.code;
       } catch (error) {
-        generateDone();
         logger.err('$error');
         return ExitCode.usage.code;
       }
@@ -106,9 +105,32 @@ class _MakeCommand extends MasonCommand {
           });
         }
       }
+
+      final preGenScript = generator.hooks.preGen;
+      if (!disableHooks && preGenScript != null) {
+        final exitCode = await preGenScript.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: outputDir,
+        );
+        if (exitCode != ExitCode.success.code) return exitCode;
+      }
+
+      generateDone = logger.progress('Making ${generator.id}');
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
+
+      final postGenScript = generator.hooks.postGen;
+      if (!disableHooks && postGenScript != null) {
+        final exitCode = await postGenScript.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: outputDir,
+        );
+        if (exitCode != ExitCode.success.code) return exitCode;
+      }
+
       return ExitCode.success.code;
     } catch (error) {
       generateDone?.call();
@@ -134,6 +156,7 @@ class _MakeCommand extends MasonCommand {
 
 extension on ArgParser {
   void addOptions() {
+    addFlag('no-hooks', help: 'skips running hooks', negatable: false);
     addOption(
       'config-path',
       abbr: 'c',

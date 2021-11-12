@@ -28,7 +28,7 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('creates a new universal bundle', () async {
+    test('creates a new universal bundle (no hooks)', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'universal'),
       )..createSync(recursive: true);
@@ -44,11 +44,31 @@ void main() {
         ),
       ).readAsStringSync();
       final expected =
-          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]}''';
+          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]}''';
       expect(actual, equals(expected));
     });
 
-    test('creates a new dart bundle', () async {
+    test('creates a new universal bundle (with hooks)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'universal'),
+      )..createSync(recursive: true);
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'hooks');
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['bundle', brickPath]);
+      expect(result, equals(ExitCode.success.code));
+      final actual = File(
+        path.join(
+          testFixturesPath(cwd, suffix: '.bundle'),
+          'universal',
+          'hooks.bundle',
+        ),
+      ).readAsStringSync();
+      final expected =
+          '''{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]}''';
+      expect(actual, equals(expected));
+    });
+
+    test('creates a new dart bundle (no hooks)', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'dart'),
       )..createSync(recursive: true);
@@ -68,14 +88,46 @@ void main() {
       expect(
         actual,
         contains(
-          '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars',
+          '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal',
         ),
       );
       expect(actual, contains("import 'package:mason/mason.dart'"));
       expect(
         actual,
         contains(
-          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
+          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
+        ),
+      );
+    });
+
+    test('creates a new dart bundle (with hooks)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'dart'),
+      )..createSync(recursive: true);
+      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'hooks');
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['bundle', brickPath, '-t', 'dart'],
+      );
+      expect(result, equals(ExitCode.success.code));
+      final actual = File(
+        path.join(
+          testFixturesPath(cwd, suffix: '.bundle'),
+          'dart',
+          'hooks_bundle.dart',
+        ),
+      ).readAsStringSync();
+      expect(
+        actual,
+        contains(
+          '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal',
+        ),
+      );
+      expect(actual, contains("import 'package:mason/mason.dart'"));
+      expect(
+        actual,
+        contains(
+          '''final hooksBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]});''',
         ),
       );
     });

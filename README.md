@@ -31,30 +31,32 @@ mason make hello
 
 ---
 
-## Table Of Contents
+## Table of Contents
 
 - [Overview](#overview)
-  * [Installation](#installation)
-  * [Initializing](#initializing)
-  * [Command Line Variables](#command-line-variables)
-  * [Variable Prompts](#variable-prompts)
-  * [Config File for Input Variables](#config-file-for-input-variables)
-  * [Custom Output Directory](#custom-output-directory)
-  * [File Conflict Resolution](#file-conflict-resolution)
+  - [Installation](#installation)
+  - [Initializing](#initializing)
+  - [Command Line Variables](#command-line-variables)
+  - [Variable Prompts](#variable-prompts)
+  - [Config File for Input Variables](#config-file-for-input-variables)
+  - [Custom Output Directory](#custom-output-directory)
+  - [File Conflict Resolution](#file-conflict-resolution)
 - [Creating New Bricks](#creating-new-bricks)
-  * [Brick YAML](#brick-yaml)
-  * [Brick Template](#brick-template)
-    + [Nested Templates (partials)](#nested-templates--partials-)
-    + [File Resolution](#file-resolution)
-    + [Built-in Lambdas](#built-in-lambdas)
+  - [Brick YAML](#brick-yaml)
+  - [Brick Template](#brick-template)
+    - [Nested Templates (partials)](#nested-templates-partials)
+    - [File Resolution](#file-resolution)
+    - [Built-in Lambdas](#built-in-lambdas)
+    - [Custom Script Execution (Hooks)](#custom-script-execution-hooks)
+      - [Hooks Usage](#hooks-usage)
 - [Adding Bricks](#adding-bricks)
-  * [Add Usage](#add-usage)
+  - [Add Usage](#add-usage)
 - [Removing Bricks](#removing-bricks)
-  * [Remove Usage](#remove-usage)
+  - [Remove Usage](#remove-usage)
 - [List all available Brick Templates](#list-all-available-brick-templates)
-  * [List Usage](#list-usage)
+  - [List Usage](#list-usage)
 - [Bundling](#bundling)
-  * [Bundle Usage](#bundle-usage)
+  - [Bundle Usage](#bundle-usage)
 - [Complete Usage](#complete-usage)
 - [Video Tutorial](#video-tutorial)
 
@@ -324,6 +326,78 @@ The output will be:
 └── MyName.java
 ```
 
+#### Custom Script Execution (Hooks)
+
+Mason supports custom script execution via `hooks`. The supported hooks are:
+
+- `pre_gen` - executed immediately before the generation step
+- `post_gen` - executed immediately after the generation step
+
+Hooks must be defined in the `hooks` directory at the root of the brick:
+
+```
+├── __brick__
+├── brick.yaml
+└── hooks
+    ├── post_gen.dart
+    └── pre_gen.dart
+```
+
+❗ Currently mason only supports hooks written in [Dart](https://dart.dev).
+
+##### Hooks Usage
+
+For example given the following `example` brick:
+
+```sh
+.
+├── __brick__
+│   └── example.md
+├── brick.yaml
+└── hooks
+    └── post_gen.dart
+```
+
+where `brick.yaml` looks like:
+
+```yaml
+name: example
+description: An example
+vars:
+  - name
+```
+
+And `post_gen.dart` contains:
+
+```dart
+import 'dart:io';
+
+void main() {
+  print('hello {{name}}!');
+  print(Directory.current.path);
+}
+```
+
+The result of running `mason make example --name Dash` would be:
+
+```sh
+mason make example --name Dash
+✓ Made brick example (0.0s)
+✓ Generated 1 file:
+  /Users/dash/mason/example/example.md (new)
+hello Dash!
+/Users/dash/mason/example
+```
+
+💡 **Note**: Scripts can contain template variables. In addition, the working directory of the script is the directory in which the code is generated.
+
+Hooks can be disabled using the `--no-hooks` flag:
+
+```sh
+# Disable hook script execution
+mason make example --name Dash --no-hooks
+```
+
 ## Adding Bricks
 
 The `add` command allows developers to add brick templates locally or globally on their machines from either a local path or git url. By default `mason add` will add the template locally but bricks can be added globally by providing the `--global` (`-g`) flag.
@@ -434,15 +508,15 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  add         Adds a brick from a local or remote source.
-  bundle      Generates a bundle from a brick template.
-  cache       Interact with mason cache.
-  get         Gets all bricks in the nearest mason.yaml.
-  init        Initialize mason in the current directory.
-  list        Lists all available bricks.
-  make        Generate code using an existing brick template.
-  new         Creates a new brick template.
-  remove      Removes a brick.
+  add      Adds a brick from a local or remote source.
+  bundle   Generates a bundle from a brick template.
+  cache    Interact with mason cache.
+  get      Gets all bricks in the nearest mason.yaml.
+  init     Initialize mason in the current directory.
+  list     Lists all available bricks.
+  make     Generate code using an existing brick template.
+  new      Creates a new brick template.
+  remove   Removes a brick.
 
 Run "mason help <command>" for more information about a command.
 ```

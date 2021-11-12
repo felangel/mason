@@ -4,9 +4,8 @@ import 'dart:convert';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
-import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart' show Directory, File, FileMode;
+import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
 import 'brick_yaml.dart';
 import 'bricks_json.dart';
@@ -53,8 +52,9 @@ class MasonGenerator extends Generator {
     String id,
     String description, {
     List<TemplateFile?> files = const <TemplateFile>[],
+    GeneratorHooks hooks = const GeneratorHooks(),
     this.vars = const <String>[],
-  }) : super(id, description) {
+  }) : super(id, description, hooks) {
     for (final file in files) {
       addTemplateFile(file);
     }
@@ -70,8 +70,9 @@ class MasonGenerator extends Generator {
   ///   - name
   /// ```
   static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
-    final directory = p.join(File(brick.path!).parent.path, BrickYaml.dir);
-    final files = Directory(directory)
+    final brickRoot = File(brick.path!).parent.path;
+    final brickDirectory = p.join(brickRoot, BrickYaml.dir);
+    final brickFiles = Directory(brickDirectory)
         .listSync(recursive: true)
         .whereType<File>()
         .map((file) {
@@ -87,11 +88,13 @@ class MasonGenerator extends Generator {
         }
       }();
     });
+
     return MasonGenerator(
       brick.name,
       brick.description,
-      files: await Future.wait(files),
       vars: brick.vars,
+      files: await Future.wait(brickFiles),
+      hooks: await GeneratorHooks.fromBrickYaml(brick),
     );
   }
 
@@ -103,6 +106,7 @@ class MasonGenerator extends Generator {
       bundle.description,
       vars: bundle.vars,
       files: _decodeConcatenatedData(bundle.files),
+      hooks: GeneratorHooks.fromBundle(bundle),
     );
   }
 
@@ -123,19 +127,117 @@ class MasonGenerator extends Generator {
   final List<String> vars;
 }
 
+/// Supported types of [GeneratorHooks].
+enum GeneratorHook {
+  /// Script run immediately before the `generate` method is invoked.
+  preGen,
+
+  /// Script run immediately after the `generate` method is invoked.
+  postGen,
+}
+
+extension on GeneratorHook {
+  String toFileName() {
+    switch (this) {
+      case GeneratorHook.preGen:
+        return 'pre_gen.dart';
+      case GeneratorHook.postGen:
+        return 'post_gen.dart';
+    }
+  }
+}
+
+/// {@template generator_hooks}
+/// Scripts that run automatically whenever a particular event occurs
+/// in a [Generator].
+/// {@endtemplate}
+class GeneratorHooks {
+  /// {@macro generator_hooks}
+  const GeneratorHooks({this.preGen, this.postGen});
+
+  /// Creates [GeneratorHooks] from a provided [MasonBundle].
+  factory GeneratorHooks.fromBundle(MasonBundle bundle) {
+    ScriptFile? _decodeHookScript(MasonBundledFile? file) {
+      if (file == null) return null;
+      final path = file.path;
+      final raw = file.data.replaceAll(_whiteSpace, '');
+      final decoded = base64.decode(raw);
+      try {
+        return ScriptFile.fromBytes(path, decoded);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final preGen = bundle.hooks.firstWhereOrNull(
+      (element) {
+        return p.basename(element.path) == GeneratorHook.preGen.toFileName();
+      },
+    );
+    final postGen = bundle.hooks.firstWhereOrNull(
+      (element) {
+        return p.basename(element.path) == GeneratorHook.postGen.toFileName();
+      },
+    );
+
+    return GeneratorHooks(
+      preGen: _decodeHookScript(preGen),
+      postGen: _decodeHookScript(postGen),
+    );
+  }
+
+  /// Creates [GeneratorHooks] from a provided [BrickYaml].
+  static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
+    Future<ScriptFile?> getHookScript(GeneratorHook hook) async {
+      try {
+        final brickRoot = File(brick.path!).parent.path;
+        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+        final file = hooksDirectory
+            .listSync()
+            .whereType<File>()
+            .firstWhereOrNull(
+                (element) => p.basename(element.path) == hook.toFileName());
+
+        if (file == null) return null;
+        final content = await file.readAsBytes();
+        final relativePath = file.path.substring(
+          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+        );
+        return ScriptFile.fromBytes(relativePath, content);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    return GeneratorHooks(
+      preGen: await getHookScript(GeneratorHook.preGen),
+      postGen: await getHookScript(GeneratorHook.postGen),
+    );
+  }
+
+  /// Script run immediately before the `generate` method is invoked.
+  final ScriptFile? preGen;
+
+  /// Script run immediately after the `generate` method is invoked.
+  final ScriptFile? postGen;
+}
+
 /// {@template generator}
 /// An abstract class which both defines a template generator and can generate a
 /// user project based on this template.
 /// {@endtemplate}
 abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
-  Generator(this.id, this.description);
+  Generator(this.id, this.description, [this.hooks = const GeneratorHooks()]);
 
   /// Unique identifier for the generator.
   final String id;
 
   /// Description of the generator.
   final String description;
+
+  /// Hooks associated with the generator.
+  final GeneratorHooks hooks;
 
   /// List of [TemplateFile] which will be used to generate files.
   final List<TemplateFile> files = [];
@@ -336,6 +438,81 @@ abstract class GeneratorTarget {
   Future createFile(String path, List<int> contents);
 }
 
+/// {@template script_file}
+/// This class represents a script file in a generator.
+/// The contents should be text and may contain mustache.
+/// {@endtemplate}
+class ScriptFile {
+  /// {@macro script_file}
+  ScriptFile.fromBytes(this.path, this.content);
+
+  /// The template file path.
+  final String path;
+
+  /// The template file content.
+  final List<int> content;
+
+  /// Performs a substitution on the [path] based on the incoming [parameters].
+  FileContents runSubstitution(Map<String, dynamic> parameters) {
+    return FileContents(path, _createContent(parameters));
+  }
+
+  List<int> _createContent(Map<String, dynamic> vars) {
+    String sanitizeInput(String input) {
+      return input.replaceAllMapped(
+        RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
+        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
+      );
+    }
+
+    String sanitizeOutput(String output) {
+      return output.replaceAllMapped(
+        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+        (match) => match.group(0)?.substring(1) ?? match.input,
+      );
+    }
+
+    try {
+      final decoded = utf8.decode(content);
+      if (!decoded.contains(_delimeterRegExp)) return content;
+      final sanitized = sanitizeInput(decoded);
+      final rendered = sanitizeOutput(sanitized.render(vars));
+      return utf8.encode(rendered);
+    } on Exception {
+      return content;
+    }
+  }
+
+  /// Executes the current script with the provided [vars] and [logger].
+  /// An optional [workingDirectory] can also be specified.
+  Future<int> run({
+    Map<String, dynamic> vars = const <String, dynamic>{},
+    Logger? logger,
+    String? workingDirectory,
+  }) async {
+    final tempDir = Directory.systemTemp.createTempSync();
+    final script = File(p.join(tempDir.path, p.basename(path)))
+      ..writeAsBytesSync(runSubstitution(vars).content);
+    final result = await Process.run(
+      'dart',
+      [script.path],
+      workingDirectory: workingDirectory,
+    );
+
+    final stdout = result.stdout as String?;
+    if (stdout != null && stdout.isNotEmpty) logger?.info(stdout.trim());
+
+    final stderr = result.stderr as String?;
+    if (stderr != null && stderr.isNotEmpty) logger?.err(stderr.trim());
+
+    try {
+      await tempDir.delete(recursive: true);
+    } catch (_) {}
+
+    return result.exitCode;
+  }
+}
+
 /// {@template template_file}
 /// This class represents a file in a generator template.
 /// The contents should be text and may contain mustache
@@ -411,23 +588,28 @@ class TemplateFile {
     Map<String, dynamic> vars,
     Map<String, List<int>> partials,
   ) {
-    String sanitize(String input) {
+    String sanitizeInput(String input) {
       return input.replaceAllMapped(
         RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
         (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
       );
     }
 
+    String sanitizeOutput(String output) {
+      return output.replaceAllMapped(
+        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+        (match) => match.group(0)?.substring(1) ?? match.input,
+      );
+    }
+
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final sanitized = sanitize(decoded);
-      final rendered = sanitized
-          .render(vars, (name) => partialResolver(name, partials, sanitize))
-          .replaceAllMapped(
-            RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
-            (match) => match.group(0)?.substring(1) ?? match.input,
-          );
+      final rendered = sanitizeOutput(
+        sanitizeInput(decoded).render(vars, (name) {
+          return partialResolver(name, partials, sanitizeInput);
+        }),
+      );
       return utf8.encode(rendered);
     } on Exception {
       return content;
@@ -500,7 +682,6 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
     final path = file.path;
     final type = file.type;
     final raw = file.data.replaceAll(_whiteSpace, '');
-
     final decoded = base64.decode(raw);
     try {
       if (type == 'binary') {

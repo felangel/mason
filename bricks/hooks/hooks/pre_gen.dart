@@ -1,0 +1,1 @@
+import 'dart:io';void main(){final file=File('.pre_gen.txt');file.writeAsStringSync('pre_gen: {{name}}');}

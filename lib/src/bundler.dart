@@ -13,7 +13,7 @@ final _binaryFileTypes = RegExp(
 );
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
-Future<MasonBundle> createBundle(Directory brick) async {
+MasonBundle createBundle(Directory brick) {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
   final brickYaml = checkedYamlDecode(
     brickYamlFile.readAsStringSync(),
@@ -22,17 +22,26 @@ Future<MasonBundle> createBundle(Directory brick) async {
   final files = Directory(path.join(brick.path, BrickYaml.dir))
       .listSync(recursive: true)
       .whereType<File>()
-      .map(_bundleFile)
+      .map(_bundleBrickFile)
       .toList();
+  final hooksDirectory = Directory(path.join(brick.path, BrickYaml.hooks));
+  final hooks = hooksDirectory.existsSync()
+      ? hooksDirectory
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map(_bundleHookFile)
+          .toList()
+      : <MasonBundledFile>[];
   return MasonBundle(
     brickYaml.name,
     brickYaml.description,
     brickYaml.vars,
     files,
+    hooks,
   );
 }
 
-MasonBundledFile _bundleFile(File file) {
+MasonBundledFile _bundleBrickFile(File file) {
   final fileType =
       _binaryFileTypes.hasMatch(path.basename(file.path)) ? 'binary' : 'text';
   final data = base64.encode(file.readAsBytesSync());
@@ -40,4 +49,10 @@ MasonBundledFile _bundleFile(File file) {
     path.split(file.path).skipWhile((value) => value != BrickYaml.dir).skip(1),
   );
   return MasonBundledFile(filePath, data, fileType);
+}
+
+MasonBundledFile _bundleHookFile(File file) {
+  final data = base64.encode(file.readAsBytesSync());
+  final filePath = path.basename(file.path);
+  return MasonBundledFile(filePath, data, 'text');
 }

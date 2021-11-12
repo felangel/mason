@@ -5,6 +5,8 @@ bricks:
     path: ../../../bricks/documentation
   hello_world:
     path: ../../../bricks/hello_world
+  hooks:
+    path: ../../../bricks/hooks
   greeting:
     path: ../../../bricks/greeting
   todos:

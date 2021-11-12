@@ -52,6 +52,8 @@ void main() {
     path: ../../../bricks/greeting
   hello_world:
     path: ../../../bricks/hello_world
+  hooks:
+    path: ../../../bricks/hooks
   plugin:
     path: ../../../bricks/plugin
   simple:
@@ -73,6 +75,9 @@ void main() {
       );
       final helloWorldPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
+      );
+      final hooksPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'hooks'),
       );
       final pluginPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'plugin'),
@@ -97,6 +102,8 @@ void main() {
               greetingPath,
           '''hello_world_fd66b903d5885651238b50e1205b0cf05f30573cc3b4a7a4f2d1f495edd33630''':
               helloWorldPath,
+          '''hooks_2e6b8bd738ff62d505cd8c6cdc7d8479eb9e9062ef6e0a2ded45fe362668f070''':
+              hooksPath,
           '''plugin_de4be97b1f4014112763f13689b00186175e5116db6bec26ee494b46f3ad8756''':
               pluginPath,
           '''simple_3bbc2ade88745ef690063c8f652631a4870ee6af619a327e297084251aebe232''':
@@ -134,6 +141,7 @@ void main() {
             '\n'
             'Usage: mason make <subcommand> [arguments]\n'
             '-h, --help                      Print this usage information.\n'
+            '    --no-hooks                  skips running hooks\n'
             '''-c, --config-path               Path to config json file containing variables.\n'''
             '''-o, --output-dir                Directory where to output the generated code.\n'''
             '                                (defaults to ".")\n'
@@ -149,6 +157,7 @@ void main() {
             '  documentation   Create Documentation Markdown Files\n'
             '  greeting        A Simple Greeting Template\n'
             '  hello_world     A Simple Hello World Template\n'
+            '  hooks           A Hooks Example Template\n'
             '  plugin          An example plugin template\n'
             '  simple          A Simple Static Template\n'
             '  todos           A Todos Template\n'
@@ -168,6 +177,7 @@ void main() {
             '\n'
             'Usage: mason make greeting [arguments]\n'
             '-h, --help                      Print this usage information.\n'
+            '    --no-hooks                  skips running hooks\n'
             '''-c, --config-path               Path to config json file containing variables.\n'''
             '''-o, --output-dir                Directory where to output the generated code.\n'''
             '                                (defaults to ".")\n'
@@ -339,6 +349,51 @@ in todos.json''',
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates hooks', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hooks', 'basic'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'hooks',
+        '--name',
+        'dash',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hooks', 'basic'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks', 'basic'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates hooks (--no-hooks)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hooks', 'no_hooks'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'hooks',
+        '--name',
+        'dash',
+        '--no-hooks',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hooks', 'no_hooks'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks', 'no_hooks'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

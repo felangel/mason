@@ -38,14 +38,19 @@ class MasonBundle {
     this.description,
     this.vars,
     this.files,
+    this.hooks,
   );
 
   /// Converts a [Map<String, dynamic>] into a [MasonBundle] instance.
   factory MasonBundle.fromJson(Map<String, dynamic> json) =>
       _$MasonBundleFromJson(json);
 
-  /// List of all [MasonBundledFile] instances for the particular brick.
+  /// List of all [MasonBundledFile] instances within the `__brick__` directory.
   final List<MasonBundledFile> files;
+
+  /// List of all [MasonBundledFile] instances within the `hooks` directory.
+  @JsonKey(defaultValue: <MasonBundledFile>[])
+  final List<MasonBundledFile> hooks;
 
   /// Name of the brick (from the `brick.yaml`).
   final String name;

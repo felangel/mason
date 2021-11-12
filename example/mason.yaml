@@ -7,6 +7,8 @@ bricks:
     path: ../bricks/greeting
   hello_world:
     path: ../bricks/hello_world
+  hooks:
+    path: ../bricks/hooks
   plugin:
     path: ../bricks/plugin
   simple:

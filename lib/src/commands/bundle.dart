@@ -61,7 +61,7 @@ class BundleCommand extends MasonCommand {
       throw MasonException('could not find brick at ${brick.path}');
     }
 
-    final bundle = await createBundle(brick);
+    final bundle = createBundle(brick);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
 
@@ -70,7 +70,7 @@ class BundleCommand extends MasonCommand {
         File(path.join(outputDir, '${bundle.name}_bundle.dart'))
           ..createSync(recursive: true)
           ..writeAsStringSync(
-            "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
+            "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
           );
         break;
       case BundleType.universal:
