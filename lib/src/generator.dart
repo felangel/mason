@@ -408,7 +408,7 @@ abstract class GeneratorTarget {
 
 /// {@template script_file}
 /// This class represents a script file in a generator.
-/// The contents should be text and may contain mustache
+/// The contents should be text and may contain mustache.
 /// {@endtemplate}
 class ScriptFile {
   /// {@macro script_file}
