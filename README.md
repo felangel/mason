@@ -389,7 +389,7 @@ hello Dash!
 /Users/dash/mason/example
 ```
 
-💡 **Note**: scripts can contain template variables. In addition, the working directory of the script is the directory in which the code is generated.
+💡 **Note**: Scripts can contain template variables. In addition, the working directory of the script is the directory in which the code is generated.
 
 Hooks can be disabled using the `--no-hooks` flag:
 
