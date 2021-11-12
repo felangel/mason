@@ -139,9 +139,9 @@ extension on GeneratorHook {
   String toFileName() {
     switch (this) {
       case GeneratorHook.preGen:
-        return 'pre_gen';
+        return 'pre_gen.dart';
       case GeneratorHook.postGen:
-        return 'post_gen';
+        return 'post_gen.dart';
     }
   }
 }
@@ -163,12 +163,10 @@ class GeneratorHooks {
         final file = hooksDirectory
             .listSync()
             .whereType<File>()
-            .firstWhereOrNull((element) =>
-                p.basenameWithoutExtension(element.path) == hook.toFileName());
+            .firstWhereOrNull(
+                (element) => p.basename(element.path) == hook.toFileName());
 
         if (file == null) return null;
-        final extension = p.extension(file.path);
-        if (extension != '.dart' && extension != '.sh') return null;
         final content = await file.readAsBytes();
         final relativePath = file.path.substring(
           file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
@@ -463,9 +461,8 @@ class ScriptFile {
     final tempDir = Directory.systemTemp.createTempSync();
     final script = File(p.join(tempDir.path, p.basename(path)))
       ..writeAsBytesSync(runSubstitution(vars).content);
-    final isDart = p.extension(path) == '.dart';
     final result = await Process.run(
-      isDart ? 'dart' : 'bash',
+      'dart',
       [script.path],
       workingDirectory: workingDirectory,
     );

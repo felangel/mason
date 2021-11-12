@@ -1,1 +1,1 @@
-post_gen dash
+post_gen: dash
