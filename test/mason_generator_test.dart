@@ -65,15 +65,39 @@ void main() {
         expect(hooks.postGen, isNotNull);
         expect(generator.id, equals('hooks'));
 
+        const vars = {'name': 'Dash'};
         final target = Directory.systemTemp.createTempSync();
+
+        await hooks.preGen?.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: target.path,
+        );
+        expect(
+          File(path.join(target.path, '.pre_gen.txt')).existsSync(),
+          isTrue,
+        );
+
         final fileCount = await generator.generate(
           DirectoryGeneratorTarget(target, logger),
+          vars: vars,
         );
         expect(fileCount, equals(1));
         expect(
           File(path.join(target.path, 'hooks.md')).existsSync(),
           isTrue,
         );
+
+        await hooks.postGen?.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: target.path,
+        );
+        expect(
+          File(path.join(target.path, '.post_gen.txt')).existsSync(),
+          isTrue,
+        );
+
         target.deleteSync(recursive: true);
       });
     });
