@@ -22,12 +22,12 @@ Future<MasonBundle> createBundle(Directory brick) async {
   final files = Directory(path.join(brick.path, BrickYaml.dir))
       .listSync(recursive: true)
       .whereType<File>()
-      .map(_bundleFile)
+      .map(_bundleBrickFile)
       .toList();
   final hooks = Directory(path.join(brick.path, BrickYaml.hooks))
       .listSync(recursive: true)
       .whereType<File>()
-      .map(_bundleHook)
+      .map(_bundleHookFile)
       .toList();
   return MasonBundle(
     brickYaml.name,
@@ -38,7 +38,7 @@ Future<MasonBundle> createBundle(Directory brick) async {
   );
 }
 
-MasonBundledFile _bundleFile(File file) {
+MasonBundledFile _bundleBrickFile(File file) {
   final fileType =
       _binaryFileTypes.hasMatch(path.basename(file.path)) ? 'binary' : 'text';
   final data = base64.encode(file.readAsBytesSync());
@@ -48,7 +48,7 @@ MasonBundledFile _bundleFile(File file) {
   return MasonBundledFile(filePath, data, fileType);
 }
 
-MasonBundledFile _bundleHook(File file) {
+MasonBundledFile _bundleHookFile(File file) {
   final data = base64.encode(file.readAsBytesSync());
   final filePath = path.basename(file.path);
   return MasonBundledFile(filePath, data, 'text');
