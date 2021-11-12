@@ -49,6 +49,7 @@ class MasonBundle {
   final List<MasonBundledFile> files;
 
   /// List of all [MasonBundledFile] instances within the `hooks` directory.
+  @JsonKey(defaultValue: <MasonBundledFile>[])
   final List<MasonBundledFile> hooks;
 
   /// Name of the brick (from the `brick.yaml`).

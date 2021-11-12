@@ -13,7 +13,7 @@ final _binaryFileTypes = RegExp(
 );
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
-Future<MasonBundle> createBundle(Directory brick) async {
+MasonBundle createBundle(Directory brick) {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
   final brickYaml = checkedYamlDecode(
     brickYamlFile.readAsStringSync(),
@@ -24,11 +24,14 @@ Future<MasonBundle> createBundle(Directory brick) async {
       .whereType<File>()
       .map(_bundleBrickFile)
       .toList();
-  final hooks = Directory(path.join(brick.path, BrickYaml.hooks))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map(_bundleHookFile)
-      .toList();
+  final hooksDirectory = Directory(path.join(brick.path, BrickYaml.hooks));
+  final hooks = hooksDirectory.existsSync()
+      ? hooksDirectory
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map(_bundleHookFile)
+          .toList()
+      : <MasonBundledFile>[];
   return MasonBundle(
     brickYaml.name,
     brickYaml.description,

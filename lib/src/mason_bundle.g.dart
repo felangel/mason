@@ -42,12 +42,13 @@ MasonBundle _$MasonBundleFromJson(Map json) {
                   Map<String, dynamic>.from(e as Map)))
               .toList()),
       $checkedConvert(
-          json,
-          'hooks',
-          (v) => (v as List<dynamic>)
-              .map((e) => MasonBundledFile.fromJson(
-                  Map<String, dynamic>.from(e as Map)))
-              .toList()),
+              json,
+              'hooks',
+              (v) => (v as List<dynamic>?)
+                  ?.map((e) => MasonBundledFile.fromJson(
+                      Map<String, dynamic>.from(e as Map)))
+                  .toList()) ??
+          [],
     );
     return val;
   });
