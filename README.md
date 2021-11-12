@@ -31,7 +31,7 @@ mason make hello
 
 ---
 
-## Table of contents
+## Table of Contents
 
 - [Overview](#overview)
   - [Installation](#installation)
