@@ -1,3 +1,8 @@
+# 0.0.1-dev.57
+
+- feat: add `mason bundle` output
+- feat: add generator hooks support
+
 # 0.0.1-dev.56
 
 - fix: `mason new` output format improvements
