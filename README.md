@@ -508,15 +508,15 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  add         Adds a brick from a local or remote source.
-  bundle      Generates a bundle from a brick template.
-  cache       Interact with mason cache.
-  get         Gets all bricks in the nearest mason.yaml.
-  init        Initialize mason in the current directory.
-  list        Lists all available bricks.
-  make        Generate code using an existing brick template.
-  new         Creates a new brick template.
-  remove      Removes a brick.
+  add      Adds a brick from a local or remote source.
+  bundle   Generates a bundle from a brick template.
+  cache    Interact with mason cache.
+  get      Gets all bricks in the nearest mason.yaml.
+  init     Initialize mason in the current directory.
+  list     Lists all available bricks.
+  make     Generate code using an existing brick template.
+  new      Creates a new brick template.
+  remove   Removes a brick.
 
 Run "mason help <command>" for more information about a command.
 ```
