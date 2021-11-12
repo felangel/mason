@@ -36,16 +36,27 @@ void main() {
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
-      final actual = File(
+      final file = File(
         path.join(
           testFixturesPath(cwd, suffix: '.bundle'),
           'universal',
           'greeting.bundle',
         ),
-      ).readAsStringSync();
+      );
+      final actual = file.readAsStringSync();
       final expected =
           '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]}''';
       expect(actual, equals(expected));
+      verify(() => logger.progress('Bundling greeting')).called(1);
+      verify(
+        () => logger.info(
+          '${lightGreen.wrap('✓')} '
+          'Generated 1 file:',
+        ),
+      ).called(1);
+      verify(
+        () => logger.detail('  ${path.canonicalize(file.path)}'),
+      ).called(1);
     });
 
     test('creates a new universal bundle (with hooks)', () async {
@@ -56,16 +67,27 @@ void main() {
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
-      final actual = File(
+      final file = File(
         path.join(
           testFixturesPath(cwd, suffix: '.bundle'),
           'universal',
           'hooks.bundle',
         ),
-      ).readAsStringSync();
+      );
+      final actual = file.readAsStringSync();
       final expected =
           '''{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]}''';
       expect(actual, equals(expected));
+      verify(() => logger.progress('Bundling hooks')).called(1);
+      verify(
+        () => logger.info(
+          '${lightGreen.wrap('✓')} '
+          'Generated 1 file:',
+        ),
+      ).called(1);
+      verify(
+        () => logger.detail('  ${path.canonicalize(file.path)}'),
+      ).called(1);
     });
 
     test('creates a new dart bundle (no hooks)', () async {
@@ -78,13 +100,14 @@ void main() {
         ['bundle', brickPath, '-t', 'dart'],
       );
       expect(result, equals(ExitCode.success.code));
-      final actual = File(
+      final file = File(
         path.join(
           testFixturesPath(cwd, suffix: '.bundle'),
           'dart',
           'greeting_bundle.dart',
         ),
-      ).readAsStringSync();
+      );
+      final actual = file.readAsStringSync();
       expect(
         actual,
         contains(
@@ -98,6 +121,16 @@ void main() {
           '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","vars":["name"]});''',
         ),
       );
+      verify(() => logger.progress('Bundling greeting')).called(1);
+      verify(
+        () => logger.info(
+          '${lightGreen.wrap('✓')} '
+          'Generated 1 file:',
+        ),
+      ).called(1);
+      verify(
+        () => logger.detail('  ${path.canonicalize(file.path)}'),
+      ).called(1);
     });
 
     test('creates a new dart bundle (with hooks)', () async {
@@ -110,13 +143,14 @@ void main() {
         ['bundle', brickPath, '-t', 'dart'],
       );
       expect(result, equals(ExitCode.success.code));
-      final actual = File(
+      final file = File(
         path.join(
           testFixturesPath(cwd, suffix: '.bundle'),
           'dart',
           'hooks_bundle.dart',
         ),
-      ).readAsStringSync();
+      );
+      final actual = file.readAsStringSync();
       expect(
         actual,
         contains(
@@ -130,6 +164,16 @@ void main() {
           '''final hooksBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]});''',
         ),
       );
+      verify(() => logger.progress('Bundling hooks')).called(1);
+      verify(
+        () => logger.info(
+          '${lightGreen.wrap('✓')} '
+          'Generated 1 file:',
+        ),
+      ).called(1);
+      verify(
+        () => logger.detail('  ${path.canonicalize(file.path)}'),
+      ).called(1);
     });
 
     test('exits with code 64 when no brick path is provided', () async {
@@ -138,6 +182,7 @@ void main() {
       verify(
         () => logger.err('path to the brick template must be provided'),
       ).called(1);
+      verifyNever(() => logger.progress(any()));
     });
 
     test('exits with code 64 when no brick exists at path', () async {
@@ -147,6 +192,7 @@ void main() {
       verify(
         () => logger.err('could not find brick at $brickPath'),
       ).called(1);
+      verifyNever(() => logger.progress(any()));
     });
   });
 }
