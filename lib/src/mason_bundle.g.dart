@@ -28,7 +28,7 @@ Map<String, dynamic> _$MasonBundledFileToJson(MasonBundledFile instance) =>
 MasonBundle _$MasonBundleFromJson(Map json) {
   return $checkedNew('MasonBundle', json, () {
     $checkKeys(json,
-        allowedKeys: const ['files', 'name', 'description', 'vars']);
+        allowedKeys: const ['files', 'hooks', 'name', 'description', 'vars']);
     final val = MasonBundle(
       $checkedConvert(json, 'name', (v) => v as String),
       $checkedConvert(json, 'description', (v) => v as String),
@@ -41,6 +41,13 @@ MasonBundle _$MasonBundleFromJson(Map json) {
               .map((e) => MasonBundledFile.fromJson(
                   Map<String, dynamic>.from(e as Map)))
               .toList()),
+      $checkedConvert(
+          json,
+          'hooks',
+          (v) => (v as List<dynamic>)
+              .map((e) => MasonBundledFile.fromJson(
+                  Map<String, dynamic>.from(e as Map)))
+              .toList()),
     );
     return val;
   });
@@ -49,6 +56,7 @@ MasonBundle _$MasonBundleFromJson(Map json) {
 Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) =>
     <String, dynamic>{
       'files': instance.files.map((e) => e.toJson()).toList(),
+      'hooks': instance.hooks.map((e) => e.toJson()).toList(),
       'name': instance.name,
       'description': instance.description,
       'vars': instance.vars,

@@ -106,6 +106,7 @@ class MasonGenerator extends Generator {
       bundle.description,
       vars: bundle.vars,
       files: _decodeConcatenatedData(bundle.files),
+      hooks: GeneratorHooks.fromBundle(bundle),
     );
   }
 
@@ -153,6 +154,37 @@ extension on GeneratorHook {
 class GeneratorHooks {
   /// {@macro generator_hooks}
   const GeneratorHooks({this.preGen, this.postGen});
+
+  /// Creates [GeneratorHooks] from a provided [MasonBundle].
+  factory GeneratorHooks.fromBundle(MasonBundle bundle) {
+    ScriptFile? _decodeHookScript(MasonBundledFile? file) {
+      if (file == null) return null;
+      final path = file.path;
+      final raw = file.data.replaceAll(_whiteSpace, '');
+      final decoded = base64.decode(raw);
+      try {
+        return ScriptFile.fromBytes(path, decoded);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final preGen = bundle.hooks.firstWhereOrNull(
+      (element) {
+        return p.basename(element.path) == GeneratorHook.preGen.toFileName();
+      },
+    );
+    final postGen = bundle.hooks.firstWhereOrNull(
+      (element) {
+        return p.basename(element.path) == GeneratorHook.postGen.toFileName();
+      },
+    );
+
+    return GeneratorHooks(
+      preGen: _decodeHookScript(preGen),
+      postGen: _decodeHookScript(postGen),
+    );
+  }
 
   /// Creates [GeneratorHooks] from a provided [BrickYaml].
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
@@ -646,7 +678,6 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
     final path = file.path;
     final type = file.type;
     final raw = file.data.replaceAll(_whiteSpace, '');
-
     final decoded = base64.decode(raw);
     try {
       if (type == 'binary') {

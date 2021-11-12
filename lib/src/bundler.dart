@@ -24,11 +24,17 @@ Future<MasonBundle> createBundle(Directory brick) async {
       .whereType<File>()
       .map(_bundleFile)
       .toList();
+  final hooks = Directory(path.join(brick.path, BrickYaml.hooks))
+      .listSync(recursive: true)
+      .whereType<File>()
+      .map(_bundleHook)
+      .toList();
   return MasonBundle(
     brickYaml.name,
     brickYaml.description,
     brickYaml.vars,
     files,
+    hooks,
   );
 }
 
@@ -40,4 +46,10 @@ MasonBundledFile _bundleFile(File file) {
     path.split(file.path).skipWhile((value) => value != BrickYaml.dir).skip(1),
   );
   return MasonBundledFile(filePath, data, fileType);
+}
+
+MasonBundledFile _bundleHook(File file) {
+  final data = base64.encode(file.readAsBytesSync());
+  final filePath = path.basename(file.path);
+  return MasonBundledFile(filePath, data, 'text');
 }
