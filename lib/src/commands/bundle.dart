@@ -64,24 +64,54 @@ class BundleCommand extends MasonCommand {
     final bundle = createBundle(brick);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
+    final bundleDone = logger.progress('Bundling ${bundle.name}');
 
-    switch (bundleType) {
-      case BundleType.dart:
-        File(path.join(outputDir, '${bundle.name}_bundle.dart'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(
-            "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
-          );
-        break;
-      case BundleType.universal:
-        File(path.join(outputDir, '${bundle.name}.bundle'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync(json.encode(bundle.toJson()));
-        break;
+    try {
+      late final String bundlePath;
+      switch (bundleType) {
+        case BundleType.dart:
+          bundlePath = await _generateDartBundle(bundle, outputDir);
+          break;
+        case BundleType.universal:
+          bundlePath = await _generateUniversalBundle(bundle, outputDir);
+          break;
+      }
+      bundleDone();
+      logger
+        ..info(
+          '${lightGreen.wrap('✓')} '
+          'Generated 1 file:',
+        )
+        ..detail('  $bundlePath');
+    } catch (_) {
+      bundleDone();
+      rethrow;
     }
 
     return ExitCode.success.code;
   }
+}
+
+Future<String> _generateDartBundle(
+  MasonBundle bundle,
+  String outputDir,
+) async {
+  final file = File(path.join(outputDir, '${bundle.name}_bundle.dart'));
+  await file.create(recursive: true);
+  await file.writeAsString(
+    "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
+  );
+  return path.canonicalize(file.path);
+}
+
+Future<String> _generateUniversalBundle(
+  MasonBundle bundle,
+  String outputDir,
+) async {
+  final file = File(path.join(outputDir, '${bundle.name}.bundle'));
+  await file.create(recursive: true);
+  await file.writeAsString(json.encode(bundle.toJson()));
+  return path.canonicalize(file.path);
 }
 
 extension on String {
