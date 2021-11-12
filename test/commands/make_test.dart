@@ -352,11 +352,14 @@ in todos.json''',
     });
 
     test('generates hooks', () async {
-      logger = Logger();
       final testDir = Directory(
         path.join(Directory.current.path, 'hooks'),
       )..createSync(recursive: true);
       Directory.current = testDir.path;
+      commandRunner = MasonCommandRunner(
+        logger: Logger(),
+        pubUpdater: pubUpdater,
+      );
       final result = await commandRunner.run([
         'make',
         'hooks',
