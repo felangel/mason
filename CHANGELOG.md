@@ -1,3 +1,9 @@
+# 0.0.1-dev.57
+
+- feat: add `mason bundle` output
+- feat: add generator hooks support (custom script execution)
+  - support for `pre_gen` and `post_gen` hooks
+
 # 0.0.1-dev.56
 
 - fix: `mason new` output format improvements
