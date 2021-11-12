@@ -352,6 +352,7 @@ in todos.json''',
     });
 
     test('generates hooks', () async {
+      logger = Logger();
       final testDir = Directory(
         path.join(Directory.current.path, 'hooks'),
       )..createSync(recursive: true);

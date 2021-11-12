@@ -5,7 +5,7 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart' show Directory, File, FileMode;
+import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
 import 'brick_yaml.dart';
 import 'bricks_json.dart';
@@ -451,6 +451,32 @@ class ScriptFile {
     } on Exception {
       return content;
     }
+  }
+
+  /// Executes the current script with the provided [vars] and [logger].
+  /// An optional [workingDirectory] can also be specified.
+  Future<int> run({
+    Map<String, dynamic> vars = const <String, dynamic>{},
+    Logger? logger,
+    String? workingDirectory,
+  }) async {
+    final tempDir = Directory.systemTemp.createTempSync();
+    final script = File(p.join(tempDir.path, p.basename(path)))
+      ..writeAsBytesSync(runSubstitution(vars).content);
+    final isDart = p.extension(path) == '.dart';
+    final result = await Process.run(
+      isDart ? 'dart' : 'bash',
+      [script.path],
+      workingDirectory: workingDirectory,
+    );
+
+    final stdout = result.stdout as String?;
+    if (stdout != null && stdout.isNotEmpty) logger?.info(stdout.trim());
+
+    final stderr = result.stderr as String?;
+    if (stderr != null && stderr.isNotEmpty) logger?.err(stderr.trim());
+
+    return result.exitCode;
   }
 }
 

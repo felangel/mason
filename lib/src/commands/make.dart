@@ -107,7 +107,11 @@ class _MakeCommand extends MasonCommand {
 
       final preGenScript = generator.hooks.preGen;
       if (preGenScript != null) {
-        final exitCode = await preGenScript.run(vars, logger, outputDir);
+        final exitCode = await preGenScript.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: outputDir,
+        );
         if (exitCode != ExitCode.success.code) return exitCode;
       }
 
@@ -118,7 +122,11 @@ class _MakeCommand extends MasonCommand {
 
       final postGenScript = generator.hooks.postGen;
       if (postGenScript != null) {
-        final exitCode = await postGenScript.run(vars, logger, outputDir);
+        final exitCode = await postGenScript.run(
+          vars: vars,
+          logger: logger,
+          workingDirectory: outputDir,
+        );
         if (exitCode != ExitCode.success.code) return exitCode;
       }
 
@@ -210,31 +218,5 @@ extension on Logger {
         )
         ..flush(detail);
     }
-  }
-}
-
-extension on ScriptFile {
-  Future<int> run(
-    Map<String, dynamic> vars,
-    Logger logger,
-    String workingDirectory,
-  ) async {
-    final tempDir = Directory.systemTemp.createTempSync();
-    final script = File(p.join(tempDir.path, p.basename(path)))
-      ..writeAsBytesSync(runSubstitution(vars).content);
-    final isDart = p.extension(path) == '.dart';
-    final result = await Process.run(
-      isDart ? 'dart' : 'bash',
-      [script.path],
-      workingDirectory: workingDirectory,
-    );
-
-    final stdout = result.stdout as String?;
-    if (stdout != null && stdout.isNotEmpty) logger.info(stdout.trim());
-
-    final stderr = result.stderr as String?;
-    if (stderr != null && stderr.isNotEmpty) logger.err(stderr.trim());
-
-    return result.exitCode;
   }
 }
