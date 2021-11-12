@@ -141,6 +141,7 @@ void main() {
             '\n'
             'Usage: mason make <subcommand> [arguments]\n'
             '-h, --help                      Print this usage information.\n'
+            '    --no-hooks                  skips running hooks\n'
             '''-c, --config-path               Path to config json file containing variables.\n'''
             '''-o, --output-dir                Directory where to output the generated code.\n'''
             '                                (defaults to ".")\n'
@@ -176,6 +177,7 @@ void main() {
             '\n'
             'Usage: mason make greeting [arguments]\n'
             '-h, --help                      Print this usage information.\n'
+            '    --no-hooks                  skips running hooks\n'
             '''-c, --config-path               Path to config json file containing variables.\n'''
             '''-o, --output-dir                Directory where to output the generated code.\n'''
             '                                (defaults to ".")\n'
@@ -353,7 +355,7 @@ in todos.json''',
 
     test('generates hooks', () async {
       final testDir = Directory(
-        path.join(Directory.current.path, 'hooks'),
+        path.join(Directory.current.path, 'hooks', 'basic'),
       )..createSync(recursive: true);
       Directory.current = testDir.path;
       final result = await commandRunner.run([
@@ -365,10 +367,33 @@ in todos.json''',
       expect(result, equals(ExitCode.success.code));
 
       final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.make'), 'hooks'),
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hooks', 'basic'),
       );
       final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks'),
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks', 'basic'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates hooks (--no-hooks)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hooks', 'no_hooks'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'hooks',
+        '--name',
+        'dash',
+        '--no-hooks',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hooks', 'no_hooks'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks', 'no_hooks'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });

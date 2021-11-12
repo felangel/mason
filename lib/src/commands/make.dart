@@ -76,6 +76,7 @@ class _MakeCommand extends MasonCommand {
       logger,
       fileConflictResolution,
     );
+    final disableHooks = results['no-hooks'] as bool;
 
     Function? generateDone;
 
@@ -106,7 +107,7 @@ class _MakeCommand extends MasonCommand {
       }
 
       final preGenScript = generator.hooks.preGen;
-      if (preGenScript != null) {
+      if (!disableHooks && preGenScript != null) {
         final exitCode = await preGenScript.run(
           vars: vars,
           logger: logger,
@@ -121,7 +122,7 @@ class _MakeCommand extends MasonCommand {
       logger.logFiles(fileCount);
 
       final postGenScript = generator.hooks.postGen;
-      if (postGenScript != null) {
+      if (!disableHooks && postGenScript != null) {
         final exitCode = await postGenScript.run(
           vars: vars,
           logger: logger,
@@ -155,6 +156,7 @@ class _MakeCommand extends MasonCommand {
 
 extension on ArgParser {
   void addOptions() {
+    addFlag('no-hooks', help: 'skips running hooks', negatable: false);
     addOption(
       'config-path',
       abbr: 'c',
