@@ -1,0 +1,14 @@
+name: mason_cli
+description: >
+  A Dart template generator which helps teams generate files quickly and consistently.
+version: 0.1.0-dev.1
+homepage: https://github.com/felangel/mason
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  universal_io: ^2.0.4
+
+executables:
+  mason:
