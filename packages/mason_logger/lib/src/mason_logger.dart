@@ -62,7 +62,7 @@ class _StdioOverridesScope extends StdioOverrides {
   }
 }
 
-/// A basic Logger which wraps [print] and applies various styles.
+/// A basic Logger which wraps `stdio` and applies various styles.
 class Logger {
   static const List<String> _progressAnimation = [
     '⠋',
@@ -79,7 +79,6 @@ class Logger {
 
   final _queue = <String?>[];
   final _stopwatch = Stopwatch();
-
   final StdioOverrides? _overrides = StdioOverrides.current;
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
