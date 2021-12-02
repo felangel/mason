@@ -1,21 +1,10 @@
-import 'dart:async';
-
-import 'package:universal_io/io.dart';
-
-/// Flushes the stdout and stderr streams, then exits the program with the given
-/// status code.
-///
-/// This returns a Future that will never complete, since the program will have
-/// exited already. This is useful to prevent Future chains from proceeding
-/// after you've decided to exit.
-Future flushThenExit(int status) {
-  return Future.wait<void>([stdout.close(), stderr.close()])
-      .then<void>((_) => exit(status));
-}
-
 // Copyright 2017, the Dart project authors.  Please see the AUTHORS file
 // for details. All rights reserved. Use of this source code is governed by a
 // BSD-style license that can be found in the LICENSE file.
+
+import 'dart:async';
+
+import 'package:universal_io/io.dart';
 
 /// Exit code constants.
 ///
@@ -117,6 +106,12 @@ bool _isNoop(bool skip, String? input, bool? forScript) =>
     input == null ||
     input.isEmpty ||
     !((forScript ?? false) || ansiOutputEnabled);
+
+/// Allows overriding [ansiOutputEnabled] to [enableAnsiOutput] for the code run
+/// within [body].
+// ignore: avoid_positional_boolean_parameters
+T overrideAnsiOutput<T>(bool enableAnsiOutput, T Function() body) =>
+    runZoned(body, zoneValues: <Object, Object>{AnsiCode: enableAnsiOutput});
 
 /// The type of code represented by [AnsiCode].
 class AnsiCodeType {

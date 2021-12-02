@@ -152,5 +152,34 @@ void main() {
         );
       });
     });
+
+    group('.progress', () {
+      test('writes lines to stdout', () async {
+        await StdioOverrides.runZoned(
+          () async {
+            const message = 'test message';
+            final done = Logger().progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            done();
+            verify(
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} $message (0.1s)\n''',
+                );
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+    });
   });
 }
