@@ -49,7 +49,8 @@ void main() {
         });
 
         test('adds brick successfully when brick exists', () async {
-          final brickPath = path.join('..', '..', '..', 'bricks', 'greeting');
+          final brickPath =
+              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(
             ['add', '--source', 'path', brickPath],
           );
@@ -73,7 +74,8 @@ void main() {
         });
 
         test('adds brick successfully when brick exists (shorthand)', () async {
-          final brickPath = path.join('..', '..', '..', 'bricks', 'greeting');
+          final brickPath =
+              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(['add', brickPath]);
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
@@ -156,7 +158,8 @@ void main() {
         });
 
         test('adds brick successfully when brick exists', () async {
-          final brickPath = path.join('..', '..', '..', 'bricks', 'greeting');
+          final brickPath =
+              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(
             ['add', '-g', '--source', 'path', brickPath],
           );
@@ -180,7 +183,8 @@ void main() {
         });
 
         test('adds brick successfully when brick exists (shorthand)', () async {
-          final brickPath = path.join('..', '..', '..', 'bricks', 'greeting');
+          final brickPath =
+              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(['add', '-g', brickPath]);
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(

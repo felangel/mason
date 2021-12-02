@@ -45,14 +45,15 @@ void main() {
     test(
         'exits successfully and lists all bricks '
         'when local and global bricks are available', () async {
-      final greetingPath = p.join('..', '..', '..', 'bricks', 'greeting');
+      final greetingPath =
+          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
 bricks:
   documentation:
-    path: ../../../bricks/documentation
+    path: ../../../../../bricks/documentation
   todos:
-    path: ../../../bricks/todos
+    path: ../../../../../bricks/todos
   widget:
     git:
       url: https://github.com/felangel/mason

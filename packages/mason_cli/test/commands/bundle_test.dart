@@ -31,7 +31,8 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'universal'),
       )..createSync(recursive: true);
-      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
@@ -62,7 +63,8 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'universal'),
       )..createSync(recursive: true);
-      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'hooks');
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', '..', 'bricks', 'hooks');
       Directory.current = testDir.path;
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.success.code));
@@ -93,7 +95,8 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'dart'),
       )..createSync(recursive: true);
-      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'greeting');
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', '..', 'bricks', 'greeting');
       Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['bundle', brickPath, '-t', 'dart'],
@@ -136,7 +139,8 @@ void main() {
       final testDir = Directory(
         path.join(Directory.current.path, 'dart'),
       )..createSync(recursive: true);
-      final brickPath = path.join('..', '..', '..', '..', 'bricks', 'hooks');
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', '..', 'bricks', 'hooks');
       Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['bundle', brickPath, '-t', 'dart'],

@@ -28,7 +28,7 @@ void main() {
         '''
 bricks:
   app_icon:
-    path: ../../../bricks/app_icon
+    path: ../../../../../bricks/app_icon
 ''',
       );
     });

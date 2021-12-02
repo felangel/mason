@@ -45,26 +45,26 @@ void main() {
         '''
 bricks:
   app_icon:
-    path: ../../../bricks/app_icon
+    path: ../../../../../bricks/app_icon
   documentation:
-    path: ../../../bricks/documentation
+    path: ../../../../../bricks/documentation
   greeting:
-    path: ../../../bricks/greeting
+    path: ../../../../../bricks/greeting
   hello_world:
-    path: ../../../bricks/hello_world
+    path: ../../../../../bricks/hello_world
   hooks:
-    path: ../../../bricks/hooks
+    path: ../../../../../bricks/hooks
   plugin:
-    path: ../../../bricks/plugin
+    path: ../../../../../bricks/plugin
   simple:
-    path: ../../../bricks/simple
+    path: ../../../../../bricks/simple
   todos:
-    path: ../../../bricks/todos
+    path: ../../../../../bricks/todos
   widget:
-    path: ../../../bricks/widget
+    path: ../../../../../bricks/widget
 ''',
       );
-      final bricksPath = path.join('..', '..', '..', 'bricks');
+      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
       final appIconPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
@@ -96,23 +96,23 @@ bricks:
         ..createSync(recursive: true)
         ..writeAsStringSync(
           json.encode({
-            '''app_icon_cfe75d2168207dcf5ee22960c0260e93ee4168306dbeb09348c262bd7c73906e''':
+            '''app_icon_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
                 appIconPath,
-            '''documentation_a4bd9a921f7902c67a8ae5918498ce13c8136233c3d11d835207447386ddd650''':
+            '''documentation_227871e1f882f1e60fbc26adaf0d5ea0f03616b24c54ce4ffc331ebcba54018a''':
                 docPath,
-            '''greeting_81a4ec348561cdd721c3bb79b3d6dc14738bf17f02e18810dad2a6d88732e298''':
-                greetingPath,
-            '''hello_world_fd66b903d5885651238b50e1205b0cf05f30573cc3b4a7a4f2d1f495edd33630''':
+            '''hello_world_cfb7bfe4be052f5e635f9291624c97e8c45ac933c18d1b8ee0e6a80fb81d491a''':
                 helloWorldPath,
-            '''hooks_2e6b8bd738ff62d505cd8c6cdc7d8479eb9e9062ef6e0a2ded45fe362668f070''':
+            '''hooks_a765dcb6544a44c14697c793e67ab2885f2efd292b8d619739aeef699c07af5b''':
                 hooksPath,
-            '''plugin_de4be97b1f4014112763f13689b00186175e5116db6bec26ee494b46f3ad8756''':
+            '''greeting_7271b59f2b3d670acfa5ed607915573ed3e66bf38b4bb2cd8a7972bb3e17b239''':
+                greetingPath,
+            '''plugin_40192192887515a0911c28a4738bb32229909ac5d7161c00b3d9bd41accf3485''':
                 pluginPath,
-            '''simple_3bbc2ade88745ef690063c8f652631a4870ee6af619a327e297084251aebe232''':
+            '''simple_6c33a2482d658c2355275550eb6960356ef483e03badf54b9e4f7daae613acd6''':
                 simplePath,
-            '''todos_6d110323da1d9f3a3ae2ecc6feae02edef8af68ca329601f33ee29e725f1f740''':
+            '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
                 todosPath,
-            '''widget_02426be7ece33230d574cb7a76eb7a9a595a79cbf53a1b1c8f2f1de78dfbe23f''':
+            '''widget_3e9a45e03a5fe88eed08372ea15dce0ce1b9e2685a75e62ebd4deac7563c8704''':
                 widgetPath,
           }),
         );
