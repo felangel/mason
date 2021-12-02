@@ -11,7 +11,7 @@ on:
   pull_request:
     branches:
       - master
-      -  feat/mason_cli
+      -  refactor/mason_cli
     paths:
       - .github/workflows/mason_logger.yaml
       - packages/mason_logger/**
