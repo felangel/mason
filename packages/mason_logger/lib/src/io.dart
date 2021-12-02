@@ -97,7 +97,7 @@ class ExitCode {
 }
 
 const _ansiEscapeLiteral = '\x1B';
-const _ansiEscapeForScript = '\\033';
+const _ansiEscapeForScript = r'\033';
 
 /// Whether formatted ANSI output is enabled for [AnsiCode.wrap].
 ///
@@ -107,7 +107,6 @@ const _ansiEscapeForScript = '\\033';
 /// The default can be overridden by setting the [Zone] variable [AnsiCode] to
 /// either `true` or `false`.
 ///
-/// [overrideAnsiOutput] is provided to make this easy.
 bool get ansiOutputEnabled =>
     Zone.current[AnsiCode] as bool? ??
     (stdout.supportsAnsiEscapes && stderr.supportsAnsiEscapes);
@@ -118,11 +117,6 @@ bool _isNoop(bool skip, String? input, bool? forScript) =>
     input == null ||
     input.isEmpty ||
     !((forScript ?? false) || ansiOutputEnabled);
-
-/// Allows overriding [ansiOutputEnabled] to [enableAnsiOutput] for the code run
-/// within [body].
-T overrideAnsiOutput<T>(bool enableAnsiOutput, T Function() body) =>
-    runZoned(body, zoneValues: <Object, Object>{AnsiCode: enableAnsiOutput});
 
 /// The type of code represented by [AnsiCode].
 class AnsiCodeType {
