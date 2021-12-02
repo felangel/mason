@@ -16,7 +16,11 @@ Mason allows developers to create and consume reusable templates called bricks.
 
 ```sh
 # 🎯 Activate from https://pub.dev
-dart pub global activate mason_cli
+dart pub global activate mason
+
+# 🍺 Or install from https://brew.sh
+brew tap felangel/mason
+brew install mason
 
 # 🚀 Initialize mason
 mason init

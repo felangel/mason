@@ -1,8 +1,0 @@
-{
-  "todos": [
-    { "todo": "Eat", "done": true },
-    { "todo": "Code", "done": true },
-    { "todo": "Sleep", "done": false }
-  ],
-  "developers": [{ "name": "Alex" }, { "name": "Sam" }, { "name": "Jen" }]
-}
