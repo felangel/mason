@@ -355,8 +355,8 @@ enum OverwriteRule {
 class DirectoryGeneratorTarget extends GeneratorTarget {
   /// {@macro directory_generator_target}
   DirectoryGeneratorTarget(
-    this.dir,
-    this.logger, [
+    this.dir, [
+    this.logger,
     FileConflictResolution? fileConflictResolution,
   ]) : _overwriteRule = fileConflictResolution?.toOverwriteRule() {
     dir.createSync(recursive: true);
@@ -365,8 +365,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   /// The target [Directory].
   final Directory dir;
 
-  /// Logger used to output created files.
-  final Logger logger;
+  /// Optional logger used to output created files.
+  final Logger? logger;
 
   /// The rule used to handle file conflicts.
   /// Determines whether to overwrite existing file or skip.
@@ -381,18 +381,19 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       final existingContents = file.readAsBytesSync();
 
       if (const ListEquality<int>().equals(existingContents, contents)) {
-        logger.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+        logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
         return file;
       }
 
-      final shouldPrompt = _overwriteRule != OverwriteRule.alwaysOverwrite &&
-          _overwriteRule != OverwriteRule.alwaysSkip &&
-          _overwriteRule != OverwriteRule.alwaysAppend;
+      final shouldPrompt = logger != null &&
+          (_overwriteRule != OverwriteRule.alwaysOverwrite &&
+              _overwriteRule != OverwriteRule.alwaysSkip &&
+              _overwriteRule != OverwriteRule.alwaysAppend);
 
       if (shouldPrompt) {
-        logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+        logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
         _overwriteRule = logger
-            .prompt(
+            ?.prompt(
               yellow.wrap(
                 styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
               ),
@@ -404,7 +405,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     switch (_overwriteRule) {
       case OverwriteRule.alwaysSkip:
       case OverwriteRule.skipOnce:
-        logger.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        logger?.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
         return file;
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
@@ -419,10 +420,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
                 mode: shouldAppend ? FileMode.append : FileMode.write))
             .whenComplete(
               () => shouldAppend
-                  ? logger.delayed(
+                  ? logger?.delayed(
                       '  ${file.path} ${lightBlue.wrap('(modified)')}',
                     )
-                  : logger.delayed(
+                  : logger?.delayed(
                       '  ${file.path} ${lightGreen.wrap('(new)')}',
                     ),
             );

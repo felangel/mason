@@ -10,7 +10,7 @@
 
 ---
 
-Mason allows developers to create and consume reusable templates called bricks.
+Mason CLI allows developers to create and consume reusable templates called bricks.
 
 ## Quick Start
 
