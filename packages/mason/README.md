@@ -15,14 +15,18 @@ Mason contains the core generator and rendering engine which is used by [mason_c
 `package:mason` allows developers to build custom CLIs and other tooling that leverages the mason generator and rendering engine.
 
 ```dart
+import 'dart:io';
+
 import 'package:mason/mason.dart';
 
-import './my_bundle.dart';
-
 void main() async {
-  final generator = await MasonGenerator.fromBundle(myBundle);
-  final target = DirectoryTarget(Directory.current);
-  final vars = {'myVariable': 'myValue'};
-  final fileCount = await generator.generate(target, vars);
+  final generator = await MasonGenerator.fromGitPath(
+    const GitPath(
+      'https://github.com/felangel/mason.git',
+      path: 'bricks/greeting',
+    ),
+  );
+  final target = DirectoryGeneratorTarget(Directory.current);
+  await generator.generate(target, vars: <String, dynamic>{'name': 'Dash'});
 }
 ```

@@ -9,7 +9,7 @@ environment:
 
 dependencies:
   mason: ^0.0.1-dev.57
-  mason_logger: ^0.1.0-dev.2
+  pub_updater: ^0.2.1
   universal_io: ^2.0.4
 
 dev_dependencies:

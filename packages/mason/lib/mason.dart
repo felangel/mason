@@ -4,6 +4,8 @@
 /// Get started at [https://github.com/felangel/mason](https://github.com/felangel/mason) 🧱
 library mason;
 
+export 'package:mason_logger/mason_logger.dart';
+
 export 'src/brick_yaml.dart' show BrickYaml;
 export 'src/bricks_json.dart' show BricksJson;
 export 'src/bundler.dart' show createBundle;
