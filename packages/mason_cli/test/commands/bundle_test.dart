@@ -76,9 +76,28 @@ void main() {
         ),
       );
       final actual = file.readAsStringSync();
-      const expected =
-          '''{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]}''';
-      expect(actual, equals(expected));
+      expect(
+        actual,
+        contains('{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}'),
+      );
+      expect(
+        actual,
+        contains(
+          '''{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"}''',
+        ),
+      );
+      expect(
+        actual,
+        contains(
+          '''{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}''',
+        ),
+      );
+      expect(
+        actual,
+        contains(
+          '''"name":"hooks","description":"A Hooks Example Template","vars":["name"]''',
+        ),
+      );
       verify(() => logger.progress('Bundling hooks')).called(1);
       verify(
         () => logger.info(
@@ -164,7 +183,29 @@ void main() {
       expect(
         actual,
         contains(
-          '''final hooksBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"},{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}],"name":"hooks","description":"A Hooks Example Template","vars":["name"]});''',
+          '''final hooksBundle = MasonBundle.fromJson(<String, dynamic>{''',
+        ),
+      );
+      expect(
+        actual,
+        contains('{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}'),
+      );
+      expect(
+        actual,
+        contains(
+          '''{"path":"post_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9","type":"text"}''',
+        ),
+      );
+      expect(
+        actual,
+        contains(
+          '''{"path":"pre_gen.dart","data":"aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==","type":"text"}''',
+        ),
+      );
+      expect(
+        actual,
+        contains(
+          '''"name":"hooks","description":"A Hooks Example Template","vars":["name"]''',
         ),
       );
       verify(() => logger.progress('Bundling hooks')).called(1);
