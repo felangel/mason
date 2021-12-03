@@ -1,5 +1,5 @@
+import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command_runner.dart';
-import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
