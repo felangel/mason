@@ -1,0 +1,28 @@
+<p align="center">
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_full.png" height="125" alt="mason logo" />
+</p>
+
+<p align="center">
+<a href="https://pub.dev/packages/mason"><img src="https://img.shields.io/pub/v/mason.svg" alt="Pub"></a>
+<a href="https://github.com/felangel/mason/actions"><img src="https://github.com/felangel/mason/workflows/mason/badge.svg" alt="mason"></a>
+<a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License: MIT"></a>
+</p>
+
+---
+
+Mason contains the core generator and rendering engine which is used by [mason_cli](https://pub.dev/packages/mason_cli).
+
+`package:mason` allows developers to build custom CLIs and other tooling that leverages the mason generator and rendering engine.
+
+```dart
+import 'package:mason/mason.dart';
+
+import './my_bundle.dart';
+
+void main() async {
+  final generator = await MasonGenerator.fromBundle(myBundle);
+  final target = DirectoryTarget(Directory.current);
+  final vars = {'myVariable': 'myValue'};
+  final fileCount = await generator.generate(target, vars);
+}
+```
