@@ -1,3 +1,7 @@
+# 0.1.0-dev.1
+
+- feat: decompose `mason` into `mason`, `mason_cli` and `mason_logger`
+
 # 0.0.1-dev.57
 
 - feat: add `mason bundle` output
