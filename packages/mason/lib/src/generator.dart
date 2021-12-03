@@ -4,21 +4,19 @@ import 'dart:convert';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:http/http.dart' as http;
+import 'package:mason/mason.dart';
+import 'package:mason/src/mason_bundle.dart';
+import 'package:mason/src/render.dart';
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
-import 'brick_yaml.dart';
-import 'bricks_json.dart';
-import 'mason_bundle.dart';
-import 'mason_yaml.dart';
-import 'render.dart';
-
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
-final _delimeterRegExp = RegExp(r'{{(.*?)}}');
-final _loopKeyRegExp = RegExp(r'{{#(.*?)}}');
-final _loopValueReplaceRegExp = RegExp(r'({{{.*?}}})');
+final _delimeterRegExp = RegExp('{{(.*?)}}');
+final _loopKeyRegExp = RegExp('{{#(.*?)}}');
+final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
 final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
 final _newlineInRegExp = RegExp(r'(\\\r\n|\\\r|\\\n)');
 final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
@@ -29,15 +27,15 @@ final _lambdas = RegExp(
 );
 
 RegExp _loopRegExp([String name = '.*?']) {
-  return RegExp('({{#$name}}.*?{{{.*?}}}.*?{{\/$name}})');
+  return RegExp('({{#$name}}.*?{{{.*?}}}.*?{{/$name}})');
 }
 
 RegExp _loopValueRegExp([String name = '.*?']) {
-  return RegExp('{{#$name}}.*?{{{(.*?)}}}.*?{{\/$name}}');
+  return RegExp('{{#$name}}.*?{{{(.*?)}}}.*?{{/$name}}');
 }
 
 RegExp _loopInnerRegExp([String name = '.*?']) {
-  return RegExp('{{#$name}}(.*?{{{.*?}}}.*?){{\/$name}}');
+  return RegExp('{{#$name}}(.*?{{{.*?}}}.*?){{/$name}}');
 }
 
 /// {@template mason_generator}
@@ -191,11 +189,10 @@ class GeneratorHooks {
       try {
         final brickRoot = File(brick.path!).parent.path;
         final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file = hooksDirectory
-            .listSync()
-            .whereType<File>()
-            .firstWhereOrNull(
-                (element) => p.basename(element.path) == hook.toFileName());
+        final file =
+            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
+                  (element) => p.basename(element.path) == hook.toFileName(),
+                );
 
         if (file == null) return null;
         final content = await file.readAsBytes();
@@ -411,13 +408,17 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.overwriteOnce:
       case OverwriteRule.appendOnce:
       case OverwriteRule.alwaysAppend:
-      default:
+      case null:
         final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
             _overwriteRule == OverwriteRule.alwaysAppend;
         return file
             .create(recursive: true)
-            .then<File>((_) => file.writeAsBytes(contents,
-                mode: shouldAppend ? FileMode.append : FileMode.write))
+            .then<File>(
+              (_) => file.writeAsBytes(
+                contents,
+                mode: shouldAppend ? FileMode.append : FileMode.write,
+              ),
+            )
             .whenComplete(
               () => shouldAppend
                   ? logger?.delayed(
@@ -433,6 +434,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
 
 /// A target for a [Generator].
 /// This class knows how to create files given a path and contents.
+// ignore: one_member_abstracts
 abstract class GeneratorTarget {
   /// Create a file at the given path with the given contents.
   Future createFile(String path, List<int> contents);
@@ -537,7 +539,7 @@ class TemplateFile {
     Map<String, dynamic> parameters,
     Map<String, List<int>> partials,
   ) {
-    var filePath = path.replaceAll(r'\', r'/');
+    var filePath = path.replaceAll(r'\', '/');
     if (_loopRegExp().hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
 
@@ -620,6 +622,7 @@ class TemplateFile {
 /// {@template file_contents}
 /// A representation of the contents for a specific file.
 /// {@endtemplate}
+@immutable
 class FileContents {
   /// {@macro file_contents}
   const FileContents(this.path, this.content);

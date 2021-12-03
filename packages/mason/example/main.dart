@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:mason/mason.dart';
 
-void main() async {
+Future<void> main() async {
   final generator = await MasonGenerator.fromGitPath(
     const GitPath(
       'https://github.com/felangel/mason.git',

@@ -1,13 +1,10 @@
 import 'dart:convert';
 
 import 'package:crypto/crypto.dart';
+import 'package:mason/mason.dart';
+import 'package:mason/src/git.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
-
-import 'brick_yaml.dart';
-import 'exception.dart';
-import 'git.dart';
-import 'mason_yaml.dart';
 
 /// {@template bricks_json}
 /// A local cache for mason bricks.
@@ -81,7 +78,7 @@ class BricksJson {
     }
     if (brick.git != null) {
       final path =
-          p.join(brick.git!.url, brick.git!.path).replaceAll(r'\', r'/');
+          p.join(brick.git!.url, brick.git!.path).replaceAll(r'\', '/');
       final name = p.basenameWithoutExtension(path);
       final hash = sha256.convert(utf8.encode(path));
       final key = brick.git!.ref != null
@@ -137,9 +134,8 @@ class BricksJson {
     )!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
-    final directoryIsNotEmpty = directoryExists
-        ? directory.listSync(recursive: true).isNotEmpty
-        : false;
+    final directoryIsNotEmpty =
+        directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
     void _ensureRemoteBrickExists(Directory directory, GitPath gitPath) {
       final brickYaml = File(
