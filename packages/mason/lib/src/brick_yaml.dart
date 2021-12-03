@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:meta/meta.dart';
 
 part 'brick_yaml.g.dart';
 
@@ -6,6 +7,7 @@ part 'brick_yaml.g.dart';
 /// Brick yaml file which contains metadata required to create
 /// a `MasonGenerator` from a brick template.
 /// {@endtemplate}
+@immutable
 @JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}

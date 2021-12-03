@@ -1,11 +1,10 @@
 import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:mason/mason.dart';
+import 'package:mason/src/mason_bundle.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
-
-import 'brick_yaml.dart';
-import 'mason_bundle.dart';
 
 final _binaryFileTypes = RegExp(
   r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf)$',

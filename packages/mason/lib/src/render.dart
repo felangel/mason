@@ -33,40 +33,40 @@ extension TemplateX on String {
     );
 
     /// camelCase
-    final camelCase = (LambdaContext ctx) => ctx.renderString().camelCase;
+    String camelCase(LambdaContext ctx) => ctx.renderString().camelCase;
 
     /// CONSTANT_CASE
-    final constantCase = (LambdaContext ctx) => ctx.renderString().constantCase;
+    String constantCase(LambdaContext ctx) => ctx.renderString().constantCase;
 
     /// dot.case
-    final dotCase = (LambdaContext ctx) => ctx.renderString().dotCase;
+    String dotCase(LambdaContext ctx) => ctx.renderString().dotCase;
 
     /// Header-Case
-    final headerCase = (LambdaContext ctx) => ctx.renderString().headerCase;
+    String headerCase(LambdaContext ctx) => ctx.renderString().headerCase;
 
     /// lower case
-    final lowerCase = (LambdaContext ctx) => ctx.renderString().toLowerCase();
+    String lowerCase(LambdaContext ctx) => ctx.renderString().toLowerCase();
 
     /// PascalCase
-    final pascalCase = (LambdaContext ctx) => ctx.renderString().pascalCase;
+    String pascalCase(LambdaContext ctx) => ctx.renderString().pascalCase;
 
     /// param-case
-    final paramCase = (LambdaContext ctx) => ctx.renderString().paramCase;
+    String paramCase(LambdaContext ctx) => ctx.renderString().paramCase;
 
     /// path/case
-    final pathCase = (LambdaContext ctx) => ctx.renderString().pathCase;
+    String pathCase(LambdaContext ctx) => ctx.renderString().pathCase;
 
     /// Sentence case
-    final sentenceCase = (LambdaContext ctx) => ctx.renderString().sentenceCase;
+    String sentenceCase(LambdaContext ctx) => ctx.renderString().sentenceCase;
 
     /// snake_case
-    final snakeCase = (LambdaContext ctx) => ctx.renderString().snakeCase;
+    String snakeCase(LambdaContext ctx) => ctx.renderString().snakeCase;
 
     /// Title Case
-    final titleCase = (LambdaContext ctx) => ctx.renderString().titleCase;
+    String titleCase(LambdaContext ctx) => ctx.renderString().titleCase;
 
     /// UPPER CASE
-    final upperCase = (LambdaContext ctx) => ctx.renderString().toUpperCase();
+    String upperCase(LambdaContext ctx) => ctx.renderString().toUpperCase();
 
     return template.renderString(<String, dynamic>{
       'camelCase': camelCase,
