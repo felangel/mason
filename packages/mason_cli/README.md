@@ -11,7 +11,7 @@
 
 ---
 
-Mason CLI allows developers to create and consume reusable templates called bricks.
+Mason CLI allows developers to create and consume reusable templates called bricks powered by the [mason](https://pub.dev/packages/mason) generator.
 
 ## Quick Start
 
