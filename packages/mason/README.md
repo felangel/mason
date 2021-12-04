@@ -11,9 +11,9 @@
 
 ---
 
-Mason contains the core generator and rendering engine which is used by [mason_cli](https://pub.dev/packages/mason_cli).
+Mason contains the core generator that powers [mason_cli](https://pub.dev/packages/mason_cli).
 
-`package:mason` allows developers to build custom CLIs and other tooling that leverages the mason generator and rendering engine.
+`package:mason` allows developers to build custom CLIs and other tooling that leverages the mason generator.
 
 ```dart
 import 'dart:io';
