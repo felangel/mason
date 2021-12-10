@@ -71,7 +71,7 @@ class AddCommand extends MasonCommand {
       } else {
         final gitPath = GitPath(
           location,
-          path: results['path'] as String?,
+          path: results['path'] as String? ?? '',
           ref: results['ref'] as String?,
         );
         brick = Brick(git: gitPath);

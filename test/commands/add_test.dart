@@ -104,6 +104,12 @@ void main() {
           expect(result, equals(ExitCode.usage.code));
           verify(() => logger.err('brick not found at url $url')).called(1);
         });
+        test('exits with code 0 when brick does exist', () async {
+          const url = 'https://github.com/RomanticEra/bricks';
+          final result =
+              await commandRunner.run(['add', '--source', 'git', url]);
+          expect(result, equals(ExitCode.success.code));
+        });
 
         test('adds brick successfully when brick exists', () async {
           const url = 'https://github.com/felangel/mason';
