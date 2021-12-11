@@ -106,8 +106,8 @@ void main() {
         });
         test('exits with code 0 when brick does exist', () async {
           const url = 'https://github.com/RomanticEra/bricks';
-          final result =
-              await commandRunner.run(['add', '--source', 'git', url]);
+          final result = await commandRunner
+              .run(['add', '--source', 'git', url, '--ref', 'melos']);
           expect(result, equals(ExitCode.success.code));
         });
 
