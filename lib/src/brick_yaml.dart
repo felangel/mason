@@ -13,6 +13,7 @@ class BrickYaml {
     this.name,
     this.description, {
     this.vars = const <String>[],
+    this.exclude = const <String>[],
     this.path,
   });
 
@@ -45,13 +46,18 @@ class BrickYaml {
   @JsonKey(defaultValue: <String>[])
   final List<String> vars;
 
+  /// List of paths to exclude when templating a brick.
+  @JsonKey(defaultValue: <String>[])
+  final List<String> exclude;
+
   /// Path to the [BrickYaml] file.
   final String? path;
 
   /// Returns a copy of the current [BrickYaml] with
   /// an overridden [path].
   BrickYaml copyWith({String? path}) {
-    return BrickYaml(name, description, vars: vars, path: path ?? this.path);
+    return BrickYaml(name, description,
+        vars: vars, exclude: exclude, path: path ?? this.path);
   }
 
   @override

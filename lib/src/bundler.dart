@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:glob/glob.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
 
@@ -19,9 +20,17 @@ MasonBundle createBundle(Directory brick) {
     brickYamlFile.readAsStringSync(),
     (m) => BrickYaml.fromJson(m!),
   );
-  final files = Directory(path.join(brick.path, BrickYaml.dir))
+  final brickDir = Directory(path.join(brick.path, BrickYaml.dir));
+  final files = brickDir
       .listSync(recursive: true)
       .whereType<File>()
+      .where(
+        (f) => !brickYaml.exclude.any(
+          (toExclude) => Glob(toExclude).matches(
+            path.relative(f.path, from: brickDir.path),
+          ),
+        ),
+      )
       .map(_bundleBrickFile)
       .toList();
   final hooksDirectory = Directory(path.join(brick.path, BrickYaml.hooks));
