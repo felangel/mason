@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart';
-import 'package:mason/src/bricks_json.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mocktail/mocktail.dart';
