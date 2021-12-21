@@ -3,6 +3,8 @@ import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
+import '../bundles/bundles.dart';
+
 void main() {
   group('MasonGenerator', () {
     group('.fromBrickYaml', () {
@@ -33,6 +35,41 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+      });
+    });
+
+    group('.fromBundle', () {
+      test('constructs an instance', () async {
+        const name = 'Dash';
+        final generator = await MasonGenerator.fromBundle(greetingBundle);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file = File(path.join(tempDir.path, 'GREETINGS.md'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+        expect(file.readAsStringSync(), equals('Hi Dash!'));
+      });
+    });
+
+    group('.fromGitPath', () {
+      test('constructs an instance', () async {
+        const name = 'Dash';
+        final generator = await MasonGenerator.fromGitPath(const GitPath(
+          'https://github.com/felangel/mason',
+          path: 'bricks/greeting',
+        ));
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file = File(path.join(tempDir.path, 'GREETINGS.md'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+        expect(file.readAsStringSync(), equals('Hi Dash!'));
       });
     });
   });
