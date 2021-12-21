@@ -57,10 +57,12 @@ void main() {
     group('.fromGitPath', () {
       test('constructs an instance', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromGitPath(const GitPath(
-          'https://github.com/felangel/mason',
-          path: 'bricks/greeting',
-        ));
+        final generator = await MasonGenerator.fromGitPath(
+          const GitPath(
+            'https://github.com/felangel/mason',
+            path: 'bricks/greeting',
+          ),
+        );
         final tempDir = Directory.systemTemp.createTempSync();
         final fileCount = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
