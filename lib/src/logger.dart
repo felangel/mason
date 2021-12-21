@@ -76,8 +76,8 @@ class Logger {
   void detail(String? message) => stdout.writeln(darkGray.wrap(message));
 
   /// Writes warning message to stdout.
-  void warn(String? message) {
-    stdout.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+  void warn(String? message, [String tag = 'WARN']) {
+    stdout.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
