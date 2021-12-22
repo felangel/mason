@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart';
+import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -268,6 +269,43 @@ FormatException: Unexpected character (at character 12)
 in todos.json''',
         ),
       ).called(1);
+    });
+
+    test('exits with code 64 when mason.yaml contains mismatch', () async {
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  app_icon1:
+    path: ../../../../../bricks/app_icon
+''',
+      );
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+      final getResult = await commandRunner.run(['get']);
+      expect(getResult, equals(ExitCode.success.code));
+      final makeResult = await commandRunner.run(['make', 'app_icon1']);
+      expect(makeResult, equals(ExitCode.usage.code));
+      final expectedErrorMessage = MasonYamlNameMismatch(
+        '''brick name "app_icon" doesn't match provided name "app_icon1" in mason.yaml.''',
+      ).message;
+      verify(() => logger.err(expectedErrorMessage)).called(1);
+    });
+
+    test('exits with code 73 when mason.yaml is malformed', () async {
+      final file = File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync(
+          '''
+bricks: {malformed}
+''',
+        );
+      final result = await commandRunner.run(['make', 'app_icon']);
+      expect(result, equals(ExitCode.cantCreate.code));
+      final expectedErrorMessage = MasonYamlParseException(
+        '''Malformed mason.yaml at ${path.canonicalize(file.path)}\nUnrecognized keys: [malformed]; supported keys: [bricks]''',
+      ).message;
+      verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 
     test('generates app_icon', () async {

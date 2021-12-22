@@ -179,6 +179,22 @@ bricks:
       ).called(1);
     });
 
+    test('throws MasonYamlParseException when mason.yaml is malformed',
+        () async {
+      final file = File(path.join(Directory.current.path, 'mason.yaml'))
+        ..writeAsStringSync(
+          '''
+{malformed}
+''',
+        );
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.usage.code));
+      final expectedErrorMessage = MasonYamlParseException(
+        '''Malformed mason.yaml at ${path.canonicalize(file.path)}\nUnrecognized keys: [malformed]; supported keys: [bricks]''',
+      ).message;
+      verify(() => logger.err(expectedErrorMessage)).called(1);
+    });
+
     test('throws ProcessException when remote does not exist', () async {
       File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
