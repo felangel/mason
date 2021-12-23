@@ -68,7 +68,6 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
         with:
           path: packages/mason_cli/coverage/lcov.info
-          exclude: "**/*.g.dart"
 
   pana:
     runs-on: ubuntu-latest
