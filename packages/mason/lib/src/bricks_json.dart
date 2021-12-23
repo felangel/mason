@@ -3,7 +3,9 @@ import 'dart:convert';
 import 'package:crypto/crypto.dart';
 import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
+import 'package:platform/platform.dart';
 import 'package:universal_io/io.dart';
 
 /// {@template bricks_json}
@@ -26,6 +28,10 @@ class BricksJson {
 
   /// Creates a [BricksJson] instance from a temporary directory.
   BricksJson.temp() : this(directory: Directory.systemTemp.createTempSync());
+
+  /// [Platform] which can be overridden for testing purposes.
+  @visibleForTesting
+  static Platform? testPlatform;
 
   /// Map of Brick to local path for bricks.
   late Map<String, String> _cache;
@@ -185,16 +191,17 @@ class BricksJson {
 
   /// Root mason cache directory
   static Directory get rootDir {
-    if (Platform.environment.containsKey('MASON_CACHE')) {
-      return Directory(Platform.environment['MASON_CACHE']!);
-    } else if (Platform.isWindows) {
-      final appData = Platform.environment['APPDATA']!;
+    final platform = testPlatform ?? const LocalPlatform();
+    if (platform.environment.containsKey('MASON_CACHE')) {
+      return Directory(platform.environment['MASON_CACHE']!);
+    } else if (platform.isWindows) {
+      final appData = platform.environment['APPDATA']!;
       final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
       if (appDataCacheDir.existsSync()) return Directory(appDataCacheDir.path);
-      final localAppData = Platform.environment['LOCALAPPDATA']!;
+      final localAppData = platform.environment['LOCALAPPDATA']!;
       return Directory(p.join(localAppData, 'Mason', 'Cache'));
     } else {
-      return Directory(p.join(Platform.environment['HOME']!, '.mason-cache'));
+      return Directory(p.join(platform.environment['HOME']!, '.mason-cache'));
     }
   }
 }

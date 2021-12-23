@@ -75,7 +75,7 @@ class Brick {
 @JsonSerializable()
 class GitPath {
   /// {@macro git_path}
-  const GitPath(this.url, {this.path, this.ref});
+  const GitPath(this.url, {String? path, this.ref}) : path = path ?? '';
 
   /// Converts [Map] to [MasonYaml]
   factory GitPath.fromJson(Map<dynamic, dynamic> json) =>
@@ -87,8 +87,8 @@ class GitPath {
   /// The local brick template path.
   final String url;
 
-  /// Path in repository. Defaults to /.
-  final String? path;
+  /// Path in repository. Defaults to `''` (empty string).
+  final String path;
 
   /// Anything that git can use to identify a commit.
   /// Can be a branch name, tag, or commit hash.
