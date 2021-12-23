@@ -14,6 +14,9 @@ final _binaryFileTypes = RegExp(
 /// Generates a [MasonBundle] from the provided [brick] directory.
 MasonBundle createBundle(Directory brick) {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
+  if (!brickYamlFile.existsSync()) {
+    throw BrickNotFoundException(brickYamlFile.path);
+  }
   final brickYaml = checkedYamlDecode(
     brickYamlFile.readAsStringSync(),
     (m) => BrickYaml.fromJson(m!),

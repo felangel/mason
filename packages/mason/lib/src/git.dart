@@ -33,12 +33,8 @@ void _throwIfProcessFailed(
       'Standard error': pr.stderr.toString().trim()
     }..removeWhere((k, v) => v.isEmpty);
 
-    String message;
-    if (values.isEmpty) {
-      message = 'Unknown error';
-    } else if (values.length == 1) {
-      message = values.values.single;
-    } else {
+    var message = 'Unknown error';
+    if (values.isNotEmpty) {
       message = values.entries.map((e) => '${e.key}\n${e.value}').join('\n');
     }
 
