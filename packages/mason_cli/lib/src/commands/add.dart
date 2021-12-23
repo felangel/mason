@@ -49,7 +49,7 @@ class AddCommand extends MasonCommand {
     final location = results.rest.first;
     final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
     if (bricksJson == null) {
-      throw UsageException('brick not found at path $location', usage);
+      throw UsageException('bricks.json not found', usage);
     }
 
     late final Brick brick;

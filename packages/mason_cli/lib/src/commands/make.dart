@@ -196,12 +196,7 @@ extension on String {
 
 extension on Logger {
   void logFiles(int fileCount) {
-    if (fileCount == 0) {
-      info(
-        '${lightGreen.wrap('✓')} '
-        'Generated $fileCount files',
-      );
-    } else if (fileCount == 1) {
+    if (fileCount == 1) {
       this
         ..info(
           '${lightGreen.wrap('✓')} '

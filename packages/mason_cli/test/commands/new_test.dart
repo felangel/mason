@@ -36,6 +36,21 @@ void main() {
       ).called(1);
     });
 
+    test(
+        'exits with code 64 when '
+        'exception occurs during generation', () async {
+      when(() => logger.progress(any())).thenReturn(([update]) {
+        if (update?.startsWith('Created new brick:') == true) {
+          throw const MasonException('oops');
+        }
+      });
+      File(path.join(Directory.current.path, 'mason.yaml'))
+          .writeAsStringSync('bricks:\n');
+      final result = await commandRunner.run(['new', 'hello world']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('oops')).called(1);
+    });
+
     test('creates a new brick when it does not exist', () async {
       File(path.join(Directory.current.path, 'mason.yaml'))
           .writeAsStringSync('bricks:\n');

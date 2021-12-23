@@ -238,5 +238,16 @@ void main() {
       ).called(1);
       verifyNever(() => logger.progress(any()));
     });
+
+    test('exists with code 64 when exception occurs during bundling', () async {
+      when(() => logger.progress(any())).thenReturn(([update]) {
+        if (update == null) throw const MasonException('oops');
+      });
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      final result = await commandRunner.run(['bundle', brickPath]);
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('oops')).called(1);
+    });
   });
 }

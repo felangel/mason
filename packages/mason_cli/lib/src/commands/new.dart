@@ -64,18 +64,18 @@ class NewCommand extends MasonCommand {
       ]);
       await bricksJson.add(newBrick);
       await bricksJson.flush();
+
+      done('Created new brick: $name');
+      logger
+        ..info(
+          '''${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):''',
+        )
+        ..flush(logger.detail);
+      return ExitCode.success.code;
     } catch (_) {
       done();
       rethrow;
     }
-
-    done('Created new brick: $name');
-    logger
-      ..info(
-        '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
-      )
-      ..flush(logger.detail);
-    return ExitCode.success.code;
   }
 }
 

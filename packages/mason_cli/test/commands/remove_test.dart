@@ -45,6 +45,40 @@ void main() {
         verify(() => logger.err('no brick named garbage was found')).called(1);
       });
 
+      test('exits with code 64 when exception occurs during removal', () async {
+        when(() => logger.progress(any())).thenReturn(([update]) {
+          if (update?.startsWith('Removed') == true) {
+            throw const MasonException('oops');
+          }
+        });
+        const url = 'https://github.com/felangel/mason';
+        final addResult = await commandRunner.run(
+          ['add', '--source', 'git', url, '--path', 'bricks/widget'],
+        );
+        expect(addResult, equals(ExitCode.success.code));
+
+        final masonYaml = File(p.join(Directory.current.path, 'mason.yaml'));
+        expect(masonYaml.readAsStringSync(), contains('widget:'));
+
+        const key =
+            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
+        final value = p.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+        );
+        final bricksJson = File(
+          p.join(Directory.current.path, '.mason', 'bricks.json'),
+        );
+        final bricksJsonContent =
+            bricksJson.readAsStringSync().replaceAll(r'\\', r'\');
+        expect(bricksJsonContent, contains('"$key":"$value"'));
+
+        final removeResult = await commandRunner.run(['remove', 'widget']);
+        expect(removeResult, equals(ExitCode.usage.code));
+        verify(() => logger.err('oops')).called(1);
+      });
+
       test('removes successfully when brick exists', () async {
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
