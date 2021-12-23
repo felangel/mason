@@ -285,8 +285,11 @@ in todos.json''',
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err(
-          '''
-FileSystemException: Cannot open file, path = 'todos.json' (OS Error: No such file or directory, errno = 2)''',
+          any(
+            that: contains(
+              "FileSystemException: Cannot open file, path = 'todos.json",
+            ),
+          ),
         ),
       ).called(1);
     });
