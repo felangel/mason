@@ -1,7 +1,7 @@
 # mason_logger
 
 [![build](https://github.com/felangel/mason/workflows/mason_logger/badge.svg)](https://github.com/felangel/mason/actions)
-[![coverage](https://raw.githubusercontent.com/felangel/mason/feat/mason-logger/packages/mason_logger/coverage_badge.svg)](https://github.com/felangel/mason/actions)
+[![coverage](https://raw.githubusercontent.com/felangel/mason/refactor/mason_cli/packages/mason_logger/coverage_badge.svg)](https://github.com/felangel/mason/actions)
 [![Pub](https://img.shields.io/pub/v/mason_logger.svg)](https://pub.dev/packages/mason)
 [![style: very good analysis](https://img.shields.io/badge/style-very_good_analysis-B22C89.svg)](https://pub.dev/packages/very_good_analysis)
 [![License: MIT](https://img.shields.io/badge/license-MIT-purple.svg)](https://opensource.org/licenses/MIT)
