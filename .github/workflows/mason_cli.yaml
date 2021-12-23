@@ -11,7 +11,7 @@ on:
   pull_request:
     branches:
       - master
-      -  refactor/mason_cli
+      - refactor/mason_cli
     paths:
       - .github/workflows/mason_cli.yaml
       - packages/mason_cli/**
@@ -19,7 +19,7 @@ on:
 jobs:
   setup:
     runs-on: ubuntu-latest
-    
+
     defaults:
       run:
         working-directory: packages/mason_cli
@@ -63,6 +63,11 @@ jobs:
 
       - name: Run Tests
         run: dart test -j 1 -x pull-request-only --coverage=coverage && pub run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+
+      - name: Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
+        with:
+          path: packages/mason_cli/coverage/lcov.info
 
   pana:
     runs-on: ubuntu-latest

@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart';
+import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -270,7 +271,78 @@ in todos.json''',
       ).called(1);
     });
 
-    test('generates app_icon', () async {
+    test('exits with code 64 when config does not exist', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'todos'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'todos',
+        '--config-path',
+        'todos.json',
+      ]);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err(
+          any(
+            that: contains(
+              "FileSystemException: Cannot open file, path = 'todos.json",
+            ),
+          ),
+        ),
+      ).called(1);
+    });
+
+    test('exits with code 64 when mason.yaml contains mismatch', () async {
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  app_icon1:
+    path: ../../../../../bricks/app_icon
+''',
+      );
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+      final getResult = await commandRunner.run(['get']);
+      expect(getResult, equals(ExitCode.success.code));
+      final makeResult = await commandRunner.run(['make', 'app_icon1']);
+      expect(makeResult, equals(ExitCode.usage.code));
+      final expectedErrorMessage = MasonYamlNameMismatch(
+        '''brick name "app_icon" doesn't match provided name "app_icon1" in mason.yaml.''',
+      ).message;
+      verify(() => logger.err(expectedErrorMessage)).called(1);
+    });
+
+    test(
+        'exits with code 73 when exception occurs '
+        'decoding prompt response', () async {
+      final result = await commandRunner.run(['make', 'app_icon']);
+      expect(result, equals(ExitCode.cantCreate.code));
+      verify(
+        () => logger.err("type 'Null' is not a subtype of type 'String'"),
+      ).called(1);
+    });
+
+    test('exits with code 73 when exception occurs while generating', () async {
+      const url =
+          'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
+      when(() => logger.prompt('url: ')).thenReturn(url);
+      final testDir = Directory(
+        path.join(Directory.current.path, 'app_icon_conflict'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      File(path.join(testDir.path, 'app_icon.jpg')).writeAsStringSync('');
+      final result = await commandRunner.run(['make', 'app_icon']);
+      expect(result, equals(ExitCode.cantCreate.code));
+      verify(
+        () => logger.err("type 'Null' is not a subtype of type 'String'"),
+      ).called(1);
+    });
+
+    test('generates app_icon (from args)', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'app_icon'),
       )..createSync(recursive: true);
@@ -281,6 +353,26 @@ in todos.json''',
         '--url',
         'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg'
       ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'app_icon'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'app_icon'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates app_icon (from prompt)', () async {
+      const url =
+          'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
+      when(() => logger.prompt(any())).thenReturn(url);
+      final testDir = Directory(
+        path.join(Directory.current.path, 'app_icon'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['make', 'app_icon']);
       expect(result, equals(ExitCode.success.code));
 
       final actual = Directory(

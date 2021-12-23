@@ -166,12 +166,7 @@ abstract class MasonCommand extends Command<int> {
   Logger? _logger;
 
   /// Return the current working directory.
-  Directory get cwd => _cwd ??= Directory.current;
-
-  /// An override for the directory to generate into; public for testing.
-  set cwd(Directory value) => _cwd = value;
-
-  Directory? _cwd;
+  Directory get cwd => Directory.current;
 
   /// The path to the cached brick directory if it exists.
   /// Returns `null` if the brick is not cached.
@@ -202,7 +197,7 @@ abstract class MasonCommand extends Command<int> {
         ).copyWith(path: filePath);
         if (brickYaml.name != entry.key) {
           throw MasonYamlNameMismatch(
-            'brick name "${brickYaml.name}": '
+            'brick name "${brickYaml.name}" '
             'doesn\'t match provided name "${entry.key}" in ${MasonYaml.file}.',
           );
         }

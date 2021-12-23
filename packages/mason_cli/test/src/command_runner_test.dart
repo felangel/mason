@@ -8,7 +8,7 @@ import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
-import 'helpers/helpers.dart';
+import '../helpers/helpers.dart';
 
 class MockLogger extends Mock implements Logger {}
 

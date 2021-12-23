@@ -30,6 +30,30 @@ void main() {
       Directory.current = cwd;
     });
 
+    test('exits with code 64 when bricks.json does not exist', () async {
+      Directory.current = Directory.systemTemp.createTempSync();
+      final result = await commandRunner.run(
+        ['add', '--source', 'path', '.'],
+      );
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('bricks.json not found')).called(1);
+    });
+
+    test('exits with code 64 when exception occurs', () async {
+      when(() => logger.progress(any())).thenReturn(([update]) {
+        if (update?.startsWith('Added') == true) {
+          throw const MasonException('oops');
+        }
+      });
+      final brickPath =
+          path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      final result = await commandRunner.run(
+        ['add', '--source', 'path', brickPath],
+      );
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('oops')).called(1);
+    });
+
     group('local', () {
       test('exits with code 64 when brick is not provided', () async {
         final result = await commandRunner.run(
