@@ -8,7 +8,7 @@ import '../bundles/bundles.dart';
 void main() {
   group('MasonGenerator', () {
     group('.fromBrickYaml', () {
-      test('constructs an instance', () async {
+      test('constructs an instance (hello_world)', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
           'hello_world',
@@ -35,6 +35,33 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+      });
+
+      test('constructs an instance (todos)', () async {
+        final brickYaml = BrickYaml(
+          'todos',
+          'A Todos Template',
+          path: path.join('..', '..', 'bricks', 'todos', 'brick.yaml'),
+          vars: const ['todos'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'todos': [
+              {'todo': 'Eat', 'done': true},
+              {'todo': 'Code', 'done': true},
+              {'todo': 'Sleep', 'done': false}
+            ],
+            'developers': [
+              {'name': 'Alex'},
+              {'name': 'Sam'},
+              {'name': 'Jen'}
+            ]
+          },
+        );
+        expect(fileCount, equals(13));
       });
 
       test('constructs an instance with hooks', () async {
@@ -72,6 +99,54 @@ void main() {
         final postGenFile = File(path.join(tempDir.path, '.post_gen.txt'));
         expect(postGenFile.existsSync(), isTrue);
         expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
+      });
+
+      test('constructs an instance multiple times (hello_world)', () async {
+        const name = 'Dash';
+        final brickYaml = BrickYaml(
+          'hello_world',
+          'A Simple Hello World Template',
+          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
+          vars: const ['name'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final fileCount1 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file1 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount1, equals(1));
+        expect(file1.existsSync(), isTrue);
+        expect(
+          file1.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+
+        final fileCount2 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file2 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount2, equals(1));
+        expect(file2.existsSync(), isTrue);
+        expect(
+          file2.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
       });
     });
 
@@ -155,7 +230,7 @@ void main() {
     });
 
     group('generate', () {
-      test('generates app_icon from dynamic url', () async {
+      test('generates app_icon from remote url', () async {
         const url =
             'https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png';
         final brickYaml = BrickYaml(
@@ -173,6 +248,55 @@ void main() {
         final file = File(path.join(tempDir.path, path.basename(url)));
         expect(fileCount, equals(1));
         expect(file.existsSync(), isTrue);
+      });
+
+      test('generates app_icon from local url', () async {
+        final url = path.join('..', '..', 'assets', 'mason_logo.png');
+        final brickYaml = BrickYaml(
+          'app_icon',
+          'Create an app_icon file from a URL',
+          path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
+          vars: const ['url'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'url': url},
+        );
+        final file = File(path.join(tempDir.path, path.basename(url)));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+      });
+    });
+
+    group('compareTo', () {
+      test('returns 0 when generators are the same type', () async {
+        final generatorA = await MasonGenerator.fromBundle(greetingBundle);
+        final generatorB = await MasonGenerator.fromBundle(greetingBundle);
+        expect(generatorA.compareTo(generatorB), equals(0));
+      });
+
+      test('returns -1 when generators are different types', () async {
+        final generatorA = await MasonGenerator.fromBundle(greetingBundle);
+        final generatorB = await MasonGenerator.fromBundle(hooksBundle);
+        expect(generatorA.compareTo(generatorB), equals(-1));
+      });
+
+      test('returns 1 when generators are different types', () async {
+        final generatorA = await MasonGenerator.fromBundle(greetingBundle);
+        final generatorB = await MasonGenerator.fromBundle(hooksBundle);
+        expect(generatorB.compareTo(generatorA), equals(1));
+      });
+    });
+
+    group('toString', () {
+      test('returns correct string', () async {
+        final generator = await MasonGenerator.fromBundle(greetingBundle);
+        expect(
+          generator.toString(),
+          equals('[${generator.id}: ${generator.description}]'),
+        );
       });
     });
   });
