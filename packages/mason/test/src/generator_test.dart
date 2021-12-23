@@ -170,9 +170,9 @@ void main() {
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'url': url},
         );
-        // final file = File(path.join(tempDir.path, path.basename(url)));
+        final file = File(path.join(tempDir.path, path.basename(url)));
         expect(fileCount, equals(1));
-        // expect(file.existsSync(), isTrue);
+        expect(file.existsSync(), isTrue);
       });
     });
   });

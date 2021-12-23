@@ -261,7 +261,10 @@ abstract class Generator implements Comparable<Generator> {
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
         if (resultFile.path.isEmpty) return;
-        await target.createFile(resultFile.path, resultFile.content);
+        await target.createFile(
+          p.basename(resultFile.path),
+          resultFile.content,
+        );
         fileCount++;
       } else {
         final resultFiles = file.runSubstitution(
