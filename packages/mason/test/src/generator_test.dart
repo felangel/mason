@@ -1,6 +1,7 @@
 // ignore_for_file: missing_whitespace_between_adjacent_strings
 
 import 'package:mason/mason.dart';
+import 'package:mason/src/generator.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -13,6 +14,30 @@ class MockLogger extends Mock implements Logger {}
 void main() {
   group('MasonGenerator', () {
     group('.fromBrickYaml', () {
+      test('handles malformed brick', () async {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final brickYaml = BrickYaml(
+          'malformed',
+          'A Malformed Template',
+          path: path.join(tempDir.path, 'malformed', 'brick.yaml'),
+        );
+        File(path.join(tempDir.path, 'malformed', 'brick.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('name: malformed\ndescription: example');
+        final brokenFile = File(
+          path.join(tempDir.path, 'malformed', '__brick__', 'locked.txt'),
+        )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('secret');
+        await Process.run('chmod', ['000', brokenFile.path]);
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{},
+        );
+        expect(fileCount, equals(0));
+      });
+
       test('constructs an instance (hello_world)', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
@@ -218,9 +243,9 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
-
+        final logger = MockLogger();
         final fileCount1 = await generator.generate(
-          DirectoryGeneratorTarget(tempDir),
+          DirectoryGeneratorTarget(tempDir, logger),
           vars: <String, dynamic>{'name': name},
         );
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
@@ -240,7 +265,7 @@ void main() {
         final fileCount2 = await generator.generate(
           DirectoryGeneratorTarget(
             tempDir,
-            null,
+            logger,
             FileConflictResolution.append,
           ),
           vars: <String, dynamic>{'name': otherName},
@@ -379,6 +404,18 @@ void main() {
         expect(postGenFile.existsSync(), isTrue);
         expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
       });
+
+      test('constructs an instance (photos)', () async {
+        final generator = await MasonGenerator.fromBundle(photosBundle);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{},
+        );
+        final file = File(path.join(tempDir.path, 'image.png'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+      });
     });
 
     group('.fromGitPath', () {
@@ -441,6 +478,23 @@ void main() {
         expect(fileCount, equals(1));
         expect(file.existsSync(), isTrue);
       });
+
+      test('generates photos', () async {
+        final brickYaml = BrickYaml(
+          'photos',
+          'A Photos Example Template',
+          path: path.join('..', '..', 'bricks', 'photos', 'brick.yaml'),
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{},
+        );
+        final file = File(path.join(tempDir.path, 'image.png'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+      });
     });
 
     group('compareTo', () {
@@ -470,6 +524,37 @@ void main() {
           generator.toString(),
           equals('[${generator.id}: ${generator.description}]'),
         );
+      });
+    });
+
+    group('TemplateFile', () {
+      group('runSubstitution', () {
+        test('handles malformed content', () {
+          final tempDir = Directory.systemTemp.createTempSync();
+          final bytes = [0x80, 0x00];
+          final template = TemplateFile.fromBytes(
+            path.join(tempDir.path, 'malformed.txt'),
+            bytes,
+          );
+          final set = template.runSubstitution(<String, dynamic>{}, {});
+          expect(set.length, equals(1));
+          expect(set.first.content, equals(bytes));
+        });
+      });
+    });
+
+    group('ScriptFile', () {
+      group('runSubstitution', () {
+        test('handles malformed content', () {
+          final tempDir = Directory.systemTemp.createTempSync();
+          final bytes = [0x80, 0x00];
+          final template = ScriptFile.fromBytes(
+            path.join(tempDir.path, 'malformed.txt'),
+            bytes,
+          );
+          final file = template.runSubstitution(<String, dynamic>{});
+          expect(file.content, equals(bytes));
+        });
       });
     });
   });
