@@ -1,9 +1,14 @@
+// ignore_for_file: missing_whitespace_between_adjacent_strings
+
 import 'package:mason/mason.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
 import '../bundles/bundles.dart';
+
+class MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
@@ -143,6 +148,174 @@ void main() {
             '# 🧱 $name\n'
             '\n'
             'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+      });
+
+      test(
+          'constructs an instance multiple '
+          'times w/skip (hello_world)', () async {
+        const name = 'Dash';
+        const otherName = 'Other Dash';
+        final brickYaml = BrickYaml(
+          'hello_world',
+          'A Simple Hello World Template',
+          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
+          vars: const ['name'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final fileCount1 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file1 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount1, equals(1));
+        expect(file1.existsSync(), isTrue);
+        expect(
+          file1.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+
+        final fileCount2 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir, null, FileConflictResolution.skip),
+          vars: <String, dynamic>{'name': otherName},
+        );
+        final file2 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount2, equals(1));
+        expect(file2.existsSync(), isTrue);
+        expect(
+          file2.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+      });
+
+      test(
+          'constructs an instance multiple '
+          'times w/append (hello_world)', () async {
+        const name = 'Dash';
+        const otherName = 'Other Dash';
+        final brickYaml = BrickYaml(
+          'hello_world',
+          'A Simple Hello World Template',
+          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
+          vars: const ['name'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final fileCount1 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file1 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount1, equals(1));
+        expect(file1.existsSync(), isTrue);
+        expect(
+          file1.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+
+        final fileCount2 = await generator.generate(
+          DirectoryGeneratorTarget(
+            tempDir,
+            null,
+            FileConflictResolution.append,
+          ),
+          vars: <String, dynamic>{'name': otherName},
+        );
+        final file2 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount2, equals(1));
+        expect(file2.existsSync(), isTrue);
+        expect(
+          file2.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_'
+            '# 🧱 $otherName\n'
+            '\n'
+            'Hello $otherName!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+      });
+
+      test(
+          'constructs an instance multiple '
+          'times w/prompt - Y (hello_world)', () async {
+        const name = 'Dash';
+        const otherName = 'Other Dash';
+        final brickYaml = BrickYaml(
+          'hello_world',
+          'A Simple Hello World Template',
+          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
+          vars: const ['name'],
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final fileCount1 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file1 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount1, equals(1));
+        expect(file1.existsSync(), isTrue);
+        expect(
+          file1.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+
+        final logger = MockLogger();
+        when(() => logger.prompt(any())).thenReturn('Y');
+        final fileCount2 = await generator.generate(
+          DirectoryGeneratorTarget(
+            tempDir,
+            logger,
+            FileConflictResolution.prompt,
+          ),
+          vars: <String, dynamic>{'name': otherName},
+        );
+        final file2 = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount2, equals(1));
+        expect(file2.existsSync(), isTrue);
+        expect(
+          file2.readAsStringSync(),
+          equals(
+            '# 🧱 $otherName\n'
+            '\n'
+            'Hello $otherName!\n'
             '\n'
             '_made with 💖 by mason_',
           ),
