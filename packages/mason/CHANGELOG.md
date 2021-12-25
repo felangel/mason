@@ -2,7 +2,7 @@
 
 - feat: decompose `mason` into `mason`, `mason_cli` and `mason_logger`
   - `package:mason` - core generator
-  - `package:mason_cli` - command line interace
+  - `package:mason_cli` - command line interface
   - `package:mason_logger` - reusable logger
 - fix: file resolution with custom path generates in the correct location
 
