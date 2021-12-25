@@ -8,7 +8,7 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  mason: ^0.0.1-dev.57
+  mason: ^0.1.0-dev.1
   pub_updater: ^0.2.1
   universal_io: ^2.0.4
 
@@ -19,10 +19,6 @@ dev_dependencies:
   coverage: ^1.0.2
   mocktail: ^0.2.0
   very_good_analysis: ^2.4.0
-
-dependency_overrides:
-  mason:
-    path: ../mason
 
 executables:
   mason:
