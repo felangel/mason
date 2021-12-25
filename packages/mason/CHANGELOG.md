@@ -1,6 +1,10 @@
 # 0.1.0-dev.1
 
 - feat: decompose `mason` into `mason`, `mason_cli` and `mason_logger`
+  - `package:mason` - core generator
+  - `package:mason_cli` - command line interace
+  - `package:mason_logger` - reusable logger
+- fix: file resolution with custom path generates in the correct location
 
 # 0.0.1-dev.57
 
