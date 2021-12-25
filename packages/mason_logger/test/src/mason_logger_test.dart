@@ -121,6 +121,21 @@ void main() {
           stdout: () => stdout,
         );
       });
+
+      test('writes line to stdout with custom tag', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().warn(message, tag: '🚨');
+            verify(
+              () {
+                stdout.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('.success', () {

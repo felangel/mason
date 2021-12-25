@@ -1,3 +1,7 @@
+# 0.1.0-dev.3
+
+- feat: add `tag` to `warn` call
+
 # 0.1.0-dev.2
 
 - test: 100% test coverage
