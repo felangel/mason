@@ -46,7 +46,6 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
         with:
           path: packages/mason/coverage/lcov.info
-          exclude: "**/*.g.dart"
 
   pana:
     defaults:
