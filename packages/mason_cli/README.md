@@ -64,7 +64,7 @@ mason make hello
 
 ```sh
 # 🎯 Activate from https://pub.dev
-dart pub global activate mason
+dart pub global activate mason_cli
 
 # 🍺 Or install from https://brew.sh
 brew tap felangel/mason
