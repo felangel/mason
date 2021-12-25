@@ -33,7 +33,7 @@ mason make hello
 
 ## Documentation
 
-Visit [https://github.com/felangel/mason/packages/mason_cli](https://github.com/felangel/mason/packages/mason_cli) to view the full documentation.
+View the full documentation [here](https://github.com/felangel/mason/tree/master/packages/mason_cli).
 
 ## Video Tutorial
 
