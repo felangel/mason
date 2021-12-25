@@ -12,9 +12,9 @@
 
 ---
 
-Mason contains the core generator that powers [mason_cli](https://pub.dev/packages/mason_cli).
+A Dart template generator which helps teams generate files quickly and consistently.
 
-`package:mason` allows developers to build custom CLIs and other tooling that leverages the mason generator.
+`package:mason` contains the core generator that powers [package:mason_cli](https://pub.dev/packages/mason_cli) and can be used to build custom code generation tools.
 
 ```dart
 import 'dart:io';
