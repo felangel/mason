@@ -8,7 +8,6 @@ environment:
   sdk: ">=2.12.0 <3.0.0"
 
 dependencies:
-  args: ^2.1.0
   checked_yaml: ^2.0.1
   collection: ^1.15.0
   crypto: ^3.0.1
@@ -18,7 +17,6 @@ dependencies:
   meta: ^1.7.0
   mustache_template: ^2.0.0
   path: ^1.8.0
-  platform: ^3.1.0
   recase: ^4.0.0
   universal_io: ^2.0.4
   yaml: ^3.1.0
@@ -27,8 +25,7 @@ dev_dependencies:
   build_runner: ^2.0.0
   build_verify: ^2.0.0
   build_version: ^2.0.0
-  coverage: ^1.0.2
   json_serializable: ^4.1.0
-  mocktail: ^0.1.1
+  mocktail: ^0.2.0
   test: ^1.17.0
   very_good_analysis: ^2.4.0

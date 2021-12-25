@@ -46,7 +46,6 @@ jobs:
         uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
         with:
           path: packages/mason/coverage/lcov.info
-          exclude: "**/*.g.dart"
 
   pana:
     defaults:
@@ -65,4 +64,4 @@ jobs:
           dart pub global activate pana
 
       - name: Verify Pub Score
-        run: ../../tool/verify_pub_score.sh 110
+        run: ../../tool/verify_pub_score.sh

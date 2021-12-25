@@ -1,13 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:mason/mason.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
-import 'package:platform/platform.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
-
-class MockPlatform extends Mock implements Platform {}
 
 void main() {
   group('BricksJson', () {
@@ -224,18 +220,9 @@ void main() {
     });
 
     group('rootDir', () {
-      late Platform platform;
-
-      setUp(() {
-        platform = MockPlatform();
-      });
-
       test('uses MASON_CACHE environment when available', () {
         final directory = Directory.systemTemp.createTempSync();
-        BricksJson.testPlatform = platform;
-        when(() => platform.environment).thenReturn(
-          {'MASON_CACHE': directory.path},
-        );
+        BricksJson.testEnvironment = {'MASON_CACHE': directory.path};
         expect(BricksJson.rootDir.path, equals(directory.path));
       });
 
@@ -244,11 +231,8 @@ void main() {
         final appDataCacheDirectory = Directory(
           path.join(directory.path, 'Mason', 'Cache'),
         )..createSync(recursive: true);
-        BricksJson.testPlatform = platform;
-        when(() => platform.isWindows).thenReturn(true);
-        when(() => platform.environment).thenReturn(
-          {'APPDATA': directory.path},
-        );
+        BricksJson.testEnvironment = {'APPDATA': directory.path};
+        BricksJson.testIsWindows = true;
         expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));
       });
 
@@ -259,11 +243,11 @@ void main() {
         final appDataCacheDirectory = Directory(
           path.join(directory.path, 'Mason', 'Cache'),
         )..createSync(recursive: true);
-        BricksJson.testPlatform = platform;
-        when(() => platform.isWindows).thenReturn(true);
-        when(() => platform.environment).thenReturn(
-          {'APPDATA': '', 'LOCALAPPDATA': directory.path},
-        );
+        BricksJson.testEnvironment = {
+          'APPDATA': '',
+          'LOCALAPPDATA': directory.path
+        };
+        BricksJson.testIsWindows = true;
         expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));
       });
 
@@ -272,9 +256,8 @@ void main() {
         final appDataCacheDirectory = Directory(
           path.join(directory.path, '.mason-cache'),
         )..createSync(recursive: true);
-        BricksJson.testPlatform = platform;
-        when(() => platform.isWindows).thenReturn(false);
-        when(() => platform.environment).thenReturn({'HOME': directory.path});
+        BricksJson.testEnvironment = {'HOME': directory.path};
+        BricksJson.testIsWindows = false;
         expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));
       });
     });
