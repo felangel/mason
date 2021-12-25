@@ -5,7 +5,6 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:platform/platform.dart';
 import 'package:universal_io/io.dart';
 
 /// {@template bricks_json}
@@ -29,9 +28,14 @@ class BricksJson {
   /// Creates a [BricksJson] instance from a temporary directory.
   BricksJson.temp() : this(directory: Directory.systemTemp.createTempSync());
 
-  /// [Platform] which can be overridden for testing purposes.
+  /// Environment map which can be overridden for testing purposes.
   @visibleForTesting
-  static Platform? testPlatform;
+  static Map<String, String>? testEnvironment;
+
+  /// bool which can be overridden for test purposes
+  /// to indicate the platform is windows.
+  @visibleForTesting
+  static bool? testIsWindows;
 
   /// Map of Brick to local path for bricks.
   late Map<String, String> _cache;
@@ -191,17 +195,18 @@ class BricksJson {
 
   /// Root mason cache directory
   static Directory get rootDir {
-    final platform = testPlatform ?? const LocalPlatform();
-    if (platform.environment.containsKey('MASON_CACHE')) {
-      return Directory(platform.environment['MASON_CACHE']!);
-    } else if (platform.isWindows) {
-      final appData = platform.environment['APPDATA']!;
+    final environment = testEnvironment ?? Platform.environment;
+    final isWindows = testIsWindows ?? Platform.isWindows;
+    if (environment.containsKey('MASON_CACHE')) {
+      return Directory(environment['MASON_CACHE']!);
+    } else if (isWindows) {
+      final appData = environment['APPDATA']!;
       final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
       if (appDataCacheDir.existsSync()) return Directory(appDataCacheDir.path);
-      final localAppData = platform.environment['LOCALAPPDATA']!;
+      final localAppData = environment['LOCALAPPDATA']!;
       return Directory(p.join(localAppData, 'Mason', 'Cache'));
     } else {
-      return Directory(p.join(platform.environment['HOME']!, '.mason-cache'));
+      return Directory(p.join(environment['HOME']!, '.mason-cache'));
     }
   }
 }
