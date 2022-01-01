@@ -99,6 +99,7 @@ class _BrickGenerator extends MasonGenerator {
   static String _content(String name, String description) => '''
 name: $name
 description: $description
+version: 1.0.0
 vars:
   - name
 ''';
