@@ -36,7 +36,7 @@ void main() {
     });
 
     group('partials', () {
-      test('resolve outputs correct string', () {
+      test('resolve outputs correct template', () {
         const name = 'header';
         const content = 'Hello world!';
         final source = utf8.encode(content);
