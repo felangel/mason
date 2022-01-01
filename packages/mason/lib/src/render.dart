@@ -3,10 +3,24 @@ import 'dart:convert';
 import 'package:mustache_template/mustache_template.dart';
 import 'package:recase/recase.dart';
 
-final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
 final _newlineInRegExp = RegExp(r'(\\\r\n|\\\r|\\\n)');
-final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
+final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
+final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
+
+String _sanitizeInput(String input) {
+  return input.replaceAllMapped(
+    RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
+    (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
+  );
+}
+
+String _sanitizeOutput(String output) {
+  return output.replaceAllMapped(
+    RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+    (match) => match.group(0)?.substring(1) ?? match.input,
+  );
+}
 
 /// [Map] of all the built-in lambda functions.
 final _builtInLambdas = <String, LambdaFunction>{
@@ -98,18 +112,4 @@ extension ResolvePartial on Map<String, List<int>> {
     final sanitized = _sanitizeInput(decoded);
     return Template(sanitized, name: name, lenient: true);
   }
-}
-
-String _sanitizeInput(String input) {
-  return input.replaceAllMapped(
-    RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
-    (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
-  );
-}
-
-String _sanitizeOutput(String output) {
-  return output.replaceAllMapped(
-    RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
-    (match) => match.group(0)?.substring(1) ?? match.input,
-  );
 }
