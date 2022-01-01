@@ -16,10 +16,6 @@ final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{(.*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
-final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
-final _newlineInRegExp = RegExp(r'(\\\r\n|\\\r|\\\n)');
-final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
-final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
 final _whiteSpace = RegExp(r'\s+');
 final _lambdas = RegExp(
   '''(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)''',
@@ -462,25 +458,10 @@ class ScriptFile {
   }
 
   List<int> _createContent(Map<String, dynamic> vars) {
-    String sanitizeInput(String input) {
-      return input.replaceAllMapped(
-        RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
-        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
-      );
-    }
-
-    String sanitizeOutput(String output) {
-      return output.replaceAllMapped(
-        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
-        (match) => match.group(0)?.substring(1) ?? match.input,
-      );
-    }
-
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final sanitized = sanitizeInput(decoded);
-      final rendered = sanitizeOutput(sanitized.render(vars));
+      final rendered = decoded.render(vars);
       return utf8.encode(rendered);
     } on Exception {
       return content;
@@ -592,28 +573,10 @@ class TemplateFile {
     Map<String, dynamic> vars,
     Map<String, List<int>> partials,
   ) {
-    String sanitizeInput(String input) {
-      return input.replaceAllMapped(
-        RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
-        (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
-      );
-    }
-
-    String sanitizeOutput(String output) {
-      return output.replaceAllMapped(
-        RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
-        (match) => match.group(0)?.substring(1) ?? match.input,
-      );
-    }
-
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = sanitizeOutput(
-        sanitizeInput(decoded).render(vars, (name) {
-          return partialResolver(name, partials, sanitizeInput);
-        }),
-      );
+      final rendered = decoded.render(vars, partials);
       return utf8.encode(rendered);
     } on Exception {
       return content;
