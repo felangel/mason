@@ -11,9 +11,10 @@ part 'brick_yaml.g.dart';
 @JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}
-  const BrickYaml(
-    this.name,
-    this.description, {
+  const BrickYaml({
+    required this.name,
+    required this.description,
+    required this.version,
     this.vars = const <String>[],
     this.path,
   });
@@ -43,8 +44,10 @@ class BrickYaml {
   /// Description of the brick.
   final String description;
 
+  /// Version of the brick (semver).
+  final String version;
+
   /// List of variables used when templating a brick.
-  @JsonKey(defaultValue: <String>[])
   final List<String> vars;
 
   /// Path to the [BrickYaml] file.
@@ -53,7 +56,13 @@ class BrickYaml {
   /// Returns a copy of the current [BrickYaml] with
   /// an overridden [path].
   BrickYaml copyWith({String? path}) {
-    return BrickYaml(name, description, vars: vars, path: path ?? this.path);
+    return BrickYaml(
+      name: name,
+      description: description,
+      version: version,
+      vars: vars,
+      path: path ?? this.path,
+    );
   }
 
   @override
