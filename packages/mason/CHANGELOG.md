@@ -1,3 +1,8 @@
+# 0.1.0-dev.2
+
+- feat: export `render` APIs
+  - `RenderTemplate` extension on `String`
+
 # 0.1.0-dev.1
 
 - feat: decompose `mason` into `mason`, `mason_cli` and `mason_logger`
