@@ -17,8 +17,9 @@ void main() {
       test('handles malformed brick', () async {
         final tempDir = Directory.systemTemp.createTempSync();
         final brickYaml = BrickYaml(
-          'malformed',
-          'A Malformed Template',
+          name: 'malformed',
+          description: 'A Malformed Template',
+          version: '1.0.0',
           path: path.join(tempDir.path, 'malformed', 'brick.yaml'),
         );
         File(path.join(tempDir.path, 'malformed', 'brick.yaml'))
@@ -41,8 +42,9 @@ void main() {
       test('constructs an instance (hello_world)', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
-          'hello_world',
-          'A Simple Hello World Template',
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -69,8 +71,9 @@ void main() {
 
       test('constructs an instance (todos)', () async {
         final brickYaml = BrickYaml(
-          'todos',
-          'A Todos Template',
+          name: 'todos',
+          description: 'A Todos Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'todos', 'brick.yaml'),
           vars: const ['todos'],
         );
@@ -97,8 +100,9 @@ void main() {
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
-          'hooks',
-          'A Hooks Example Template',
+          name: 'hooks',
+          description: 'A Hooks Example Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hooks', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -134,8 +138,9 @@ void main() {
       test('constructs an instance multiple times (hello_world)', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
-          'hello_world',
-          'A Simple Hello World Template',
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -185,8 +190,9 @@ void main() {
         const name = 'Dash';
         const otherName = 'Other Dash';
         final brickYaml = BrickYaml(
-          'hello_world',
-          'A Simple Hello World Template',
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -236,8 +242,9 @@ void main() {
         const name = 'Dash';
         const otherName = 'Other Dash';
         final brickYaml = BrickYaml(
-          'hello_world',
-          'A Simple Hello World Template',
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -296,8 +303,9 @@ void main() {
         const name = 'Dash';
         const otherName = 'Other Dash';
         final brickYaml = BrickYaml(
-          'hello_world',
-          'A Simple Hello World Template',
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
           vars: const ['name'],
         );
@@ -444,8 +452,9 @@ void main() {
         const url =
             'https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png';
         final brickYaml = BrickYaml(
-          'app_icon',
-          'Create an app_icon file from a URL',
+          name: 'app_icon',
+          description: 'Create an app_icon file from a URL',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
           vars: const ['url'],
         );
@@ -463,8 +472,9 @@ void main() {
       test('generates app_icon from local url', () async {
         final url = path.join('..', '..', 'assets', 'mason_logo.png');
         final brickYaml = BrickYaml(
-          'app_icon',
-          'Create an app_icon file from a URL',
+          name: 'app_icon',
+          description: 'Create an app_icon file from a URL',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
           vars: const ['url'],
         );
@@ -481,8 +491,9 @@ void main() {
 
       test('generates photos', () async {
         final brickYaml = BrickYaml(
-          'photos',
-          'A Photos Example Template',
+          name: 'photos',
+          description: 'A Photos Example Template',
+          version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'photos', 'brick.yaml'),
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
