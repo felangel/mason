@@ -35,8 +35,8 @@ void main() {
       expect(input.render(<String, dynamic>{}), equals(expected));
     });
 
-    group('PartialResolver', () {
-      test('outputs correct string', () {
+    group('partials', () {
+      test('resolve outputs correct string', () {
         const name = 'header';
         const content = 'Hello world!';
         final source = utf8.encode(content);
