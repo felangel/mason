@@ -20,4 +20,5 @@ doc/api/
 coverage/
 test/fixtures/.*/
 
+# Exceptions to the above rules
 !test/fixtures/*/.mason/
