@@ -1,7 +1,7 @@
 import 'dart:convert';
 
 import 'package:mason/src/render.dart';
-import 'package:mustache_template/mustache_template.dart';
+import 'package:mustache_template/mustache_template.dart' show Template;
 import 'package:test/test.dart';
 
 void main() {
@@ -35,13 +35,13 @@ void main() {
       expect(input.render(<String, dynamic>{}), equals(expected));
     });
 
-    group('partialResolver', () {
-      test('outputs correct string', () {
+    group('partials', () {
+      test('resolve outputs correct template', () {
         const name = 'header';
         const content = 'Hello world!';
         final source = utf8.encode(content);
         expect(
-          partialResolver(name, {'{{~ $name }}': source}),
+          {'{{~ $name }}': source}.resolve(name),
           isA<Template>()
               .having((template) => template.name, 'name', name)
               .having((template) => template.source, 'source', content),

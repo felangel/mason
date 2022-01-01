@@ -19,3 +19,4 @@ export 'src/generator.dart'
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle;
 export 'src/mason_yaml.dart' show Brick, GitPath, MasonYaml;
+export 'src/render.dart' show RenderTemplate;
