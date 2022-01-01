@@ -85,16 +85,28 @@ abstract class MasonCommand extends Command<int> {
   /// Gets all [BrickYaml] contents for bricks registered in the `mason.yaml`.
   /// Includes globally registered bricks.
   Set<BrickYaml> get bricks {
-    if (_bricks != null) return _bricks!;
-    return _bricks = {
+    return {...localBricks, ...globalBricks};
+  }
+
+  /// Gets [BrickYaml] contents for bricks registered globally.
+  Set<BrickYaml> get globalBricks {
+    if (_globalBricks != null) return _globalBricks!;
+    return _globalBricks = _getBricks(
+      _getMasonYaml(_getMasonYamlFile(BricksJson.globalDir.path)),
+    );
+  }
+
+  Set<BrickYaml>? _globalBricks;
+
+  /// Gets [BrickYaml] contents for bricks registered locally in `mason.yaml`.
+  Set<BrickYaml> get localBricks {
+    if (_localBricks != null) return _localBricks!;
+    return _localBricks = {
       if (masonInitialized) ..._getBricks(masonYaml),
-      ..._getBricks(
-        _getMasonYaml(_getMasonYamlFile(BricksJson.globalDir.path)),
-      ),
     };
   }
 
-  Set<BrickYaml>? _bricks;
+  Set<BrickYaml>? _localBricks;
 
   /// Returns `true` if a `mason.yaml` file exists locally.
   /// This excludes the global mason configuration.

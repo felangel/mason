@@ -31,17 +31,17 @@ void main() {
     test('exits successfully when no bricks are available', () async {
       final result = await commandRunner.run(['list']);
       expect(result, equals(ExitCode.success.code));
-      verify(() => logger.info('(empty)')).called(1);
+      verify(() => logger.info('└── (empty)')).called(1);
     });
 
     test('ls is available as an alias', () async {
       final result = await commandRunner.run(['ls']);
       expect(result, equals(ExitCode.success.code));
-      verify(() => logger.info('(empty)')).called(1);
+      verify(() => logger.info('└── (empty)')).called(1);
     });
 
     test(
-        'exits successfully and lists all bricks '
+        'exits successfully and lists local bricks '
         'when local and global bricks are available', () async {
       final greetingPath =
           p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
@@ -72,23 +72,54 @@ bricks:
         MasonCommandRunner(logger: logger).run(['list']),
         completion(ExitCode.success.code),
       );
-      verify(
+
+      verifyInOrder([
         () => logger.info(
-          '${styleBold.wrap('greeting')} - A Simple Greeting Template',
+              '''├── ${styleBold.wrap('documentation')} - Create Documentation Markdown Files''',
+            ),
+        () => logger.info('├── ${styleBold.wrap('todos')} - A Todos Template'),
+        () => logger.info(
+              '''└── ${styleBold.wrap('widget')} - Create a Simple Flutter Widget''',
+            ),
+      ]);
+    });
+
+    test(
+        'exits successfully and lists global bricks '
+        'when local and global bricks are available', () async {
+      final greetingPath =
+          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  documentation:
+    path: ../../../../../bricks/documentation
+  todos:
+    path: ../../../../../bricks/todos
+  widget:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/widget
+''',
+      );
+      await expectLater(
+        MasonCommandRunner(logger: logger).run(['get']),
+        completion(ExitCode.success.code),
+      );
+      await expectLater(
+        MasonCommandRunner(logger: logger).run(
+          ['add', '-g', '--source', 'path', greetingPath],
         ),
-      ).called(1);
+        completion(ExitCode.success.code),
+      );
+      await expectLater(
+        MasonCommandRunner(logger: logger).run(['list', '-g']),
+        completion(ExitCode.success.code),
+      );
 
       verify(
         () => logger.info(
-          '''${styleBold.wrap('documentation')} - Create Documentation Markdown Files''',
-        ),
-      ).called(1);
-      verify(
-        () => logger.info('${styleBold.wrap('todos')} - A Todos Template'),
-      ).called(1);
-      verify(
-        () => logger.info(
-          '${styleBold.wrap('widget')} - Create a Simple Flutter Widget',
+          '└── ${styleBold.wrap('greeting')} - A Simple Greeting Template',
         ),
       ).called(1);
     });

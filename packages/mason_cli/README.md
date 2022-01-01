@@ -51,7 +51,7 @@ mason make hello
   - [Add Usage](#add-usage)
 - [Removing Bricks](#removing-bricks)
   - [Remove Usage](#remove-usage)
-- [List all available Brick Templates](#list-all-available-brick-templates)
+- [List Installed Bricks](#list-installed-bricks)
   - [List Usage](#list-usage)
 - [Bundling](#bundling)
   - [Bundle Usage](#bundle-usage)
@@ -448,18 +448,24 @@ mason remove <BRICK_NAME>
 mason remove -g <BRICK_NAME>
 ```
 
-## List all available Brick Templates
+## List Installed Bricks
 
-All available brick templates (local and global) can be seen via the `list` (`ls` for short) command.
+All installed bricks can be seen via the `list` (`ls` for short) command.
 
 ### List Usage
 
 ```sh
-# list all available bricks
+# list all locally installed bricks
 mason list
+
+# list all globally installed bricks
+mason list --global
 
 # use alias "ls" instead of "list" for a shorthand syntax
 mason ls
+
+# list all globally installed bricks shorthand syntax
+mason ls -g
 ```
 
 ## Bundling

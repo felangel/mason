@@ -31,7 +31,7 @@ const expectedUsage = [
       '  cache    Interact with mason cache.\n'
       '  get      Gets all bricks in the nearest mason.yaml.\n'
       '  init     Initialize mason in the current directory.\n'
-      '  list     Lists all available bricks.\n'
+      '  list     Lists installed bricks.\n'
       '  make     Generate code using an existing brick template.\n'
       '  new      Creates a new brick template.\n'
       '  remove   Removes a brick.\n'
