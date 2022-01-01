@@ -74,6 +74,7 @@ class _MasonYamlGenerator extends MasonGenerator {
   static const _brickYamlContent = '''
 name: hello
 description: An example hello brick.
+version: 1.0.0
 vars:
   - name
 ''';

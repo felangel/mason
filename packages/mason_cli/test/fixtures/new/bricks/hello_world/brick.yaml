@@ -1,4 +1,5 @@
 name: hello_world
 description: A new brick created with the Mason CLI.
+version: 1.0.0
 vars:
   - name
