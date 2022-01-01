@@ -1,4 +1,5 @@
 name: widget
 description: Create a Simple Flutter Widget
+version: 1.0.0
 vars:
   - name

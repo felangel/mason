@@ -1,4 +1,5 @@
 name: app_icon
 description: Create an app_icon file from a URL
+version: 1.0.0
 vars:
   - url

@@ -1,5 +1,6 @@
 name: documentation
 description: Create Documentation Markdown Files
+version: 1.0.0
 vars:
   - name
   - description

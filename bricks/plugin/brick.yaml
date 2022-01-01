@@ -1,5 +1,6 @@
 name: plugin
 description: An example plugin template
+version: 1.0.0
 vars:
   - android
   - ios

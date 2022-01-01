@@ -1,4 +1,5 @@
 name: hooks
 description: A Hooks Example Template
+version: 1.0.0
 vars:
   - name

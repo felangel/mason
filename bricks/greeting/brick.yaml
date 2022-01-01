@@ -1,4 +1,5 @@
 name: greeting
 description: A Simple Greeting Template
+version: 1.0.0
 vars:
   - name
