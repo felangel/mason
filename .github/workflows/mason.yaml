@@ -28,7 +28,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
-        run: pub get
+        run: dart pub get
 
       - name: Format
         run: dart format --set-exit-if-changed lib
@@ -37,10 +37,7 @@ jobs:
         run: dart analyze --fatal-infos --fatal-warnings .
 
       - name: Run Tests
-        run: |
-          pub global activate test_coverage
-          export PATH=$PATH:$HOME/.pub-cache/bin
-          test_coverage
+        run: dart test -j 1 -x pull-request-only --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
 
       - name: Check Code Coverage
         uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
