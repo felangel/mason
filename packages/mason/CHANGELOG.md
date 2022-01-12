@@ -1,3 +1,8 @@
+# 0.1.0-dev.3
+
+- **BREAKING** feat: add version to `brick.yaml`
+- fix: bundle file sort order
+
 # 0.1.0-dev.2
 
 - feat: export `render` APIs
