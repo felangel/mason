@@ -49,7 +49,7 @@ void main() {
         expect(bundle.files.length, equals(1));
       });
 
-      test('returns a MasonBundle when brick exists (Plugin)', () {
+      test('returns a MasonBundle when brick exists (plugin)', () {
         final expectedFilePaths = [
           'example/{{#android}}android.dart{{/android}}',
           'example/{{#ios}}ios.dart{{/ios}}',
@@ -62,7 +62,7 @@ void main() {
           '{{#ios}}Podfile{{/ios}}',
         ];
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'Plugin')),
+          Directory(path.join('..', '..', 'bricks', 'plugin')),
         );
         expect(bundle.name, equals('plugin'));
         expect(bundle.description, equals('An example plugin template'));

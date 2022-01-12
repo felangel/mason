@@ -16,12 +16,42 @@ on:
       - packages/mason/**
 
 jobs:
-  build:
+  setup:
+    runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: packages/mason
 
-    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install Dependencies
+        run: pub get
+
+      - name: Format
+        run: dart format --set-exit-if-changed lib
+
+      - name: Analyze
+        run: dart analyze --fatal-infos --fatal-warnings .
+
+      - name: Ensure Build
+        run: dart test --run-skipped -t pull-request-only
+
+  build:
+    needs: setup
+
+    runs-on: ${{ matrix.os }}
+
+    defaults:
+      run:
+        working-directory: packages/mason
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v2.3.4
@@ -29,12 +59,6 @@ jobs:
 
       - name: Install Dependencies
         run: dart pub get
-
-      - name: Format
-        run: dart format --set-exit-if-changed lib
-
-      - name: Analyze
-        run: dart analyze --fatal-infos --fatal-warnings .
 
       - name: Run Tests
         run: dart test -j 1 -x pull-request-only --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
@@ -45,11 +69,11 @@ jobs:
           path: packages/mason/coverage/lcov.info
 
   pana:
+    runs-on: ubuntu-latest
+
     defaults:
       run:
         working-directory: packages/mason
-
-    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v2.3.4
