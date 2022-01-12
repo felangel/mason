@@ -190,6 +190,7 @@ The `brick.yaml` contains metadata for a `brick` template.
 ```yaml
 name: example
 description: An example brick
+version: 1.0.0
 vars:
   - name
 ```
@@ -263,6 +264,7 @@ For example, given the following `brick.yaml`:
 ```yaml
 name: app_icon
 description: Create an app_icon file from a URL
+version: 1.0.0
 vars:
   - url
 ```
@@ -307,6 +309,7 @@ __brick__
 ```yaml
 name: example
 description: An example brick.
+version: 1.0.0
 vars:
   - name
 ```
@@ -361,6 +364,7 @@ where `brick.yaml` looks like:
 ```yaml
 name: example
 description: An example
+version: 1.0.0
 vars:
   - name
 ```
