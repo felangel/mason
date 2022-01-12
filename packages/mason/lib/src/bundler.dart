@@ -38,9 +38,13 @@ MasonBundle createBundle(Directory brick) {
     brickYaml.name,
     brickYaml.description,
     brickYaml.vars,
-    files,
-    hooks,
+    files..sort(_comparePaths),
+    hooks..sort(_comparePaths),
   );
+}
+
+int _comparePaths(MasonBundledFile a, MasonBundledFile b) {
+  return a.path.toLowerCase().compareTo(b.path.toLowerCase());
 }
 
 MasonBundledFile _bundleBrickFile(File file) {
