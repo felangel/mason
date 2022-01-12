@@ -18,7 +18,7 @@ void main() {
 
   group('MasonBundle', () {
     test('can be (de)serialized', () {
-      final instance = MasonBundle('name', 'description', [], [], []);
+      final instance = MasonBundle('name', 'description', {}, [], []);
       expect(
         MasonBundle.fromJson(instance.toJson()),
         isA<MasonBundle>()

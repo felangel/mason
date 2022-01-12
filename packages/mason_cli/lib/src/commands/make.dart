@@ -46,7 +46,7 @@ class MakeCommand extends MasonCommand {
 class _MakeCommand extends MasonCommand {
   _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
     argParser.addOptions();
-    for (final arg in _brick.vars) {
+    for (final arg in _brick.vars.keys) {
       argParser.addOption(arg);
     }
   }
@@ -90,7 +90,7 @@ class _MakeCommand extends MasonCommand {
         return ExitCode.usage.code;
       }
 
-      for (final variable in _brick.vars) {
+      for (final variable in _brick.vars.keys) {
         if (vars.containsKey(variable)) continue;
         final arg = results[variable] as String?;
         if (arg != null) {

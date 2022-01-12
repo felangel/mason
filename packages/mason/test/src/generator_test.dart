@@ -46,7 +46,7 @@ void main() {
           description: 'A Simple Hello World Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -75,7 +75,7 @@ void main() {
           description: 'A Todos Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'todos', 'brick.yaml'),
-          vars: const ['todos'],
+          vars: const {'todos': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -104,7 +104,7 @@ void main() {
           description: 'A Hooks Example Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hooks', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -142,7 +142,7 @@ void main() {
           description: 'A Simple Hello World Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -194,7 +194,7 @@ void main() {
           description: 'A Simple Hello World Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -246,7 +246,7 @@ void main() {
           description: 'A Simple Hello World Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -307,7 +307,7 @@ void main() {
           description: 'A Simple Hello World Template',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const ['name'],
+          vars: const {'name': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -456,7 +456,7 @@ void main() {
           description: 'Create an app_icon file from a URL',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
-          vars: const ['url'],
+          vars: const {'url': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
@@ -476,7 +476,7 @@ void main() {
           description: 'Create an app_icon file from a URL',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
-          vars: const ['url'],
+          vars: const {'url': BrickVariable.string()},
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();

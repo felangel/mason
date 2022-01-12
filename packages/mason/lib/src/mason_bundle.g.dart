@@ -41,8 +41,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
         final val = MasonBundle(
           $checkedConvert('name', (v) => v as String),
           $checkedConvert('description', (v) => v as String),
-          $checkedConvert('vars',
-              (v) => (v as List<dynamic>).map((e) => e as String).toList()),
+          $checkedConvert('vars', (v) => const VarsConverter().fromJson(v)),
           $checkedConvert(
               'files',
               (v) => (v as List<dynamic>)
@@ -62,11 +61,20 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
       },
     );
 
-Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) =>
-    <String, dynamic>{
-      'files': instance.files.map((e) => e.toJson()).toList(),
-      'hooks': instance.hooks.map((e) => e.toJson()).toList(),
-      'name': instance.name,
-      'description': instance.description,
-      'vars': instance.vars,
-    };
+Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
+  final val = <String, dynamic>{
+    'files': instance.files.map((e) => e.toJson()).toList(),
+    'hooks': instance.hooks.map((e) => e.toJson()).toList(),
+    'name': instance.name,
+    'description': instance.description,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('vars', const VarsConverter().toJson(instance.vars));
+  return val;
+}
