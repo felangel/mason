@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:meta/meta.dart';
 
@@ -8,14 +10,14 @@ part 'brick_yaml.g.dart';
 /// a `MasonGenerator` from a brick template.
 /// {@endtemplate}
 @immutable
-@JsonSerializable()
+@JsonSerializable(checked: false)
 class BrickYaml {
   /// {@macro mason_yaml}
   const BrickYaml({
     required this.name,
     required this.description,
     required this.version,
-    this.vars = const <String>[],
+    this.vars = const <String, BrickVariable>{},
     this.path,
   });
 
@@ -47,8 +49,9 @@ class BrickYaml {
   /// Version of the brick (semver).
   final String version;
 
-  /// List of variables used when templating a brick.
-  final List<String> vars;
+  /// Map of variable name to [BrickVariable] used when templating a brick.
+  @VarsConverter()
+  final Map<String, BrickVariable> vars;
 
   /// Path to the [BrickYaml] file.
   final String? path;
@@ -73,4 +76,114 @@ class BrickYaml {
 
   @override
   int get hashCode => name.hashCode;
+}
+
+/// The type of brick variable.
+enum BrickVariableType {
+  /// A number (e.g. 42)
+  number,
+
+  /// A string (e.g. "Dash")
+  string,
+
+  /// A boolean (e.g. true/false)
+  boolean,
+}
+
+/// {@template brick_variable}
+/// An object representing a brick variable.
+/// {@endtemplate}
+@immutable
+@JsonSerializable()
+class BrickVariable {
+  /// {@macro brick_variable}
+  @internal
+  const BrickVariable({
+    required this.type,
+    this.description,
+    this.defaultValue,
+  });
+
+  /// {@macro brick_variable}
+  ///
+  /// Creates an instance of a [BrickVariable]
+  /// of type [BrickVariableType.string].
+  const BrickVariable.string({String? description, String? defaultValue})
+      : this(
+          type: BrickVariableType.string,
+          description: description,
+          defaultValue: defaultValue,
+        );
+
+  /// {@macro brick_variable}
+  ///
+  /// Creates an instance of a [BrickVariable]
+  /// of type [BrickVariableType.boolean].
+  const BrickVariable.boolean({String? description, bool? defaultValue})
+      : this(
+          type: BrickVariableType.boolean,
+          description: description,
+          defaultValue: defaultValue,
+        );
+
+  /// {@macro brick_variable}
+  ///
+  /// Creates an instance of a [BrickVariable]
+  /// of type [BrickVariableType.number].
+  const BrickVariable.number({String? description, num? defaultValue})
+      : this(
+          type: BrickVariableType.number,
+          description: description,
+          defaultValue: defaultValue,
+        );
+
+  /// Converts [Map] to [BrickYaml]
+  factory BrickVariable.fromJson(Map<dynamic, dynamic> json) =>
+      _$BrickVariableFromJson(json);
+
+  /// Converts [BrickVariable] to [Map]
+  Map<dynamic, dynamic> toJson() => _$BrickVariableToJson(this);
+
+  /// The type of the variable.
+  final BrickVariableType type;
+
+  /// An optional description of the variable.
+  final String? description;
+
+  /// An optional default value for the variable.
+  @JsonKey(name: 'default')
+  final Object? defaultValue;
+}
+
+/// {@template vars_converter}
+/// Json Converter for [Map<String, BrickVariable>].
+/// {@endtemplate}
+class VarsConverter
+    implements JsonConverter<Map<String, BrickVariable>, dynamic> {
+  /// {@macro vars_converter}
+  const VarsConverter();
+
+  @override
+  dynamic toJson(Map<String, BrickVariable> value) {
+    return value.map((key, value) => MapEntry(key, value.toJson()));
+  }
+
+  @override
+  Map<String, BrickVariable> fromJson(dynamic value) {
+    final dynamic _value = value is String ? json.decode(value) : value;
+    if (_value is List) {
+      return <String, BrickVariable>{
+        for (var v in _value) v as String: const BrickVariable.string(),
+      };
+    }
+    if (_value is Map) {
+      return _value.map(
+        (dynamic key, dynamic value) => MapEntry(
+          key as String,
+          BrickVariable.fromJson(_value[key] as Map),
+        ),
+      );
+    }
+    throw const FormatException();
+  }
 }

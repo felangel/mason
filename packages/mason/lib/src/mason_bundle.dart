@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mason/src/brick_yaml.dart';
 
 part 'mason_bundle.g.dart';
 
@@ -59,7 +60,8 @@ class MasonBundle {
   final String description;
 
   /// All required variables for the brick (from the `brick.yaml`).
-  final List<String> vars;
+  @VarsConverter()
+  final Map<String, BrickVariable> vars;
 
   /// Converts a [MasonBundle] into a [Map<String, dynamic>].
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);

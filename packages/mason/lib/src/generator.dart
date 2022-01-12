@@ -83,7 +83,7 @@ class MasonGenerator extends Generator {
     return MasonGenerator(
       brick.name,
       brick.description,
-      vars: brick.vars,
+      vars: brick.vars.keys.toList(),
       files: await Future.wait(brickFiles),
       hooks: await GeneratorHooks.fromBrickYaml(brick),
     );
@@ -95,7 +95,7 @@ class MasonGenerator extends Generator {
     return MasonGenerator(
       bundle.name,
       bundle.description,
-      vars: bundle.vars,
+      vars: bundle.vars.keys.toList(),
       files: _decodeConcatenatedData(bundle.files),
       hooks: GeneratorHooks.fromBundle(bundle),
     );
