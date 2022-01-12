@@ -12,7 +12,7 @@ dependencies:
   collection: ^1.15.0
   crypto: ^3.0.1
   http: ^0.13.3
-  json_annotation: ^4.0.0
+  json_annotation: ^4.4.0
   mason_logger: ^0.1.0-dev.3
   meta: ^1.7.0
   mustache_template: ^2.0.0
