@@ -1,0 +1,19 @@
+name: bio
+description: A Bio Template
+version: 1.0.0
+vars:
+  name:
+    type: string
+    description: Name of the current user
+    default: Dash
+    prompt: What is your name?
+  age:
+    type: number
+    description: Age of the current user
+    default: 42
+    prompt: How old are you?
+  isDeveloper:
+    type: boolean
+    description: If the current user is a developer
+    default: false
+    prompt: Are you a developer?

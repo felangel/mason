@@ -146,8 +146,58 @@ class Logger {
   void success(String? message) => _stdout.writeln(lightGreen.wrap(message));
 
   /// Prompts user and returns response.
-  String prompt(String? message) {
-    _stdout.write(message);
-    return _stdin.readLineSync() ?? '';
+  String prompt(String? message, {Object? defaultValue}) {
+    final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
+    final _defaultValue = hasDefault ? '$defaultValue' : '';
+    final suffix = hasDefault ? ' (${darkGray.wrap(_defaultValue)})' : '';
+    final _message = '$message$suffix ';
+    _stdout.write(_message);
+    final input = _stdin.readLineSync()?.trim();
+    final response = input == null || input.isEmpty ? _defaultValue : input;
+    _stdout.writeln(
+      '\x1b[A\u001B[2K$_message${lightCyan.wrap(styleBold.wrap(response))}',
+    );
+    return response;
+  }
+
+  /// Prompts user with a yes/no question.
+  bool confirm(String? message, {bool defaultValue = false}) {
+    final suffix = ' (${darkGray.wrap(defaultValue.toYesNo())})';
+    final _message = '$message$suffix ';
+    _stdout.write(_message);
+    final input = _stdin.readLineSync()?.trim();
+    final response = input == null || input.isEmpty
+        ? defaultValue
+        : input.toBoolean() ?? defaultValue;
+    _stdout.writeln(
+      '''\x1b[A\u001B[2K$_message${lightCyan.wrap(styleBold.wrap(response ? 'Yes' : 'No'))}''',
+    );
+    return response;
+  }
+}
+
+extension on bool {
+  String toYesNo() {
+    return this == true ? 'Y/n' : 'y/N';
+  }
+}
+
+extension on String {
+  bool? toBoolean() {
+    switch (toLowerCase()) {
+      case 'y':
+      case 'yea':
+      case 'yeah':
+      case 'yep':
+      case 'yes':
+      case 'yup':
+        return true;
+      case 'n':
+      case 'no':
+      case 'nope':
+        return false;
+      default:
+        return null;
+    }
   }
 }

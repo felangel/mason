@@ -10,7 +10,7 @@ part 'brick_yaml.g.dart';
 /// a `MasonGenerator` from a brick template.
 /// {@endtemplate}
 @immutable
-@JsonSerializable(checked: false)
+@JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}
   const BrickYaml({
@@ -102,39 +102,52 @@ class BrickVariable {
     required this.type,
     this.description,
     this.defaultValue,
+    this.prompt,
   });
 
   /// {@macro brick_variable}
   ///
   /// Creates an instance of a [BrickVariable]
   /// of type [BrickVariableType.string].
-  const BrickVariable.string({String? description, String? defaultValue})
-      : this(
+  const BrickVariable.string({
+    String? description,
+    String? defaultValue,
+    String? prompt,
+  }) : this(
           type: BrickVariableType.string,
           description: description,
           defaultValue: defaultValue,
+          prompt: prompt,
         );
 
   /// {@macro brick_variable}
   ///
   /// Creates an instance of a [BrickVariable]
   /// of type [BrickVariableType.boolean].
-  const BrickVariable.boolean({String? description, bool? defaultValue})
-      : this(
+  const BrickVariable.boolean({
+    String? description,
+    bool? defaultValue,
+    String? prompt,
+  }) : this(
           type: BrickVariableType.boolean,
           description: description,
           defaultValue: defaultValue,
+          prompt: prompt,
         );
 
   /// {@macro brick_variable}
   ///
   /// Creates an instance of a [BrickVariable]
   /// of type [BrickVariableType.number].
-  const BrickVariable.number({String? description, num? defaultValue})
-      : this(
+  const BrickVariable.number({
+    String? description,
+    num? defaultValue,
+    String? prompt,
+  }) : this(
           type: BrickVariableType.number,
           description: description,
           defaultValue: defaultValue,
+          prompt: prompt,
         );
 
   /// Converts [Map] to [BrickYaml]
@@ -153,6 +166,9 @@ class BrickVariable {
   /// An optional default value for the variable.
   @JsonKey(name: 'default')
   final Object? defaultValue;
+
+  /// An optional prompt used when requesting the variable.
+  final String? prompt;
 }
 
 /// {@template vars_converter}
