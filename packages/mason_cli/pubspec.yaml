@@ -29,6 +29,8 @@ dev_dependencies:
 dependency_overrides:
   mason:
     path: ../mason
+  mason_logger:
+    path: ../mason_logger
 
 executables:
   mason:

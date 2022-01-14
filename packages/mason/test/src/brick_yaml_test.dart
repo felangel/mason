@@ -8,11 +8,13 @@ Matcher isBrickVariable({
   required BrickVariableType type,
   String? description,
   dynamic defaultValue,
+  String? prompt,
 }) {
   return isA<BrickVariable>()
       .having((v) => v.type, 'type', type)
       .having((v) => v.description, 'description', description)
-      .having((v) => v.defaultValue, 'default', defaultValue);
+      .having((v) => v.defaultValue, 'default', defaultValue)
+      .having((v) => v.prompt, 'prompt', prompt);
 }
 
 void main() {
@@ -38,14 +40,17 @@ void main() {
             'name': BrickVariable.string(
               description: 'the name',
               defaultValue: 'Dash',
+              prompt: 'What is your name?',
             ),
             'age': BrickVariable.number(
               description: 'the age',
               defaultValue: 42,
+              prompt: 'How old are you?',
             ),
             'isDeveloper': BrickVariable.boolean(
               description: 'whether you are a developer',
               defaultValue: true,
+              prompt: 'Are you a developer?',
             ),
           },
         );
@@ -91,14 +96,17 @@ vars:
     type: string
     description: the name
     default: Dash
+    prompt: What is your name?
   age:
     type: number
     description: the age
     default: 42
+    prompt: How old are you?
   isDeveloper:
     type: boolean
     description: whether you are a developer
     default: true
+    prompt: Are you a developer?
           ''';
 
         final brickYaml = checkedYamlDecode(
@@ -116,16 +124,19 @@ vars:
               type: BrickVariableType.string,
               description: 'the name',
               defaultValue: 'Dash',
+              prompt: 'What is your name?',
             ),
             isBrickVariable(
               type: BrickVariableType.number,
               description: 'the age',
               defaultValue: 42,
+              prompt: 'How old are you?',
             ),
             isBrickVariable(
               type: BrickVariableType.boolean,
               description: 'whether you are a developer',
               defaultValue: true,
+              prompt: 'Are you a developer?',
             ),
           ]),
         );

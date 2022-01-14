@@ -6,21 +6,28 @@ part of 'brick_yaml.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-BrickYaml _$BrickYamlFromJson(Map json) {
-  $checkKeys(
-    json,
-    allowedKeys: const ['name', 'description', 'version', 'vars', 'path'],
-  );
-  return BrickYaml(
-    name: json['name'] as String,
-    description: json['description'] as String,
-    version: json['version'] as String,
-    vars: json['vars'] == null
-        ? const <String, BrickVariable>{}
-        : const VarsConverter().fromJson(json['vars']),
-    path: json['path'] as String?,
-  );
-}
+BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
+      'BrickYaml',
+      json,
+      ($checkedConvert) {
+        $checkKeys(
+          json,
+          allowedKeys: const ['name', 'description', 'version', 'vars', 'path'],
+        );
+        final val = BrickYaml(
+          name: $checkedConvert('name', (v) => v as String),
+          description: $checkedConvert('description', (v) => v as String),
+          version: $checkedConvert('version', (v) => v as String),
+          vars: $checkedConvert(
+              'vars',
+              (v) => v == null
+                  ? const <String, BrickVariable>{}
+                  : const VarsConverter().fromJson(v)),
+          path: $checkedConvert('path', (v) => v as String?),
+        );
+        return val;
+      },
+    );
 
 Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
   final val = <String, dynamic>{
@@ -46,13 +53,14 @@ BrickVariable _$BrickVariableFromJson(Map json) => $checkedCreate(
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['type', 'description', 'default'],
+          allowedKeys: const ['type', 'description', 'default', 'prompt'],
         );
         final val = BrickVariable(
           type: $checkedConvert(
               'type', (v) => $enumDecode(_$BrickVariableTypeEnumMap, v)),
           description: $checkedConvert('description', (v) => v as String?),
           defaultValue: $checkedConvert('default', (v) => v),
+          prompt: $checkedConvert('prompt', (v) => v as String?),
         );
         return val;
       },
@@ -72,6 +80,7 @@ Map<String, dynamic> _$BrickVariableToJson(BrickVariable instance) {
 
   writeNotNull('description', instance.description);
   writeNotNull('default', instance.defaultValue);
+  writeNotNull('prompt', instance.prompt);
   return val;
 }
 

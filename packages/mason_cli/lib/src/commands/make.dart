@@ -90,15 +90,36 @@ class _MakeCommand extends MasonCommand {
         return ExitCode.usage.code;
       }
 
-      for (final variable in _brick.vars.keys) {
-        if (vars.containsKey(variable)) continue;
-        final arg = results[variable] as String?;
+      for (final entry in _brick.vars.entries) {
+        final variableName = entry.key;
+        final variable = entry.value;
+        if (vars.containsKey(variableName)) continue;
+        final arg = results[variableName] as String?;
         if (arg != null) {
-          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
+          vars.addAll(<String, dynamic>{variableName: _maybeDecode(arg)});
         } else {
-          vars.addAll(<String, dynamic>{
-            variable: _maybeDecode(logger.prompt('$variable: '))
-          });
+          final prompt =
+              '''${styleBold.wrap(lightGreen.wrap('?'))} ${variable.prompt ?? variableName}''';
+          late final dynamic response;
+          switch (variable.type) {
+            case BrickVariableType.string:
+              response = _maybeDecode(
+                logger.prompt(prompt, defaultValue: variable.defaultValue),
+              );
+              break;
+            case BrickVariableType.number:
+              response = logger.prompt(
+                prompt,
+                defaultValue: variable.defaultValue,
+              );
+              break;
+            case BrickVariableType.boolean:
+              response = logger.confirm(
+                prompt,
+                defaultValue: variable.defaultValue as bool? ?? false,
+              );
+          }
+          vars.addAll(<String, dynamic>{variableName: response});
         }
       }
 
