@@ -50,11 +50,11 @@ class _MakeCommand extends MasonCommand {
       ..addSeparator('${'-' * 79}\n');
 
     for (final entry in _brick.vars.entries) {
-      final variableName = entry.key;
-      final variable = entry.value;
+      final variable = entry.key;
+      final properties = entry.value;
       argParser.addOption(
-        variableName,
-        help: variable.toHelp(),
+        variable,
+        help: properties.toHelp(),
       );
     }
   }
@@ -99,35 +99,35 @@ class _MakeCommand extends MasonCommand {
       }
 
       for (final entry in _brick.vars.entries) {
-        final variableName = entry.key;
-        final variable = entry.value;
-        if (vars.containsKey(variableName)) continue;
-        final arg = results[variableName] as String?;
+        final variable = entry.key;
+        final properties = entry.value;
+        if (vars.containsKey(variable)) continue;
+        final arg = results[variable] as String?;
         if (arg != null) {
-          vars.addAll(<String, dynamic>{variableName: _maybeDecode(arg)});
+          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
         } else {
           final prompt =
-              '''${styleBold.wrap(lightGreen.wrap('?'))} ${variable.prompt ?? variableName}''';
+              '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
           late final dynamic response;
-          switch (variable.type) {
+          switch (properties.type) {
             case BrickVariableType.string:
               response = _maybeDecode(
-                logger.prompt(prompt, defaultValue: variable.defaultValue),
+                logger.prompt(prompt, defaultValue: properties.defaultValue),
               );
               break;
             case BrickVariableType.number:
               response = logger.prompt(
                 prompt,
-                defaultValue: variable.defaultValue,
+                defaultValue: properties.defaultValue,
               );
               break;
             case BrickVariableType.boolean:
               response = logger.confirm(
                 prompt,
-                defaultValue: variable.defaultValue as bool? ?? false,
+                defaultValue: properties.defaultValue as bool? ?? false,
               );
           }
-          vars.addAll(<String, dynamic>{variableName: response});
+          vars.addAll(<String, dynamic>{variable: response});
         }
       }
 
@@ -192,7 +192,7 @@ extension on BrickVariableType {
   }
 }
 
-extension on BrickVariable {
+extension on BrickVariableProperties {
   String toHelp() {
     final _type = '<${type.name}>';
     final _defaultValue =

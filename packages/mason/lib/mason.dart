@@ -6,7 +6,8 @@ library mason;
 
 export 'package:mason_logger/mason_logger.dart';
 
-export 'src/brick_yaml.dart' show BrickYaml, BrickVariable, BrickVariableType;
+export 'src/brick_yaml.dart'
+    show BrickYaml, BrickVariableProperties, BrickVariableType;
 export 'src/bricks_json.dart' show BricksJson;
 export 'src/bundler.dart' show createBundle;
 export 'src/exception.dart'

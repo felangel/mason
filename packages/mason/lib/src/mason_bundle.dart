@@ -61,7 +61,7 @@ class MasonBundle {
 
   /// All required variables for the brick (from the `brick.yaml`).
   @VarsConverter()
-  final Map<String, BrickVariable> vars;
+  final Map<String, BrickVariableProperties> vars;
 
   /// Converts a [MasonBundle] into a [Map<String, dynamic>].
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);

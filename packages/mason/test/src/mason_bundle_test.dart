@@ -40,17 +40,17 @@ void main() {
         'name',
         'description',
         {
-          'name': BrickVariable.string(
+          'name': BrickVariableProperties.string(
             defaultValue: 'Dash',
             description: 'Your name',
             prompt: 'What is your name?',
           ),
-          'age': BrickVariable.number(
+          'age': BrickVariableProperties.number(
             defaultValue: 42,
             description: 'Your age',
             prompt: 'How old are you?',
           ),
-          'isDeveloper': BrickVariable.boolean(
+          'isDeveloper': BrickVariableProperties.boolean(
             defaultValue: false,
             description: 'If you are a dev',
             prompt: 'Are you a developer?',
@@ -60,17 +60,17 @@ void main() {
         [],
       );
       final hasCorrectVars = equals({
-        'name': isA<BrickVariable>()
+        'name': isA<BrickVariableProperties>()
             .having((v) => v.type, 'type', BrickVariableType.string)
             .having((v) => v.defaultValue, 'defaultValue', 'Dash')
             .having((v) => v.description, 'description', 'Your name')
             .having((v) => v.prompt, 'prompt', 'What is your name?'),
-        'age': isA<BrickVariable>()
+        'age': isA<BrickVariableProperties>()
             .having((v) => v.type, 'type', BrickVariableType.number)
             .having((v) => v.defaultValue, 'defaultValue', 42)
             .having((v) => v.description, 'description', 'Your age')
             .having((v) => v.prompt, 'prompt', 'How old are you?'),
-        'isDeveloper': isA<BrickVariable>()
+        'isDeveloper': isA<BrickVariableProperties>()
             .having((v) => v.type, 'type', BrickVariableType.boolean)
             .having((v) => v.defaultValue, 'defaultValue', false)
             .having((v) => v.description, 'description', 'If you are a dev')
