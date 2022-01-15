@@ -31,6 +31,8 @@ void main() {
       pubUpdater = MockPubUpdater();
       logger = MockLogger();
 
+      registerFallbackValue(Object());
+
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -47,6 +49,8 @@ void main() {
 bricks:
   app_icon:
     path: ../../../../../bricks/app_icon
+  bio:
+    path: ../../../../../bricks/bio
   documentation:
     path: ../../../../../bricks/documentation
   greeting:
@@ -68,6 +72,9 @@ bricks:
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
       final appIconPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
+      );
+      final bioPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'bio'),
       );
       final docPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
@@ -99,6 +106,8 @@ bricks:
           json.encode({
             '''app_icon_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
                 appIconPath,
+            '''bio_bc2e238615f1a25f47d1561dc1d896de7c9496d221f3397625da4e3c9838d815''':
+                bioPath,
             '''documentation_227871e1f882f1e60fbc26adaf0d5ea0f03616b24c54ce4ffc331ebcba54018a''':
                 docPath,
             '''hello_world_cfb7bfe4be052f5e635f9291624c97e8c45ac933c18d1b8ee0e6a80fb81d491a''':
@@ -160,6 +169,7 @@ bricks:
               '\n'
               'Available subcommands:\n'
               '  app_icon        Create an app_icon file from a URL\n'
+              '  bio             A Bio Template\n'
               '  documentation   Create Documentation Markdown Files\n'
               '  greeting        A Simple Greeting Template\n'
               '  hello_world     A Simple Hello World Template\n'
@@ -342,6 +352,18 @@ bricks:
       ).called(1);
     });
 
+    test('exits with code 73 when exception occurs post generation', () async {
+      when(() => logger.info(any(that: contains('Generated'))))
+          .thenThrow(Exception('oops'));
+      final testDir = Directory.systemTemp.createTempSync();
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name'],
+      );
+      expect(result, equals(ExitCode.cantCreate.code));
+      verify(() => logger.err('Exception: oops')).called(1);
+    });
+
     test('generates app_icon (from args)', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'app_icon'),
@@ -380,6 +402,38 @@ bricks:
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'app_icon'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates bio (from prompt)', () async {
+      when(
+        () => logger.prompt(
+          any(that: contains('What is your name?')),
+          defaultValue: any(named: 'defaultValue'),
+        ),
+      ).thenReturn('Dash');
+      when(
+        () => logger.prompt(
+          any(that: contains('How old are you?')),
+          defaultValue: any(named: 'defaultValue'),
+        ),
+      ).thenReturn('42');
+      when(
+        () => logger.confirm(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn(false);
+      final testDir = Directory(
+        path.join(Directory.current.path, 'bio'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['make', 'bio']);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'bio'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'bio'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });
