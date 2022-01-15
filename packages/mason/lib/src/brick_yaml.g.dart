@@ -21,7 +21,7 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
           vars: $checkedConvert(
               'vars',
               (v) => v == null
-                  ? const <String, BrickVariable>{}
+                  ? const <String, BrickVariableProperties>{}
                   : const VarsConverter().fromJson(v)),
           path: $checkedConvert('path', (v) => v as String?),
         );
@@ -47,15 +47,16 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
   return val;
 }
 
-BrickVariable _$BrickVariableFromJson(Map json) => $checkedCreate(
-      'BrickVariable',
+BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
+    $checkedCreate(
+      'BrickVariableProperties',
       json,
       ($checkedConvert) {
         $checkKeys(
           json,
           allowedKeys: const ['type', 'description', 'default', 'prompt'],
         );
-        final val = BrickVariable(
+        final val = BrickVariableProperties(
           type: $checkedConvert(
               'type', (v) => $enumDecode(_$BrickVariableTypeEnumMap, v)),
           description: $checkedConvert('description', (v) => v as String?),
@@ -67,7 +68,8 @@ BrickVariable _$BrickVariableFromJson(Map json) => $checkedCreate(
       fieldKeyMap: const {'defaultValue': 'default'},
     );
 
-Map<String, dynamic> _$BrickVariableToJson(BrickVariable instance) {
+Map<String, dynamic> _$BrickVariablePropertiesToJson(
+    BrickVariableProperties instance) {
   final val = <String, dynamic>{
     'type': _$BrickVariableTypeEnumMap[instance.type],
   };

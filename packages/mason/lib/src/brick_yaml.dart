@@ -17,7 +17,7 @@ class BrickYaml {
     required this.name,
     required this.description,
     required this.version,
-    this.vars = const <String, BrickVariable>{},
+    this.vars = const <String, BrickVariableProperties>{},
     this.path,
   });
 
@@ -49,9 +49,9 @@ class BrickYaml {
   /// Version of the brick (semver).
   final String version;
 
-  /// Map of variable name to [BrickVariable] used when templating a brick.
+  /// Map of variable properties used when templating a brick.
   @VarsConverter()
-  final Map<String, BrickVariable> vars;
+  final Map<String, BrickVariableProperties> vars;
 
   /// Path to the [BrickYaml] file.
   final String? path;
@@ -90,26 +90,26 @@ enum BrickVariableType {
   boolean,
 }
 
-/// {@template brick_variable}
+/// {@template brick_variable_properties}
 /// An object representing a brick variable.
 /// {@endtemplate}
 @immutable
 @JsonSerializable()
-class BrickVariable {
-  /// {@macro brick_variable}
+class BrickVariableProperties {
+  /// {@macro brick_variable_properties}
   @internal
-  const BrickVariable({
+  const BrickVariableProperties({
     required this.type,
     this.description,
     this.defaultValue,
     this.prompt,
   });
 
-  /// {@macro brick_variable}
+  /// {@macro brick_variable_properties}
   ///
-  /// Creates an instance of a [BrickVariable]
+  /// Creates an instance of a [BrickVariableProperties]
   /// of type [BrickVariableType.string].
-  const BrickVariable.string({
+  const BrickVariableProperties.string({
     String? description,
     String? defaultValue,
     String? prompt,
@@ -120,11 +120,11 @@ class BrickVariable {
           prompt: prompt,
         );
 
-  /// {@macro brick_variable}
+  /// {@macro brick_variable_properties}
   ///
-  /// Creates an instance of a [BrickVariable]
+  /// Creates an instance of a [BrickVariableProperties]
   /// of type [BrickVariableType.boolean].
-  const BrickVariable.boolean({
+  const BrickVariableProperties.boolean({
     String? description,
     bool? defaultValue,
     String? prompt,
@@ -135,11 +135,11 @@ class BrickVariable {
           prompt: prompt,
         );
 
-  /// {@macro brick_variable}
+  /// {@macro brick_variable_properties}
   ///
-  /// Creates an instance of a [BrickVariable]
+  /// Creates an instance of a [BrickVariableProperties]
   /// of type [BrickVariableType.number].
-  const BrickVariable.number({
+  const BrickVariableProperties.number({
     String? description,
     num? defaultValue,
     String? prompt,
@@ -151,11 +151,11 @@ class BrickVariable {
         );
 
   /// Converts [Map] to [BrickYaml]
-  factory BrickVariable.fromJson(Map<dynamic, dynamic> json) =>
-      _$BrickVariableFromJson(json);
+  factory BrickVariableProperties.fromJson(Map<dynamic, dynamic> json) =>
+      _$BrickVariablePropertiesFromJson(json);
 
-  /// Converts [BrickVariable] to [Map]
-  Map<dynamic, dynamic> toJson() => _$BrickVariableToJson(this);
+  /// Converts [BrickVariableProperties] to [Map]
+  Map<dynamic, dynamic> toJson() => _$BrickVariablePropertiesToJson(this);
 
   /// The type of the variable.
   final BrickVariableType type;
@@ -172,31 +172,32 @@ class BrickVariable {
 }
 
 /// {@template vars_converter}
-/// Json Converter for [Map<String, BrickVariable>].
+/// Json Converter for [Map<String, BrickVariableProperties>].
 /// {@endtemplate}
 class VarsConverter
-    implements JsonConverter<Map<String, BrickVariable>, dynamic> {
+    implements JsonConverter<Map<String, BrickVariableProperties>, dynamic> {
   /// {@macro vars_converter}
   const VarsConverter();
 
   @override
-  dynamic toJson(Map<String, BrickVariable> value) {
+  dynamic toJson(Map<String, BrickVariableProperties> value) {
     return value.map((key, value) => MapEntry(key, value.toJson()));
   }
 
   @override
-  Map<String, BrickVariable> fromJson(dynamic value) {
+  Map<String, BrickVariableProperties> fromJson(dynamic value) {
     final dynamic _value = value is String ? json.decode(value) : value;
     if (_value is List) {
-      return <String, BrickVariable>{
-        for (var v in _value) v as String: const BrickVariable.string(),
+      return <String, BrickVariableProperties>{
+        for (final v in _value)
+          v as String: const BrickVariableProperties.string(),
       };
     }
     if (_value is Map) {
       return _value.map(
         (dynamic key, dynamic value) => MapEntry(
           key as String,
-          BrickVariable.fromJson(_value[key] as Map),
+          BrickVariableProperties.fromJson(_value[key] as Map),
         ),
       );
     }

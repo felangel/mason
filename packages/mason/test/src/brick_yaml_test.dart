@@ -4,13 +4,13 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 
-Matcher isBrickVariable({
+Matcher equalsBrickVariableProperties({
   required BrickVariableType type,
   String? description,
   dynamic defaultValue,
   String? prompt,
 }) {
-  return isA<BrickVariable>()
+  return isA<BrickVariableProperties>()
       .having((v) => v.type, 'type', type)
       .having((v) => v.description, 'description', description)
       .having((v) => v.defaultValue, 'default', defaultValue)
@@ -37,17 +37,17 @@ void main() {
           version: '1.0.0',
           // ignore: prefer_const_literals_to_create_immutables
           vars: {
-            'name': BrickVariable.string(
+            'name': BrickVariableProperties.string(
               description: 'the name',
               defaultValue: 'Dash',
               prompt: 'What is your name?',
             ),
-            'age': BrickVariable.number(
+            'age': BrickVariableProperties.number(
               description: 'the age',
               defaultValue: 42,
               prompt: 'How old are you?',
             ),
-            'isDeveloper': BrickVariable.boolean(
+            'isDeveloper': BrickVariableProperties.boolean(
               description: 'whether you are a developer',
               defaultValue: true,
               prompt: 'Are you a developer?',
@@ -79,9 +79,9 @@ vars:
         expect(
           brickYaml.vars.values,
           equals([
-            isBrickVariable(type: BrickVariableType.string),
-            isBrickVariable(type: BrickVariableType.string),
-            isBrickVariable(type: BrickVariableType.string),
+            equalsBrickVariableProperties(type: BrickVariableType.string),
+            equalsBrickVariableProperties(type: BrickVariableType.string),
+            equalsBrickVariableProperties(type: BrickVariableType.string),
           ]),
         );
       });
@@ -120,19 +120,19 @@ vars:
         expect(
           brickYaml.vars.values,
           equals([
-            isBrickVariable(
+            equalsBrickVariableProperties(
               type: BrickVariableType.string,
               description: 'the name',
               defaultValue: 'Dash',
               prompt: 'What is your name?',
             ),
-            isBrickVariable(
+            equalsBrickVariableProperties(
               type: BrickVariableType.number,
               description: 'the age',
               defaultValue: 42,
               prompt: 'How old are you?',
             ),
-            isBrickVariable(
+            equalsBrickVariableProperties(
               type: BrickVariableType.boolean,
               description: 'whether you are a developer',
               defaultValue: true,
