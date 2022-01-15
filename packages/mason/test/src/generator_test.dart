@@ -506,6 +506,33 @@ void main() {
         expect(fileCount, equals(1));
         expect(file.existsSync(), isTrue);
       });
+
+      test('generates bio', () async {
+        final brickYaml = BrickYaml(
+          name: 'bio',
+          description: 'A Bio Template',
+          version: '1.0.0',
+          path: path.join('..', '..', 'bricks', 'bio', 'brick.yaml'),
+          vars: const {
+            'name': BrickVariable.string(),
+            'age': BrickVariable.number(),
+            'isDeveloper': BrickVariable.boolean(),
+          },
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'Dash',
+            'age': 42,
+            'isDeveloper': true,
+          },
+        );
+        final file = File(path.join(tempDir.path, 'ABOUT.md'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+      });
     });
 
     group('compareTo', () {
