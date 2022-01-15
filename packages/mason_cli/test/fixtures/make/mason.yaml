@@ -1,6 +1,8 @@
 bricks:
   app_icon:
     path: ../../../../../bricks/app_icon
+  bio:
+    path: ../../../../../bricks/bio
   documentation:
     path: ../../../../../bricks/documentation
   hello_world:

@@ -155,12 +155,151 @@ void main() {
       test('writes line to stdout and reads line from stdin', () {
         StdioOverrides.runZoned(
           () {
-            const prompt = 'test message';
+            const message = 'test message';
             const response = 'test response';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$message${styleDim.wrap(lightCyan.wrap(response))}''';
             when(() => stdin.readLineSync()).thenReturn(response);
-            final actual = Logger().prompt(prompt);
+            final actual = Logger().prompt(message);
+            expect(actual, equals(response));
+            verify(() => stdout.write(message)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('writes line to stdout and reads line from stdin with default', () {
+        StdioOverrides.runZoned(
+          () {
+            const defaultValue = 'Dash';
+            const message = 'test message';
+            const response = 'test response';
+            final prompt = '$message ${darkGray.wrap('($defaultValue)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap(response))}''';
+            when(() => stdin.readLineSync()).thenReturn(response);
+            final actual = Logger().prompt(message, defaultValue: defaultValue);
             expect(actual, equals(response));
             verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+    });
+
+    group('.confirm', () {
+      test('writes line to stdout and reads line from stdin (default no)', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
+            when(() => stdin.readLineSync()).thenReturn('');
+            final actual = Logger().confirm(message);
+            expect(actual, isFalse);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('writes line to stdout and reads line from stdin (default yes)', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
+            when(() => stdin.readLineSync()).thenReturn('y');
+            final actual = Logger().confirm(message, defaultValue: true);
+            expect(actual, isTrue);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('handles all versions of yes correctly', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            const yesWords = ['y', 'Y', 'Yes', 'yes', 'yeah', 'yea', 'yup'];
+            for (final word in yesWords) {
+              final promptWithResponse =
+                  '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
+              when(() => stdin.readLineSync()).thenReturn(word);
+              final actual = Logger().confirm(message);
+              expect(actual, isTrue);
+              verify(() => stdout.write(prompt)).called(1);
+              verify(() => stdout.writeln(promptWithResponse)).called(1);
+            }
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('handles all versions of no correctly', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            const noWords = ['n', 'N', 'No', 'no', 'nope', 'Nope', 'nopE'];
+            for (final word in noWords) {
+              final promptWithResponse =
+                  '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
+              when(() => stdin.readLineSync()).thenReturn(word);
+              final actual = Logger().confirm(message);
+              expect(actual, isFalse);
+              verify(() => stdout.write(prompt)).called(1);
+              verify(() => stdout.writeln(promptWithResponse)).called(1);
+            }
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('returns default when response is neither yes/no (default no)', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
+            when(() => stdin.readLineSync()).thenReturn('maybe');
+            final actual = Logger().confirm(message);
+            expect(actual, isFalse);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('returns default when response is neither yes/no (default yes)', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
+            when(() => stdin.readLineSync()).thenReturn('maybe');
+            final actual = Logger().confirm(message, defaultValue: true);
+            expect(actual, isTrue);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
           },
           stdout: () => stdout,
           stdin: () => stdin,
