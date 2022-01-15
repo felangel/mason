@@ -45,9 +45,17 @@ class MakeCommand extends MasonCommand {
 
 class _MakeCommand extends MasonCommand {
   _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
-    argParser.addOptions();
-    for (final arg in _brick.vars.keys) {
-      argParser.addOption(arg);
+    argParser
+      ..addOptions()
+      ..addSeparator('${'-' * 79}\n');
+
+    for (final entry in _brick.vars.entries) {
+      final variableName = entry.key;
+      final variable = entry.value;
+      argParser.addOption(
+        variableName,
+        help: variable.toHelp(),
+      );
     }
   }
 
@@ -168,6 +176,34 @@ class _MakeCommand extends MasonCommand {
     } catch (_) {
       return value;
     }
+  }
+}
+
+extension on BrickVariableType {
+  String get name {
+    switch (this) {
+      case BrickVariableType.number:
+        return 'number';
+      case BrickVariableType.string:
+        return 'string';
+      case BrickVariableType.boolean:
+        return 'boolean';
+    }
+  }
+}
+
+extension on BrickVariable {
+  String toHelp() {
+    final _type = '<${type.name}>';
+    final _defaultValue =
+        type == BrickVariableType.string ? '"$defaultValue"' : '$defaultValue';
+    final defaultsTo = '(defaults to $_defaultValue)';
+    if (description != null && defaultValue != null) {
+      return '$description $_type\n$defaultsTo';
+    }
+    if (description != null) return '$description $_type';
+    if (defaultValue != null) return '$_type\n$defaultsTo';
+    return _type;
   }
 }
 

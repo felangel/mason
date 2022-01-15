@@ -188,7 +188,7 @@ bricks:
     );
 
     test(
-      '<subcommand> --help shows correct help information',
+      '<subcommand> --help shows correct help information (greeting)',
       overridePrint(() async {
         const expectedPrintLogs = <String>[
           'A Simple Greeting Template\n'
@@ -206,15 +206,49 @@ bricks:
               '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
               '          [skip]                Always skip conflicting files.\n'
               '\n'
-              '    --name                      \n'
+              '''-------------------------------------------------------------------------------\n'''
+              '\n'
+              '    --name                      <string>\n'
               '\n'
               'Run "mason help" to see global options.'
         ];
-        final testDir = Directory(
-          path.join(Directory.current.path, 'greeting'),
-        )..createSync(recursive: true);
-        Directory.current = testDir.path;
         final result = await commandRunner.run(['make', 'greeting', '--help']);
+        expect(result, equals(ExitCode.success.code));
+        expect(printLogs, equals(expectedPrintLogs));
+      }),
+    );
+
+    test(
+      '<subcommand> --help shows correct help information (bio)',
+      overridePrint(() async {
+        const expectedPrintLogs = <String>[
+          'A Bio Template\n'
+              '\n'
+              'Usage: mason make bio [arguments]\n'
+              '-h, --help                      Print this usage information.\n'
+              '    --no-hooks                  skips running hooks\n'
+              '''-c, --config-path               Path to config json file containing variables.\n'''
+              '''-o, --output-dir                Directory where to output the generated code.\n'''
+              '                                (defaults to ".")\n'
+              '''    --on-conflict               File conflict resolution strategy.\n'''
+              '\n'
+              '''          [append]              Always append conflicting files.\n'''
+              '''          [overwrite]           Always overwrite conflicting files.\n'''
+              '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
+              '          [skip]                Always skip conflicting files.\n'
+              '\n'
+              '''-------------------------------------------------------------------------------\n'''
+              '\n'
+              '''    --name                      Name of the current user <string>\n'''
+              '                                (defaults to "Dash")\n'
+              '''    --age                       Age of the current user <number>\n'''
+              '                                (defaults to 42)\n'
+              '''    --isDeveloper               If the current user is a developer <boolean>\n'''
+              '                                (defaults to false)\n'
+              '\n'
+              'Run "mason help" to see global options.'
+        ];
+        final result = await commandRunner.run(['make', 'bio', '--help']);
         expect(result, equals(ExitCode.success.code));
         expect(printLogs, equals(expectedPrintLogs));
       }),
