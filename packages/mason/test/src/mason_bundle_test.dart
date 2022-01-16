@@ -19,11 +19,12 @@ void main() {
 
   group('MasonBundle', () {
     test('can be (de)serialized', () {
-      final instance = MasonBundle('name', 'description', {}, [], []);
+      final instance = MasonBundle('name', 'description', '1.0.0', {}, [], []);
       expect(
         MasonBundle.fromJson(instance.toJson()),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', instance.name)
+            .having((file) => file.version, 'version', instance.version)
             .having((file) => file.vars, 'vars', instance.vars)
             .having((file) => file.files, 'files', instance.files)
             .having((file) => file.hooks, 'hooks', instance.hooks)
@@ -39,6 +40,7 @@ void main() {
       final instance = MasonBundle(
         'name',
         'description',
+        '1.0.0',
         {
           'name': BrickVariableProperties.string(
             defaultValue: 'Dash',
@@ -80,6 +82,7 @@ void main() {
         MasonBundle.fromJson(instance.toJson()),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', instance.name)
+            .having((file) => file.version, 'version', instance.version)
             .having((file) => file.vars, 'vars', hasCorrectVars)
             .having((file) => file.files, 'files', instance.files)
             .having((file) => file.hooks, 'hooks', instance.hooks)
@@ -94,16 +97,19 @@ void main() {
     test('can be deserialized when hooks are null', () {
       const name = 'name';
       const description = 'description';
+      const version = '1.0.0';
 
       expect(
         MasonBundle.fromJson(<String, dynamic>{
           'name': name,
           'description': description,
+          'version': version,
           'files': <MasonBundledFile>[],
           'vars': <String>[],
         }),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', name)
+            .having((file) => file.version, 'version', version)
             .having((file) => file.vars, 'vars', isEmpty)
             .having((file) => file.files, 'files', isEmpty)
             .having((file) => file.hooks, 'hooks', isEmpty)

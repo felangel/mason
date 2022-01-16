@@ -37,6 +37,7 @@ MasonBundle createBundle(Directory brick) {
   return MasonBundle(
     brickYaml.name,
     brickYaml.description,
+    brickYaml.version,
     brickYaml.vars,
     files..sort(_comparePaths),
     hooks..sort(_comparePaths),

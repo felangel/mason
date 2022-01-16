@@ -11,17 +11,20 @@ final hooksBundle = MasonBundle.fromJson(<String, dynamic>{
     {
       "path": "post_gen.dart",
       "data":
-          "aW1wb3J0ICdkYXJ0OmlvJzsKCnZvaWQgbWFpbigpIHsKICBmaW5hbCBmaWxlID0gRmlsZSgnLnBvc3RfZ2VuLnR4dCcpOwogIGZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3Bvc3RfZ2VuOiB7e25hbWV9fScpOwp9Cg==",
+          "aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wb3N0X2dlbi50eHQnKTtmaWxlLndyaXRlQXNTdHJpbmdTeW5jKCdwb3N0X2dlbjoge3tuYW1lfX0nKTt9",
       "type": "text"
     },
     {
       "path": "pre_gen.dart",
       "data":
-          "aW1wb3J0ICdkYXJ0OmlvJzsKCnZvaWQgbWFpbigpIHsKICBmaW5hbCBmaWxlID0gRmlsZSgnLnByZV9nZW4udHh0Jyk7CiAgZmlsZS53cml0ZUFzU3RyaW5nU3luYygncHJlX2dlbjoge3tuYW1lfX0nKTsKfQo=",
+          "aW1wb3J0ICdkYXJ0OmlvJzt2b2lkIG1haW4oKXtmaW5hbCBmaWxlPUZpbGUoJy5wcmVfZ2VuLnR4dCcpO2ZpbGUud3JpdGVBc1N0cmluZ1N5bmMoJ3ByZV9nZW46IHt7bmFtZX19Jyk7fQ==",
       "type": "text"
     }
   ],
   "name": "hooks",
   "description": "A Hooks Example Template",
-  "vars": ["name"]
+  "version": "1.0.0",
+  "vars": {
+    "name": {"type": "string"}
+  }
 });
