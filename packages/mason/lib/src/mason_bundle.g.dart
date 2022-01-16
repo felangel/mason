@@ -36,11 +36,19 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['files', 'hooks', 'name', 'description', 'vars'],
+          allowedKeys: const [
+            'files',
+            'hooks',
+            'name',
+            'description',
+            'version',
+            'vars'
+          ],
         );
         final val = MasonBundle(
           $checkedConvert('name', (v) => v as String),
           $checkedConvert('description', (v) => v as String),
+          $checkedConvert('version', (v) => v as String),
           $checkedConvert('vars', (v) => const VarsConverter().fromJson(v)),
           $checkedConvert(
               'files',
@@ -67,6 +75,7 @@ Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
     'hooks': instance.hooks.map((e) => e.toJson()).toList(),
     'name': instance.name,
     'description': instance.description,
+    'version': instance.version,
   };
 
   void writeNotNull(String key, dynamic value) {

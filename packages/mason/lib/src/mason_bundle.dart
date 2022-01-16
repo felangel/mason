@@ -37,6 +37,7 @@ class MasonBundle {
   const MasonBundle(
     this.name,
     this.description,
+    this.version,
     this.vars,
     this.files,
     this.hooks,
@@ -58,6 +59,9 @@ class MasonBundle {
 
   /// Description of the brick (from the `brick.yaml`).
   final String description;
+
+  /// The brick version (from the `brick.yaml`).
+  final String version;
 
   /// All required variables for the brick (from the `brick.yaml`).
   @VarsConverter()

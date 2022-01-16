@@ -10,5 +10,8 @@ final greetingBundle = MasonBundle.fromJson(<String, dynamic>{
   "hooks": [],
   "name": "greeting",
   "description": "A Simple Greeting Template",
-  "vars": ["name"]
+  "version": "1.0.0",
+  "vars": {
+    "name": {"type": "string"}
+  }
 });
