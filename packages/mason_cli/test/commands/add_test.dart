@@ -47,9 +47,7 @@ void main() {
 
     test('exits with code 64 when bricks.json does not exist', () async {
       Directory.current = Directory.systemTemp.createTempSync();
-      final result = await commandRunner.run(
-        ['add', '--source', 'path', '.'],
-      );
+      final result = await commandRunner.run(['add', '--source', 'path', '.']);
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('bricks.json not found')).called(1);
     });
@@ -71,9 +69,7 @@ void main() {
 
     group('local', () {
       test('exits with code 64 when brick is not provided', () async {
-        final result = await commandRunner.run(
-          ['add', '--source', 'path'],
-        );
+        final result = await commandRunner.run(['add', '--source', 'path']);
         expect(result, equals(ExitCode.usage.code));
         verify(() => logger.err('path to the brick is required.')).called(1);
       });
@@ -101,9 +97,7 @@ void main() {
           final makeResult = await MasonCommandRunner(
             logger: logger,
             pubUpdater: pubUpdater,
-          ).run(
-            ['make', 'greeting', '--name', 'Dash'],
-          );
+          ).run(['make', 'greeting', '--name', 'Dash']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(

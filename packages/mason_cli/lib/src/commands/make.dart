@@ -142,9 +142,8 @@ class _MakeCommand extends MasonCommand {
       if (exitCode != ExitCode.success.code) return exitCode;
     }
 
-    late final Function([String?]) generateDone;
+    final generateDone = logger.progress('Making ${generator.id}');
     try {
-      generateDone = logger.progress('Making ${generator.id}');
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
