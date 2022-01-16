@@ -1,7 +1,9 @@
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command_runner.dart';
+import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
+import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
@@ -9,19 +11,31 @@ import '../helpers/helpers.dart';
 
 class MockLogger extends Mock implements Logger {}
 
+class MockPubUpdater extends Mock implements PubUpdater {}
+
 void main() {
   final cwd = Directory.current;
 
   group('mason list', () {
     late Logger logger;
+    late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
-    setUp(() {
+    setUp(() async {
       logger = MockLogger();
-      commandRunner = MasonCommandRunner(logger: logger);
+      pubUpdater = MockPubUpdater();
+
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
       setUpTestingEnvironment(cwd, suffix: '.list');
-      BricksJson.global().clear();
+      await commandRunner.run(['cache', 'clear']);
     });
 
     tearDown(() {
@@ -59,17 +73,19 @@ bricks:
 ''',
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(['get']),
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(['get']),
         completion(ExitCode.success.code),
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
           ['add', '-g', '--source', 'path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(['list']),
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+          ['list'],
+        ),
         completion(ExitCode.success.code),
       );
 
@@ -103,17 +119,19 @@ bricks:
 ''',
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(['get']),
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(['get']),
         completion(ExitCode.success.code),
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
           ['add', '-g', '--source', 'path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
       await expectLater(
-        MasonCommandRunner(logger: logger).run(['list', '-g']),
+        MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+          ['list', '-g'],
+        ),
         completion(ExitCode.success.code),
       );
 

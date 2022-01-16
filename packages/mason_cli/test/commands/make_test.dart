@@ -17,29 +17,29 @@ class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
-class FakeProcessResult extends Fake implements ProcessResult {}
-
 void main() {
   final cwd = Directory.current;
 
   group('mason make', () {
     late Logger logger;
-    late MasonCommandRunner commandRunner;
     late PubUpdater pubUpdater;
+    late MasonCommandRunner commandRunner;
 
     setUpAll(() async {
-      pubUpdater = MockPubUpdater();
-      logger = MockLogger();
-
       registerFallbackValue(Object());
+      logger = MockLogger();
+      pubUpdater = MockPubUpdater();
 
+      when(
+        () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn('');
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
-      when(
-        () => pubUpdater.update(packageName: packageName),
-      ).thenAnswer((_) => Future.value(FakeProcessResult()));
-      await MasonCommandRunner(pubUpdater: pubUpdater).run(['cache', 'clear']);
+      await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+        ['cache', 'clear'],
+      );
     });
 
     setUp(() async {
@@ -127,17 +127,17 @@ bricks:
           }),
         );
       printLogs = [];
-      pubUpdater = MockPubUpdater();
       logger = MockLogger();
+      pubUpdater = MockPubUpdater();
 
+      when(
+        () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn('');
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
-      when(
-        () => pubUpdater.update(packageName: packageName),
-      ).thenAnswer((_) => Future.value(FakeProcessResult()));
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
       commandRunner = MasonCommandRunner(
         logger: logger,
         pubUpdater: pubUpdater,
@@ -360,37 +360,43 @@ bricks:
       verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 
-    test(
-        'exits with code 73 when exception occurs '
-        'decoding prompt response', () async {
-      final result = await commandRunner.run(['make', 'app_icon']);
-      expect(result, equals(ExitCode.cantCreate.code));
+    test('exits with code 64 when variable input has type mismatch', () async {
+      when(
+        () => logger.prompt(
+          any(that: contains('What is your name?')),
+          defaultValue: any(named: 'defaultValue'),
+        ),
+      ).thenReturn('Dash');
+      when(
+        () => logger.prompt(
+          any(that: contains('How old are you?')),
+          defaultValue: any(named: 'defaultValue'),
+        ),
+      ).thenReturn('abc');
+      final result = await commandRunner.run(['make', 'bio']);
+      expect(result, equals(ExitCode.usage.code));
       verify(
-        () => logger.err("type 'Null' is not a subtype of type 'String'"),
+        () => logger.err('Invalid age.\n"abc" is not a number.'),
       ).called(1);
     });
 
     test('exits with code 73 when exception occurs while generating', () async {
       const url =
           'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
-      when(() => logger.prompt('url: ')).thenReturn(url);
-      final testDir = Directory(
-        path.join(Directory.current.path, 'app_icon_conflict'),
-      )..createSync(recursive: true);
-      Directory.current = testDir.path;
-      File(path.join(testDir.path, 'app_icon.jpg')).writeAsStringSync('');
+      when(
+        () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn(url);
+      when(() => logger.progress(any())).thenReturn(([update]) {
+        if (update == 'Made brick app_icon') throw Exception('oops');
+      });
       final result = await commandRunner.run(['make', 'app_icon']);
       expect(result, equals(ExitCode.cantCreate.code));
-      verify(
-        () => logger.err("type 'Null' is not a subtype of type 'String'"),
-      ).called(1);
+      verify(() => logger.err('Exception: oops')).called(1);
     });
 
     test('exits with code 73 when exception occurs post generation', () async {
       when(() => logger.info(any(that: contains('Generated'))))
           .thenThrow(Exception('oops'));
-      final testDir = Directory.systemTemp.createTempSync();
-      Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['make', 'greeting', '--name', 'test-name'],
       );

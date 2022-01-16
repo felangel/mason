@@ -1,7 +1,9 @@
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command_runner.dart';
+import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
+import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
 
@@ -9,21 +11,34 @@ import '../helpers/helpers.dart';
 
 class MockLogger extends Mock implements Logger {}
 
+class MockPubUpdater extends Mock implements PubUpdater {}
+
 void main() {
   final cwd = Directory.current;
 
   group('mason add', () {
     late Logger logger;
+    late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
-      commandRunner = MasonCommandRunner(logger: logger);
+      pubUpdater = MockPubUpdater();
+
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
       setUpTestingEnvironment(cwd, suffix: '.add');
 
-      File(path.join(Directory.current.path, 'mason.yaml'))
-          .writeAsStringSync('bricks:');
+      File(
+        path.join(Directory.current.path, 'mason.yaml'),
+      ).writeAsStringSync('bricks:');
     });
 
     tearDown(() {
@@ -83,7 +98,10 @@ void main() {
             path.join(Directory.current.path, 'greeting'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(
             ['make', 'greeting', '--name', 'Dash'],
           );
           expect(makeResult, equals(ExitCode.success.code));
@@ -106,9 +124,10 @@ void main() {
             path.join(Directory.current.path, 'greeting'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
-            ['make', 'greeting', '--name', 'Dash'],
-          );
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(
@@ -124,8 +143,9 @@ void main() {
       group('git', () {
         test('exits with code 64 when brick does not exist', () async {
           const url = 'https://github.com/felangel/mason';
-          final result =
-              await commandRunner.run(['add', '--source', 'git', url]);
+          final result = await commandRunner.run(
+            ['add', '--source', 'git', url],
+          );
           expect(result, equals(ExitCode.usage.code));
           verify(() => logger.err('brick not found at url $url')).called(1);
         });
@@ -140,9 +160,10 @@ void main() {
             path.join(Directory.current.path, 'widget'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
-            ['make', 'widget', '--name', 'cat'],
-          );
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'widget', '--name', 'cat']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(
@@ -192,9 +213,10 @@ void main() {
             path.join(Directory.current.path, 'greeting'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
-            ['make', 'greeting', '--name', 'Dash'],
-          );
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(
@@ -215,9 +237,10 @@ void main() {
             path.join(Directory.current.path, 'greeting'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
-            ['make', 'greeting', '--name', 'Dash'],
-          );
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(
@@ -250,9 +273,10 @@ void main() {
             path.join(Directory.current.path, 'widget'),
           )..createSync(recursive: true);
           Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(logger: logger).run(
-            ['make', 'widget', '--name', 'cat'],
-          );
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'widget', '--name', 'cat']);
           expect(makeResult, equals(ExitCode.success.code));
 
           final actual = Directory(
