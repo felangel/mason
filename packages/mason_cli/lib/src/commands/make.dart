@@ -81,67 +81,69 @@ class _MakeCommand extends MasonCommand {
       fileConflictResolution,
     );
     final disableHooks = results['no-hooks'] as bool;
-
-    Function([String?])? generateDone;
+    final generator = await MasonGenerator.fromBrickYaml(_brick);
+    final vars = <String, dynamic>{};
 
     try {
-      final generator = await MasonGenerator.fromBrickYaml(_brick);
-      final vars = <String, dynamic>{};
+      vars.addAll(await _decodeFile(configPath));
+    } on FormatException catch (error) {
+      logger.err('${error}in $configPath');
+      return ExitCode.usage.code;
+    } catch (error) {
+      logger.err('$error');
+      return ExitCode.usage.code;
+    }
 
-      try {
-        vars.addAll(await _decodeFile(configPath));
-      } on FormatException catch (error) {
-        logger.err('${error}in $configPath');
-        return ExitCode.usage.code;
-      } catch (error) {
-        logger.err('$error');
-        return ExitCode.usage.code;
-      }
-
-      for (final entry in _brick.vars.entries) {
-        final variable = entry.key;
-        final properties = entry.value;
-        if (vars.containsKey(variable)) continue;
-        final arg = results[variable] as String?;
-        if (arg != null) {
-          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
-        } else {
-          final prompt =
-              '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
-          late final dynamic response;
-          switch (properties.type) {
-            case BrickVariableType.string:
-              response = _maybeDecode(
-                logger.prompt(prompt, defaultValue: properties.defaultValue),
+    for (final entry in _brick.vars.entries) {
+      final variable = entry.key;
+      final properties = entry.value;
+      if (vars.containsKey(variable)) continue;
+      final arg = results[variable] as String?;
+      if (arg != null) {
+        vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
+      } else {
+        final prompt =
+            '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
+        late final dynamic response;
+        switch (properties.type) {
+          case BrickVariableType.string:
+            response = _maybeDecode(
+              logger.prompt(prompt, defaultValue: properties.defaultValue),
+            );
+            break;
+          case BrickVariableType.number:
+            response = logger.prompt(
+              prompt,
+              defaultValue: properties.defaultValue,
+            );
+            if (num.tryParse(response as String) == null) {
+              throw FormatException(
+                'Invalid $variable.\n"$response" is not a number.',
               );
-              break;
-            case BrickVariableType.number:
-              response = logger.prompt(
-                prompt,
-                defaultValue: properties.defaultValue,
-              );
-              break;
-            case BrickVariableType.boolean:
-              response = logger.confirm(
-                prompt,
-                defaultValue: properties.defaultValue as bool? ?? false,
-              );
-          }
-          vars.addAll(<String, dynamic>{variable: response});
+            }
+            break;
+          case BrickVariableType.boolean:
+            response = logger.confirm(
+              prompt,
+              defaultValue: properties.defaultValue as bool? ?? false,
+            );
         }
+        vars.addAll(<String, dynamic>{variable: response});
       }
+    }
 
-      final preGenScript = generator.hooks.preGen;
-      if (!disableHooks && preGenScript != null) {
-        final exitCode = await preGenScript.run(
-          vars: vars,
-          logger: logger,
-          workingDirectory: outputDir,
-        );
-        if (exitCode != ExitCode.success.code) return exitCode;
-      }
+    final preGenScript = generator.hooks.preGen;
+    if (!disableHooks && preGenScript != null) {
+      final exitCode = await preGenScript.run(
+        vars: vars,
+        logger: logger,
+        workingDirectory: outputDir,
+      );
+      if (exitCode != ExitCode.success.code) return exitCode;
+    }
 
-      generateDone = logger.progress('Making ${generator.id}');
+    final generateDone = logger.progress('Making ${generator.id}');
+    try {
       final fileCount = await generator.generate(target, vars: vars);
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
@@ -158,7 +160,7 @@ class _MakeCommand extends MasonCommand {
 
       return ExitCode.success.code;
     } catch (error) {
-      generateDone?.call();
+      generateDone.call();
       logger.err('$error');
       return ExitCode.cantCreate.code;
     }
