@@ -17,7 +17,7 @@ void main() {
     });
 
     group('.fromBundle', () {
-      test('creates a generator from bundle (pre hooks)', () async {
+      test('creates a generator from bundle (legacy)', () async {
         final generator = await MasonGenerator.fromBundle(legacyGreetingBundle);
         final hooks = generator.hooks;
 

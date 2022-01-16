@@ -1,5 +1,5 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
-// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal
+// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal, implicit_dynamic_map_literal
 
 import 'package:mason/mason.dart';
 
@@ -9,5 +9,6 @@ final legacyGreetingBundle = MasonBundle.fromJson(<String, dynamic>{
   ],
   "name": "greeting",
   "description": "A Simple Greeting Template",
-  "vars": ["name"]
+  "version": "1.0.0",
+  "vars": ['name']
 });
