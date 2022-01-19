@@ -162,8 +162,8 @@ class Logger {
 
   /// Prompts user with a yes/no question.
   bool confirm(String? message, {bool defaultValue = false}) {
-    final suffix = '${darkGray.wrap('(${defaultValue.toYesNo()})')}';
-    final _message = '$message $suffix ';
+    final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
+    final _message = '$message$suffix ';
     _stdout.write(_message);
     final input = _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty
