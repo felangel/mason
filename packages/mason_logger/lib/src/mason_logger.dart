@@ -149,8 +149,8 @@ class Logger {
   String prompt(String? message, {Object? defaultValue}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final _defaultValue = hasDefault ? '$defaultValue' : '';
-    final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')} ' : '';
-    final _message = '$message$suffix';
+    final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')}' : '';
+    final _message = '$message$suffix ';
     _stdout.write(_message);
     final input = _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty ? _defaultValue : input;
@@ -162,8 +162,8 @@ class Logger {
 
   /// Prompts user with a yes/no question.
   bool confirm(String? message, {bool defaultValue = false}) {
-    final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')} ';
-    final _message = '$message$suffix';
+    final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
+    final _message = '$message$suffix ';
     _stdout.write(_message);
     final input = _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty
