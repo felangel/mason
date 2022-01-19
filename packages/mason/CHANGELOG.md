@@ -1,3 +1,66 @@
+# 0.1.0-dev.4
+
+- **BREAKING** feat: restructure `brick.yaml` vars to support type, description, and default:
+
+```yaml
+name: example
+description: An example brick.
+
+# The following defines the version and build number for your brick.
+# A version number is three numbers separated by dots, like 1.2.34
+# followed by an optional build number (separated by a +).
+version: 0.1.0+1
+
+# Variables specify dynamic values that your brick depends on.
+# Zero or more variables can be specified for a given brick.
+# Each variable has:
+#  * a type (string, number, or boolean)
+#  * an optional short description
+#  * an optional default value
+#  * an optional prompt phrase used when asking for the variable.
+vars:
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
+```
+
+- **BREAKING** feat: add `version` to bundle
+- **BREAKING** refactor: API improvements to `MasonBundle`, `MasonGenerator`, and `DirectoryGeneratorTarget`
+
+  - `MasonBundle`
+    - Use named constructor parameters instead of positional parameters
+  - `MasonGenerator.generate(...)`
+    - Accepts optional `Logger` and `FileConflictResolution`
+  - `DirectoryGeneratorTarget`
+    - No longer accepts optional `Logger` and `FileConflictResolution` (moved to `generate` API above)
+
+  **Before**
+
+  ```dart
+  final generator = MasonGenerator.fromBundle(myBundle);
+  final target = DirectoryGeneratorTarget(dir, Logger(), FileConflictResolution.skip);
+  await generator.generate(target, vars: {...});
+  ```
+
+  **After**
+
+  ```dart
+  final generator = MasonGenerator.fromBundle(myBundle);
+  final target = DirectoryGeneratorTarget(dir);
+  await generator.generate(
+    DirectoryGeneratorTarget(tempDir),
+    vars: {...},
+    logger: Logger(), // optional logger
+    fileConflictResolution: FileConflictResolution.skip, // optional conflict resolution strategy
+  );
+  ```
+
+- fix: ignore `FileConflictResolution` when there are no conflicts
+- docs: README updates and upgrade example bricks
+- chore: upgrade to `mason_logger: v0.1.0-dev.4`
+
 # 0.1.0-dev.3
 
 - **BREAKING** feat: add version to `brick.yaml`
