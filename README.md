@@ -12,6 +12,10 @@
 
 Mason is a collection of packages that enable developers to create and consume reusable templates called bricks.
 
+<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif" width=400/>
+
+## Packages
+
 | Package                                                                             | Pub                                                                                                    |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [mason](https://github.com/felangel/mason/tree/master/packages/mason)               | [![pub package](https://img.shields.io/pub/v/mason.svg)](https://pub.dev/packages/mason)               |
