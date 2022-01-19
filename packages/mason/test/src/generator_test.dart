@@ -555,7 +555,7 @@ void main() {
             'https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png';
         final brickYaml = BrickYaml(
           name: 'app_icon',
-          description: 'Create an app_icon file from a URL',
+          description: 'Create an app icon file from a URL',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
           vars: const {'url': BrickVariableProperties.string()},
@@ -575,7 +575,7 @@ void main() {
         final url = path.join('..', '..', 'assets', 'mason_logo.png');
         final brickYaml = BrickYaml(
           name: 'app_icon',
-          description: 'Create an app_icon file from a URL',
+          description: 'Create an app icon file from a URL',
           version: '1.0.0',
           path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
           vars: const {'url': BrickVariableProperties.string()},

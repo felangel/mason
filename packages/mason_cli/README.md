@@ -192,7 +192,11 @@ name: example
 description: An example brick
 version: 1.0.0
 vars:
-  - name
+  name:
+    type: string
+    description: Your name.
+    default: Dash
+    prompt: What is your name?
 ```
 
 ### Brick Template
@@ -263,10 +267,13 @@ For example, given the following `brick.yaml`:
 
 ```yaml
 name: app_icon
-description: Create an app_icon file from a URL
-version: 1.0.0
+description: Create an app icon file from a URL
+version: 0.1.0+1
 vars:
-  - url
+  url:
+    type: string
+    description: The app icon URL.
+    prompt: Enter your app icon URL.
 ```
 
 And the following brick template:
@@ -309,9 +316,13 @@ __brick__
 ```yaml
 name: example
 description: An example brick.
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - name
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
 ```
 
 We can generate code via:
@@ -363,10 +374,14 @@ where `brick.yaml` looks like:
 
 ```yaml
 name: example
-description: An example
-version: 1.0.0
+description: An example brick.
+version: 0.1.0+1
 vars:
-  - name
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
 ```
 
 And `post_gen.dart` contains:
@@ -521,7 +536,7 @@ Available commands:
   cache    Interact with mason cache.
   get      Gets all bricks in the nearest mason.yaml.
   init     Initialize mason in the current directory.
-  list     Lists all available bricks.
+  list     Lists installed bricks.
   make     Generate code using an existing brick template.
   new      Creates a new brick template.
   remove   Removes a brick.

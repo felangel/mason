@@ -59,7 +59,7 @@ void main() {
       );
       final actual = file.readAsStringSync();
       const expected =
-          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"1.0.0","vars":{"name":{"type":"string"}}}''';
+          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string"}}}''';
       expect(actual, equals(expected));
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(
@@ -109,7 +109,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''"name":"hooks","description":"A Hooks Example Template","version":"1.0.0","vars":{"name":{"type":"string"}}''',
+          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string"}}''',
         ),
       );
       verify(() => logger.progress('Bundling hooks')).called(1);
@@ -153,7 +153,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"1.0.0","vars":{"name":{"type":"string"}}});''',
+          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string"}}});''',
         ),
       );
       verify(() => logger.progress('Bundling greeting')).called(1);
@@ -219,7 +219,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''"name":"hooks","description":"A Hooks Example Template","version":"1.0.0","vars":{"name":{"type":"string"}}''',
+          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string"}}''',
         ),
       );
       verify(() => logger.progress('Bundling hooks')).called(1);
