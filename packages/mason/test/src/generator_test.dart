@@ -69,6 +69,37 @@ void main() {
         );
       });
 
+      test('constructs an instance w/skip and no conflicts (hello_world)',
+          () async {
+        const name = 'Dash';
+        final brickYaml = BrickYaml(
+          name: 'hello_world',
+          description: 'A Simple Hello World Template',
+          version: '1.0.0',
+          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
+          vars: const {'name': BrickVariableProperties.string()},
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir, null, FileConflictResolution.skip),
+          vars: <String, dynamic>{'name': name},
+        );
+        final file = File(path.join(tempDir.path, 'HELLO.md'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+        expect(
+          file.readAsStringSync(),
+          equals(
+            '# 🧱 $name\n'
+            '\n'
+            'Hello $name!\n'
+            '\n'
+            '_made with 💖 by mason_',
+          ),
+        );
+      });
+
       test('constructs an instance (todos)', () async {
         final brickYaml = BrickYaml(
           name: 'todos',
