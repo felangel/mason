@@ -44,7 +44,7 @@ class NewCommand extends MasonCommand {
     }
 
     final done = logger.progress('Creating new brick: $name.');
-    final target = DirectoryGeneratorTarget(directory, logger);
+    final target = DirectoryGeneratorTarget(directory);
     final generator = _BrickGenerator(name, description);
     final newBrick = Brick(
       path: p.normalize(
@@ -58,7 +58,11 @@ class NewCommand extends MasonCommand {
 
     try {
       await Future.wait([
-        generator.generate(target, vars: <String, dynamic>{'name': '{{name}}'}),
+        generator.generate(
+          target,
+          vars: <String, dynamic>{'name': '{{name}}'},
+          logger: logger,
+        ),
         if (!masonYaml.bricks.containsKey(name))
           masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
       ]);

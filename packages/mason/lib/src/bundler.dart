@@ -35,12 +35,12 @@ MasonBundle createBundle(Directory brick) {
           .toList()
       : <MasonBundledFile>[];
   return MasonBundle(
-    brickYaml.name,
-    brickYaml.description,
-    brickYaml.version,
-    brickYaml.vars,
-    files..sort(_comparePaths),
-    hooks..sort(_comparePaths),
+    name: brickYaml.name,
+    description: brickYaml.description,
+    version: brickYaml.version,
+    vars: brickYaml.vars,
+    files: files..sort(_comparePaths),
+    hooks: hooks..sort(_comparePaths),
   );
 }
 

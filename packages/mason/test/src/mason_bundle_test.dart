@@ -19,7 +19,14 @@ void main() {
 
   group('MasonBundle', () {
     test('can be (de)serialized', () {
-      final instance = MasonBundle('name', 'description', '1.0.0', {}, [], []);
+      final instance = MasonBundle(
+        name: 'name',
+        description: 'description',
+        version: '1.0.0',
+        vars: {},
+        files: [],
+        hooks: [],
+      );
       expect(
         MasonBundle.fromJson(instance.toJson()),
         isA<MasonBundle>()
@@ -38,10 +45,10 @@ void main() {
 
     test('can be (de)serialized w/vars', () {
       final instance = MasonBundle(
-        'name',
-        'description',
-        '1.0.0',
-        {
+        name: 'name',
+        description: 'description',
+        version: '1.0.0',
+        vars: {
           'name': BrickVariableProperties.string(
             defaultValue: 'Dash',
             description: 'Your name',
@@ -58,8 +65,8 @@ void main() {
             prompt: 'Are you a developer?',
           ),
         },
-        [],
-        [],
+        files: [],
+        hooks: [],
       );
       final hasCorrectVars = equals({
         'name': isA<BrickVariableProperties>()

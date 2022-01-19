@@ -135,7 +135,9 @@ void main() {
         expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
       });
 
-      test('constructs an instance multiple times (hello_world)', () async {
+      test(
+          'constructs an instance multiple times '
+          '(identical) (hello_world)', () async {
         const name = 'Dash';
         final brickYaml = BrickYaml(
           name: 'hello_world',
@@ -146,10 +148,12 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
+        final logger = MockLogger();
 
         final fileCount1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
+          logger: logger,
         );
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount1, equals(1));
@@ -164,10 +168,15 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
+        verifyNever(
+          () => logger.delayed(any(that: contains('(identical)'))),
+        );
 
         final fileCount2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
+          logger: logger,
         );
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount2, equals(1));
@@ -182,6 +191,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+        verify(
+          () => logger.delayed(any(that: contains('(identical)'))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
       });
 
       test(
@@ -198,10 +211,12 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
+        final logger = MockLogger();
 
         final fileCount1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
+          logger: logger,
         );
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount1, equals(1));
@@ -216,10 +231,14 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
+        verifyNever(() => logger.delayed(any(that: contains('(skip)'))));
 
         final fileCount2 = await generator.generate(
-          DirectoryGeneratorTarget(tempDir, null, FileConflictResolution.skip),
+          DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': otherName},
+          fileConflictResolution: FileConflictResolution.skip,
+          logger: logger,
         );
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount2, equals(1));
@@ -234,6 +253,8 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+        verify(() => logger.delayed(any(that: contains('(skip)')))).called(1);
+        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
       });
 
       test(
@@ -252,8 +273,9 @@ void main() {
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
         final fileCount1 = await generator.generate(
-          DirectoryGeneratorTarget(tempDir, logger),
+          DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
+          logger: logger,
         );
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount1, equals(1));
@@ -270,12 +292,10 @@ void main() {
         );
 
         final fileCount2 = await generator.generate(
-          DirectoryGeneratorTarget(
-            tempDir,
-            logger,
-            FileConflictResolution.append,
-          ),
+          DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': otherName},
+          fileConflictResolution: FileConflictResolution.append,
+          logger: logger,
         );
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount2, equals(1));
@@ -333,12 +353,10 @@ void main() {
         final logger = MockLogger();
         when(() => logger.prompt(any())).thenReturn('Y');
         final fileCount2 = await generator.generate(
-          DirectoryGeneratorTarget(
-            tempDir,
-            logger,
-            FileConflictResolution.prompt,
-          ),
+          DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': otherName},
+          fileConflictResolution: FileConflictResolution.prompt,
+          logger: logger,
         );
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount2, equals(1));
@@ -420,8 +438,9 @@ void main() {
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
         final fileCount = await generator.generate(
-          DirectoryGeneratorTarget(tempDir, null, FileConflictResolution.skip),
+          DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
+          fileConflictResolution: FileConflictResolution.skip,
         );
         final file = File(path.join(tempDir.path, 'HELLO.md'));
         expect(fileCount, equals(1));

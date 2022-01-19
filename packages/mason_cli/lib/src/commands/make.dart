@@ -75,11 +75,7 @@ class _MakeCommand extends MasonCommand {
     final configPath = results['config-path'] as String?;
     final fileConflictResolution =
         (results['on-conflict'] as String).toFileConflictResolution();
-    final target = DirectoryGeneratorTarget(
-      Directory(outputDir),
-      logger,
-      fileConflictResolution,
-    );
+    final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final generator = await MasonGenerator.fromBrickYaml(_brick);
     final vars = <String, dynamic>{};
@@ -144,7 +140,12 @@ class _MakeCommand extends MasonCommand {
 
     final generateDone = logger.progress('Making ${generator.id}');
     try {
-      final fileCount = await generator.generate(target, vars: vars);
+      final fileCount = await generator.generate(
+        target,
+        vars: vars,
+        fileConflictResolution: fileConflictResolution,
+        logger: logger,
+      );
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
 

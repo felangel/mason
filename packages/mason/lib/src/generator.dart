@@ -249,7 +249,10 @@ abstract class Generator implements Comparable<Generator> {
   Future<int> generate(
     GeneratorTarget target, {
     Map<String, dynamic> vars = const <String, dynamic>{},
+    FileConflictResolution? fileConflictResolution,
+    Logger? logger,
   }) async {
+    final overwriteRule = fileConflictResolution?.toOverwriteRule();
     var fileCount = 0;
     await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
       final fileMatch = _fileRegExp.firstMatch(file.path);
@@ -259,6 +262,8 @@ abstract class Generator implements Comparable<Generator> {
         await target.createFile(
           p.basename(resultFile.path),
           resultFile.content,
+          logger: logger,
+          overwriteRule: overwriteRule,
         );
         fileCount++;
       } else {
@@ -275,7 +280,12 @@ abstract class Generator implements Comparable<Generator> {
           if (!wasRoot && isRoot) continue;
           if (file.path.isEmpty) continue;
           if (file.path.split(separator).contains('')) continue;
-          await target.createFile(file.path, file.content);
+          await target.createFile(
+            file.path,
+            file.content,
+            logger: logger,
+            overwriteRule: overwriteRule,
+          );
           fileCount++;
         }
       }
@@ -348,26 +358,21 @@ enum OverwriteRule {
 /// {@endtemplate}
 class DirectoryGeneratorTarget extends GeneratorTarget {
   /// {@macro directory_generator_target}
-  DirectoryGeneratorTarget(
-    this.dir, [
-    this.logger,
-    FileConflictResolution? fileConflictResolution,
-  ]) : _overwriteRule = fileConflictResolution?.toOverwriteRule() {
+  DirectoryGeneratorTarget(this.dir) {
     dir.createSync(recursive: true);
   }
 
   /// The target [Directory].
   final Directory dir;
 
-  /// Optional logger used to output created files.
-  final Logger? logger;
-
-  /// The rule used to handle file conflicts.
-  /// Determines whether to overwrite existing file or skip.
-  OverwriteRule? _overwriteRule;
-
   @override
-  Future<File> createFile(String path, List<int> contents) async {
+  Future<File> createFile(
+    String path,
+    List<int> contents, {
+    Logger? logger,
+    OverwriteRule? overwriteRule,
+  }) async {
+    var _overwriteRule = overwriteRule;
     final file = File(p.join(dir.path, path));
     final fileExists = file.existsSync();
 
@@ -441,7 +446,12 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
 // ignore: one_member_abstracts
 abstract class GeneratorTarget {
   /// Create a file at the given path with the given contents.
-  Future createFile(String path, List<int> contents);
+  Future createFile(
+    String path,
+    List<int> contents, {
+    Logger? logger,
+    OverwriteRule? overwriteRule,
+  });
 }
 
 /// {@template script_file}
