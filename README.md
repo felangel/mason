@@ -12,7 +12,7 @@
 
 Mason is a collection of packages that enable developers to create and consume reusable templates called bricks.
 
-<img src="https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif" width=400/>
+![Mason Demo][mason_demo]
 
 ## Packages
 
@@ -44,3 +44,5 @@ View the full documentation [here](https://github.com/felangel/mason/tree/master
 [![Mason Video Tutorial](https://img.youtube.com/vi/SnrHoN632NU/0.jpg)](https://www.youtube.com/watch?v=SnrHoN632NU)
 
 **Say HI to Mason Package! - The Top Tier Code Generation Tool | Complete Tutorial** by [_Flutterly_](https://www.youtube.com/channel/UC5PYcSe3to4mtm3SPCUmjvw)
+
+[mason_demo]: https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif
