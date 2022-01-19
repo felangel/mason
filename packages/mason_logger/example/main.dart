@@ -7,11 +7,18 @@ Future<void> main() async {
     ..err('error')
     ..success('success')
     ..warn('warning')
-    ..detail('detail');
+    ..detail('detail')
+    ..info('');
 
-  final favoriteAnimal = logger.prompt('What is your favorite animal?\n');
-  final done = logger.progress('Displaying progress');
+  final favoriteAnimal = logger.prompt(
+    'What is your favorite animal?',
+    defaultValue: '🐈',
+  );
+  final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
+  final done = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
-  done('Done displaying progress!');
-  logger.info('Your favorite animal is $favoriteAnimal!');
+  done('Done!');
+  logger
+    ..info('Your favorite animal is a $favoriteAnimal!')
+    ..alert(likesCats ? 'You are a cat person!' : 'You are not a cat person.');
 }
