@@ -27,7 +27,8 @@ void main() {
 
         final target = Directory.systemTemp.createTempSync();
         final fileCount = await generator.generate(
-          DirectoryGeneratorTarget(target, logger),
+          DirectoryGeneratorTarget(target),
+          logger: logger,
         );
         expect(fileCount, equals(1));
         expect(
@@ -47,7 +48,8 @@ void main() {
 
         final target = Directory.systemTemp.createTempSync();
         final fileCount = await generator.generate(
-          DirectoryGeneratorTarget(target, logger),
+          DirectoryGeneratorTarget(target),
+          logger: logger,
         );
         expect(fileCount, equals(1));
         expect(
@@ -79,8 +81,9 @@ void main() {
         );
 
         final fileCount = await generator.generate(
-          DirectoryGeneratorTarget(target, logger),
+          DirectoryGeneratorTarget(target),
           vars: vars,
+          logger: logger,
         );
         expect(fileCount, equals(1));
         expect(

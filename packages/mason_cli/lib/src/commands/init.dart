@@ -22,11 +22,12 @@ class InitCommand extends MasonCommand {
       return ExitCode.usage.code;
     }
     final fetchDone = logger.progress('Initializing');
-    final target = DirectoryGeneratorTarget(cwd, logger);
+    final target = DirectoryGeneratorTarget(cwd);
     final generator = _MasonYamlGenerator();
     await generator.generate(
       target,
       vars: <String, String>{'name': '{{name}}'},
+      logger: logger,
     );
     fetchDone();
 

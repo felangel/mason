@@ -34,14 +34,14 @@ class MasonBundledFile {
 @JsonSerializable()
 class MasonBundle {
   /// {@macro mason_bundle}
-  const MasonBundle(
-    this.name,
-    this.description,
-    this.version,
-    this.vars,
-    this.files,
-    this.hooks,
-  );
+  const MasonBundle({
+    required this.name,
+    required this.description,
+    required this.version,
+    this.vars = const <String, BrickVariableProperties>{},
+    this.files = const [],
+    this.hooks = const [],
+  });
 
   /// Converts a [Map<String, dynamic>] into a [MasonBundle] instance.
   factory MasonBundle.fromJson(Map<String, dynamic> json) =>

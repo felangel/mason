@@ -46,17 +46,23 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
           ],
         );
         final val = MasonBundle(
-          $checkedConvert('name', (v) => v as String),
-          $checkedConvert('description', (v) => v as String),
-          $checkedConvert('version', (v) => v as String),
-          $checkedConvert('vars', (v) => const VarsConverter().fromJson(v)),
-          $checkedConvert(
+          name: $checkedConvert('name', (v) => v as String),
+          description: $checkedConvert('description', (v) => v as String),
+          version: $checkedConvert('version', (v) => v as String),
+          vars: $checkedConvert(
+              'vars',
+              (v) => v == null
+                  ? const <String, BrickVariableProperties>{}
+                  : const VarsConverter().fromJson(v)),
+          files: $checkedConvert(
               'files',
-              (v) => (v as List<dynamic>)
-                  .map((e) => MasonBundledFile.fromJson(
-                      Map<String, dynamic>.from(e as Map)))
-                  .toList()),
-          $checkedConvert(
+              (v) =>
+                  (v as List<dynamic>?)
+                      ?.map((e) => MasonBundledFile.fromJson(
+                          Map<String, dynamic>.from(e as Map)))
+                      .toList() ??
+                  const []),
+          hooks: $checkedConvert(
               'hooks',
               (v) =>
                   (v as List<dynamic>?)
