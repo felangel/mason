@@ -103,9 +103,13 @@ class _BrickGenerator extends MasonGenerator {
   static String _content(String name, String description) => '''
 name: $name
 description: $description
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - name
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
 ''';
 
   final String brickName;

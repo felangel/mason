@@ -75,9 +75,25 @@ class _MasonYamlGenerator extends MasonGenerator {
   static const _brickYamlContent = '''
 name: hello
 description: An example hello brick.
-version: 1.0.0
+
+# The following defines the version and build number for your brick.
+# A version number is three numbers separated by dots, like 1.2.34
+# followed by an optional build number (separated by a +).
+version: 0.1.0+1
+
+# Variables specify dynamic values that your brick depends on.
+# Zero or more variables can be specified for a given brick.
+# Each variable has:
+#  * a type (string, number, or boolean)
+#  * an optional short description
+#  * an optional default value
+#  * an optional prompt phrase used when asking for the variable.
 vars:
-  - name
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
 ''';
 
   static const _masonYamlContent = '''
