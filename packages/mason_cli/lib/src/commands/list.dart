@@ -36,9 +36,11 @@ class ListCommand extends MasonCommand {
       return ExitCode.success.code;
     }
 
-    for (var i = 0; i < bricks.length; i++) {
-      final brick = bricks.elementAt(i);
-      final prefix = i == bricks.length - 1 ? '└──' : '├──';
+    final sortedBricks = [...bricks]..sort((a, b) => a.name.compareTo(b.name));
+
+    for (var i = 0; i < sortedBricks.length; i++) {
+      final brick = sortedBricks.elementAt(i);
+      final prefix = i == sortedBricks.length - 1 ? '└──' : '├──';
 
       logger.info(
         '$prefix ${styleBold.wrap(brick.name)} - ${brick.description}',
