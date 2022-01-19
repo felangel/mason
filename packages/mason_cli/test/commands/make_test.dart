@@ -55,6 +55,8 @@ bricks:
     path: ../../../../../bricks/documentation
   greeting:
     path: ../../../../../bricks/greeting
+  legacy:
+    path: ../../../../../bricks/legacy
   hello_world:
     path: ../../../../../bricks/hello_world
   hooks:
@@ -81,6 +83,9 @@ bricks:
       );
       final greetingPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
+      );
+      final legacyPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'legacy'),
       );
       final helloWorldPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
@@ -116,6 +121,8 @@ bricks:
                 hooksPath,
             '''greeting_7271b59f2b3d670acfa5ed607915573ed3e66bf38b4bb2cd8a7972bb3e17b239''':
                 greetingPath,
+            '''legacy_c47d71be087d59069d8d6f3d85d7cac46b3972c8717c9cecf005eb56db8d1214''':
+                legacyPath,
             '''plugin_40192192887515a0911c28a4738bb32229909ac5d7161c00b3d9bd41accf3485''':
                 pluginPath,
             '''simple_6c33a2482d658c2355275550eb6960356ef483e03badf54b9e4f7daae613acd6''':
@@ -174,6 +181,7 @@ bricks:
               '  greeting        A Simple Greeting Template\n'
               '  hello_world     A Simple Hello World Template\n'
               '  hooks           A Hooks Example Template\n'
+              '  legacy          A Legacy Greeting Template\n'
               '  plugin          An example plugin template\n'
               '  simple          A Simple Static Template\n'
               '  todos           A Todos Template\n'
@@ -214,6 +222,37 @@ bricks:
               'Run "mason help" to see global options.'
         ];
         final result = await commandRunner.run(['make', 'greeting', '--help']);
+        expect(result, equals(ExitCode.success.code));
+        expect(printLogs, equals(expectedPrintLogs));
+      }),
+    );
+
+    test(
+      '<subcommand> --help shows correct help information (legacy)',
+      overridePrint(() async {
+        const expectedPrintLogs = <String>[
+          'A Legacy Greeting Template\n'
+              '\n'
+              'Usage: mason make legacy [arguments]\n'
+              '-h, --help                      Print this usage information.\n'
+              '    --no-hooks                  skips running hooks\n'
+              '''-c, --config-path               Path to config json file containing variables.\n'''
+              '''-o, --output-dir                Directory where to output the generated code.\n'''
+              '                                (defaults to ".")\n'
+              '''    --on-conflict               File conflict resolution strategy.\n'''
+              '\n'
+              '''          [append]              Always append conflicting files.\n'''
+              '''          [overwrite]           Always overwrite conflicting files.\n'''
+              '''          [prompt] (default)    Always prompt the user for each file conflict.\n'''
+              '          [skip]                Always skip conflicting files.\n'
+              '\n'
+              '''-------------------------------------------------------------------------------\n'''
+              '\n'
+              '    --name                      <string>\n'
+              '\n'
+              'Run "mason help" to see global options.'
+        ];
+        final result = await commandRunner.run(['make', 'legacy', '--help']);
         expect(result, equals(ExitCode.success.code));
         expect(printLogs, equals(expectedPrintLogs));
       }),
