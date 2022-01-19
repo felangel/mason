@@ -371,29 +371,36 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final file = File(p.join(dir.path, path));
     final fileExists = file.existsSync();
 
-    if (fileExists) {
-      final existingContents = file.readAsBytesSync();
+    if (!fileExists) {
+      return file
+          .create(recursive: true)
+          .then<File>((_) => file.writeAsBytes(contents))
+          .whenComplete(
+            () => logger?.delayed('  ${file.path} ${lightGreen.wrap('(new)')}'),
+          );
+    }
 
-      if (const ListEquality<int>().equals(existingContents, contents)) {
-        logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
-        return file;
-      }
+    final existingContents = file.readAsBytesSync();
 
-      final shouldPrompt = logger != null &&
-          (_overwriteRule != OverwriteRule.alwaysOverwrite &&
-              _overwriteRule != OverwriteRule.alwaysSkip &&
-              _overwriteRule != OverwriteRule.alwaysAppend);
+    if (const ListEquality<int>().equals(existingContents, contents)) {
+      logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+      return file;
+    }
 
-      if (shouldPrompt) {
-        logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
-        _overwriteRule = logger
-            ?.prompt(
-              yellow.wrap(
-                styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
-              ),
-            )
-            .toOverwriteRule();
-      }
+    final shouldPrompt = logger != null &&
+        (_overwriteRule != OverwriteRule.alwaysOverwrite &&
+            _overwriteRule != OverwriteRule.alwaysSkip &&
+            _overwriteRule != OverwriteRule.alwaysAppend);
+
+    if (shouldPrompt) {
+      logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      _overwriteRule = logger
+          ?.prompt(
+            yellow.wrap(
+              styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
+            ),
+          )
+          .toOverwriteRule();
     }
 
     switch (_overwriteRule) {
