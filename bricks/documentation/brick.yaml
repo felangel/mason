@@ -1,7 +1,19 @@
 name: documentation
 description: Create Documentation Markdown Files
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - name
-  - description
-  - author
+  name:
+    type: string
+    description: The name of the project
+    default: Example
+    prompt: What is the project name?
+  description:
+    type: string
+    description: A short description of the project
+    default: null
+    prompt: What is the project description?
+  author:
+    type: string
+    description: The name of the project author
+    default: Dash
+    prompt: Who is the project author?

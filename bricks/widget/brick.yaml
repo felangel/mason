@@ -1,5 +1,9 @@
 name: widget
 description: Create a Simple Flutter Widget
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - name
+  name:
+    type: string
+    description: The widget name
+    default: MyWidget
+    prompt: Please enter the widget name.

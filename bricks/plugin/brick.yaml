@@ -1,6 +1,14 @@
 name: plugin
 description: An example plugin template
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - android
-  - ios
+  android:
+    type: boolean
+    description: Whether to generate an Android project.
+    default: false
+    prompt: Do you want to generate an Android project?
+  ios:
+    type: boolean
+    description: Whether to generate an iOS project.
+    default: false
+    prompt: Do you want to generate an iOS project?

@@ -168,7 +168,7 @@ bricks:
               '          [skip]                Always skip conflicting files.\n'
               '\n'
               'Available subcommands:\n'
-              '  app_icon        Create an app_icon file from a URL\n'
+              '  app_icon        Create an app icon file from a URL\n'
               '  bio             A Bio Template\n'
               '  documentation   Create Documentation Markdown Files\n'
               '  greeting        A Simple Greeting Template\n'
@@ -208,7 +208,8 @@ bricks:
               '\n'
               '''-------------------------------------------------------------------------------\n'''
               '\n'
-              '    --name                      <string>\n'
+              '    --name                      Your name <string>\n'
+              '                                (defaults to "Dash")\n'
               '\n'
               'Run "mason help" to see global options.'
         ];

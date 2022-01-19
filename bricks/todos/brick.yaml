@@ -1,5 +1,14 @@
 name: todos
 description: A Todos Template
-version: 1.0.0
+version: 0.1.0+1
 vars:
-  - todos
+  todos:
+    type: string
+    description: 'JSON Array of todos ([{"todo":"Walk Dog","done":false}])'
+    default: '[{"todo":"Walk Dog","done":false}]'
+    prompt: What is the list of todos?
+  developers:
+    type: string
+    description: "JSON Array of developers ([{'name': 'Dash'}])"
+    default: '[{"name": "Dash"}]'
+    prompt: What is the list of developers?
