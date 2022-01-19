@@ -1,0 +1,5 @@
+name: legacy
+description: A Legacy Greeting Template
+version: 0.1.0+1
+vars:
+  - name
