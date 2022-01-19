@@ -11,6 +11,8 @@ bricks:
     path: ../../../bricks/hello_world
   hooks:
     path: ../../../bricks/hooks
+  legacy:
+    path: ../../../bricks/legacy
   plugin:
     path: ../../../bricks/plugin
   simple:
