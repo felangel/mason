@@ -120,7 +120,7 @@ class Logger {
       final time =
           (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
       _stdout.write(
-        '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} ${update ?? message} (${time}s)\n''',
+        '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} ${update ?? message} ${darkGray.wrap('(${time}s)')}\n''',
       );
       _timer?.cancel();
     };
