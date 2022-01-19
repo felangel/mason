@@ -22,16 +22,24 @@ Future<void> main() async {
     ..detail('detail');
 
   // Prompt for user input.
-  final favoriteAnimal = logger.prompt('What is your favorite animal?');
+  final favoriteAnimal = logger.prompt(
+    'What is your favorite animal?',
+    defaultValue: '🐈',
+  );
+
+  // Ask for user confirmation.
+  final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
 
   // Show a progress message while performing an asynchronous operation.
-  final done = logger.progress('Displaying progress');
+  final done = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
 
   // Show a completion message when the asynchronous operation has completed.
-  done('Done displaying progress!');
+  done('Done!');
 
   // Use the user provided input.
-  logger.info('Your favorite animal is $favoriteAnimal!');
+  logger
+    ..info('Your favorite animal is a $favoriteAnimal!')
+    ..alert(likesCats ? 'You are a cat person!' : 'You are not a cat person.');
 }
 ```
