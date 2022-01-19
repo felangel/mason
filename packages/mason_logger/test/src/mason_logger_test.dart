@@ -326,7 +326,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}✓')} $message ${darkGray.wrap('(0.1s)')}\n''',
+                  '''\b${'\b' * (message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.1s)')}\n''',
                 );
               },
             ).called(1);
