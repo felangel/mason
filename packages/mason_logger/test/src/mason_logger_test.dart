@@ -157,12 +157,13 @@ void main() {
           () {
             const message = 'test message';
             const response = 'test response';
+            const prompt = '$message ';
             final promptWithResponse =
-                '''\x1b[A\u001B[2K$message${styleDim.wrap(lightCyan.wrap(response))}''';
+                '''\x1b[A\u001B[2K$message ${styleDim.wrap(lightCyan.wrap(response))}''';
             when(() => stdin.readLineSync()).thenReturn(response);
             final actual = Logger().prompt(message);
             expect(actual, equals(response));
-            verify(() => stdout.write(message)).called(1);
+            verify(() => stdout.write(prompt)).called(1);
             verify(() => stdout.writeln(promptWithResponse)).called(1);
           },
           stdout: () => stdout,
