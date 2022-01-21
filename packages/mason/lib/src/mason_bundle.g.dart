@@ -42,6 +42,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
             'name',
             'description',
             'version',
+            'aliases',
             'vars'
           ],
         );
@@ -49,6 +50,13 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
           name: $checkedConvert('name', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String),
           version: $checkedConvert('version', (v) => v as String),
+          aliases: $checkedConvert(
+              'aliases',
+              (v) =>
+                  (v as Map?)?.map(
+                    (k, e) => MapEntry(k as String, e as String),
+                  ) ??
+                  const <String, String>{}),
           vars: $checkedConvert(
               'vars',
               (v) => v == null
@@ -90,6 +98,7 @@ Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
     }
   }
 
+  writeNotNull('aliases', instance.aliases);
   writeNotNull('vars', const VarsConverter().toJson(instance.vars));
   return val;
 }

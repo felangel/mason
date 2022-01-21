@@ -84,11 +84,17 @@ final _builtInLambdas = <String, LambdaFunction>{
 extension RenderTemplate on String {
   /// {@macro render_template}
   String render(
-    Map<String, dynamic> vars, [
+    Map<String, dynamic> vars,
+    Map<String, String> aliases, [
     Map<String, List<int>>? partials = const {},
   ]) {
+    var content = this;
+    for (final alias in aliases.entries) {
+      content = content.replaceAll(alias.key, alias.value);
+    }
+
     final template = Template(
-      _sanitizeInput(this),
+      _sanitizeInput(content),
       lenient: true,
       partialResolver: partials?.resolve,
     );

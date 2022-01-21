@@ -8,14 +8,17 @@ void main() {
   group('render', () {
     test('outputs unchanged string when there are no variables', () {
       const input = 'hello world';
-      expect(input.render(<String, dynamic>{}), equals(input));
+      expect(input.render(<String, dynamic>{}, {}), equals(input));
     });
 
     test('outputs correct string when there is a single variable', () {
       const name = 'dash';
       const input = 'hello {{name}}';
       const expected = 'hello $name';
-      expect(input.render(<String, dynamic>{'name': name}), equals(expected));
+      expect(
+        input.render(<String, dynamic>{'name': name}, {}),
+        equals(expected),
+      );
     });
 
     test('outputs correct string when there is are multiple variables', () {
@@ -24,7 +27,7 @@ void main() {
       const input = 'hello {{name}}! Age is {{age}}';
       const expected = 'hello $name! Age is $age';
       expect(
-        input.render(<String, dynamic>{'name': name, 'age': age}),
+        input.render(<String, dynamic>{'name': name, 'age': age}, {}),
         equals(expected),
       );
     });
@@ -32,7 +35,16 @@ void main() {
     test('outputs correct string when variable is missing', () {
       const input = 'hello {{name}}!';
       const expected = 'hello !';
-      expect(input.render(<String, dynamic>{}), equals(expected));
+      expect(input.render(<String, dynamic>{}, {}), equals(expected));
+    });
+
+    test('outputs correct string with aliases', () {
+      const input = 'hello test!';
+      const expected = 'hello world!';
+      expect(
+        input.render(<String, dynamic>{'name': 'world'}, {'test': '{{name}}'}),
+        equals(expected),
+      );
     });
 
     group('partials', () {
@@ -55,7 +67,7 @@ void main() {
         const input = 'Greeting: {{#camelCase}}{{greeting}}{{/camelCase}}!';
         const expected = 'Greeting: helloWorld!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -66,7 +78,7 @@ void main() {
             'Greeting: {{#constantCase}}{{greeting}}{{/constantCase}}!';
         const expected = 'Greeting: HELLO_WORLD!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -76,7 +88,7 @@ void main() {
         const input = 'Greeting: {{#dotCase}}{{greeting}}{{/dotCase}}!';
         const expected = 'Greeting: hello.world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -86,7 +98,7 @@ void main() {
         const input = 'Greeting: {{#headerCase}}{{greeting}}{{/headerCase}}!';
         const expected = 'Greeting: Hello-World!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -96,7 +108,7 @@ void main() {
         const input = 'Greeting: {{#lowerCase}}{{greeting}}{{/lowerCase}}!';
         const expected = 'Greeting: hello world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -106,7 +118,7 @@ void main() {
         const input = 'Greeting: {{#pascalCase}}{{greeting}}{{/pascalCase}}!';
         const expected = 'Greeting: HelloWorld!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -116,7 +128,7 @@ void main() {
         const input = 'Greeting: {{#paramCase}}{{greeting}}{{/paramCase}}!';
         const expected = 'Greeting: hello-world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -126,7 +138,7 @@ void main() {
         const input = 'Greeting: {{#pathCase}}{{greeting}}{{/pathCase}}!';
         const expected = 'Greeting: hello/world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -137,7 +149,7 @@ void main() {
             'Greeting: {{#sentenceCase}}{{greeting}}{{/sentenceCase}}!';
         const expected = 'Greeting: Hello world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -147,7 +159,7 @@ void main() {
         const input = 'Greeting: {{#snakeCase}}{{greeting}}{{/snakeCase}}!';
         const expected = 'Greeting: hello_world!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -157,7 +169,7 @@ void main() {
         const input = 'Greeting: {{#titleCase}}{{greeting}}{{/titleCase}}!';
         const expected = 'Greeting: Hello World!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });
@@ -167,7 +179,7 @@ void main() {
         const input = 'Greeting: {{#upperCase}}{{greeting}}{{/upperCase}}!';
         const expected = 'Greeting: HELLO WORLD!';
         expect(
-          input.render(<String, dynamic>{'greeting': greeting}),
+          input.render(<String, dynamic>{'greeting': greeting}, {}),
           equals(expected),
         );
       });

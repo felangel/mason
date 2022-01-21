@@ -123,5 +123,31 @@ void main() {
             .having((file) => file.description, 'description', description),
       );
     });
+
+    test('can be (de)serialized w/ aliases', () {
+      const name = 'name';
+      const description = 'description';
+      const version = '1.0.0';
+      const aliases = {'alias1': 'value1'};
+
+      expect(
+        MasonBundle.fromJson(<String, dynamic>{
+          'name': name,
+          'description': description,
+          'version': version,
+          'files': <MasonBundledFile>[],
+          'vars': <String>[],
+          'aliases': aliases,
+        }),
+        isA<MasonBundle>()
+            .having((file) => file.name, 'name', name)
+            .having((file) => file.version, 'version', version)
+            .having((file) => file.vars, 'vars', isEmpty)
+            .having((file) => file.files, 'files', isEmpty)
+            .having((file) => file.hooks, 'hooks', isEmpty)
+            .having((file) => file.description, 'description', description)
+            .having((file) => file.aliases, 'aliases', aliases),
+      );
+    });
   });
 }

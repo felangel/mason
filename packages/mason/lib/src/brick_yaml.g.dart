@@ -12,7 +12,14 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['name', 'description', 'version', 'vars', 'path'],
+          allowedKeys: const [
+            'name',
+            'description',
+            'version',
+            'vars',
+            'path',
+            'aliases'
+          ],
         );
         final val = BrickYaml(
           name: $checkedConvert('name', (v) => v as String),
@@ -24,6 +31,11 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
                   ? const <String, BrickVariableProperties>{}
                   : const VarsConverter().fromJson(v)),
           path: $checkedConvert('path', (v) => v as String?),
+          aliases: $checkedConvert(
+              'aliases',
+              (v) => (v as Map?)?.map(
+                    (k, e) => MapEntry(k as String, e as String),
+                  )),
         );
         return val;
       },
@@ -44,6 +56,7 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
 
   writeNotNull('vars', const VarsConverter().toJson(instance.vars));
   writeNotNull('path', instance.path);
+  writeNotNull('aliases', instance.aliases);
   return val;
 }
 

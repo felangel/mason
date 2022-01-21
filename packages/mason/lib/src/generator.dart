@@ -42,10 +42,11 @@ class MasonGenerator extends Generator {
   MasonGenerator(
     String id,
     String description, {
+    Map<String, String>? aliases = const {},
     List<TemplateFile?> files = const <TemplateFile>[],
     GeneratorHooks hooks = const GeneratorHooks(),
     this.vars = const <String>[],
-  }) : super(id, description, hooks) {
+  }) : super(id, description, hooks, aliases) {
     for (final file in files) {
       addTemplateFile(file);
     }
@@ -84,6 +85,7 @@ class MasonGenerator extends Generator {
       brick.name,
       brick.description,
       vars: brick.vars.keys.toList(),
+      aliases: brick.aliases,
       files: await Future.wait(brickFiles),
       hooks: await GeneratorHooks.fromBrickYaml(brick),
     );
@@ -96,6 +98,7 @@ class MasonGenerator extends Generator {
       bundle.name,
       bundle.description,
       vars: bundle.vars.keys.toList(),
+      aliases: bundle.aliases,
       files: _decodeConcatenatedData(bundle.files),
       hooks: GeneratorHooks.fromBundle(bundle),
     );
@@ -218,7 +221,12 @@ class GeneratorHooks {
 /// {@endtemplate}
 abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
-  Generator(this.id, this.description, [this.hooks = const GeneratorHooks()]);
+  Generator(
+    this.id,
+    this.description, [
+    this.hooks = const GeneratorHooks(),
+    Map<String, String>? aliases,
+  ]) : aliases = aliases ?? {};
 
   /// Unique identifier for the generator.
   final String id;
@@ -236,6 +244,9 @@ abstract class Generator implements Comparable<Generator> {
   ///
   /// Contains a Map of partial file path to partial file content.
   final Map<String, List<int>> partials = {};
+
+  /// A Map of aliases to their values.
+  final Map<String, String> aliases;
 
   /// Add a new template file.
   void addTemplateFile(TemplateFile? file) {
@@ -270,6 +281,7 @@ abstract class Generator implements Comparable<Generator> {
         final resultFiles = file.runSubstitution(
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
+          aliases,
         );
         final root = RegExp(r'\w:\\|\w:\/');
         final separator = RegExp(r'\/|\\');
@@ -469,15 +481,21 @@ class ScriptFile {
   final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, dynamic> parameters) {
-    return FileContents(path, _createContent(parameters));
+  FileContents runSubstitution(
+    Map<String, dynamic> parameters,
+    Map<String, String> aliases,
+  ) {
+    return FileContents(path, _createContent(parameters, aliases));
   }
 
-  List<int> _createContent(Map<String, dynamic> vars) {
+  List<int> _createContent(
+    Map<String, dynamic> vars,
+    Map<String, String> aliases,
+  ) {
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = decoded.render(vars);
+      final rendered = decoded.render(vars, aliases);
       return utf8.encode(rendered);
     } on Exception {
       return content;
@@ -490,10 +508,16 @@ class ScriptFile {
     Map<String, dynamic> vars = const <String, dynamic>{},
     Logger? logger,
     String? workingDirectory,
+    Map<String, String> aliases = const <String, String>{},
   }) async {
     final tempDir = Directory.systemTemp.createTempSync();
     final script = File(p.join(tempDir.path, p.basename(path)))
-      ..writeAsBytesSync(runSubstitution(vars).content);
+      ..writeAsBytesSync(
+        runSubstitution(
+          vars,
+          aliases,
+        ).content,
+      );
     final result = await Process.run(
       'dart',
       [script.path],
@@ -537,6 +561,7 @@ class TemplateFile {
   Set<FileContents> runSubstitution(
     Map<String, dynamic> parameters,
     Map<String, List<int>> partials,
+    Map<String, String> aliases,
   ) {
     var filePath = path.replaceAll(r'\', '/');
     if (_loopRegExp().hasMatch(filePath)) {
@@ -569,30 +594,31 @@ class TemplateFile {
         for (var i = 0; i < permutation.length; i++) {
           param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
         }
-        final newPath = filePath.render(param);
+        final newPath = filePath.render(param, aliases);
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
-        )._createContent(parameters..addAll(param), partials);
+        )._createContent(parameters..addAll(param), aliases, partials);
         fileContents.add(FileContents(newPath, newContents));
       }
 
       return fileContents;
     } else {
-      final newPath = filePath.render(parameters);
-      final newContents = _createContent(parameters, partials);
+      final newPath = filePath.render(parameters, aliases);
+      final newContents = _createContent(parameters, aliases, partials);
       return {FileContents(newPath, newContents)};
     }
   }
 
   List<int> _createContent(
     Map<String, dynamic> vars,
+    Map<String, String> aliases,
     Map<String, List<int>> partials,
   ) {
     try {
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = decoded.render(vars, partials);
+      final rendered = decoded.render(vars, aliases, partials);
       return utf8.encode(rendered);
     } on Exception {
       return content;

@@ -150,6 +150,16 @@ vars:
         );
         expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
       });
+
+      test('can be (de)serialized correctly with aliases', () {
+        final instance = BrickYaml(
+          name: 'A',
+          description: 'descriptionA',
+          version: '1.0.0',
+          aliases: const {'alias1': 'value1'},
+        );
+        expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
+      });
     });
 
     group('copyWith', () {

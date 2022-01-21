@@ -19,6 +19,7 @@ class BrickYaml {
     required this.version,
     this.vars = const <String, BrickVariableProperties>{},
     this.path,
+    this.aliases,
   });
 
   /// Converts [Map] to [BrickYaml]
@@ -56,6 +57,9 @@ class BrickYaml {
   /// Path to the [BrickYaml] file.
   final String? path;
 
+  /// Map of aliases to the values they represent.
+  final Map<String, String>? aliases;
+
   /// Returns a copy of the current [BrickYaml] with
   /// an overridden [path].
   BrickYaml copyWith({String? path}) {
@@ -65,6 +69,7 @@ class BrickYaml {
       version: version,
       vars: vars,
       path: path ?? this.path,
+      aliases: aliases,
     );
   }
 

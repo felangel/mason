@@ -38,6 +38,7 @@ class MasonBundle {
     required this.name,
     required this.description,
     required this.version,
+    this.aliases = const <String, String>{},
     this.vars = const <String, BrickVariableProperties>{},
     this.files = const [],
     this.hooks = const [],
@@ -62,6 +63,9 @@ class MasonBundle {
 
   /// The brick version (from the `brick.yaml`).
   final String version;
+
+  /// The aliases defined in the `brick.yaml`
+  final Map<String, String>? aliases;
 
   /// All required variables for the brick (from the `brick.yaml`).
   @VarsConverter()

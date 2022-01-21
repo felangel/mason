@@ -676,7 +676,7 @@ void main() {
             path.join(tempDir.path, 'malformed.txt'),
             bytes,
           );
-          final set = template.runSubstitution(<String, dynamic>{}, {});
+          final set = template.runSubstitution(<String, dynamic>{}, {}, {});
           expect(set.length, equals(1));
           expect(set.first.content, equals(bytes));
         });
@@ -692,7 +692,7 @@ void main() {
             path.join(tempDir.path, 'malformed.txt'),
             bytes,
           );
-          final file = template.runSubstitution(<String, dynamic>{});
+          final file = template.runSubstitution(<String, dynamic>{}, {});
           expect(file.content, equals(bytes));
         });
       });
