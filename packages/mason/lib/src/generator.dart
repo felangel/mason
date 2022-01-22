@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
@@ -8,7 +9,7 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/mason_bundle.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
+import 'package:universal_io/io.dart' show Directory, File, FileMode;
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
@@ -490,27 +491,47 @@ class ScriptFile {
     Map<String, dynamic> vars = const <String, dynamic>{},
     Logger? logger,
     String? workingDirectory,
+    void Function(dynamic message)? onMessage,
   }) async {
-    final tempDir = Directory.systemTemp.createTempSync();
-    final script = File(p.join(tempDir.path, p.basename(path)))
-      ..writeAsBytesSync(runSubstitution(vars).content);
-    final result = await Process.run(
-      'dart',
-      [script.path],
-      workingDirectory: workingDirectory,
+    final subscriptions = <StreamSubscription>[];
+    final messagePort = ReceivePort();
+    final errorPort = ReceivePort();
+    final exitPort = ReceivePort();
+
+    var didError = false;
+
+    subscriptions
+      ..add(
+        errorPort.listen((dynamic error) {
+          didError = true;
+          logger?.err('$error');
+        }),
+      )
+      ..add(messagePort.listen(onMessage?.call));
+
+    final uri = Uri.dataFromBytes(
+      runSubstitution(vars).content,
+      mimeType: 'application/dart',
     );
 
-    final stdout = result.stdout as String?;
-    if (stdout != null && stdout.isNotEmpty) logger?.info(stdout.trim());
+    final isolate = await Isolate.spawnUri(
+      uri,
+      [json.encode(vars)],
+      messagePort.sendPort,
+      paused: true,
+    );
 
-    final stderr = result.stderr as String?;
-    if (stderr != null && stderr.isNotEmpty) logger?.err(stderr.trim());
+    isolate
+      ..addErrorListener(errorPort.sendPort)
+      ..addOnExitListener(exitPort.sendPort)
+      ..resume(isolate.pauseCapability!);
 
-    try {
-      await tempDir.delete(recursive: true);
-    } catch (_) {}
+    await exitPort.first;
+    for (final subscription in subscriptions) {
+      unawaited(subscription.cancel());
+    }
 
-    return result.exitCode;
+    return didError ? ExitCode.software.code : ExitCode.success.code;
   }
 }
 

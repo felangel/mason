@@ -128,12 +128,21 @@ class _MakeCommand extends MasonCommand {
       }
     }
 
+    Map<String, dynamic>? updatedVars;
+
+    void _onPreGenMessage(dynamic message) {
+      try {
+        updatedVars = json.decode(message as String) as Map<String, dynamic>;
+      } catch (_) {}
+    }
+
     final preGenScript = generator.hooks.preGen;
     if (!disableHooks && preGenScript != null) {
       final exitCode = await preGenScript.run(
         vars: vars,
         logger: logger,
         workingDirectory: outputDir,
+        onMessage: _onPreGenMessage,
       );
       if (exitCode != ExitCode.success.code) return exitCode;
     }
@@ -142,7 +151,7 @@ class _MakeCommand extends MasonCommand {
     try {
       final fileCount = await generator.generate(
         target,
-        vars: vars,
+        vars: updatedVars ?? vars,
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
@@ -152,7 +161,7 @@ class _MakeCommand extends MasonCommand {
       final postGenScript = generator.hooks.postGen;
       if (!disableHooks && postGenScript != null) {
         final exitCode = await postGenScript.run(
-          vars: vars,
+          vars: updatedVars ?? vars,
           logger: logger,
           workingDirectory: outputDir,
         );
