@@ -263,19 +263,6 @@ enum OverwriteRule {
   appendOnce,
 }
 
-/// A target for a [Generator].
-/// This class knows how to create files given a path and contents.
-// ignore: one_member_abstracts
-abstract class GeneratorTarget {
-  /// Create a file at the given path with the given contents.
-  Future createFile(
-    String path,
-    List<int> contents, {
-    Logger? logger,
-    OverwriteRule? overwriteRule,
-  });
-}
-
 /// {@template directory_generator_target}
 /// A [GeneratorTarget] based on a provided [Directory].
 /// {@endtemplate}
@@ -362,6 +349,19 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             );
     }
   }
+}
+
+/// A target for a [Generator].
+/// This class knows how to create files given a path and contents.
+// ignore: one_member_abstracts
+abstract class GeneratorTarget {
+  /// Create a file at the given path with the given contents.
+  Future createFile(
+    String path,
+    List<int> contents, {
+    Logger? logger,
+    OverwriteRule? overwriteRule,
+  });
 }
 
 /// {@template template_file}
