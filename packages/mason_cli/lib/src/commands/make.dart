@@ -132,7 +132,9 @@ class _MakeCommand extends MasonCommand {
 
     void _onPreGenMessage(dynamic message) {
       try {
-        updatedVars = json.decode(message as String) as Map<String, dynamic>;
+        if (message is Map) {
+          updatedVars = message.cast<String, dynamic>();
+        }
       } catch (_) {}
     }
 
@@ -142,6 +144,7 @@ class _MakeCommand extends MasonCommand {
         vars: vars,
         logger: logger,
         workingDirectory: outputDir,
+        pubspec: generator.hooks.pubspec,
         onMessage: _onPreGenMessage,
       );
       if (exitCode != ExitCode.success.code) return exitCode;
@@ -163,6 +166,7 @@ class _MakeCommand extends MasonCommand {
         final exitCode = await postGenScript.run(
           vars: updatedVars ?? vars,
           logger: logger,
+          pubspec: generator.hooks.pubspec,
           workingDirectory: outputDir,
         );
         if (exitCode != ExitCode.success.code) return exitCode;

@@ -4,12 +4,13 @@ import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/mason_bundle.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart' show Directory, File, FileMode;
+import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
@@ -145,7 +146,7 @@ extension on GeneratorHook {
 /// {@endtemplate}
 class GeneratorHooks {
   /// {@macro generator_hooks}
-  const GeneratorHooks({this.preGen, this.postGen});
+  const GeneratorHooks({this.preGen, this.postGen, this.pubspec});
 
   /// Creates [GeneratorHooks] from a provided [MasonBundle].
   factory GeneratorHooks.fromBundle(MasonBundle bundle) {
@@ -161,6 +162,12 @@ class GeneratorHooks {
       }
     }
 
+    List<int>? _decodeHookPubspec(MasonBundledFile? file) {
+      if (file == null) return null;
+      final raw = file.data.replaceAll(_whiteSpace, '');
+      return base64.decode(raw);
+    }
+
     final preGen = bundle.hooks.firstWhereOrNull(
       (element) {
         return p.basename(element.path) == GeneratorHook.preGen.toFileName();
@@ -171,10 +178,16 @@ class GeneratorHooks {
         return p.basename(element.path) == GeneratorHook.postGen.toFileName();
       },
     );
+    final pubspec = bundle.hooks.firstWhereOrNull(
+      (element) {
+        return p.basename(element.path) == 'pubspec.yaml';
+      },
+    );
 
     return GeneratorHooks(
       preGen: _decodeHookScript(preGen),
       postGen: _decodeHookScript(postGen),
+      pubspec: _decodeHookPubspec(pubspec),
     );
   }
 
@@ -191,10 +204,23 @@ class GeneratorHooks {
 
         if (file == null) return null;
         final content = await file.readAsBytes();
-        final relativePath = file.path.substring(
-          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-        );
-        return ScriptFile.fromBytes(relativePath, content);
+        return ScriptFile.fromBytes(file.path, content);
+      } catch (_) {
+        return null;
+      }
+    }
+
+    Future<List<int>?> getHooksPubspec() async {
+      try {
+        final brickRoot = File(brick.path!).parent.path;
+        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+        final file =
+            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
+                  (element) => p.basename(element.path) == 'pubspec.yaml',
+                );
+
+        if (file == null) return null;
+        return await file.readAsBytes();
       } catch (_) {
         return null;
       }
@@ -203,6 +229,7 @@ class GeneratorHooks {
     return GeneratorHooks(
       preGen: await getHookScript(GeneratorHook.preGen),
       postGen: await getHookScript(GeneratorHook.postGen),
+      pubspec: await getHooksPubspec(),
     );
   }
 
@@ -211,6 +238,9 @@ class GeneratorHooks {
 
   /// Script run immediately after the `generate` method is invoked.
   final ScriptFile? postGen;
+
+  /// Contents of the hooks `pubspec.yaml` if exists.
+  final List<int>? pubspec;
 }
 
 /// {@template generator}
@@ -491,6 +521,7 @@ class ScriptFile {
     Map<String, dynamic> vars = const <String, dynamic>{},
     Logger? logger,
     String? workingDirectory,
+    List<int>? pubspec,
     void Function(dynamic message)? onMessage,
   }) async {
     final subscriptions = <StreamSubscription>[];
@@ -509,6 +540,39 @@ class ScriptFile {
       )
       ..add(messagePort.listen(onMessage?.call));
 
+    Uri? packageConfigUri;
+
+    if (pubspec != null) {
+      final directoryHash = sha1.convert(pubspec).toString();
+      final directory = Directory(
+        p.join(Directory.systemTemp.path, '.mason', directoryHash),
+      );
+      final packageConfigFile = File(
+        p.join(directory.path, '.dart_tool', 'package_config.json'),
+      );
+
+      if (!packageConfigFile.existsSync()) {
+        await directory.create(recursive: true);
+        await File(
+          p.join(directory.path, 'pubspec.yaml'),
+        ).writeAsBytes(pubspec);
+
+        final result = await Process.run(
+          'dart',
+          ['pub', 'get'],
+          workingDirectory: directory.path,
+        );
+
+        if (result.exitCode != 0) {
+          logger?.err('${result.stderr}');
+          return ExitCode.software.code;
+        }
+      }
+
+      final packageConfigBytes = await packageConfigFile.readAsBytes();
+      packageConfigUri = Uri.dataFromBytes(packageConfigBytes);
+    }
+
     final uri = Uri.dataFromBytes(
       runSubstitution(vars).content,
       mimeType: 'application/dart',
@@ -519,6 +583,7 @@ class ScriptFile {
       [json.encode(vars)],
       messagePort.sendPort,
       paused: true,
+      packageConfig: packageConfigUri,
     );
 
     isolate

@@ -17,5 +17,5 @@ const colors = [
 void main(List<String> args, SendPort port) {
   final vars = json.decode(args.first);
   final randomSeed = Random().nextInt(colors.length);
-  port.send(json.encode({...vars, 'favorite_color': colors[randomSeed]}));
+  port.send({...vars, 'favorite_color': colors[randomSeed]});
 }
