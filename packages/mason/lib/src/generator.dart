@@ -12,9 +12,7 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
-part 'generator_target.dart';
 part 'hooks.dart';
-part 'mason_generator.dart';
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
@@ -36,6 +34,92 @@ RegExp _loopValueRegExp([String name = '.*?']) {
 
 RegExp _loopInnerRegExp([String name = '.*?']) {
   return RegExp('{{#$name}}(.*?{{{.*?}}}.*?){{/$name}}');
+}
+
+/// {@template mason_generator}
+/// A [MasonGenerator] which extends [Generator] and
+/// exposes the ability to create a [Generator] from a
+/// [Brick].
+/// {@endtemplate}
+class MasonGenerator extends Generator {
+  /// {@macro mason_generator}
+  MasonGenerator(
+    String id,
+    String description, {
+    List<TemplateFile?> files = const <TemplateFile>[],
+    GeneratorHooks hooks = const GeneratorHooks(),
+    this.vars = const <String>[],
+  }) : super(id, description, hooks) {
+    for (final file in files) {
+      addTemplateFile(file);
+    }
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a configuration file for a [BrickYaml]:
+  ///
+  /// ```yaml
+  /// name: greetings
+  /// description: A Simple Greetings Template
+  /// vars:
+  ///   - name
+  /// ```
+  static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
+    final brickRoot = File(brick.path!).parent.path;
+    final brickDirectory = p.join(brickRoot, BrickYaml.dir);
+    final brickFiles = Directory(brickDirectory)
+        .listSync(recursive: true)
+        .whereType<File>()
+        .map((file) {
+      return () async {
+        try {
+          final content = await File(file.path).readAsBytes();
+          final relativePath = file.path.substring(
+            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+          );
+          return TemplateFile.fromBytes(relativePath, content);
+        } on Exception {
+          return null;
+        }
+      }();
+    });
+
+    return MasonGenerator(
+      brick.name,
+      brick.description,
+      vars: brick.vars.keys.toList(),
+      files: await Future.wait(brickFiles),
+      hooks: await GeneratorHooks.fromBrickYaml(brick),
+    );
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a local [MasonBundle].
+  static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
+    return MasonGenerator(
+      bundle.name,
+      bundle.description,
+      vars: bundle.vars.keys.toList(),
+      files: _decodeConcatenatedData(bundle.files),
+      hooks: GeneratorHooks.fromBundle(bundle),
+    );
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a [GitPath] for a remote [BrickYaml] file.
+  static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
+    final directory = await BricksJson.temp().add(Brick(git: gitPath));
+    final file = File(p.join(directory, gitPath.path, BrickYaml.file));
+    final brickYaml = checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    ).copyWith(path: file.path);
+    return MasonGenerator.fromBrickYaml(brickYaml);
+  }
+
+  /// Optional list of variables which will be used to populate
+  /// the corresponding mustache variables within the template.
+  final List<String> vars;
 }
 
 /// {@template generator}
@@ -138,6 +222,175 @@ abstract class Generator implements Comparable<Generator> {
       final target = p.join(Directory.current.path, p.basename(uri.path));
       final response = await http.Client().get(uri);
       return FileContents(target, response.bodyBytes);
+    }
+  }
+}
+
+/// File conflict resolution strategies used during
+/// the generation process.
+enum FileConflictResolution {
+  /// Always prompt the user for each file conflict.
+  prompt,
+
+  /// Always overwrite conflicting files.
+  overwrite,
+
+  /// Always skip conflicting files.
+  skip,
+
+  /// Always append conflicting files.
+  append,
+}
+
+/// The overwrite rule when generating code and a conflict occurs.
+enum OverwriteRule {
+  /// Always overwrite the existing file.
+  alwaysOverwrite,
+
+  /// Always skip overwriting the existing file.
+  alwaysSkip,
+
+  /// Always append the existing file.
+  alwaysAppend,
+
+  /// Overwrite one time.
+  overwriteOnce,
+
+  /// Do not overwrite one time.
+  skipOnce,
+
+  /// Append one time
+  appendOnce,
+}
+
+extension on FileConflictResolution {
+  OverwriteRule? toOverwriteRule() {
+    switch (this) {
+      case FileConflictResolution.overwrite:
+        return OverwriteRule.alwaysOverwrite;
+      case FileConflictResolution.skip:
+        return OverwriteRule.alwaysSkip;
+      case FileConflictResolution.append:
+        return OverwriteRule.alwaysAppend;
+      case FileConflictResolution.prompt:
+        return null;
+    }
+  }
+}
+
+extension on String {
+  OverwriteRule toOverwriteRule() {
+    switch (this) {
+      case 'n':
+        return OverwriteRule.skipOnce;
+      case 'a':
+        return OverwriteRule.appendOnce;
+      case 'Y':
+        return OverwriteRule.alwaysOverwrite;
+      case 'y':
+      default:
+        return OverwriteRule.overwriteOnce;
+    }
+  }
+}
+
+/// A target for a [Generator].
+/// This class knows how to create files given a path and contents.
+// ignore: one_member_abstracts
+abstract class GeneratorTarget {
+  /// Create a file at the given path with the given contents.
+  Future createFile(
+    String path,
+    List<int> contents, {
+    Logger? logger,
+    OverwriteRule? overwriteRule,
+  });
+}
+
+/// {@template directory_generator_target}
+/// A [GeneratorTarget] based on a provided [Directory].
+/// {@endtemplate}
+class DirectoryGeneratorTarget extends GeneratorTarget {
+  /// {@macro directory_generator_target}
+  DirectoryGeneratorTarget(this.dir) {
+    dir.createSync(recursive: true);
+  }
+
+  /// The target [Directory].
+  final Directory dir;
+
+  @override
+  Future<File> createFile(
+    String path,
+    List<int> contents, {
+    Logger? logger,
+    OverwriteRule? overwriteRule,
+  }) async {
+    var _overwriteRule = overwriteRule;
+    final file = File(p.join(dir.path, path));
+    final fileExists = file.existsSync();
+
+    if (!fileExists) {
+      return file
+          .create(recursive: true)
+          .then<File>((_) => file.writeAsBytes(contents))
+          .whenComplete(
+            () => logger?.delayed('  ${file.path} ${lightGreen.wrap('(new)')}'),
+          );
+    }
+
+    final existingContents = file.readAsBytesSync();
+
+    if (const ListEquality<int>().equals(existingContents, contents)) {
+      logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+      return file;
+    }
+
+    final shouldPrompt = logger != null &&
+        (_overwriteRule != OverwriteRule.alwaysOverwrite &&
+            _overwriteRule != OverwriteRule.alwaysSkip &&
+            _overwriteRule != OverwriteRule.alwaysAppend);
+
+    if (shouldPrompt) {
+      logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      _overwriteRule = logger
+          ?.prompt(
+            yellow.wrap(
+              styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
+            ),
+          )
+          .toOverwriteRule();
+    }
+
+    switch (_overwriteRule) {
+      case OverwriteRule.alwaysSkip:
+      case OverwriteRule.skipOnce:
+        logger?.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        return file;
+      case OverwriteRule.alwaysOverwrite:
+      case OverwriteRule.overwriteOnce:
+      case OverwriteRule.appendOnce:
+      case OverwriteRule.alwaysAppend:
+      case null:
+        final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
+            _overwriteRule == OverwriteRule.alwaysAppend;
+        return file
+            .create(recursive: true)
+            .then<File>(
+              (_) => file.writeAsBytes(
+                contents,
+                mode: shouldAppend ? FileMode.append : FileMode.write,
+              ),
+            )
+            .whenComplete(
+              () => shouldAppend
+                  ? logger?.delayed(
+                      '  ${file.path} ${lightBlue.wrap('(modified)')}',
+                    )
+                  : logger?.delayed(
+                      '  ${file.path} ${lightGreen.wrap('(new)')}',
+                    ),
+            );
     }
   }
 }
