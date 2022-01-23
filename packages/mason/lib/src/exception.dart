@@ -9,14 +9,6 @@ class MasonException implements Exception {
   final String message;
 }
 
-/// {@template write_brick_exception}
-/// Thrown when an error occurs while writing a brick to cache.
-/// {@endtemplate}
-class WriteBrickException extends MasonException {
-  /// {@macro write_brick_exception}
-  const WriteBrickException(String message) : super(message);
-}
-
 /// {@template brick_not_found_exception}
 /// Thrown when a brick registered in the `mason.yaml` cannot be found locally.
 /// {@endtemplate}

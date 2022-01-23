@@ -683,12 +683,12 @@ void main() {
       });
     });
 
-    group('ScriptFile', () {
+    group('HookFile', () {
       group('runSubstitution', () {
         test('handles malformed content', () {
           final tempDir = Directory.systemTemp.createTempSync();
           final bytes = [0x80, 0x00];
-          final template = ScriptFile.fromBytes(
+          final template = HookFile.fromBytes(
             path.join(tempDir.path, 'malformed.txt'),
             bytes,
           );

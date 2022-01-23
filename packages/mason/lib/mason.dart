@@ -8,16 +8,15 @@ export 'package:mason_logger/mason_logger.dart';
 
 export 'src/brick_yaml.dart'
     show BrickYaml, BrickVariableProperties, BrickVariableType;
-export 'src/bricks_json.dart' show BricksJson;
+export 'src/bricks_json.dart' show BricksJson, WriteBrickException;
 export 'src/bundler.dart' show createBundle;
-export 'src/exception.dart'
-    show MasonException, BrickNotFoundException, WriteBrickException;
+export 'src/exception.dart' show BrickNotFoundException, MasonException;
 export 'src/generator.dart'
     show
-        MasonGenerator,
         DirectoryGeneratorTarget,
         FileConflictResolution,
         HookContext,
+        MasonGenerator,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle;
 export 'src/mason_yaml.dart' show Brick, GitPath, MasonYaml;

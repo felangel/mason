@@ -85,9 +85,6 @@ class _MakeCommand extends MasonCommand {
     } on FormatException catch (error) {
       logger.err('${error}in $configPath');
       return ExitCode.usage.code;
-    } catch (error) {
-      logger.err('$error');
-      return ExitCode.usage.code;
     }
 
     for (final entry in _brick.vars.entries) {
@@ -130,24 +127,14 @@ class _MakeCommand extends MasonCommand {
 
     Map<String, dynamic>? updatedVars;
 
-    void _onPreGenMessage(dynamic message) {
-      try {
-        if (message is Map) {
-          updatedVars = message.cast<String, dynamic>();
-        }
-      } catch (_) {}
-    }
-
     final preGenScript = generator.hooks.preGen;
     if (!disableHooks && preGenScript != null) {
-      final exitCode = await preGenScript.run(
+      await preGenScript.run(
         vars: vars,
-        logger: logger,
         workingDirectory: outputDir,
         pubspec: generator.hooks.pubspec,
-        onMessage: _onPreGenMessage,
+        onVarsChanged: (vars) => updatedVars = vars,
       );
-      if (exitCode != ExitCode.success.code) return exitCode;
     }
 
     final generateDone = logger.progress('Making ${generator.id}');
@@ -163,20 +150,17 @@ class _MakeCommand extends MasonCommand {
 
       final postGenScript = generator.hooks.postGen;
       if (!disableHooks && postGenScript != null) {
-        final exitCode = await postGenScript.run(
+        await postGenScript.run(
           vars: updatedVars ?? vars,
-          logger: logger,
           pubspec: generator.hooks.pubspec,
           workingDirectory: outputDir,
         );
-        if (exitCode != ExitCode.success.code) return exitCode;
       }
 
       return ExitCode.success.code;
-    } catch (error) {
+    } catch (_) {
       generateDone.call();
-      logger.err('$error');
-      return ExitCode.cantCreate.code;
+      rethrow;
     }
   }
 

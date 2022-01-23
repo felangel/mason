@@ -7,6 +7,14 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
 
+/// {@template write_brick_exception}
+/// Thrown when an error occurs while writing a brick to cache.
+/// {@endtemplate}
+class WriteBrickException extends MasonException {
+  /// {@macro write_brick_exception}
+  const WriteBrickException(String message) : super(message);
+}
+
 /// {@template bricks_json}
 /// A local cache for mason bricks.
 ///

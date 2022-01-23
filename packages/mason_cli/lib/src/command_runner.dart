@@ -58,10 +58,13 @@ class MasonCommandRunner extends CommandRunner<int> {
       return ExitCode.usage.code;
     } on MasonException catch (e) {
       _logger.err(e.message);
-      return ExitCode.usage.code;
+      return ExitCode.software.code;
     } on ProcessException catch (error) {
       _logger.err(error.message);
       return ExitCode.unavailable.code;
+    } catch (error) {
+      _logger.err('$error');
+      return ExitCode.software.code;
     }
   }
 
