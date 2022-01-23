@@ -17,6 +17,7 @@ export 'src/generator.dart'
         MasonGenerator,
         DirectoryGeneratorTarget,
         FileConflictResolution,
+        HookContext,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle;
 export 'src/mason_yaml.dart' show Brick, GitPath, MasonYaml;

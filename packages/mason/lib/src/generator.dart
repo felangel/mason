@@ -12,6 +12,8 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
+part 'hook_context.dart';
+
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{(.*?)}}');
@@ -573,11 +575,7 @@ class ScriptFile {
       packageConfigUri = Uri.dataFromBytes(packageConfigBytes);
     }
 
-    final uri = Uri.dataFromBytes(
-      runSubstitution(vars).content,
-      mimeType: 'application/dart',
-    );
-
+    final uri = _getHookUri(runSubstitution(vars).content);
     final isolate = await Isolate.spawnUri(
       uri,
       [json.encode(vars)],

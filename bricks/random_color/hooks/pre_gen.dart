@@ -1,6 +1,6 @@
-import 'dart:convert';
-import 'dart:isolate';
 import 'dart:math';
+
+import 'package:mason/mason.dart';
 
 const colors = [
   'Red',
@@ -14,8 +14,10 @@ const colors = [
   'Black',
 ];
 
-void main(List<String> args, SendPort port) {
-  final vars = json.decode(args.first);
+Future<void> run(HookContext context) async {
+  final done = context.logger.progress('Generating a random color');
+  await Future<void>.delayed(Duration(seconds: 1));
+  done('Generated');
   final randomSeed = Random().nextInt(colors.length);
-  port.send({...vars, 'favorite_color': colors[randomSeed]});
+  context.vars = {...context.vars, 'favorite_color': colors[randomSeed]};
 }
