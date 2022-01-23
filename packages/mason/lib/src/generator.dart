@@ -263,37 +263,6 @@ enum OverwriteRule {
   appendOnce,
 }
 
-extension on FileConflictResolution {
-  OverwriteRule? toOverwriteRule() {
-    switch (this) {
-      case FileConflictResolution.overwrite:
-        return OverwriteRule.alwaysOverwrite;
-      case FileConflictResolution.skip:
-        return OverwriteRule.alwaysSkip;
-      case FileConflictResolution.append:
-        return OverwriteRule.alwaysAppend;
-      case FileConflictResolution.prompt:
-        return null;
-    }
-  }
-}
-
-extension on String {
-  OverwriteRule toOverwriteRule() {
-    switch (this) {
-      case 'n':
-        return OverwriteRule.skipOnce;
-      case 'a':
-        return OverwriteRule.appendOnce;
-      case 'Y':
-        return OverwriteRule.alwaysOverwrite;
-      case 'y':
-      default:
-        return OverwriteRule.overwriteOnce;
-    }
-  }
-}
-
 /// A target for a [Generator].
 /// This class knows how to create files given a path and contents.
 // ignore: one_member_abstracts
@@ -559,4 +528,35 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
   }
 
   return results;
+}
+
+extension on FileConflictResolution {
+  OverwriteRule? toOverwriteRule() {
+    switch (this) {
+      case FileConflictResolution.overwrite:
+        return OverwriteRule.alwaysOverwrite;
+      case FileConflictResolution.skip:
+        return OverwriteRule.alwaysSkip;
+      case FileConflictResolution.append:
+        return OverwriteRule.alwaysAppend;
+      case FileConflictResolution.prompt:
+        return null;
+    }
+  }
+}
+
+extension on String {
+  OverwriteRule toOverwriteRule() {
+    switch (this) {
+      case 'n':
+        return OverwriteRule.skipOnce;
+      case 'a':
+        return OverwriteRule.appendOnce;
+      case 'Y':
+        return OverwriteRule.alwaysOverwrite;
+      case 'y':
+      default:
+        return OverwriteRule.overwriteOnce;
+    }
+  }
 }
