@@ -109,7 +109,7 @@ void main() {
         final generator = await MasonGenerator.fromBrickYaml(brickYaml);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        await generator.hooks.preGen?.run(
+        await generator.hooks.preGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );
@@ -117,7 +117,7 @@ void main() {
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
         );
-        await generator.hooks.postGen?.run(
+        await generator.hooks.postGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );
@@ -464,7 +464,7 @@ void main() {
         final generator = await MasonGenerator.fromBundle(greetingBundle);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        await generator.hooks.preGen?.run(
+        await generator.hooks.preGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );
@@ -472,7 +472,7 @@ void main() {
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
         );
-        await generator.hooks.postGen?.run(
+        await generator.hooks.postGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );
@@ -488,7 +488,7 @@ void main() {
         final generator = await MasonGenerator.fromBundle(hooksBundle);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        await generator.hooks.preGen?.run(
+        await generator.hooks.preGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );
@@ -496,7 +496,7 @@ void main() {
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{'name': name},
         );
-        await generator.hooks.postGen?.run(
+        await generator.hooks.postGen(
           vars: <String, dynamic>{'name': name},
           workingDirectory: tempDir.path,
         );

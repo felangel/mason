@@ -127,12 +127,10 @@ class _MakeCommand extends MasonCommand {
 
     Map<String, dynamic>? updatedVars;
 
-    final preGenScript = generator.hooks.preGen;
-    if (!disableHooks && preGenScript != null) {
-      await preGenScript.run(
+    if (!disableHooks) {
+      await generator.hooks.preGen(
         vars: vars,
         workingDirectory: outputDir,
-        pubspec: generator.hooks.pubspec,
         onVarsChanged: (vars) => updatedVars = vars,
       );
     }
@@ -148,11 +146,9 @@ class _MakeCommand extends MasonCommand {
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
 
-      final postGenScript = generator.hooks.postGen;
-      if (!disableHooks && postGenScript != null) {
-        await postGenScript.run(
+      if (!disableHooks) {
+        await generator.hooks.postGen(
           vars: updatedVars ?? vars,
-          pubspec: generator.hooks.pubspec,
           workingDirectory: outputDir,
         );
       }

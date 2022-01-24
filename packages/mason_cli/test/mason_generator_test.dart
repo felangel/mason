@@ -70,7 +70,7 @@ void main() {
         const vars = {'name': 'Dash'};
         final target = Directory.systemTemp.createTempSync();
 
-        await hooks.preGen?.run(vars: vars, workingDirectory: target.path);
+        await hooks.preGen(vars: vars, workingDirectory: target.path);
         expect(
           File(path.join(target.path, '.pre_gen.txt')).existsSync(),
           isTrue,
@@ -87,7 +87,7 @@ void main() {
           isTrue,
         );
 
-        await hooks.postGen?.run(vars: vars, workingDirectory: target.path);
+        await hooks.postGen(vars: vars, workingDirectory: target.path);
         expect(
           File(path.join(target.path, '.post_gen.txt')).existsSync(),
           isTrue,

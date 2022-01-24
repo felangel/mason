@@ -100,7 +100,7 @@ extension GeneratorHookToFileName on GeneratorHook {
 /// {@endtemplate}
 class GeneratorHooks {
   /// {@macro generator_hooks}
-  const GeneratorHooks({this.preGen, this.postGen, this.pubspec});
+  const GeneratorHooks({this.preGenHook, this.postGenHook, this.pubspec});
 
   /// Creates [GeneratorHooks] from a provided [MasonBundle].
   factory GeneratorHooks.fromBundle(MasonBundle bundle) {
@@ -139,8 +139,8 @@ class GeneratorHooks {
     );
 
     return GeneratorHooks(
-      preGen: _decodeHookFile(preGen),
-      postGen: _decodeHookFile(postGen),
+      preGenHook: _decodeHookFile(preGen),
+      postGenHook: _decodeHookFile(postGen),
       pubspec: _decodeHookPubspec(pubspec),
     );
   }
@@ -181,60 +181,66 @@ class GeneratorHooks {
     }
 
     return GeneratorHooks(
-      preGen: await getHookFile(GeneratorHook.preGen),
-      postGen: await getHookFile(GeneratorHook.postGen),
+      preGenHook: await getHookFile(GeneratorHook.preGen),
+      postGenHook: await getHookFile(GeneratorHook.postGen),
       pubspec: await getHookPubspec(),
     );
   }
 
   /// Hook run immediately before the `generate` method is invoked.
-  final HookFile? preGen;
+  final HookFile? preGenHook;
 
   /// Hook run immediately after the `generate` method is invoked.
-  final HookFile? postGen;
+  final HookFile? postGenHook;
 
   /// Contents of the hooks `pubspec.yaml` if exists.
   final List<int>? pubspec;
-}
 
-/// {@template hook_file}
-/// This class represents a hook file in a generator.
-/// The contents should be text and may contain mustache.
-/// {@endtemplate}
-class HookFile {
-  /// {@macro hook_file}
-  HookFile.fromBytes(this.path, this.content);
-
-  /// The template file path.
-  final String path;
-
-  /// The template file content.
-  final List<int> content;
-
-  /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, dynamic> parameters) {
-    return FileContents(path, _createContent(parameters));
-  }
-
-  List<int> _createContent(Map<String, dynamic> vars) {
-    try {
-      final decoded = utf8.decode(content);
-      if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = decoded.render(vars);
-      return utf8.encode(rendered);
-    } on Exception {
-      return content;
+  /// Runs the pre-generation (pre_gen) hook with the specified [vars].
+  /// An optional [workingDirectory] can also be specified.
+  Future<void> preGen({
+    Map<String, dynamic> vars = const <String, dynamic>{},
+    String? workingDirectory,
+    void Function(Map<String, dynamic> vars)? onVarsChanged,
+  }) async {
+    final preGenHook = this.preGenHook;
+    if (preGenHook != null && pubspec != null) {
+      return _runHook(
+        hook: preGenHook,
+        vars: vars,
+        workingDirectory: workingDirectory,
+        onVarsChanged: onVarsChanged,
+      );
     }
   }
 
-  /// Executes the current hook with the provided [vars] and [pubspec].
+  /// Runs the post-generation (post_gen) hook with the specified [vars].
   /// An optional [workingDirectory] can also be specified.
-  Future<void> run({
+  Future<void> postGen({
     Map<String, dynamic> vars = const <String, dynamic>{},
     String? workingDirectory,
-    List<int>? pubspec,
     void Function(Map<String, dynamic> vars)? onVarsChanged,
   }) async {
+    final postGenHook = this.postGenHook;
+    if (postGenHook != null && pubspec != null) {
+      return _runHook(
+        hook: postGenHook,
+        vars: vars,
+        workingDirectory: workingDirectory,
+        onVarsChanged: onVarsChanged,
+      );
+    }
+  }
+
+  /// Runs the provided [hook] with the specified [vars].
+  /// An optional [workingDirectory] can also be specified.
+  Future<void> _runHook({
+    required HookFile hook,
+    Map<String, dynamic> vars = const <String, dynamic>{},
+    void Function(Map<String, dynamic> vars)? onVarsChanged,
+    String? workingDirectory,
+  }) async {
+    final pubspec = this.pubspec;
     final subscriptions = <StreamSubscription>[];
     final messagePort = ReceivePort();
     final errorPort = ReceivePort();
@@ -275,7 +281,7 @@ class HookFile {
         );
 
         if (result.exitCode != 0) {
-          throw HookDependencyInstallFailure(path, '${result.stderr}');
+          throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
         }
       }
 
@@ -285,16 +291,18 @@ class HookFile {
 
     late final Uri? uri;
     try {
-      uri = _getHookUri(runSubstitution(vars).content);
+      uri = _getHookUri(hook.runSubstitution(vars).content);
       // ignore: avoid_catching_errors
     } on ArgumentError {
-      throw HookInvalidCharactersException(path);
+      throw HookInvalidCharactersException(hook.path);
     }
 
-    if (uri == null) throw HookMissingRunException(path);
+    if (uri == null) throw HookMissingRunException(hook.path);
 
+    final cwd = Directory.current;
     late final Isolate isolate;
     try {
+      if (workingDirectory != null) Directory.current = workingDirectory;
       isolate = await Isolate.spawnUri(
         uri,
         [json.encode(vars)],
@@ -303,10 +311,11 @@ class HookFile {
         packageConfig: packageConfigUri,
       );
     } on IsolateSpawnException catch (error) {
+      Directory.current = cwd;
       final message = error.message.contains('Error: ')
           ? error.message.split('Error: ').last
           : error.message;
-      throw HookRunException(path, message.trim());
+      throw HookRunException(hook.path, message.trim());
     }
 
     isolate
@@ -314,7 +323,12 @@ class HookFile {
       ..addOnExitListener(exitPort.sendPort)
       ..resume(isolate.pauseCapability!);
 
-    await exitPort.first;
+    try {
+      await exitPort.first;
+    } finally {
+      Directory.current = cwd;
+    }
+
     for (final subscription in subscriptions) {
       unawaited(subscription.cancel());
     }
@@ -322,7 +336,38 @@ class HookFile {
       final dynamic error = hookError;
       final content =
           error is List && error.isNotEmpty ? '${error.first}' : '$error';
-      throw HookExecutionException(path, content);
+      throw HookExecutionException(hook.path, content);
+    }
+  }
+}
+
+/// {@template hook_file}
+/// This class represents a hook file in a generator.
+/// The contents should be text and may contain mustache.
+/// {@endtemplate}
+class HookFile {
+  /// {@macro hook_file}
+  HookFile.fromBytes(this.path, this.content);
+
+  /// The template file path.
+  final String path;
+
+  /// The template file content.
+  final List<int> content;
+
+  /// Performs a substitution on the [path] based on the incoming [parameters].
+  FileContents runSubstitution(Map<String, dynamic> parameters) {
+    return FileContents(path, _createContent(parameters));
+  }
+
+  List<int> _createContent(Map<String, dynamic> vars) {
+    try {
+      final decoded = utf8.decode(content);
+      if (!decoded.contains(_delimeterRegExp)) return content;
+      final rendered = decoded.render(vars);
+      return utf8.encode(rendered);
+    } on Exception {
+      return content;
     }
   }
 }
