@@ -1,0 +1,9 @@
+name: random_color
+description: A Random Color Generator
+version: 0.1.0+1
+vars:
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?

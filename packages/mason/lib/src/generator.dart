@@ -1,14 +1,18 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/mason_bundle.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
+
+part 'hooks.dart';
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
@@ -116,100 +120,6 @@ class MasonGenerator extends Generator {
   /// Optional list of variables which will be used to populate
   /// the corresponding mustache variables within the template.
   final List<String> vars;
-}
-
-/// Supported types of [GeneratorHooks].
-enum GeneratorHook {
-  /// Script run immediately before the `generate` method is invoked.
-  preGen,
-
-  /// Script run immediately after the `generate` method is invoked.
-  postGen,
-}
-
-extension on GeneratorHook {
-  String toFileName() {
-    switch (this) {
-      case GeneratorHook.preGen:
-        return 'pre_gen.dart';
-      case GeneratorHook.postGen:
-        return 'post_gen.dart';
-    }
-  }
-}
-
-/// {@template generator_hooks}
-/// Scripts that run automatically whenever a particular event occurs
-/// in a [Generator].
-/// {@endtemplate}
-class GeneratorHooks {
-  /// {@macro generator_hooks}
-  const GeneratorHooks({this.preGen, this.postGen});
-
-  /// Creates [GeneratorHooks] from a provided [MasonBundle].
-  factory GeneratorHooks.fromBundle(MasonBundle bundle) {
-    ScriptFile? _decodeHookScript(MasonBundledFile? file) {
-      if (file == null) return null;
-      final path = file.path;
-      final raw = file.data.replaceAll(_whiteSpace, '');
-      final decoded = base64.decode(raw);
-      try {
-        return ScriptFile.fromBytes(path, decoded);
-      } catch (_) {
-        return null;
-      }
-    }
-
-    final preGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.preGen.toFileName();
-      },
-    );
-    final postGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.postGen.toFileName();
-      },
-    );
-
-    return GeneratorHooks(
-      preGen: _decodeHookScript(preGen),
-      postGen: _decodeHookScript(postGen),
-    );
-  }
-
-  /// Creates [GeneratorHooks] from a provided [BrickYaml].
-  static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
-    Future<ScriptFile?> getHookScript(GeneratorHook hook) async {
-      try {
-        final brickRoot = File(brick.path!).parent.path;
-        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file =
-            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
-                  (element) => p.basename(element.path) == hook.toFileName(),
-                );
-
-        if (file == null) return null;
-        final content = await file.readAsBytes();
-        final relativePath = file.path.substring(
-          file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-        );
-        return ScriptFile.fromBytes(relativePath, content);
-      } catch (_) {
-        return null;
-      }
-    }
-
-    return GeneratorHooks(
-      preGen: await getHookScript(GeneratorHook.preGen),
-      postGen: await getHookScript(GeneratorHook.postGen),
-    );
-  }
-
-  /// Script run immediately before the `generate` method is invoked.
-  final ScriptFile? preGen;
-
-  /// Script run immediately after the `generate` method is invoked.
-  final ScriptFile? postGen;
 }
 
 /// {@template generator}
@@ -452,66 +362,6 @@ abstract class GeneratorTarget {
     Logger? logger,
     OverwriteRule? overwriteRule,
   });
-}
-
-/// {@template script_file}
-/// This class represents a script file in a generator.
-/// The contents should be text and may contain mustache.
-/// {@endtemplate}
-class ScriptFile {
-  /// {@macro script_file}
-  ScriptFile.fromBytes(this.path, this.content);
-
-  /// The template file path.
-  final String path;
-
-  /// The template file content.
-  final List<int> content;
-
-  /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, dynamic> parameters) {
-    return FileContents(path, _createContent(parameters));
-  }
-
-  List<int> _createContent(Map<String, dynamic> vars) {
-    try {
-      final decoded = utf8.decode(content);
-      if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = decoded.render(vars);
-      return utf8.encode(rendered);
-    } on Exception {
-      return content;
-    }
-  }
-
-  /// Executes the current script with the provided [vars] and [logger].
-  /// An optional [workingDirectory] can also be specified.
-  Future<int> run({
-    Map<String, dynamic> vars = const <String, dynamic>{},
-    Logger? logger,
-    String? workingDirectory,
-  }) async {
-    final tempDir = Directory.systemTemp.createTempSync();
-    final script = File(p.join(tempDir.path, p.basename(path)))
-      ..writeAsBytesSync(runSubstitution(vars).content);
-    final result = await Process.run(
-      'dart',
-      [script.path],
-      workingDirectory: workingDirectory,
-    );
-
-    final stdout = result.stdout as String?;
-    if (stdout != null && stdout.isNotEmpty) logger?.info(stdout.trim());
-
-    final stderr = result.stderr as String?;
-    if (stderr != null && stderr.isNotEmpty) logger?.err(stderr.trim());
-
-    try {
-      await tempDir.delete(recursive: true);
-    } catch (_) {}
-
-    return result.exitCode;
-  }
 }
 
 /// {@template template_file}

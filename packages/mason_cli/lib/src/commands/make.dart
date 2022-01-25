@@ -128,42 +128,38 @@ class _MakeCommand extends MasonCommand {
       }
     }
 
-    final preGenScript = generator.hooks.preGen;
-    if (!disableHooks && preGenScript != null) {
-      final exitCode = await preGenScript.run(
+    Map<String, dynamic>? updatedVars;
+
+    if (!disableHooks) {
+      await generator.hooks.preGen(
         vars: vars,
-        logger: logger,
         workingDirectory: outputDir,
+        onVarsChanged: (vars) => updatedVars = vars,
       );
-      if (exitCode != ExitCode.success.code) return exitCode;
     }
 
     final generateDone = logger.progress('Making ${generator.id}');
     try {
       final fileCount = await generator.generate(
         target,
-        vars: vars,
+        vars: updatedVars ?? vars,
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
       generateDone('Made brick ${_brick.name}');
       logger.logFiles(fileCount);
 
-      final postGenScript = generator.hooks.postGen;
-      if (!disableHooks && postGenScript != null) {
-        final exitCode = await postGenScript.run(
-          vars: vars,
-          logger: logger,
+      if (!disableHooks) {
+        await generator.hooks.postGen(
+          vars: updatedVars ?? vars,
           workingDirectory: outputDir,
         );
-        if (exitCode != ExitCode.success.code) return exitCode;
       }
 
       return ExitCode.success.code;
-    } catch (error) {
+    } catch (_) {
       generateDone.call();
-      logger.err('$error');
-      return ExitCode.cantCreate.code;
+      rethrow;
     }
   }
 

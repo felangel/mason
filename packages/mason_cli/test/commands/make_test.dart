@@ -63,6 +63,8 @@ bricks:
     path: ../../../../../bricks/hooks
   plugin:
     path: ../../../../../bricks/plugin
+  random_color:
+    path: ../../../../../bricks/random_color
   simple:
     path: ../../../../../bricks/simple
   todos:
@@ -96,6 +98,9 @@ bricks:
       final pluginPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'plugin'),
       );
+      final randomColorPath = path.canonicalize(
+        path.join(Directory.current.path, bricksPath, 'random_color'),
+      );
       final simplePath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
@@ -125,6 +130,8 @@ bricks:
                 legacyPath,
             '''plugin_40192192887515a0911c28a4738bb32229909ac5d7161c00b3d9bd41accf3485''':
                 pluginPath,
+            '''random_color_2f0793e6e68f849a8e6ee12f3a244b9ad5bce1c1a7579d5e3cf15fb2ea55b0bb''':
+                randomColorPath,
             '''simple_6c33a2482d658c2355275550eb6960356ef483e03badf54b9e4f7daae613acd6''':
                 simplePath,
             '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
@@ -183,6 +190,7 @@ bricks:
               '  hooks           A Hooks Example Template\n'
               '  legacy          A Legacy Greeting Template\n'
               '  plugin          An example plugin template\n'
+              '  random_color    A Random Color Generator\n'
               '  simple          A Simple Static Template\n'
               '  todos           A Todos Template\n'
               '  widget          Create a Simple Flutter Widget\n'
@@ -420,7 +428,7 @@ bricks:
       ).called(1);
     });
 
-    test('exits with code 73 when exception occurs while generating', () async {
+    test('exits with code 70 when exception occurs while generating', () async {
       const url =
           'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
       when(
@@ -430,17 +438,17 @@ bricks:
         if (update == 'Made brick app_icon') throw Exception('oops');
       });
       final result = await commandRunner.run(['make', 'app_icon']);
-      expect(result, equals(ExitCode.cantCreate.code));
+      expect(result, equals(ExitCode.software.code));
       verify(() => logger.err('Exception: oops')).called(1);
     });
 
-    test('exits with code 73 when exception occurs post generation', () async {
+    test('exits with code 70 when exception occurs post generation', () async {
       when(() => logger.info(any(that: contains('Generated'))))
           .thenThrow(Exception('oops'));
       final result = await commandRunner.run(
         ['make', 'greeting', '--name', 'test-name'],
       );
-      expect(result, equals(ExitCode.cantCreate.code));
+      expect(result, equals(ExitCode.software.code));
       verify(() => logger.err('Exception: oops')).called(1);
     });
 
@@ -631,6 +639,32 @@ bricks:
         path.join(testFixturesPath(cwd, suffix: 'make'), 'hooks', 'no_hooks'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates random_color', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'random_color'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run([
+        'make',
+        'random_color',
+        '--name',
+        'dash',
+      ]);
+      expect(result, equals(ExitCode.success.code));
+
+      final file = File(
+        path.join(
+          testFixturesPath(cwd, suffix: '.make'),
+          'random_color',
+          'color.md',
+        ),
+      );
+      expect(file.existsSync(), isTrue);
+      final contents = file.readAsStringSync();
+      expect(contents, contains('Hi dash!'));
+      expect(contents, contains('Your favorite color is'));
     });
 
     test('generates plugin (empty)', () async {

@@ -62,6 +62,9 @@ class MasonCommandRunner extends CommandRunner<int> {
     } on ProcessException catch (error) {
       _logger.err(error.message);
       return ExitCode.unavailable.code;
+    } catch (error) {
+      _logger.err('$error');
+      return ExitCode.software.code;
     }
   }
 

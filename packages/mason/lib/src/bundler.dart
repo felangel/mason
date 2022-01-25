@@ -11,6 +11,8 @@ final _binaryFileTypes = RegExp(
   caseSensitive: false,
 );
 
+final _hookFiles = RegExp('(pre_gen.dart|post_gen.dart|pubspec.yaml)');
+
 /// Generates a [MasonBundle] from the provided [brick] directory.
 MasonBundle createBundle(Directory brick) {
   final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
@@ -31,6 +33,7 @@ MasonBundle createBundle(Directory brick) {
       ? hooksDirectory
           .listSync(recursive: true)
           .whereType<File>()
+          .where((file) => _hookFiles.hasMatch(path.basename(file.path)))
           .map(_bundleHookFile)
           .toList()
       : <MasonBundledFile>[];
