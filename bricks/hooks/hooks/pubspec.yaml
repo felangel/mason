@@ -1,4 +1,4 @@
-name: random_color_hooks
+name: hooks_hooks
 
 environment:
   sdk: ">=2.12.0 <3.0.0"
