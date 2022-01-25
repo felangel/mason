@@ -662,10 +662,9 @@ bricks:
         ),
       );
       expect(file.existsSync(), isTrue);
-      expect(
-        file.readAsStringSync(),
-        contains('Hi dash!\nYour favorite color is'),
-      );
+      final contents = file.readAsStringSync();
+      expect(contents, contains('Hi dash!'));
+      expect(contents, contains('Your favorite color is'));
     });
 
     test('generates plugin (empty)', () async {
