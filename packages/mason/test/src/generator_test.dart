@@ -135,6 +135,48 @@ void main() {
         expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
       });
 
+      test('constructs an instance with random_color', () async {
+        const name = 'Dash';
+        final brickYaml = BrickYaml(
+          name: 'random_color',
+          description: 'A Random Color Generator',
+          version: '1.0.0',
+          path: path.join('..', '..', 'bricks', 'random_color', 'brick.yaml'),
+          vars: const {'name': BrickVariableProperties.string()},
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final updatedVars = <Map<String, dynamic>>[];
+        await generator.hooks.preGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+          onVarsChanged: updatedVars.add,
+        );
+
+        expect(updatedVars.length, equals(1));
+        expect(updatedVars.first['name'], equals(name));
+        expect(updatedVars.first['favorite_color'], isNotEmpty);
+
+        final fileCount = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+
+        await generator.hooks.postGen(
+          vars: updatedVars.first,
+          workingDirectory: tempDir.path,
+        );
+
+        final file = File(path.join(tempDir.path, 'color.md'));
+        expect(fileCount, equals(1));
+        expect(file.existsSync(), isTrue);
+        expect(
+          file.readAsStringSync(),
+          contains('Hi $name!\nYour favorite color is'),
+        );
+      });
+
       test(
           'constructs an instance multiple times '
           '(identical) (hello_world)', () async {

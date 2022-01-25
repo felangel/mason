@@ -37,16 +37,13 @@ void main() {
         );
         expect(bundle.name, equals('hooks'));
         expect(bundle.description, equals('A Hooks Example Template'));
-        expect(bundle.hooks.length, equals(2));
-        expect(
-          bundle.hooks.first.path,
-          equals('post_gen.dart'),
-        );
-        expect(
-          bundle.hooks.last.path,
-          equals('pre_gen.dart'),
-        );
         expect(bundle.files.length, equals(1));
+        expect(bundle.hooks.length, equals(3));
+        final expectedFiles = ['post_gen.dart', 'pre_gen.dart', 'pubspec.yaml'];
+        for (var i = 0; i < bundle.hooks.length; i++) {
+          final hookFile = bundle.hooks[i];
+          expect(hookFile.path, equals(expectedFiles[i]));
+        }
       });
 
       test('returns a MasonBundle when brick exists (plugin)', () {
