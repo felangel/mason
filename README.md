@@ -4,6 +4,7 @@
 
 <p align="center">
 <a href="https://github.com/felangel/mason/actions"><img src="https://github.com/felangel/mason/workflows/mason/badge.svg" alt="mason"></a>
+<a href="https://github.com/felangel/mason/actions"><img src="https://raw.githubusercontent.com/felangel/mason/master/packages/mason/coverage_badge.svg" alt="coverage"></a>
 <a href="https://pub.dev/packages/very_good_analysis"><img src="https://img.shields.io/badge/style-very_good_analysis-B22C89.svg" alt="style: very good analysis"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License: MIT"></a>
 </p>
@@ -11,6 +12,10 @@
 ---
 
 Mason is a collection of packages that enable developers to create and consume reusable templates called bricks.
+
+![Mason Demo][mason_demo]
+
+## Packages
 
 | Package                                                                             | Pub                                                                                                    |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
@@ -40,3 +45,5 @@ View the full documentation [here](https://github.com/felangel/mason/tree/master
 [![Mason Video Tutorial](https://img.youtube.com/vi/SnrHoN632NU/0.jpg)](https://www.youtube.com/watch?v=SnrHoN632NU)
 
 **Say HI to Mason Package! - The Top Tier Code Generation Tool | Complete Tutorial** by [_Flutterly_](https://www.youtube.com/channel/UC5PYcSe3to4mtm3SPCUmjvw)
+
+[mason_demo]: https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif
