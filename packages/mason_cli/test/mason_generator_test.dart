@@ -21,8 +21,8 @@ void main() {
         final generator = await MasonGenerator.fromBundle(legacyGreetingBundle);
         final hooks = generator.hooks;
 
-        expect(hooks.preGen, isNull);
-        expect(hooks.postGen, isNull);
+        expect(hooks.preGenHook, isNull);
+        expect(hooks.postGenHook, isNull);
         expect(generator.id, equals('greeting'));
 
         final target = Directory.systemTemp.createTempSync();
@@ -42,8 +42,8 @@ void main() {
         final generator = await MasonGenerator.fromBundle(greetingBundle);
         final hooks = generator.hooks;
 
-        expect(hooks.preGen, isNull);
-        expect(hooks.postGen, isNull);
+        expect(hooks.preGenHook, isNull);
+        expect(hooks.postGenHook, isNull);
         expect(generator.id, equals('greeting'));
 
         final target = Directory.systemTemp.createTempSync();
@@ -63,8 +63,8 @@ void main() {
         final generator = await MasonGenerator.fromBundle(hooksBundle);
         final hooks = generator.hooks;
 
-        expect(hooks.preGen, isNotNull);
-        expect(hooks.postGen, isNotNull);
+        expect(hooks.preGenHook, isNotNull);
+        expect(hooks.postGenHook, isNotNull);
         expect(generator.id, equals('hooks'));
 
         const vars = {'name': 'Dash'};

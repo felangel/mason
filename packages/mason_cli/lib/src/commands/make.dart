@@ -85,6 +85,9 @@ class _MakeCommand extends MasonCommand {
     } on FormatException catch (error) {
       logger.err('${error}in $configPath');
       return ExitCode.usage.code;
+    } catch (error) {
+      logger.err('$error');
+      return ExitCode.usage.code;
     }
 
     for (final entry in _brick.vars.entries) {
