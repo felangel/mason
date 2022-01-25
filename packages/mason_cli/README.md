@@ -354,14 +354,17 @@ Hooks must be defined in the `hooks` directory at the root of the brick:
 ├── brick.yaml
 └── hooks
     ├── post_gen.dart
-    └── pre_gen.dart
+    ├── pre_gen.dart
+    └── pubspec.yaml
 ```
 
 ❗ Currently mason only supports hooks written in [Dart](https://dart.dev).
 
 ##### Hooks Usage
 
-For example given the following `example` brick:
+Every hook must contain a `run` method which accepts a `HookContext` from `package:mason/mason.dart`.
+
+For example, given the following `example` brick:
 
 ```sh
 .
@@ -369,7 +372,8 @@ For example given the following `example` brick:
 │   └── example.md
 ├── brick.yaml
 └── hooks
-    └── post_gen.dart
+    ├── post_gen.dart
+    └── pubspec.yaml
 ```
 
 where `brick.yaml` looks like:
@@ -386,12 +390,26 @@ vars:
     prompt: What is your name?
 ```
 
+and `pubspec.yaml` looks like:
+
+```yaml
+name: example_hooks
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  mason: any
+```
+
 And `post_gen.dart` contains:
 
 ```dart
 import 'dart:io';
 
-void main() {
+import 'package:mason/mason.dart';
+
+void run(HookContext context) {
   print('hello {{name}}!');
   print(Directory.current.path);
 }
@@ -410,7 +428,21 @@ hello Dash!
 
 💡 **Note**: Scripts can contain template variables. In addition, the working directory of the script is the directory in which the code is generated.
 
-Hooks can be disabled using the `--no-hooks` flag:
+`HookContext` can be used to access/modify the brick `vars` or to interface with the logger.
+
+```dart
+import 'package:mason/mason.dart';
+
+void run(HookContext context) {
+  // Read/Write vars
+  context.vars = {...context.vars, 'custom_var': 'foo'};
+  
+  // Use the logger
+  context.logger.info('hook says hi!');
+}
+```
+
+Hook execution can be disabled using the `--no-hooks` flag:
 
 ```sh
 # Disable hook script execution
