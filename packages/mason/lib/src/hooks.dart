@@ -252,7 +252,11 @@ class GeneratorHooks {
     if (onVarsChanged != null) {
       subscriptions.add(
         messagePort.listen((dynamic message) {
-          if (message is Map) onVarsChanged(message.cast<String, dynamic>());
+          if (message is String) {
+            onVarsChanged(
+              json.decode(message) as Map<String, dynamic>,
+            );
+          }
         }),
       );
     }
@@ -331,6 +335,7 @@ class GeneratorHooks {
     for (final subscription in subscriptions) {
       unawaited(subscription.cancel());
     }
+
     if (hookError != null) {
       final dynamic error = hookError;
       final content =
@@ -446,7 +451,7 @@ class _HookContext implements HookContext {
   @override
   set vars(Map<String, dynamic> value) {
     _vars = value;
-    _port.send(_vars);
+    _port.send(json.encode(_vars));
   }
 }
 ''';
