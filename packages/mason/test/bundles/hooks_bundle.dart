@@ -23,7 +23,7 @@ final hooksBundle = MasonBundle.fromJson(<String, dynamic>{
     {
       "path": "pubspec.yaml",
       "data":
-          "bmFtZTogaG9va3NfaG9va3MKCmVudmlyb25tZW50OgogIHNkazogIj49Mi4xMi4wIDwzLjAuMCIKCmRlcGVuZGVuY2llczoKICBtYXNvbjoKICAgIHBhdGg6IC9Vc2Vycy9mZWxhbmdlbC9EZXZlbG9wbWVudC9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29uL3BhY2thZ2VzL21hc29uCg==",
+          "bmFtZTogaG9va3NfaG9va3MKCmVudmlyb25tZW50OgogIHNkazogIj49Mi4xMi4wIDwzLjAuMCIKCmRlcGVuZGVuY2llczoKICBtYXNvbjoKICAgIGdpdDoKICAgICAgdXJsOiBodHRwczovL2dpdGh1Yi5jb20vZmVsYW5nZWwvbWFzb24KICAgICAgcGF0aDogcGFja2FnZXMvbWFzb24KICAgICAgcmVmOiBmZWF0L2NvbXB1dGVkLXZhcnMK",
       "type": "text"
     }
   ],
