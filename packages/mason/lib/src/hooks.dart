@@ -289,7 +289,7 @@ class GeneratorHooks {
       packageConfigUri = Uri.dataFromBytes(packageConfigBytes);
     }
 
-    late final Uri? uri;
+    Uri? uri;
     try {
       uri = _getHookUri(hook.runSubstitution(vars).content);
       // ignore: avoid_catching_errors
@@ -300,7 +300,7 @@ class GeneratorHooks {
     if (uri == null) throw HookMissingRunException(hook.path);
 
     final cwd = Directory.current;
-    late final Isolate isolate;
+    Isolate? isolate;
     try {
       if (workingDirectory != null) Directory.current = workingDirectory;
       isolate = await Isolate.spawnUri(
@@ -312,10 +312,9 @@ class GeneratorHooks {
       );
     } on IsolateSpawnException catch (error) {
       Directory.current = cwd;
-      final message = error.message.contains('Error: ')
-          ? error.message.split('Error: ').last
-          : error.message;
-      throw HookRunException(hook.path, message.trim());
+      final msg = error.message;
+      final content = msg.contains('Error: ') ? msg.split('Error: ').last : msg;
+      throw HookRunException(hook.path, content.trim());
     }
 
     isolate
