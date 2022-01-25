@@ -405,13 +405,10 @@ dependencies:
 And `post_gen.dart` contains:
 
 ```dart
-import 'dart:io';
-
 import 'package:mason/mason.dart';
 
 void run(HookContext context) {
-  print('hello {{name}}!');
-  print(Directory.current.path);
+  context.logger.info('hello {{name}}!');  
 }
 ```
 
@@ -423,7 +420,6 @@ mason make example --name Dash
 ✓ Generated 1 file:
   /Users/dash/mason/example/example.md (new)
 hello Dash!
-/Users/dash/mason/example
 ```
 
 💡 **Note**: Scripts can contain template variables. In addition, the working directory of the script is the directory in which the code is generated.
