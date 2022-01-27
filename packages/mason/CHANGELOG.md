@@ -1,3 +1,23 @@
+# 0.1.0-dev.5
+
+- **BREAKING** feat: add computed vars support via `HookContext`
+
+```dart
+// pre_gen.dart
+
+import 'package:mason/mason.dart';
+
+// Every hook must contain a run method which accepts a `HookContext`
+// from package:mason/mason.dart.
+void run(HookContext context) {
+  // Read/Write vars
+  context.vars = {...context.vars, 'custom_var': 'foo'};
+  
+  // Use the logger
+  context.logger.info('hello from pre_gen.dart');
+}
+```
+
 # 0.1.0-dev.4
 
 - **BREAKING** feat: restructure `brick.yaml` vars to support type, description, and default:
