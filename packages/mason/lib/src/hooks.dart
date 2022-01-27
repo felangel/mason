@@ -285,7 +285,6 @@ class GeneratorHooks {
         );
 
         if (result.exitCode != 0) {
-          print(result.stderr);
           throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
         }
       }
