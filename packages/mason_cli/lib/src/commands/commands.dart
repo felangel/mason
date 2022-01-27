@@ -7,3 +7,4 @@ export 'list.dart';
 export 'make.dart';
 export 'new.dart';
 export 'remove.dart';
+export 'update.dart';

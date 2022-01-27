@@ -557,8 +557,9 @@ mason
 Usage: mason <command> [arguments]
 
 Global options:
--h, --help       Print this usage information.
-    --version    Print the current version.
+-h, --help                 Print this usage information.
+    --version              Print the current version.
+    --skip-update-check    Skip the automatic update check.
 
 Available commands:
   add      Adds a brick from a local or remote source.
