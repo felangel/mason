@@ -85,6 +85,16 @@ void main() {
         verify(() => logger.info(updatePrompt)).called(1);
       });
 
+      test('handles pub update errors gracefully', () async {
+        when(
+          () => pubUpdater.getLatestVersion(any()),
+        ).thenThrow(Exception('oops'));
+
+        final result = await commandRunner.run(['--version']);
+        expect(result, equals(ExitCode.success.code));
+        verifyNever(() => logger.info(updatePrompt));
+      });
+
       test('handles FormatException', () async {
         const exception = FormatException('oops!');
         var isFirstInvocation = true;
