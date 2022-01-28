@@ -1,3 +1,9 @@
+# 0.1.0-dev.8
+
+- feat: add `mason update` command
+- feat: remove auto-update prompt when never version exists
+- docs: minor updates to CLI description and README
+
 # 0.1.0-dev.7
 
 - **BREAKING** feat: upgrade to `mason ^0.1.0-dev.5`
