@@ -50,8 +50,8 @@ class UpdateCommand extends MasonCommand {
       logger.err('$error');
       return ExitCode.software.code;
     }
-
     updateDone('Updated to $latestVersion');
+
     return ExitCode.success.code;
   }
 }
