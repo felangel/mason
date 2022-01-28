@@ -552,7 +552,7 @@ await generator.generate(...);
 
 ```sh
 mason
-⛏️  mason • lay the foundation!
+🧱  mason • lay the foundation!
 
 Usage: mason <command> [arguments]
 
@@ -570,6 +570,7 @@ Available commands:
   make     Generate code using an existing brick template.
   new      Creates a new brick template.
   remove   Removes a brick.
+  update   Update mason.
 
 Run "mason help <command>" for more information about a command.
 ```

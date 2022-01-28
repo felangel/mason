@@ -20,12 +20,8 @@ class MasonCommandRunner extends CommandRunner<int> {
   MasonCommandRunner({Logger? logger, PubUpdater? pubUpdater})
       : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
-        super(executableName, '⛏️  mason \u{2022} lay the foundation!') {
-    argParser.addFlag(
-      'version',
-      negatable: false,
-      help: 'Print the current version.',
-    );
+        super(executableName, '🧱  mason \u{2022} lay the foundation!') {
+    argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
     addCommand(BundleCommand(logger: _logger));
@@ -35,6 +31,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
     addCommand(RemoveCommand(logger: _logger));
+    addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
   }
 
   final Logger _logger;
@@ -77,7 +74,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     } else {
       exitCode = await super.runCommand(topLevelResults);
     }
-    await _checkForUpdates();
+    if (topLevelResults.command?.name != 'update') await _checkForUpdates();
     return exitCode;
   }
 
@@ -94,24 +91,22 @@ class MasonCommandRunner extends CommandRunner<int> {
 |                                                                                    |
 |                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
 |  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}  |
+|                             Run ${cyan.wrap('mason update')} to update                             |
 |                                                                                    |
 +------------------------------------------------------------------------------------+
 ''',
           );
-        final response = _logger.prompt('Would you like to update? (y/n) ');
-        if (response.isYes()) {
-          final updateDone = _logger.progress('Updating to $latestVersion');
-          await _pubUpdater.update(packageName: packageName);
-          updateDone('Updated to $latestVersion');
-        }
       }
     } catch (_) {}
   }
 }
 
-extension on String {
-  bool isYes() {
-    final normalized = toLowerCase().trim();
-    return normalized == 'y' || normalized == 'yes';
+extension on ArgParser {
+  void addFlags() {
+    addFlag(
+      'version',
+      negatable: false,
+      help: 'Print the current version.',
+    );
   }
 }
