@@ -39,7 +39,7 @@ const expectedUsage = [
 
 const latestVersion = '0.0.0';
 
-final updatePrompt = '''
+final updateMessage = '''
 +------------------------------------------------------------------------------------+
 |                                                                                    |
 |                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
@@ -82,7 +82,7 @@ void main() {
         ).thenAnswer((_) async => latestVersion);
         final result = await commandRunner.run(['--version']);
         expect(result, equals(ExitCode.success.code));
-        verify(() => logger.info(updatePrompt)).called(1);
+        verify(() => logger.info(updateMessage)).called(1);
       });
 
       test('handles pub update errors gracefully', () async {
@@ -92,7 +92,7 @@ void main() {
 
         final result = await commandRunner.run(['--version']);
         expect(result, equals(ExitCode.success.code));
-        verifyNever(() => logger.info(updatePrompt));
+        verifyNever(() => logger.info(updateMessage));
       });
 
       test('handles FormatException', () async {
