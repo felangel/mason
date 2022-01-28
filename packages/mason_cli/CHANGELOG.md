@@ -1,7 +1,7 @@
 # 0.1.0-dev.8
 
 - feat: add `mason update` command
-- feat: remove auto-update prompt when never version exists
+- feat: remove auto-update prompt when newer version exists
 - docs: minor updates to CLI description and README
 
 # 0.1.0-dev.7
