@@ -552,14 +552,13 @@ await generator.generate(...);
 
 ```sh
 mason
-⛏️  mason • lay the foundation!
+🧱  mason • lay the foundation!
 
 Usage: mason <command> [arguments]
 
 Global options:
--h, --help                 Print this usage information.
-    --version              Print the current version.
-    --skip-update-check    Skip the automatic update check.
+-h, --help       Print this usage information.
+    --version    Print the current version.
 
 Available commands:
   add      Adds a brick from a local or remote source.
@@ -571,6 +570,7 @@ Available commands:
   make     Generate code using an existing brick template.
   new      Creates a new brick template.
   remove   Removes a brick.
+  update   Update mason.
 
 Run "mason help <command>" for more information about a command.
 ```

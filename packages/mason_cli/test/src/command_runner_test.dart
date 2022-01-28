@@ -76,6 +76,15 @@ void main() {
     });
 
     group('run', () {
+      test('prompts for update when newer version exists', () async {
+        when(
+          () => pubUpdater.getLatestVersion(any()),
+        ).thenAnswer((_) async => latestVersion);
+        final result = await commandRunner.run(['--version']);
+        expect(result, equals(ExitCode.success.code));
+        verify(() => logger.info(updatePrompt)).called(1);
+      });
+
       test('handles FormatException', () async {
         const exception = FormatException('oops!');
         var isFirstInvocation = true;
