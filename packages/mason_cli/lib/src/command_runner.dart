@@ -74,7 +74,7 @@ class MasonCommandRunner extends CommandRunner<int> {
     } else {
       exitCode = await super.runCommand(topLevelResults);
     }
-    await _checkForUpdates();
+    if (topLevelResults.command?.name != 'update') await _checkForUpdates();
     return exitCode;
   }
 

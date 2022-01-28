@@ -34,7 +34,7 @@ class UpdateCommand extends MasonCommand {
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateCheckDone();
+    updateCheckDone('Checked for updates');
 
     final isUpToDate = packageVersion == latestVersion;
     if (isUpToDate) {
