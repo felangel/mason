@@ -38,7 +38,7 @@ void main() {
       );
     });
 
-    test('handles pub update errors gracefully', () async {
+    test('handles pub latest version query errors', () async {
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenThrow(Exception('oops'));
@@ -49,6 +49,22 @@ void main() {
       verifyNever(
         () => pubUpdater.update(packageName: any(named: 'packageName')),
       );
+    });
+
+    test('handles pub update errors', () async {
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => latestVersion);
+      when(
+        () => pubUpdater.update(packageName: any(named: 'packageName')),
+      ).thenThrow(Exception('oops'));
+      final result = await commandRunner.run(['update']);
+      expect(result, equals(ExitCode.software.code));
+      verify(() => logger.progress('Checking for updates')).called(1);
+      verify(() => logger.err('Exception: oops'));
+      verify(
+        () => pubUpdater.update(packageName: any(named: 'packageName')),
+      ).called(1);
     });
 
     test('updates when newer version exists', () async {
