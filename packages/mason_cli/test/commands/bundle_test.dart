@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:archive/archive.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
@@ -57,7 +60,9 @@ void main() {
           'greeting.bundle',
         ),
       );
-      final actual = file.readAsStringSync();
+      final actual = utf8.decode(
+        BZip2Decoder().decodeBytes(file.readAsBytesSync()),
+      );
       const expected =
           '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
       expect(actual, equals(expected));
@@ -89,7 +94,9 @@ void main() {
           'hooks.bundle',
         ),
       );
-      final actual = file.readAsStringSync();
+      final actual = utf8.decode(
+        BZip2Decoder().decodeBytes(file.readAsBytesSync()),
+      );
       expect(
         actual,
         contains('{"path":"hooks.md","data":"SGkge3tuYW1lfX0h","type":"text"}'),
