@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:archive/archive_io.dart';
+import 'package:archive/archive.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
