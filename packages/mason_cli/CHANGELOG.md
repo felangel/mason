@@ -1,3 +1,8 @@
+# 0.1.0-dev.9
+
+- feat: apply bzip compression to universal bundle
+- chore: fix typo in CHANGELOG
+
 # 0.1.0-dev.8
 
 - feat: add `mason update` command
