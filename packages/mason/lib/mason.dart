@@ -10,7 +10,8 @@ export 'src/brick_yaml.dart'
     show BrickYaml, BrickVariableProperties, BrickVariableType;
 export 'src/bricks_json.dart' show BricksJson, WriteBrickException;
 export 'src/bundler.dart' show createBundle;
-export 'src/exception.dart' show BrickNotFoundException, MasonException;
+export 'src/exception.dart'
+    show BrickNotFoundException, MasonException, BrickOutputChangedException;
 export 'src/generator.dart'
     show
         DirectoryGeneratorTarget,

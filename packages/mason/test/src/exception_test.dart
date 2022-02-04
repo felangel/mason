@@ -28,5 +28,13 @@ void main() {
         expect(exception.message, equals('Could not find brick at $path'));
       });
     });
+
+    group('BrickOutputChangedException', () {
+      test('can be instantiated', () {
+        const path = 'test path';
+        final exception = BrickOutputChangedException(path);
+        expect(exception.path, equals(path));
+      });
+    });
   });
 }

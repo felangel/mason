@@ -17,3 +17,14 @@ class BrickNotFoundException extends MasonException {
   const BrickNotFoundException(String path)
       : super('Could not find brick at $path');
 }
+
+/// {@template brick_output_changed_exception}
+///  Thrown when a brick's output has changed and the `overrideRule` is `error`
+/// {@endtemplate}
+class BrickOutputChangedException implements Exception {
+  /// {@macro brick_output_changed_exception}
+  BrickOutputChangedException(this.path);
+
+  /// The path to the brick which has changed.
+  final String path;
+}

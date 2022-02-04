@@ -164,42 +164,51 @@ abstract class Generator implements Comparable<Generator> {
   }) async {
     final overwriteRule = fileConflictResolution?.toOverwriteRule();
     var fileCount = 0;
+    final conflicts = <String>[];
     await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
-      final fileMatch = _fileRegExp.firstMatch(file.path);
-      if (fileMatch != null) {
-        final resultFile = await _fetch(vars[fileMatch[1]] as String);
-        if (resultFile.path.isEmpty) return;
-        await target.createFile(
-          p.basename(resultFile.path),
-          resultFile.content,
-          logger: logger,
-          overwriteRule: overwriteRule,
-        );
-        fileCount++;
-      } else {
-        final resultFiles = file.runSubstitution(
-          Map<String, dynamic>.of(vars),
-          Map<String, List<int>>.of(partials),
-        );
-        final root = RegExp(r'\w:\\|\w:\/');
-        final separator = RegExp(r'\/|\\');
-        final rootOrSeparator = RegExp('$root|$separator');
-        final wasRoot = file.path.startsWith(rootOrSeparator);
-        for (final file in resultFiles) {
-          final isRoot = file.path.startsWith(rootOrSeparator);
-          if (!wasRoot && isRoot) continue;
-          if (file.path.isEmpty) continue;
-          if (file.path.split(separator).contains('')) continue;
+      try {
+        final fileMatch = _fileRegExp.firstMatch(file.path);
+        if (fileMatch != null) {
+          final resultFile = await _fetch(vars[fileMatch[1]] as String);
+          if (resultFile.path.isEmpty) return;
           await target.createFile(
-            file.path,
-            file.content,
+            p.basename(resultFile.path),
+            resultFile.content,
             logger: logger,
             overwriteRule: overwriteRule,
           );
           fileCount++;
+        } else {
+          final resultFiles = file.runSubstitution(
+            Map<String, dynamic>.of(vars),
+            Map<String, List<int>>.of(partials),
+          );
+          final root = RegExp(r'\w:\\|\w:\/');
+          final separator = RegExp(r'\/|\\');
+          final rootOrSeparator = RegExp('$root|$separator');
+          final wasRoot = file.path.startsWith(rootOrSeparator);
+          for (final file in resultFiles) {
+            final isRoot = file.path.startsWith(rootOrSeparator);
+            if (!wasRoot && isRoot) continue;
+            if (file.path.isEmpty) continue;
+            if (file.path.split(separator).contains('')) continue;
+            await target.createFile(
+              file.path,
+              file.content,
+              logger: logger,
+              overwriteRule: overwriteRule,
+            );
+            fileCount++;
+          }
         }
+      } on BrickOutputChangedException catch (e) {
+        conflicts.add(e.path);
       }
     });
+
+    if (conflicts.isNotEmpty) {
+      throw MasonException('Exiting due to ${conflicts.length} conflict(s).');
+    }
     return fileCount;
   }
 
@@ -240,6 +249,9 @@ enum FileConflictResolution {
 
   /// Always append conflicting files.
   append,
+
+  /// Exit with code 1 if any file conflicts are found.
+  error,
 }
 
 /// The overwrite rule when generating code and a conflict occurs.
@@ -261,6 +273,9 @@ enum OverwriteRule {
 
   /// Append one time
   appendOnce,
+
+  /// Exit the process with code 1 if a conflict occurs.
+  error,
 }
 
 /// {@template directory_generator_target}
@@ -287,6 +302,11 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final fileExists = file.existsSync();
 
     if (!fileExists) {
+      if (_overwriteRule == OverwriteRule.error) {
+        logger?.err('${red.wrap(styleBold.wrap('(missing)'))} ${file.path}');
+        throw BrickOutputChangedException(file.path);
+      }
+
       return file
           .create(recursive: true)
           .then<File>((_) => file.writeAsBytes(contents))
@@ -300,6 +320,11 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     if (const ListEquality<int>().equals(existingContents, contents)) {
       logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
       return file;
+    }
+
+    if (_overwriteRule == OverwriteRule.error) {
+      logger?.err('${red.wrap(styleBold.wrap('(conflict)'))} ${file.path}');
+      throw BrickOutputChangedException(file.path);
     }
 
     final shouldPrompt = logger != null &&
@@ -327,6 +352,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.overwriteOnce:
       case OverwriteRule.appendOnce:
       case OverwriteRule.alwaysAppend:
+      case OverwriteRule.error:
       case null:
         final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||
             _overwriteRule == OverwriteRule.alwaysAppend;
@@ -539,6 +565,8 @@ extension on FileConflictResolution {
         return OverwriteRule.alwaysSkip;
       case FileConflictResolution.append:
         return OverwriteRule.alwaysAppend;
+      case FileConflictResolution.error:
+        return OverwriteRule.error;
       case FileConflictResolution.prompt:
         return null;
     }
