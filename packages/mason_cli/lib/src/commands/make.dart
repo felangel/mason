@@ -75,7 +75,10 @@ class _MakeCommand extends MasonCommand {
     final configPath = results['config-path'] as String?;
     final fileConflictResolution =
         (results['on-conflict'] as String).toFileConflictResolution();
+    final setExitIfChanged = results['set-exit-if-changed'] as bool;
     final target = DirectoryGeneratorTarget(Directory(outputDir));
+    final lastModified =
+        setExitIfChanged ? target.dir.statSync().modified : null;
     final disableHooks = results['no-hooks'] as bool;
     final generator = await MasonGenerator.fromBrickYaml(_brick);
     final vars = <String, dynamic>{};
@@ -156,6 +159,11 @@ class _MakeCommand extends MasonCommand {
         );
       }
 
+      if (setExitIfChanged) {
+        final modified = target.dir.statSync().modified != lastModified;
+        if (modified) return ExitCode.software.code;
+      }
+
       return ExitCode.success.code;
     } catch (_) {
       generateDone.call();
@@ -209,6 +217,11 @@ extension on BrickVariableProperties {
 extension on ArgParser {
   void addOptions() {
     addFlag('no-hooks', help: 'skips running hooks', negatable: false);
+    addFlag(
+      'set-exit-if-changed',
+      help: 'Return exit code 70 if there are files modified.',
+      negatable: false,
+    );
     addOption(
       'config-path',
       abbr: 'c',
