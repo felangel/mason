@@ -677,6 +677,81 @@ void main() {
         expect(fileCount, equals(1));
         expect(file.existsSync(), isTrue);
       });
+
+      test(
+          'throws MasonException when fileConflictResolution is error'
+          ' and file is missing', () async {
+        final brickYaml = BrickYaml(
+          name: 'bio',
+          description: 'A Bio Template',
+          version: '1.0.0',
+          path: path.join('..', '..', 'bricks', 'bio', 'brick.yaml'),
+          vars: const {
+            'name': BrickVariableProperties.string(),
+            'age': BrickVariableProperties.number(),
+            'isDeveloper': BrickVariableProperties.boolean(),
+          },
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final logger = MockLogger();
+
+        await expectLater(
+          generator.generate(
+            DirectoryGeneratorTarget(tempDir),
+            vars: <String, dynamic>{
+              'name': 'Dash',
+              'age': 42,
+              'isDeveloper': true,
+            },
+            logger: logger,
+            fileConflictResolution: FileConflictResolution.error,
+          ),
+          throwsA(isA<MasonException>()),
+        );
+
+        verify(() => logger.err(any(that: contains('(missing)'))));
+      });
+
+      test(
+          'throws MasonException when fileConflictResolution is error'
+          ' and file is missing', () async {
+        final brickYaml = BrickYaml(
+          name: 'bio',
+          description: 'A Bio Template',
+          version: '1.0.0',
+          path: path.join('..', '..', 'bricks', 'bio', 'brick.yaml'),
+          vars: const {
+            'name': BrickVariableProperties.string(),
+            'age': BrickVariableProperties.number(),
+            'isDeveloper': BrickVariableProperties.boolean(),
+          },
+        );
+        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        File(path.join(tempDir.path, 'ABOUT.md'))
+            .writeAsStringSync('wrong contents');
+
+        final logger = MockLogger();
+
+        await expectLater(
+          generator.generate(
+            DirectoryGeneratorTarget(tempDir),
+            vars: <String, dynamic>{
+              'name': 'Dash',
+              'age': 42,
+              'isDeveloper': true,
+            },
+            logger: logger,
+            fileConflictResolution: FileConflictResolution.error,
+          ),
+          throwsA(isA<MasonException>()),
+        );
+
+        verify(() => logger.err(any(that: contains('(conflict)'))));
+      });
     });
 
     group('compareTo', () {
