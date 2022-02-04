@@ -173,6 +173,9 @@ mason make hello --name Felix --on-conflict skip
 
 # Always append when there is a file conflict
 mason make hello --name Felix --on-conflict append
+
+# Finish with error when there is a file conflict
+mason make hello --name Felix --on-conflict error
 ```
 
 ## Creating New Bricks
@@ -408,7 +411,7 @@ And `post_gen.dart` contains:
 import 'package:mason/mason.dart';
 
 void run(HookContext context) {
-  context.logger.info('hello {{name}}!');  
+  context.logger.info('hello {{name}}!');
 }
 ```
 
@@ -432,7 +435,7 @@ import 'package:mason/mason.dart';
 void run(HookContext context) {
   // Read/Write vars
   context.vars = {...context.vars, 'custom_var': 'foo'};
-  
+
   // Use the logger
   context.logger.info('hook says hi!');
 }
