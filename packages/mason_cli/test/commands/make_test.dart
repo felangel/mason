@@ -171,7 +171,6 @@ bricks:
               'Usage: mason make <subcommand> [arguments]\n'
               '-h, --help                      Print this usage information.\n'
               '    --no-hooks                  skips running hooks\n'
-              '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -213,7 +212,6 @@ bricks:
               'Usage: mason make greeting [arguments]\n'
               '-h, --help                      Print this usage information.\n'
               '    --no-hooks                  skips running hooks\n'
-              '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -246,7 +244,6 @@ bricks:
               'Usage: mason make legacy [arguments]\n'
               '-h, --help                      Print this usage information.\n'
               '    --no-hooks                  skips running hooks\n'
-              '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -278,7 +275,6 @@ bricks:
               'Usage: mason make bio [arguments]\n'
               '-h, --help                      Print this usage information.\n'
               '    --no-hooks                  skips running hooks\n'
-              '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -605,10 +601,7 @@ bricks:
         path.join(Directory.current.path, 'hooks', 'basic'),
       )..createSync(recursive: true);
       Directory.current = testDir.path;
-      final result = await MasonCommandRunner(
-        logger: Logger(),
-        pubUpdater: pubUpdater,
-      ).run([
+      final result = await commandRunner.run([
         'make',
         'hooks',
         '--name',
