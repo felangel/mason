@@ -77,8 +77,6 @@ class _MakeCommand extends MasonCommand {
         (results['on-conflict'] as String).toFileConflictResolution();
     final setExitIfChanged = results['set-exit-if-changed'] as bool;
     final target = DirectoryGeneratorTarget(Directory(outputDir));
-    final lastModified =
-        setExitIfChanged ? target.dir.statSync().modified : null;
     final disableHooks = results['no-hooks'] as bool;
     final generator = await MasonGenerator.fromBrickYaml(_brick);
     final vars = <String, dynamic>{};
@@ -160,7 +158,7 @@ class _MakeCommand extends MasonCommand {
       }
 
       if (setExitIfChanged) {
-        final modified = target.dir.statSync().modified != lastModified;
+        final modified = files.any((file) => file.modified);
         if (modified) return ExitCode.software.code;
       }
 
@@ -182,6 +180,20 @@ class _MakeCommand extends MasonCommand {
       return json.decode(value);
     } catch (_) {
       return value;
+    }
+  }
+}
+
+extension on GeneratedFile {
+  bool get modified {
+    switch (status) {
+      case GeneratedFileStatus.created:
+      case GeneratedFileStatus.overwritten:
+      case GeneratedFileStatus.appended:
+        return true;
+      case GeneratedFileStatus.skipped:
+      case GeneratedFileStatus.identical:
+        return false;
     }
   }
 }
