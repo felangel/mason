@@ -15,6 +15,8 @@ export 'src/generator.dart'
     show
         DirectoryGeneratorTarget,
         FileConflictResolution,
+        GeneratedFile,
+        GeneratedFileStatus,
         HookContext,
         MasonGenerator,
         TemplateFile;

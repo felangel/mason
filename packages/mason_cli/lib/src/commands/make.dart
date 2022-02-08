@@ -143,14 +143,14 @@ class _MakeCommand extends MasonCommand {
 
     final generateDone = logger.progress('Making ${generator.id}');
     try {
-      final fileCount = await generator.generate(
+      final files = await generator.generate(
         target,
         vars: updatedVars ?? vars,
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
       generateDone('Made brick ${_brick.name}');
-      logger.logFiles(fileCount);
+      logger.logFiles(files.length);
 
       if (!disableHooks) {
         await generator.hooks.postGen(
