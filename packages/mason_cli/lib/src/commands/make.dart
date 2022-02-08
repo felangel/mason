@@ -158,7 +158,7 @@ class _MakeCommand extends MasonCommand {
       }
 
       if (setExitIfChanged) {
-        final filesChanged = files.where((file) => file.modified);
+        final filesChanged = files.where((file) => file.hasChanged);
         logger.logFilesChanged(filesChanged);
         if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
@@ -186,7 +186,7 @@ class _MakeCommand extends MasonCommand {
 }
 
 extension on GeneratedFile {
-  bool get modified {
+  bool get hasChanged {
     switch (status) {
       case GeneratedFileStatus.created:
       case GeneratedFileStatus.overwritten:
