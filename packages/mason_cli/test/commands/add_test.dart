@@ -146,10 +146,7 @@ void main() {
 
         test('adds brick successfully when brick exists', () async {
           const url = 'https://github.com/felangel/mason';
-          final result = await MasonCommandRunner(
-            logger: Logger(),
-            pubUpdater: pubUpdater,
-          ).run(
+          final result = await commandRunner.run(
             ['add', '--source', 'git', url, '--path', 'bricks/widget'],
           );
           expect(result, equals(ExitCode.success.code));
