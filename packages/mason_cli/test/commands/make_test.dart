@@ -605,7 +605,10 @@ bricks:
         path.join(Directory.current.path, 'hooks', 'basic'),
       )..createSync(recursive: true);
       Directory.current = testDir.path;
-      final result = await commandRunner.run([
+      final result = await MasonCommandRunner(
+        logger: Logger(),
+        pubUpdater: pubUpdater,
+      ).run([
         'make',
         'hooks',
         '--name',
