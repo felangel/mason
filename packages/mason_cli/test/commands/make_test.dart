@@ -213,7 +213,7 @@ bricks:
               'Usage: mason make greeting [arguments]\n'
               '-h, --help                      Print this usage information.\n'
               '    --no-hooks                  skips running hooks\n'
-              
+              '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
