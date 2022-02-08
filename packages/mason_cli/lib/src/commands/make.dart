@@ -159,7 +159,7 @@ class _MakeCommand extends MasonCommand {
 
       if (setExitIfChanged) {
         final filesChanged = files.where((file) => file.hasChanged);
-        logger.logFilesChanged(filesChanged);
+        logger.logFilesChanged(filesChanged.length);
         if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
 
@@ -277,11 +277,11 @@ extension on String {
 }
 
 extension on Logger {
-  void logFilesChanged(Iterable<GeneratedFile> files) {
-    if (files.isEmpty) return info('${lightGreen.wrap('✓')} 0 files changed');
-    return files.length == 1
-        ? err('${lightRed.wrap('✗')} ${files.length} file changed')
-        : err('${lightRed.wrap('✗')} ${files.length} files changed');
+  void logFilesChanged(int fileCount) {
+    if (fileCount == 0) return info('${lightGreen.wrap('✓')} 0 files changed');
+    return fileCount == 1
+        ? err('${lightRed.wrap('✗')} $fileCount file changed')
+        : err('${lightRed.wrap('✗')} $fileCount files changed');
   }
 
   void logFilesGenerated(int fileCount) {
