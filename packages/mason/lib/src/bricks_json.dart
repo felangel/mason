@@ -161,6 +161,7 @@ class BricksJson {
       );
       if (!brickYaml.existsSync()) {
         if (directory.existsSync()) directory.deleteSync(recursive: true);
+        print('brick does not exist!');
         throw BrickNotFoundException('${gitPath.url}/${gitPath.path}');
       }
     }
@@ -173,7 +174,10 @@ class BricksJson {
         await _clone(gitPath, tempDirectory);
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
-      } catch (_) {}
+      } catch (_, stackTrace) {
+        print('Error cloning brick $_');
+        print(stackTrace.toString());
+      }
       _ensureRemoteBrickExists(directory, gitPath);
       _cache[key] = directory.path;
       return directory.path;
@@ -182,7 +186,9 @@ class BricksJson {
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
+    print('cloning into ${directory.absolute.path}');
     await _clone(gitPath, directory);
+    print('ensuring brick exists');
     _ensureRemoteBrickExists(directory, gitPath);
     _cache[key] = directory.path;
     return directory.path;
