@@ -189,7 +189,6 @@ class BricksJson {
   }
 
   Future<void> _clone(GitPath gitPath, Directory directory) async {
-    print('cloning into ${directory.path}');
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
       await Git.run(
