@@ -148,7 +148,7 @@ class _MakeCommand extends MasonCommand {
         logger: logger,
       );
       generateDone('Made brick ${_brick.name}');
-      logger.logFiles(files.length);
+      logger.logFilesGenerated(files.length);
 
       if (!disableHooks) {
         await generator.hooks.postGen(
@@ -158,8 +158,9 @@ class _MakeCommand extends MasonCommand {
       }
 
       if (setExitIfChanged) {
-        final modified = files.any((file) => file.modified);
-        if (modified) return ExitCode.software.code;
+        final filesChanged = files.where((file) => file.modified);
+        logger.logFilesChanged(filesChanged);
+        if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
 
       return ExitCode.success.code;
@@ -276,7 +277,14 @@ extension on String {
 }
 
 extension on Logger {
-  void logFiles(int fileCount) {
+  void logFilesChanged(Iterable<GeneratedFile> files) {
+    if (files.isEmpty) return info('${lightGreen.wrap('✓')} 0 files changed');
+    return files.length == 1
+        ? err('${lightRed.wrap('✗')} ${files.length} file changed')
+        : err('${lightRed.wrap('✗')} ${files.length} files changed');
+  }
+
+  void logFilesGenerated(int fileCount) {
     if (fileCount == 1) {
       this
         ..info(
