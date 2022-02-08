@@ -26,11 +26,11 @@ void main() {
         expect(generator.id, equals('greeting'));
 
         final target = Directory.systemTemp.createTempSync();
-        final fileCount = await generator.generate(
+        final files = await generator.generate(
           DirectoryGeneratorTarget(target),
           logger: logger,
         );
-        expect(fileCount, equals(1));
+        expect(files.length, equals(1));
         expect(
           File(path.join(target.path, 'GREETINGS.md')).existsSync(),
           isTrue,
@@ -47,11 +47,11 @@ void main() {
         expect(generator.id, equals('greeting'));
 
         final target = Directory.systemTemp.createTempSync();
-        final fileCount = await generator.generate(
+        final files = await generator.generate(
           DirectoryGeneratorTarget(target),
           logger: logger,
         );
-        expect(fileCount, equals(1));
+        expect(files.length, equals(1));
         expect(
           File(path.join(target.path, 'GREETINGS.md')).existsSync(),
           isTrue,
@@ -76,12 +76,12 @@ void main() {
           isTrue,
         );
 
-        final fileCount = await generator.generate(
+        final files = await generator.generate(
           DirectoryGeneratorTarget(target),
           vars: vars,
           logger: logger,
         );
-        expect(fileCount, equals(1));
+        expect(files.length, equals(1));
         expect(
           File(path.join(target.path, 'hooks.md')).existsSync(),
           isTrue,
