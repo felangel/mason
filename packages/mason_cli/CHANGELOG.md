@@ -1,3 +1,18 @@
+# 0.1.0-dev.10
+
+- **BREAKING** feat: upgrade to `mason ^0.1.0-dev.6`
+
+  - add `--set-exit-if-changed` to `make` command
+
+    ```sh
+    # fail with exit code 70 if any files were changed
+    mason make greeting --name Dash --set-exit-if-changed
+    ✓ Made brick greeting (0.1s)
+    ✓ Generated 1 file:
+      GREETINGS.md (new)
+    ✗ 1 file changed
+    ```
+
 # 0.1.0-dev.9
 
 - feat: apply bzip compression to universal bundle
