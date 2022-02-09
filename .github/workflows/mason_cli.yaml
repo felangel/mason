@@ -64,7 +64,7 @@ jobs:
         run: dart test -j 1 -x pull-request-only --coverage=coverage && dart run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
 
       - name: Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v1
         with:
           path: packages/mason_cli/coverage/lcov.info
 

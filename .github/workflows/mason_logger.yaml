@@ -43,7 +43,7 @@ jobs:
           test_coverage
 
       - name: Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1.2.0
+        uses: VeryGoodOpenSource/very_good_coverage@v1
         with:
           path: packages/mason_logger/coverage/lcov.info
 
