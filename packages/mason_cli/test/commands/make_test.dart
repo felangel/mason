@@ -969,5 +969,207 @@ bricks:
         () => logger.delayed(any(that: contains('(modified)'))),
       ).called(1);
     });
+
+    test('generates greeting --set-exit-if-changed (identical)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-set-exit-if-changed'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name', '--set-exit-if-changed'],
+      );
+      expect(result, equals(ExitCode.software.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name',
+        '--on-conflict',
+        'overwrite',
+        '--set-exit-if-changed'
+      ]);
+
+      expect(result, equals(ExitCode.success.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(identical)'))),
+      ).called(1);
+      verify(
+        () => logger.info(any(that: contains('0 files changed'))),
+      ).called(1);
+    });
+
+    test('generates greeting --set-exit-if-changed (overwritten)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-set-exit-if-changed'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name', '--set-exit-if-changed'],
+      );
+      expect(result, equals(ExitCode.software.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name1',
+        '--on-conflict',
+        'overwrite',
+        '--set-exit-if-changed'
+      ]);
+
+      expect(result, equals(ExitCode.software.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name1!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+    });
+
+    test('generates greeting --set-exit-if-changed (skipped)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-set-exit-if-changed'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name', '--set-exit-if-changed'],
+      );
+      expect(result, equals(ExitCode.software.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name1',
+        '--on-conflict',
+        'skip',
+        '--set-exit-if-changed'
+      ]);
+
+      expect(result, equals(ExitCode.success.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(skip)'))),
+      ).called(1);
+      verify(
+        () => logger.info(any(that: contains('0 files changed'))),
+      ).called(1);
+    });
+
+    test('generates greeting --set-exit-if-changed (modified)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'greeting-set-exit-if-changed'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      var result = await commandRunner.run(
+        ['make', 'greeting', '--name', 'test-name', '--set-exit-if-changed'],
+      );
+      expect(result, equals(ExitCode.software.code));
+
+      final fileA = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileA.readAsStringSync(), contains('Hi test-name!'));
+      verify(
+        () => logger.delayed(any(that: contains('(new)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+
+      result = await commandRunner.run([
+        'make',
+        'greeting',
+        '--name',
+        'test-name1',
+        '--on-conflict',
+        'append',
+        '--set-exit-if-changed'
+      ]);
+
+      expect(result, equals(ExitCode.software.code));
+      final fileB = File(
+        path.join(Directory.current.path, 'GREETINGS.md'),
+      );
+      expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name1!'));
+      verify(
+        () => logger.delayed(any(that: contains('(modified)'))),
+      ).called(1);
+      verify(
+        () => logger.err(any(that: contains('1 file changed'))),
+      ).called(1);
+    });
+
+    test('generates plugin --set-exit-if-changed', () async {
+      final testDir = Directory(
+        path.join(
+          Directory.current.path,
+          'plugin',
+          'empty-set-exit-if-changed',
+        ),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        [
+          'make',
+          'plugin',
+          '--ios',
+          'false',
+          '--android',
+          'true',
+          '--set-exit-if-changed'
+        ],
+      );
+      expect(result, equals(ExitCode.software.code));
+      verify(
+        () => logger.err(any(that: contains('5 files changed'))),
+      ).called(1);
+    });
   });
 }
