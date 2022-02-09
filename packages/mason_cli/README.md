@@ -47,6 +47,7 @@ mason make hello
     - [Nested Templates (partials)](#nested-templates-partials)
     - [File Resolution](#file-resolution)
     - [Built-in Lambdas](#built-in-lambdas)
+    - [Detecting Changes After Generation](#detecting-changes-after-generation)
     - [Custom Script Execution (Hooks)](#custom-script-execution-hooks)
       - [Hooks Usage](#hooks-usage)
 - [Adding Bricks](#adding-bricks)
@@ -338,6 +339,15 @@ The output will be:
 ```
 ├── my_name.md
 └── MyName.java
+```
+
+#### Detecting Changes After Generation
+
+Mason supports verifying that `mason make` did not change any files via the `--set-exit-if-changed` flag. This is often useful in continuous integration (CI) environments to ensure all generated code is up to date.
+
+```sh
+# fail with exit code 70 if any files were changed
+mason make example --name Dash --set-exit-if-changed
 ```
 
 #### Custom Script Execution (Hooks)
