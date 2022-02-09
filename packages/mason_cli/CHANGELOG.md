@@ -1,6 +1,7 @@
 # 0.1.0-dev.10
 
 - **BREAKING** feat: upgrade to `mason ^0.1.0-dev.6`
+
   - add `--set-exit-if-changed` to `make` command
 
     ```sh
