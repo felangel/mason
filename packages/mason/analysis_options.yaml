@@ -4,3 +4,4 @@ analyzer:
     - "test/.test_coverage.dart"
     - "test/fixtures/**"
     - "**/*.g.dart"
+    - "lib/src/version.dart"

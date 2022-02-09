@@ -1,6 +1,9 @@
 # See https://github.com/dart-lang/build/tree/master/build_web_compilers#configuration
 targets:
   $default:
+    sources:
+      exclude:
+        - test/**
     builders:
       json_serializable:
         options:
