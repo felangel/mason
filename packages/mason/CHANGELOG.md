@@ -1,3 +1,28 @@
+# 0.1.0-dev.6
+
+- **BREAKING** feat: return list of `GeneratedFile` from `generate`
+
+```dart
+import 'dart:io';
+
+import 'package:mason/mason.dart';
+
+Future<void> main() async {
+  final generator = await MasonGenerator.fromGitPath(
+    const GitPath(
+      'https://github.com/felangel/mason.git',
+      path: 'bricks/greeting',
+    ),
+  );
+  final files = await generator.generate(
+    DirectoryGeneratorTarget(Directory.current),
+    vars: <String, dynamic>{'name': 'Dash'},
+  );
+}
+```
+
+- feat: expose `packageVersion`
+
 # 0.1.0-dev.5
 
 - **BREAKING** feat: add computed vars support via `HookContext`
@@ -12,7 +37,7 @@ import 'package:mason/mason.dart';
 void run(HookContext context) {
   // Read/Write vars
   context.vars = {...context.vars, 'custom_var': 'foo'};
-  
+
   // Use the logger
   context.logger.info('hello from pre_gen.dart');
 }
