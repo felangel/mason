@@ -75,6 +75,7 @@ class _MakeCommand extends MasonCommand {
     final configPath = results['config-path'] as String?;
     final fileConflictResolution =
         (results['on-conflict'] as String).toFileConflictResolution();
+    final setExitIfChanged = results['set-exit-if-changed'] as bool;
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final generator = await MasonGenerator.fromBrickYaml(_brick);
@@ -147,13 +148,19 @@ class _MakeCommand extends MasonCommand {
         logger: logger,
       );
       generateDone('Made brick ${_brick.name}');
-      logger.logFiles(files.length);
+      logger.logFilesGenerated(files.length);
 
       if (!disableHooks) {
         await generator.hooks.postGen(
           vars: updatedVars ?? vars,
           workingDirectory: outputDir,
         );
+      }
+
+      if (setExitIfChanged) {
+        final filesChanged = files.where((file) => file.hasChanged);
+        logger.logFilesChanged(filesChanged.length);
+        if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
 
       return ExitCode.success.code;
@@ -174,6 +181,20 @@ class _MakeCommand extends MasonCommand {
       return json.decode(value);
     } catch (_) {
       return value;
+    }
+  }
+}
+
+extension on GeneratedFile {
+  bool get hasChanged {
+    switch (status) {
+      case GeneratedFileStatus.created:
+      case GeneratedFileStatus.overwritten:
+      case GeneratedFileStatus.appended:
+        return true;
+      case GeneratedFileStatus.skipped:
+      case GeneratedFileStatus.identical:
+        return false;
     }
   }
 }
@@ -209,6 +230,11 @@ extension on BrickVariableProperties {
 extension on ArgParser {
   void addOptions() {
     addFlag('no-hooks', help: 'skips running hooks', negatable: false);
+    addFlag(
+      'set-exit-if-changed',
+      help: 'Return exit code 70 if there are files modified.',
+      negatable: false,
+    );
     addOption(
       'config-path',
       abbr: 'c',
@@ -251,7 +277,14 @@ extension on String {
 }
 
 extension on Logger {
-  void logFiles(int fileCount) {
+  void logFilesChanged(int fileCount) {
+    if (fileCount == 0) return info('${lightGreen.wrap('✓')} 0 files changed');
+    return fileCount == 1
+        ? err('${lightRed.wrap('✗')} $fileCount file changed')
+        : err('${lightRed.wrap('✗')} $fileCount files changed');
+  }
+
+  void logFilesGenerated(int fileCount) {
     if (fileCount == 1) {
       this
         ..info(
