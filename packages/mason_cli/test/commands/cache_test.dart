@@ -1,4 +1,4 @@
-import 'package:mason/mason.dart';
+import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
