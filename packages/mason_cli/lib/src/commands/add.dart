@@ -62,7 +62,7 @@ class AddCommand extends MasonCommand {
         if (!file.existsSync()) {
           throw UsageException('brick not found at path $location', usage);
         }
-        brick = Brick(path: file.parent.path);
+        brick = Brick.path(file.parent.path);
         await bricksJson.add(brick);
       } else {
         final gitPath = GitPath(
@@ -70,7 +70,7 @@ class AddCommand extends MasonCommand {
           path: results['path'] as String?,
           ref: results['ref'] as String?,
         );
-        brick = Brick(git: gitPath);
+        brick = Brick.git(gitPath);
         try {
           final directory = await bricksJson.add(brick);
           file = File(p.join(directory, gitPath.path, BrickYaml.file));
@@ -90,7 +90,7 @@ class AddCommand extends MasonCommand {
     final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final bricks = Map.of(targetMasonYaml.bricks)
-      ..addAll({brickYaml.name: brick});
+      ..addAll({brickYaml.name: brick.location});
     final addDone = logger.progress('Adding ${brickYaml.name}');
     try {
       if (!targetMasonYaml.bricks.containsKey(name)) {

@@ -1,6 +1,8 @@
 import 'dart:convert';
 
+import 'package:archive/archive.dart';
 import 'package:crypto/crypto.dart';
+import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
 import 'package:meta/meta.dart';
@@ -87,22 +89,24 @@ class BricksJson {
   /// Returns the cache key for the given [brick].
   /// Return `null` if the [brick] does not have a valid path.
   String? _getKey(Brick brick) {
-    if (brick.path != null) {
-      final path = brick.path!;
-      final name = p.basenameWithoutExtension(path);
-      final hash = sha256.convert(utf8.encode(path));
+    final name = brick.name;
+    final location = brick.location;
+    if (location.path != null) {
+      final hash = sha256.convert(utf8.encode(location.path!));
       final key = '${name}_$hash';
       return key;
     }
-    if (brick.git != null) {
+    if (location.git != null) {
       final path =
-          p.join(brick.git!.url, brick.git!.path).replaceAll(r'\', '/');
-      final name = p.basenameWithoutExtension(path);
+          p.join(location.git!.url, location.git!.path).replaceAll(r'\', '/');
       final hash = sha256.convert(utf8.encode(path));
-      final key = brick.git!.ref != null
-          ? '${name}_${brick.git!.ref}_$hash'
+      final key = location.git!.ref != null
+          ? '${name}_${location.git!.ref}_$hash'
           : '${name}_$hash';
       return key;
+    }
+    if (location.version != null) {
+      return '${name}_${location.version}';
     }
     return null;
   }
@@ -117,11 +121,11 @@ class BricksJson {
     final key = _getKey(brick);
     if (key == null) {
       throw const WriteBrickException(
-        'Brick must contain either a path or a git url',
+        'Brick must contain either a path, git url, or version',
       );
     }
 
-    final path = brick.path;
+    final path = brick.location.path;
     if (path != null) {
       final brickYaml = File(p.join(path, BrickYaml.file));
       if (!brickYaml.existsSync()) {
@@ -129,26 +133,39 @@ class BricksJson {
       }
       final remoteDir = getPath(brick);
       if (remoteDir != null) return remoteDir;
-      return _addLocalBrick(path);
+      return _addLocalBrick(brick);
     }
 
-    return _addRemoteBrick(brick.git!);
+    final gitPath = brick.location.git;
+    if (gitPath != null) {
+      return _addRemoteBrickFromGit(brick);
+    }
+
+    final version = brick.location.version;
+    if (version != null) {
+      return _addRemoteBrickFromRegistry(brick);
+    }
+
+    throw const WriteBrickException(
+      'Brick must contain either a path, git url, or version',
+    );
   }
 
-  /// Writes local brick at [path] to cache
+  /// Writes local brick at using path to cache
   /// and returns the local path to the brick.
-  String _addLocalBrick(String path) {
-    final localPath = p.canonicalize(path);
-    _cache[_getKey(Brick(path: path))!] = localPath;
+  String _addLocalBrick(Brick brick) {
+    final localPath = p.canonicalize(brick.location.path!);
+    _cache[_getKey(brick)!] = localPath;
     return localPath;
   }
 
-  /// Writes remote brick at [gitPath] to cache
+  /// Writes remote brick via git url to cache
   /// and returns the local path to the brick.
-  Future<String> _addRemoteBrick(GitPath gitPath) async {
-    final key = _getKey(Brick(git: gitPath))!;
+  Future<String> _addRemoteBrickFromGit(Brick brick) async {
+    final gitPath = brick.location.git!;
+    final key = _getKey(brick)!;
     final dirName = _getKey(
-      Brick(git: GitPath(gitPath.url, ref: gitPath.ref)),
+      Brick.git(GitPath(gitPath.url, ref: gitPath.ref)),
     )!;
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
@@ -198,8 +215,73 @@ class BricksJson {
     }
   }
 
+  /// Writes remote brick from registry to cache
+  /// and returns the local path to the brick.
+  Future<String> _addRemoteBrickFromRegistry(Brick brick) async {
+    final key = _getKey(brick)!;
+    final directory = Directory(p.join(rootDir.path, 'hosted', hostedUrl, key));
+    final directoryExists = directory.existsSync();
+    final directoryIsNotEmpty =
+        directoryExists && directory.listSync(recursive: true).isNotEmpty;
+
+    void _ensureRemoteBrickExists(Directory directory) {
+      final brickYaml = File(
+        p.join(directory.path, BrickYaml.file),
+      );
+      if (!brickYaml.existsSync()) {
+        if (directory.existsSync()) directory.deleteSync(recursive: true);
+        throw BrickNotFoundException('${brick.name} ${brick.location.version}');
+      }
+    }
+
+    /// Even if a cached version exists, still try to update.
+    /// Fall-back to cached version if update fails.
+    if (directoryExists && directoryIsNotEmpty) {
+      try {
+        final tempDirectory = Directory.systemTemp.createTempSync();
+        await _download(brick, tempDirectory);
+        await directory.delete(recursive: true);
+        await tempDirectory.rename(directory.path);
+      } catch (_) {}
+      _ensureRemoteBrickExists(directory);
+      _cache[key] = directory.path;
+      return directory.path;
+    }
+
+    if (directoryExists) await directory.delete(recursive: true);
+
+    await directory.create(recursive: true);
+    await _download(brick, directory);
+    _ensureRemoteBrickExists(directory);
+    _cache[key] = directory.path;
+    return directory.path;
+  }
+
+  Future<void> _download(Brick brick, Directory directory) async {
+    final uri = Uri.parse(
+      'https://$hostedUrl/api/v1/bricks/${brick.name}/versions/${brick.location.version}.bundle',
+    );
+    final response = await http.get(uri);
+    if (response.statusCode != 200) {
+      throw BrickNotFoundException(uri.toString());
+    }
+
+    final bundle = MasonBundle.fromJson(
+      json.decode(
+        utf8.decode(BZip2Decoder().decodeBytes(response.bodyBytes)),
+      ) as Map<String, dynamic>,
+    );
+    unpackBundle(bundle, directory);
+  }
+
   /// Global subdirectory within the mason cache.
   static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
+
+  /// The location of the registry where bricks are hosted.
+  static String get hostedUrl {
+    final environment = testEnvironment ?? Platform.environment;
+    return environment['MASON_HOSTED_URL'] ?? 'registry.brickhub.dev';
+  }
 
   /// Root mason cache directory
   static Directory get rootDir {

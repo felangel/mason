@@ -22,7 +22,7 @@ void main() {
 
       expect(bricksJson.encode, equals('{}'));
 
-      final brick = Brick(path: path.join('..', '..', 'bricks', 'simple'));
+      final brick = Brick.path(path.join('..', '..', 'bricks', 'simple'));
       final result = await bricksJson.add(brick);
 
       expect(result, isNotEmpty);
@@ -68,8 +68,8 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         final result = await bricksJson.add(
-          Brick(
-            git: GitPath(
+          Brick.git(
+            GitPath(
               'https://github.com/felangel/mason',
               path: 'bricks/simple',
             ),
@@ -84,8 +84,8 @@ void main() {
           'with existing empty directory', () async {
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);
-        final brick = Brick(
-          git: GitPath(
+        final brick = Brick.git(
+          GitPath(
             'https://github.com/felangel/mason',
             path: 'bricks/simple',
           ),
@@ -118,8 +118,8 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         final result = await bricksJson.add(
-          Brick(
-            git: GitPath(
+          Brick.git(
+            GitPath(
               'https://github.com/felangel/mason',
               path: 'bricks/simple',
               ref: 'master',
@@ -139,7 +139,7 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         final result = await bricksJson.add(
-          Brick(path: path.join('..', '..', 'bricks', 'simple')),
+          Brick.path(path.join('..', '..', 'bricks', 'simple')),
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('simple_'));
@@ -157,7 +157,7 @@ void main() {
         expect(bricksJson.encode, equals('{}'));
         expect(
           () => bricksJson.add(
-            Brick(git: GitPath('https://github.com/felangel/mason')),
+            Brick.git(GitPath('https://github.com/felangel/mason')),
           ),
           throwsA(isA<BrickNotFoundException>()),
         );
@@ -174,7 +174,7 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         expect(
-          () => bricksJson.add(Brick(path: 'simple')),
+          () => bricksJson.add(Brick.path('simple')),
           throwsA(isA<BrickNotFoundException>()),
         );
       });
@@ -191,7 +191,7 @@ void main() {
         expect(bricksJson.encode, equals('{}'));
         expect(file.readAsStringSync(), isEmpty);
         final result = await bricksJson.add(
-          Brick(path: path.join('..', '..', 'bricks', 'simple')),
+          Brick.path(path.join('..', '..', 'bricks', 'simple')),
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('simple_'));
@@ -210,7 +210,7 @@ void main() {
         ).createSync(recursive: true);
         expect(bricksJson.encode, equals('{}'));
 
-        final brick = Brick(path: path.join('..', '..', 'bricks', 'simple'));
+        final brick = Brick.path(path.join('..', '..', 'bricks', 'simple'));
         final result = await bricksJson.add(brick);
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('simple_'));

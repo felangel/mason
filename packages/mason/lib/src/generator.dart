@@ -108,7 +108,7 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
-    final directory = await BricksJson.temp().add(Brick(git: gitPath));
+    final directory = await BricksJson.temp().add(Brick.git(gitPath));
     final file = File(p.join(directory, gitPath.path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),

@@ -20,8 +20,13 @@ class GetCommand extends MasonCommand {
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final getDone = logger.progress('Getting bricks');
     try {
-      if (masonYaml.bricks.values.isNotEmpty) {
-        await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+      if (masonYaml.bricks.entries.isNotEmpty) {
+        await Future.forEach<MapEntry<String, BrickLocation>>(
+          masonYaml.bricks.entries,
+          (entry) => bricksJson.add(
+            Brick(name: entry.key, location: entry.value),
+          ),
+        );
       }
     } finally {
       await bricksJson.flush();

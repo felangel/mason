@@ -194,12 +194,12 @@ abstract class MasonCommand extends Command<int> {
   Set<BrickYaml> _getBricks(MasonYaml masonYaml) {
     final bricks = <BrickYaml>{};
     for (final entry in masonYaml.bricks.entries) {
-      final brick = entry.value;
+      final brick = Brick(name: entry.key, location: entry.value);
       final dirPath = _cacheDirectory(brick);
       if (dirPath == null) break;
-      final filePath = brick.path != null
+      final filePath = brick.location.path != null
           ? p.join(dirPath, BrickYaml.file)
-          : p.join(dirPath, brick.git?.path ?? '', BrickYaml.file);
+          : p.join(dirPath, brick.location.git?.path ?? '', BrickYaml.file);
       final file = File(filePath);
       if (!file.existsSync()) throw BrickNotFoundException(filePath);
       try {

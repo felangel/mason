@@ -40,7 +40,9 @@ void main() {
       });
 
       test('is thrown when brick.yaml is malformed', () async {
-        final directory = Directory.systemTemp.createTempSync();
+        final tempDirectory = Directory.systemTemp.createTempSync();
+        final directory = Directory(path.join(tempDirectory.path, 'malformed'))
+          ..createSync(recursive: true);
         final brickYaml = File(path.join(directory.path, 'brick.yaml'))
           ..writeAsStringSync(
             '''

@@ -11,8 +11,8 @@ part 'mason_yaml.g.dart';
 @JsonSerializable()
 class MasonYaml {
   /// {@macro mason_yaml}
-  const MasonYaml(Map<String, Brick>? bricks)
-      : bricks = bricks ?? const <String, Brick>{};
+  const MasonYaml(Map<String, BrickLocation>? bricks)
+      : bricks = bricks ?? const <String, BrickLocation>{};
 
   /// Converts [Map] to [MasonYaml]
   factory MasonYaml.fromJson(Map<dynamic, dynamic> json) =>
@@ -26,10 +26,10 @@ class MasonYaml {
   static const file = 'mason.yaml';
 
   /// static constant for an empty `mason.yaml` file.
-  static const empty = MasonYaml(<String, Brick>{});
+  static const empty = MasonYaml(<String, BrickLocation>{});
 
-  /// [Map] of [Brick] alias to [Brick] instances.
-  final Map<String, Brick> bricks;
+  /// [Map] of [BrickLocation] alias to [BrickLocation] instances.
+  final Map<String, BrickLocation> bricks;
 
   /// Finds nearest ancestor `mason.yaml` file
   /// relative to the [cwd].
@@ -46,27 +46,33 @@ class MasonYaml {
   }
 }
 
-/// {@template brick}
-/// Contains metadata for a reusable brick template.
+/// {@template brick_location}
+/// Contains metadata for the location of a reusable brick template.
 ///
 /// Used by [MasonYaml].
 /// {@endtemplate}
 @JsonSerializable()
-class Brick {
-  /// {@macro brick}
-  const Brick({this.path, this.git});
+class BrickLocation {
+  /// {@macro brick_location}
+  const BrickLocation({this.path, this.git, this.version});
 
-  /// Converts a [Map] to a [Brick].
-  factory Brick.fromJson(Map<dynamic, dynamic> json) => _$BrickFromJson(json);
+  /// Converts a [Map] to a [BrickLocation].
+  factory BrickLocation.fromJson(dynamic json) {
+    if (json is String) return BrickLocation(version: json);
+    return _$BrickLocationFromJson(json as Map);
+  }
 
-  /// Converts [Brick] to [Map]
-  Map<dynamic, dynamic> toJson() => _$BrickToJson(this);
+  /// Converts [BrickLocation] to [Map]
+  Map<dynamic, dynamic> toJson() => _$BrickLocationToJson(this);
 
   /// The local brick template path.
   final String? path;
 
   /// Git brick template path.
   final GitPath? git;
+
+  /// Brick version constraint.
+  final String? version;
 }
 
 /// {@template git_path}

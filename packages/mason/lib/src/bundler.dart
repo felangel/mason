@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
+import 'package:mason/src/brick_yaml.dart';
 import 'package:mason/src/mason_bundle.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
@@ -12,6 +13,25 @@ final _binaryFileTypes = RegExp(
 );
 
 final _hookFiles = RegExp('(pre_gen.dart|post_gen.dart|pubspec.yaml)');
+
+/// Unpack the [bundle] in the [target] directory.
+void unpackBundle(MasonBundle bundle, Directory target) {
+  for (final file in bundle.files) {
+    _unbundleFile(file, path.join(target.path, BrickYaml.dir));
+  }
+  for (final hook in bundle.hooks) {
+    _unbundleFile(hook, path.join(target.path, BrickYaml.hooks));
+  }
+  final brickYaml = BrickYaml(
+    name: bundle.name,
+    description: bundle.description,
+    version: bundle.version,
+    vars: bundle.vars,
+  );
+  File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
+    json.encode(brickYaml.toJson()),
+  );
+}
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
 MasonBundle createBundle(Directory brick) {
@@ -65,4 +85,12 @@ MasonBundledFile _bundleHookFile(File file) {
   final data = base64.encode(file.readAsBytesSync());
   final filePath = path.basename(file.path);
   return MasonBundledFile(filePath, data, 'text');
+}
+
+File _unbundleFile(MasonBundledFile file, String target) {
+  final data = base64.decode(file.data);
+  final filePath = path.join(target, file.path);
+  return File(filePath)
+    ..createSync(recursive: true)
+    ..writeAsBytesSync(data);
 }
