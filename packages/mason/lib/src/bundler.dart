@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
-import 'package:mason/src/brick_yaml.dart';
 import 'package:mason/src/mason_bundle.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
