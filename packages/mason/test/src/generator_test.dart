@@ -677,6 +677,30 @@ void main() {
       });
     });
 
+    group('.fromRegistry', () {
+      test('constructs an instance', () async {
+        const name = 'Dash';
+        final generator = await MasonGenerator.fromRegistry(
+          name: 'greeting',
+          version: '0.1.0+1',
+        );
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+
+        final file = File(path.join(tempDir.path, 'GREETINGS.md'));
+        final generatedFile = files.first;
+        expect(files.length, equals(1));
+        expect(generatedFile.status, equals(GeneratedFileStatus.created));
+        expect(generatedFile.path, equals(file.path));
+        expect(file.existsSync(), isTrue);
+        expect(file.readAsStringSync(), equals('Hi $name!'));
+      });
+    });
+
     group('generate', () {
       test('generates app_icon from remote url', () async {
         const url =

@@ -5,15 +5,6 @@ import 'package:mason/mason.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
 
-/// {@template mason_yaml_name_mismatch}
-/// Thrown when a brick's name in `mason.yaml` does not match
-/// the name in `brick.yaml`.
-/// {@endtemplate}
-class MasonYamlNameMismatch extends MasonException {
-  /// {@macro mason_yaml_name_mismatch}
-  MasonYamlNameMismatch(String message) : super(message);
-}
-
 /// {@template mason_yaml_not_found_exception}
 /// Thrown when a `mason.yaml` cannot be found locally.
 /// {@endtemplate}
@@ -39,6 +30,14 @@ class MasonYamlParseException extends MasonException {
 class BrickYamlParseException extends MasonException {
   /// {@macro brick_yaml_parse_exception}
   const BrickYamlParseException(String message) : super(message);
+}
+
+/// {@template malformed_bricks_json}
+/// Thrown when a brick from mason.yaml cannot be found in bricks.json.
+/// {@endtemplate}
+class MalformedBricksJson extends MasonException {
+  /// {@macro malformed_bricks_json}
+  const MalformedBricksJson(String message) : super(message);
 }
 
 /// {@template mason_command}
@@ -196,7 +195,12 @@ abstract class MasonCommand extends Command<int> {
     for (final entry in masonYaml.bricks.entries) {
       final brick = Brick(name: entry.key, location: entry.value);
       final dirPath = _cacheDirectory(brick);
-      if (dirPath == null) break;
+      if (dirPath == null) {
+        throw MalformedBricksJson(
+          'bricks.json does not contain brick "${brick.name}". '
+          'Did you forget to run "mason get"?',
+        );
+      }
       final filePath = brick.location.path != null
           ? p.join(dirPath, BrickYaml.file)
           : p.join(dirPath, brick.location.git?.path ?? '', BrickYaml.file);

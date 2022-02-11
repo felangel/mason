@@ -70,5 +70,73 @@ void main() {
         }
       });
     });
+
+    group('unpackBundle', () {
+      test('unpacks a MasonBundle (simple)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('..', '..', 'bricks', 'simple')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            '''{"name":"simple","description":"A Simple Static Template","version":"0.1.0+1","vars":{}}''',
+          ),
+        );
+        final file = File(path.join(tempDir.path, '__brick__', 'HELLO.md'));
+        expect(file.existsSync(), isTrue);
+        expect(file.readAsStringSync(), equals('Hello World!'));
+      });
+
+      test('unpacks a MasonBundle (hooks)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('..', '..', 'bricks', 'hooks')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            '''{"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
+          ),
+        );
+        final file = File(path.join(tempDir.path, '__brick__', 'hooks.md'));
+        expect(file.existsSync(), isTrue);
+        expect(file.readAsStringSync(), equals('Hi {{name}}!'));
+        final preGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
+        );
+        expect(preGenHookFile.existsSync(), true);
+        expect(
+          preGenHookFile.readAsStringSync(),
+          equals(
+            '''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.pre_gen.txt');file.writeAsStringSync('pre_gen: {{name}}');}''',
+          ),
+        );
+        final postGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'post_gen.dart'),
+        );
+        expect(postGenHookFile.existsSync(), true);
+        expect(
+          postGenHookFile.readAsStringSync(),
+          equals(
+            '''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.post_gen.txt');file.writeAsStringSync('post_gen: {{name}}');}''',
+          ),
+        );
+        final hookPubspecFile = File(
+          path.join(tempDir.path, 'hooks', 'pubspec.yaml'),
+        );
+        expect(
+          hookPubspecFile.readAsStringSync(),
+          contains('name: hooks_hooks'),
+        );
+        expect(hookPubspecFile.existsSync(), true);
+      });
+    });
   });
 }

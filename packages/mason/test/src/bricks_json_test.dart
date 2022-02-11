@@ -59,6 +59,46 @@ void main() {
     });
 
     group('add', () {
+      test('adds bricks to bricks.json (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        final result = await bricksJson.add(
+          Brick.version(name: 'greeting', version: '0.1.0+1'),
+        );
+        expect(result, isNotEmpty);
+        expect(bricksJson.encode, contains('greeting_'));
+      });
+
+      test(
+          'adds bricks to bricks.json via registry '
+          'with existing empty directory', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final brick = Brick.version(name: 'greeting', version: '0.1.0+1');
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+
+        final result1 = await bricksJson.add(brick);
+        expect(result1, isNotEmpty);
+        expect(bricksJson.encode, contains('greeting_'));
+        Directory(result1)
+          ..deleteSync(recursive: true)
+          ..createSync();
+
+        final result2 = await bricksJson.add(brick);
+        expect(result2, isNotEmpty);
+        expect(bricksJson.encode, contains('greeting_'));
+        expect(result1, equals(result2));
+      });
+
       test('adds bricks to bricks.json (git)', () async {
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);
@@ -147,6 +187,24 @@ void main() {
 
       test(
           'throws BrickNotFoundException when '
+          'brick does not exist (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'greeting', version: '0.0.0'),
+          ),
+          throwsA(isA<BrickNotFoundException>()),
+        );
+      });
+
+      test(
+          'throws BrickNotFoundException when '
           'brick does not exist (git)', () async {
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);
@@ -176,6 +234,29 @@ void main() {
         expect(
           () => bricksJson.add(Brick.path('simple')),
           throwsA(isA<BrickNotFoundException>()),
+        );
+      });
+
+      test(
+          'throws MasonYamlNameMismatch when '
+          'mason.yaml contains mismatch (path)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick(
+              name: 'simple1',
+              location: BrickLocation(
+                path: path.join('..', '..', 'bricks', 'simple'),
+              ),
+            ),
+          ),
+          throwsA(isA<MasonYamlNameMismatch>()),
         );
       });
     });

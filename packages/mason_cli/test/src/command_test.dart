@@ -48,6 +48,7 @@ void main() {
             '''
 name: malformed
 description: A malformed Template
+version: 0.1.0+1
 ''',
           );
         File(path.join(directory.path, 'mason.yaml')).writeAsStringSync(

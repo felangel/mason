@@ -117,6 +117,23 @@ class MasonGenerator extends Generator {
     return MasonGenerator.fromBrickYaml(brickYaml);
   }
 
+  /// Factory which creates a [MasonGenerator] based on
+  /// a brick [name] and [version] hosted in a registry.
+  static Future<MasonGenerator> fromRegistry({
+    required String name,
+    required String version,
+  }) async {
+    final directory = await BricksJson.temp().add(
+      Brick.version(name: name, version: version),
+    );
+    final file = File(p.join(directory, BrickYaml.file));
+    final brickYaml = checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    ).copyWith(path: file.path);
+    return MasonGenerator.fromBrickYaml(brickYaml);
+  }
+
   /// Optional list of variables which will be used to populate
   /// the corresponding mustache variables within the template.
   final List<String> vars;

@@ -213,6 +213,28 @@ bricks:
       ).called(1);
     });
 
+    test(
+        'throws MasonYamlNameMismatch '
+        'when mason.yaml contains mismatch', () async {
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  app_icon1:
+    path: ../../../../../bricks/app_icon
+''',
+      );
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+      final expectedErrorMessage = MasonYamlNameMismatch(
+        '''brick name "app_icon1" doesn't match provided name "app_icon" in mason.yaml.''',
+      ).message;
+      final getResult = await commandRunner.run(['get']);
+      expect(getResult, equals(ExitCode.usage.code));
+      verify(() => logger.err(expectedErrorMessage)).called(1);
+    });
+
     test('throws ProcessException when remote does not exist', () async {
       File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''

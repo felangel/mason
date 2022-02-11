@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:archive/archive.dart';
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
@@ -15,6 +16,15 @@ import 'package:universal_io/io.dart';
 class WriteBrickException extends MasonException {
   /// {@macro write_brick_exception}
   const WriteBrickException(String message) : super(message);
+}
+
+/// {@template mason_yaml_name_mismatch}
+/// Thrown when a brick's name in `mason.yaml` does not match
+/// the name in `brick.yaml`.
+/// {@endtemplate}
+class MasonYamlNameMismatch extends MasonException {
+  /// {@macro mason_yaml_name_mismatch}
+  MasonYamlNameMismatch(String message) : super(message);
 }
 
 /// {@template bricks_json}
@@ -127,12 +137,6 @@ class BricksJson {
 
     final path = brick.location.path;
     if (path != null) {
-      final brickYaml = File(p.join(path, BrickYaml.file));
-      if (!brickYaml.existsSync()) {
-        throw BrickNotFoundException(p.canonicalize(path));
-      }
-      final remoteDir = getPath(brick);
-      if (remoteDir != null) return remoteDir;
       return _addLocalBrick(brick);
     }
 
@@ -154,6 +158,26 @@ class BricksJson {
   /// Writes local brick at using path to cache
   /// and returns the local path to the brick.
   String _addLocalBrick(Brick brick) {
+    final path = brick.location.path!;
+    final brickYaml = File(p.join(path, BrickYaml.file));
+    if (!brickYaml.existsSync()) {
+      throw BrickNotFoundException(p.canonicalize(path));
+    }
+
+    final yaml = checkedYamlDecode(
+      brickYaml.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    if (yaml.name != brick.name) {
+      throw MasonYamlNameMismatch(
+        'brick name "${brick.name}" '
+        'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
+      );
+    }
+
+    final remoteDir = getPath(brick);
+    if (remoteDir != null) return remoteDir;
     final localPath = p.canonicalize(brick.location.path!);
     _cache[_getKey(brick)!] = localPath;
     return localPath;
@@ -224,16 +248,6 @@ class BricksJson {
     final directoryIsNotEmpty =
         directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
-    void _ensureRemoteBrickExists(Directory directory) {
-      final brickYaml = File(
-        p.join(directory.path, BrickYaml.file),
-      );
-      if (!brickYaml.existsSync()) {
-        if (directory.existsSync()) directory.deleteSync(recursive: true);
-        throw BrickNotFoundException('${brick.name} ${brick.location.version}');
-      }
-    }
-
     /// Even if a cached version exists, still try to update.
     /// Fall-back to cached version if update fails.
     if (directoryExists && directoryIsNotEmpty) {
@@ -243,7 +257,6 @@ class BricksJson {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
-      _ensureRemoteBrickExists(directory);
       _cache[key] = directory.path;
       return directory.path;
     }
@@ -252,7 +265,6 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _download(brick, directory);
-    _ensureRemoteBrickExists(directory);
     _cache[key] = directory.path;
     return directory.path;
   }
