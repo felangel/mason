@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:archive/archive.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
@@ -60,8 +59,8 @@ void main() {
           'greeting.bundle',
         ),
       );
-      final actual = utf8.decode(
-        BZip2Decoder().decodeBytes(file.readAsBytesSync()),
+      final actual = json.encode(
+        MasonBundle.fromUniversalBundle(file.readAsBytesSync()).toJson(),
       );
       const expected =
           '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
@@ -94,8 +93,8 @@ void main() {
           'hooks.bundle',
         ),
       );
-      final actual = utf8.decode(
-        BZip2Decoder().decodeBytes(file.readAsBytesSync()),
+      final actual = json.encode(
+        MasonBundle.fromUniversalBundle(file.readAsBytesSync()).toJson(),
       );
       expect(
         actual,

@@ -123,5 +123,30 @@ void main() {
             .having((file) => file.description, 'description', description),
       );
     });
+
+    test('can be converted to/from universal bundle', () {
+      final instance = MasonBundle(
+        name: 'name',
+        description: 'description',
+        version: '1.0.0',
+        vars: {},
+        files: [],
+        hooks: [],
+      );
+      expect(
+        MasonBundle.fromUniversalBundle(instance.toUniversalBundle()),
+        isA<MasonBundle>()
+            .having((file) => file.name, 'name', instance.name)
+            .having((file) => file.version, 'version', instance.version)
+            .having((file) => file.vars, 'vars', instance.vars)
+            .having((file) => file.files, 'files', instance.files)
+            .having((file) => file.hooks, 'hooks', instance.hooks)
+            .having(
+              (file) => file.description,
+              'description',
+              instance.description,
+            ),
+      );
+    });
   });
 }

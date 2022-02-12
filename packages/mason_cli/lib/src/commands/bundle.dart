@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:archive/archive.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -108,10 +107,7 @@ Future<String> _generateUniversalBundle(
 ) async {
   final file = File(path.join(outputDir, '${bundle.name}.bundle'));
   await file.create(recursive: true);
-  final compressedBundle = BZip2Encoder().encode(
-    utf8.encode(json.encode(bundle.toJson())),
-  );
-  await file.writeAsBytes(compressedBundle);
+  await file.writeAsBytes(bundle.toUniversalBundle());
   return path.canonicalize(file.path);
 }
 
