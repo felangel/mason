@@ -11,7 +11,7 @@
 
 ---
 
-Mason is a collection of packages that enable developers to create and consume reusable templates called bricks.
+A collection of packages that enable developers to create and consume reusable templates called bricks.
 
 ![Mason Demo][mason_demo]
 
