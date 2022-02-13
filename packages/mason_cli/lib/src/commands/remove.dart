@@ -32,15 +32,15 @@ class RemoveCommand extends MasonCommand {
     final isGlobal = results['global'] == true;
     final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
     final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
-    final brick = targetMasonYaml.bricks[brickName];
-    if (bricksJson == null || brick == null) {
+    final brickLocation = targetMasonYaml.bricks[brickName];
+    if (bricksJson == null || brickLocation == null) {
       throw UsageException('no brick named $brickName was found', usage);
     }
 
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final removeDone = logger.progress('Removing $brickName');
     try {
-      bricksJson.remove(brick);
+      bricksJson.remove(Brick(name: brickName, location: brickLocation));
       final bricks = Map.of(targetMasonYaml.bricks)
         ..removeWhere((key, value) => key == brickName);
 

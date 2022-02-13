@@ -35,8 +35,13 @@ class InitCommand extends MasonCommand {
     final bricksJson = localBricksJson;
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     try {
-      if (masonYaml.bricks.values.isNotEmpty) {
-        await Future.forEach(masonYaml.bricks.values, bricksJson.add);
+      if (masonYaml.bricks.entries.isNotEmpty) {
+        await Future.forEach<MapEntry<String, BrickLocation>>(
+          masonYaml.bricks.entries,
+          (entry) => bricksJson.add(
+            Brick(name: entry.key, location: entry.value),
+          ),
+        );
       }
     } finally {
       await bricksJson.flush();

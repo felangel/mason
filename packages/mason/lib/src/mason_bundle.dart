@@ -1,3 +1,6 @@
+import 'dart:convert';
+
+import 'package:archive/archive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mason/src/brick_yaml.dart';
 
@@ -47,6 +50,17 @@ class MasonBundle {
   factory MasonBundle.fromJson(Map<String, dynamic> json) =>
       _$MasonBundleFromJson(json);
 
+  /// Converts a universal bundle into a [MasonBundle] instance.
+  factory MasonBundle.fromUniversalBundle(List<int> bytes) {
+    return MasonBundle.fromJson(
+      json.decode(
+        utf8.decode(
+          BZip2Decoder().decodeBytes(bytes),
+        ),
+      ) as Map<String, dynamic>,
+    );
+  }
+
   /// List of all [MasonBundledFile] instances within the `__brick__` directory.
   final List<MasonBundledFile> files;
 
@@ -69,4 +83,9 @@ class MasonBundle {
 
   /// Converts a [MasonBundle] into a [Map<String, dynamic>].
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);
+
+  /// Converts a [MasonBundle] into universal bundle bytes.
+  List<int> toUniversalBundle() {
+    return BZip2Encoder().encode(utf8.encode(json.encode(toJson())));
+  }
 }

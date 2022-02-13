@@ -6,10 +6,11 @@ library mason;
 
 export 'package:mason_logger/mason_logger.dart';
 
+export 'src/brick.dart' show Brick;
 export 'src/brick_yaml.dart'
     show BrickYaml, BrickVariableProperties, BrickVariableType;
-export 'src/bricks_json.dart' show BricksJson, WriteBrickException;
-export 'src/bundler.dart' show createBundle;
+export 'src/bricks_json.dart' show BricksJson;
+export 'src/bundler.dart' show createBundle, unpackBundle;
 export 'src/exception.dart' show BrickNotFoundException, MasonException;
 export 'src/generator.dart'
     show
@@ -21,6 +22,6 @@ export 'src/generator.dart'
         MasonGenerator,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle;
-export 'src/mason_yaml.dart' show Brick, GitPath, MasonYaml;
+export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/render.dart' show RenderTemplate;
 export 'src/version.dart' show packageVersion;

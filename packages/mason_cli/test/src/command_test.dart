@@ -18,13 +18,6 @@ void main() {
       Directory.current = cwd;
     });
 
-    group('MasonYamlNameMismatch', () {
-      test('has the correct message', () {
-        const message = 'test message';
-        expect(MasonYamlNameMismatch(message).message, equals(message));
-      });
-    });
-
     group('MasonYamlNotFoundException', () {
       test('has the correct message', () {
         const message =
@@ -40,12 +33,15 @@ void main() {
       });
 
       test('is thrown when brick.yaml is malformed', () async {
-        final directory = Directory.systemTemp.createTempSync();
+        final tempDirectory = Directory.systemTemp.createTempSync();
+        final directory = Directory(path.join(tempDirectory.path, 'malformed'))
+          ..createSync(recursive: true);
         final brickYaml = File(path.join(directory.path, 'brick.yaml'))
           ..writeAsStringSync(
             '''
 name: malformed
 description: A malformed Template
+version: 0.1.0+1
 ''',
           );
         File(path.join(directory.path, 'mason.yaml')).writeAsStringSync(

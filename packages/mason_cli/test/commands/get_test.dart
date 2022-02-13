@@ -98,13 +98,17 @@ bricks:
       final todosPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      const widgetPath =
-          '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
-      final masonUrl = path.join(
-        BricksJson.rootDir.path,
-        'git',
-        '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
-      );
+      final widgetPath = path
+          .canonicalize(
+            path.join(
+              BricksJson.rootDir.path,
+              'git',
+              '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+              'bricks',
+              'widget',
+            ),
+          )
+          .replaceAll(r'\', '/');
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -120,7 +124,8 @@ bricks:
                 simplePath,
             '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
                 todosPath,
-            widgetPath: masonUrl,
+            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''':
+                widgetPath,
           }),
         ),
       );
@@ -211,6 +216,27 @@ bricks:
           ),
         ),
       ).called(1);
+    });
+
+    test(
+        'throws MasonYamlNameMismatch '
+        'when mason.yaml contains mismatch', () async {
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  app_icon1:
+    path: ../../../../../bricks/app_icon
+''',
+      );
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+      const expectedErrorMessage =
+          '''Brick name "app_icon1" doesn't match provided name "app_icon" in mason.yaml.''';
+      final getResult = await commandRunner.run(['get']);
+      expect(getResult, equals(ExitCode.usage.code));
+      verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 
     test('throws ProcessException when remote does not exist', () async {

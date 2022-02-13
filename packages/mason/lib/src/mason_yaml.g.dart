@@ -18,7 +18,7 @@ MasonYaml _$MasonYamlFromJson(Map json) => $checkedCreate(
           $checkedConvert(
               'bricks',
               (v) => (v as Map?)?.map(
-                    (k, e) => MapEntry(k as String, Brick.fromJson(e as Map)),
+                    (k, e) => MapEntry(k as String, BrickLocation.fromJson(e)),
                   )),
         );
         return val;
@@ -29,24 +29,25 @@ Map<String, dynamic> _$MasonYamlToJson(MasonYaml instance) => <String, dynamic>{
       'bricks': instance.bricks.map((k, e) => MapEntry(k, e.toJson())),
     };
 
-Brick _$BrickFromJson(Map json) => $checkedCreate(
-      'Brick',
+BrickLocation _$BrickLocationFromJson(Map json) => $checkedCreate(
+      'BrickLocation',
       json,
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['path', 'git'],
+          allowedKeys: const ['path', 'git', 'version'],
         );
-        final val = Brick(
+        final val = BrickLocation(
           path: $checkedConvert('path', (v) => v as String?),
           git: $checkedConvert(
               'git', (v) => v == null ? null : GitPath.fromJson(v as Map)),
+          version: $checkedConvert('version', (v) => v as String?),
         );
         return val;
       },
     );
 
-Map<String, dynamic> _$BrickToJson(Brick instance) {
+Map<String, dynamic> _$BrickLocationToJson(BrickLocation instance) {
   final val = <String, dynamic>{};
 
   void writeNotNull(String key, dynamic value) {
@@ -57,6 +58,7 @@ Map<String, dynamic> _$BrickToJson(Brick instance) {
 
   writeNotNull('path', instance.path);
   writeNotNull('git', instance.git?.toJson());
+  writeNotNull('version', instance.version);
   return val;
 }
 

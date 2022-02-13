@@ -2,7 +2,6 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -398,17 +397,45 @@ bricks:
     path: ../../../../../bricks/app_icon
 ''',
       );
+
+      File(
+        path.join(Directory.current.path, '.mason', 'bricks.json'),
+      ).writeAsStringSync(
+        json.encode(
+          {
+            '''app_icon1_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
+                '../../../../../bricks/app_icon'
+          },
+        ),
+      );
       commandRunner = MasonCommandRunner(
         logger: logger,
         pubUpdater: pubUpdater,
       );
-      final getResult = await commandRunner.run(['get']);
-      expect(getResult, equals(ExitCode.success.code));
       final makeResult = await commandRunner.run(['make', 'app_icon1']);
       expect(makeResult, equals(ExitCode.usage.code));
-      final expectedErrorMessage = MasonYamlNameMismatch(
-        '''brick name "app_icon" doesn't match provided name "app_icon1" in mason.yaml.''',
-      ).message;
+      const expectedErrorMessage =
+          '''Could not find a subcommand named "app_icon1" for "mason make".''';
+
+      verify(
+        () => logger.err(any(that: contains(expectedErrorMessage))),
+      ).called(1);
+    });
+
+    test('exits with code 64 when bricks.json contains bad path', () async {
+      File(path.join(Directory.current.path, '.mason', 'bricks.json'))
+          .writeAsStringSync(
+        '''
+{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"bricks/greeting"}
+''',
+      );
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+      final makeResult = await commandRunner.run(['make', 'greeting']);
+      expect(makeResult, equals(ExitCode.usage.code));
+      const expectedErrorMessage = 'Could not find brick at bricks/greeting';
       verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 

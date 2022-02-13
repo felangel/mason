@@ -46,15 +46,15 @@ class NewCommand extends MasonCommand {
     final done = logger.progress('Creating new brick: $name.');
     final target = DirectoryGeneratorTarget(directory);
     final generator = _BrickGenerator(name, description);
-    final newBrick = Brick(
-      path: p.normalize(
+    final newBrick = Brick.path(
+      p.normalize(
         p.relative(
           brickYaml.parent.path,
           from: entryPoint.path,
         ),
       ),
     );
-    final bricks = Map.of(masonYaml.bricks)..addAll({name: newBrick});
+    final bricks = Map.of(masonYaml.bricks)..addAll({name: newBrick.location});
 
     try {
       await Future.wait([

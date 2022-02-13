@@ -8,14 +8,14 @@ import 'package:universal_io/io.dart';
 void main() {
   group('MasonYaml', () {
     test('can be (de)serialized', () {
-      final brick = Brick(path: '.');
-      final instance = MasonYaml({'example': brick});
+      final brickLocation = BrickLocation(path: '.');
+      final instance = MasonYaml({'example': brickLocation});
       final result = MasonYaml.fromJson(instance.toJson());
       expect(result.bricks.length, equals(1));
       expect(result.bricks.keys.first, equals('example'));
       expect(
         result.bricks.values.first,
-        isA<Brick>().having((b) => b.path, 'path', brick.path),
+        isA<BrickLocation>().having((b) => b.path, 'path', brickLocation.path),
       );
     });
 
@@ -51,17 +51,17 @@ void main() {
     });
   });
 
-  group('Brick', () {
+  group('BrickLocation', () {
     test('can be (de)serialized (path)', () {
-      final instance = Brick(path: '.');
+      final instance = BrickLocation(path: '.');
       expect(
-        Brick.fromJson(instance.toJson()),
-        isA<Brick>().having((b) => b.path, 'path', instance.path),
+        BrickLocation.fromJson(instance.toJson()),
+        isA<BrickLocation>().having((b) => b.path, 'path', instance.path),
       );
     });
 
     test('can be (de)serialized (gitPath)', () {
-      final instance = Brick(
+      final instance = BrickLocation(
         git: GitPath(
           'https://github.com/felangel/mason',
           ref: 'main',
@@ -69,7 +69,7 @@ void main() {
         ),
       );
       expect(
-        Brick.fromJson(instance.toJson()).git,
+        BrickLocation.fromJson(instance.toJson()).git,
         isA<GitPath>()
             .having((g) => g.url, 'url', instance.git!.url)
             .having((g) => g.ref, 'ref', instance.git!.ref)
