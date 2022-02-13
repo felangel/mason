@@ -176,7 +176,7 @@ abstract class MasonCommand extends Command<int> {
       final dirPath = entry.value;
       final filePath = p.join(dirPath, BrickYaml.file);
       final file = File(filePath);
-      if (!file.existsSync()) throw BrickNotFoundException(filePath);
+      if (!file.existsSync()) throw BrickNotFoundException(dirPath);
       try {
         final brickYaml = checkedYamlDecode(
           file.readAsStringSync(),
