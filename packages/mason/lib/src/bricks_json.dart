@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:archive/archive.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
@@ -154,13 +153,11 @@ class BricksJson {
   /// Caches brick if necessary and updates `bricks.json`.
   /// Returns the local path to the brick.
   Future<String> add(Brick brick) async {
-    final path = brick.location.path;
-    if (path != null) {
+    if (brick.location.path != null) {
       return _addLocalBrick(brick);
     }
 
-    final gitPath = brick.location.git;
-    if (gitPath != null) {
+    if (brick.location.git != null) {
       return _addRemoteBrickFromGit(brick);
     }
 
@@ -370,11 +367,7 @@ class BricksJson {
       throw BrickNotFoundException(uri.toString());
     }
 
-    final bundle = MasonBundle.fromJson(
-      json.decode(
-        utf8.decode(BZip2Decoder().decodeBytes(response.bodyBytes)),
-      ) as Map<String, dynamic>,
-    );
+    final bundle = MasonBundle.fromUniversalBundle(response.bodyBytes);
     unpackBundle(bundle, directory);
   }
 
