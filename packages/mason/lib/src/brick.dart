@@ -22,7 +22,7 @@ class Brick {
   Brick.git(GitPath git)
       : this(
           name: p.basenameWithoutExtension(
-            p.join(git.url, git.path).replaceAll(r'\', '/'),
+            p.join(git.url, git.path),
           ),
           location: BrickLocation(git: git),
         );
