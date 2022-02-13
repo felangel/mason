@@ -55,7 +55,7 @@ class BundleCommand extends MasonCommand {
     }
     final brick = Directory(results.rest.first);
     if (!brick.existsSync()) {
-      throw MasonException('could not find brick at ${brick.path}');
+      throw BrickNotFoundException(brick.path);
     }
 
     final bundle = createBundle(brick);

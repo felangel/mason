@@ -237,7 +237,7 @@ class BricksJson {
         await tempDirectory.rename(directory.path);
       } catch (_) {}
       _ensureRemoteBrickExists(directory, gitPath);
-      final localPath = p.join(directory.path, gitPath.path);
+      final localPath = p.canonicalize(p.join(directory.path, gitPath.path));
       _cache[key] = localPath;
       return localPath;
     }
@@ -247,7 +247,7 @@ class BricksJson {
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
     _ensureRemoteBrickExists(directory, gitPath);
-    final localPath = p.join(directory.path, gitPath.path);
+    final localPath = p.canonicalize(p.join(directory.path, gitPath.path));
     _cache[key] = localPath;
     return localPath;
   }

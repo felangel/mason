@@ -98,12 +98,14 @@ bricks:
       final todosPath = path.canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      const widgetPath =
-          '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
-      final masonUrl = path.join(
-        BricksJson.rootDir.path,
-        'git',
-        '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+      final widgetPath = path.canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+          'bricks',
+          'widget',
+        ),
       );
 
       expect(
@@ -120,7 +122,8 @@ bricks:
                 simplePath,
             '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
                 todosPath,
-            widgetPath: '$masonUrl/bricks/widget',
+            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''':
+                widgetPath,
           }),
         ),
       );

@@ -262,7 +262,7 @@ void main() {
       final result = await commandRunner.run(['bundle', brickPath]);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        () => logger.err('could not find brick at $brickPath'),
+        () => logger.err('Could not find brick at $brickPath'),
       ).called(1);
       verifyNever(() => logger.progress(any()));
     });
