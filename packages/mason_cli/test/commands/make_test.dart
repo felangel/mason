@@ -423,11 +423,10 @@ bricks:
     });
 
     test('exits with code 64 when bricks.json contains bad path', () async {
-      final badPath = path.join('bricks', 'greeting');
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
           .writeAsStringSync(
         '''
-{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"$badPath"}
+{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"bricks/greeting"}
 ''',
       );
       commandRunner = MasonCommandRunner(
