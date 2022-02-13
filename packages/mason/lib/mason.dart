@@ -9,8 +9,7 @@ export 'package:mason_logger/mason_logger.dart';
 export 'src/brick.dart' show Brick;
 export 'src/brick_yaml.dart'
     show BrickYaml, BrickVariableProperties, BrickVariableType;
-export 'src/bricks_json.dart'
-    show BricksJson, WriteBrickException, MasonYamlNameMismatch;
+export 'src/bricks_json.dart' show BricksJson;
 export 'src/bundler.dart' show createBundle, unpackBundle;
 export 'src/exception.dart' show BrickNotFoundException, MasonException;
 export 'src/generator.dart'

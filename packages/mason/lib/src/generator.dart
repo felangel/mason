@@ -109,7 +109,7 @@ class MasonGenerator extends Generator {
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
     final directory = await BricksJson.temp().add(Brick.git(gitPath));
-    final file = File(p.join(directory, gitPath.path, BrickYaml.file));
+    final file = File(p.join(directory, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),

@@ -8,14 +8,15 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
+import 'package:pub_semver/pub_semver.dart';
 import 'package:universal_io/io.dart';
 
-/// {@template write_brick_exception}
-/// Thrown when an error occurs while writing a brick to cache.
+/// {@template brick_resolve_version_exception}
+/// Thrown when an error occurs while resolving a brick version.
 /// {@endtemplate}
-class WriteBrickException extends MasonException {
-  /// {@macro write_brick_exception}
-  const WriteBrickException(String message) : super(message);
+class BrickResolveVersionException extends MasonException {
+  /// {@macro brick_resolve_version_exception}
+  const BrickResolveVersionException(String message) : super(message);
 }
 
 /// {@template mason_yaml_name_mismatch}
@@ -25,6 +26,22 @@ class WriteBrickException extends MasonException {
 class MasonYamlNameMismatch extends MasonException {
   /// {@macro mason_yaml_name_mismatch}
   MasonYamlNameMismatch(String message) : super(message);
+}
+
+/// {@template brick_unsatisfied_version_constraint}
+/// Thrown when a brick version constraint could not be satisfied.
+/// {@endtemplate}
+class BrickUnsatisfiedVersionConstraint extends MasonException {
+  /// {@macro brick_unsatisfied_version_constraint}
+  BrickUnsatisfiedVersionConstraint(String message) : super(message);
+}
+
+/// {@template malformed_bricks_json}
+/// Thrown when a brick from mason.yaml cannot be found in bricks.json.
+/// {@endtemplate}
+class MalformedBricksJson extends MasonException {
+  /// {@macro malformed_bricks_json}
+  const MalformedBricksJson(String message) : super(message);
 }
 
 /// {@template bricks_json}
@@ -63,6 +80,9 @@ class BricksJson {
   /// Associated bricks.json file
   late File _bricksJsonFile;
 
+  /// Read-only cache of brick,location pairs.
+  Map<String, String> get cache => _cache;
+
   /// Removes all key/value pairs from the cache.
   void clear() {
     _cache.clear();
@@ -76,9 +96,15 @@ class BricksJson {
     if (!bricksJson.existsSync()) return <String, String>{};
     final content = bricksJson.readAsStringSync();
     if (content.isEmpty) return <String, String>{};
-    return Map.castFrom<dynamic, dynamic, String, String>(
-      json.decode(content) as Map,
-    );
+    try {
+      return Map.castFrom<dynamic, dynamic, String, String>(
+        json.decode(content) as Map,
+      );
+    } catch (error) {
+      throw MalformedBricksJson(
+        'Malformed bricks.json at ${bricksJson.path}\n$error',
+      );
+    }
   }
 
   /// Encodes entire cache contents.
@@ -128,13 +154,6 @@ class BricksJson {
   /// Caches brick if necessary and updates `bricks.json`.
   /// Returns the local path to the brick.
   Future<String> add(Brick brick) async {
-    final key = _getKey(brick);
-    if (key == null) {
-      throw const WriteBrickException(
-        'Brick must contain either a path, git url, or version',
-      );
-    }
-
     final path = brick.location.path;
     if (path != null) {
       return _addLocalBrick(brick);
@@ -145,14 +164,7 @@ class BricksJson {
       return _addRemoteBrickFromGit(brick);
     }
 
-    final version = brick.location.version;
-    if (version != null) {
-      return _addRemoteBrickFromRegistry(brick);
-    }
-
-    throw const WriteBrickException(
-      'Brick must contain either a path, git url, or version',
-    );
+    return _addRemoteBrickFromRegistry(brick);
   }
 
   /// Writes local brick at using path to cache
@@ -160,6 +172,7 @@ class BricksJson {
   String _addLocalBrick(Brick brick) {
     final path = brick.location.path!;
     final brickYaml = File(p.join(path, BrickYaml.file));
+
     if (!brickYaml.existsSync()) {
       throw BrickNotFoundException(p.canonicalize(path));
     }
@@ -171,7 +184,7 @@ class BricksJson {
 
     if (yaml.name != brick.name) {
       throw MasonYamlNameMismatch(
-        'brick name "${brick.name}" '
+        'Brick name "${brick.name}" '
         'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
       );
     }
@@ -204,6 +217,17 @@ class BricksJson {
         if (directory.existsSync()) directory.deleteSync(recursive: true);
         throw BrickNotFoundException('${gitPath.url}/${gitPath.path}');
       }
+      final yaml = checkedYamlDecode(
+        brickYaml.readAsStringSync(),
+        (m) => BrickYaml.fromJson(m!),
+      );
+
+      if (yaml.name != brick.name) {
+        throw MasonYamlNameMismatch(
+          'Brick name "${brick.name}" '
+          'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
+        );
+      }
     }
 
     /// Even if a cached version exists, still try to update.
@@ -216,8 +240,9 @@ class BricksJson {
         await tempDirectory.rename(directory.path);
       } catch (_) {}
       _ensureRemoteBrickExists(directory, gitPath);
-      _cache[key] = directory.path;
-      return directory.path;
+      final localPath = p.join(directory.path, gitPath.path);
+      _cache[key] = localPath;
+      return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
@@ -225,8 +250,9 @@ class BricksJson {
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
     _ensureRemoteBrickExists(directory, gitPath);
-    _cache[key] = directory.path;
-    return directory.path;
+    final localPath = p.join(directory.path, gitPath.path);
+    _cache[key] = localPath;
+    return localPath;
   }
 
   Future<void> _clone(GitPath gitPath, Directory directory) async {
@@ -242,21 +268,16 @@ class BricksJson {
   /// Writes remote brick from registry to cache
   /// and returns the local path to the brick.
   Future<String> _addRemoteBrickFromRegistry(Brick brick) async {
-    final key = _getKey(brick)!;
+    final version = await _resolveBrickVersion(brick);
+    final resolvedBrick = Brick.version(name: brick.name, version: version);
+    final key = _getKey(resolvedBrick)!;
     final directory = Directory(p.join(rootDir.path, 'hosted', hostedUrl, key));
     final directoryExists = directory.existsSync();
     final directoryIsNotEmpty =
         directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
-    /// Even if a cached version exists, still try to update.
-    /// Fall-back to cached version if update fails.
+    /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      try {
-        final tempDirectory = Directory.systemTemp.createTempSync();
-        await _download(brick, tempDirectory);
-        await directory.delete(recursive: true);
-        await tempDirectory.rename(directory.path);
-      } catch (_) {}
       _cache[key] = directory.path;
       return directory.path;
     }
@@ -264,9 +285,80 @@ class BricksJson {
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
-    await _download(brick, directory);
+    await _download(resolvedBrick, directory);
     _cache[key] = directory.path;
     return directory.path;
+  }
+
+  Future<String> _resolveBrickVersion(Brick brick) async {
+    final _version = brick.location.version;
+    if (_version != null) {
+      try {
+        final version = Version.parse(_version);
+        return version.toString();
+      } catch (_) {}
+    }
+    final constraint = VersionConstraint.parse(_version ?? 'any');
+    final uri = Uri.parse('https://$hostedUrl/api/v1/bricks/${brick.name}');
+
+    late final http.Response response;
+    try {
+      response = await http.get(uri);
+    } catch (_) {
+      throw BrickResolveVersionException(
+        'Unable to fetch versions for brick "${brick.name}".',
+      );
+    }
+
+    if (response.statusCode == 404) {
+      throw BrickResolveVersionException(
+        'Brick "${brick.name}" does not exist.',
+      );
+    }
+
+    if (response.statusCode != 200) {
+      throw BrickResolveVersionException(
+        'Unable to fetch versions for brick "${brick.name}".',
+      );
+    }
+
+    late final Map body;
+    late final Version latestVersion;
+    try {
+      body = json.decode(response.body) as Map;
+      final latest = body['latest'] as Map;
+      final _latestVersion = latest['version'] as String;
+      latestVersion = Version.parse(_latestVersion);
+    } catch (_) {
+      throw BrickResolveVersionException(
+        'Unable to parse latest version of brick "${brick.name}".',
+      );
+    }
+
+    if (constraint.isAny) return latestVersion.toString();
+    if (constraint.allows(latestVersion)) return latestVersion.toString();
+
+    late final List<Version> versions;
+    try {
+      final _versions = body['versions'] as List;
+      versions = _versions
+          .map((dynamic v) => Version.parse((v as Map)['version'] as String))
+          .toList()
+        ..sort(Version.antiprioritize);
+    } catch (_) {
+      throw BrickResolveVersionException(
+        'Unable to parse available versions for brick "${brick.name}".',
+      );
+    }
+
+    for (final version in versions) {
+      if (constraint.allows(version)) return version.toString();
+    }
+
+    throw BrickUnsatisfiedVersionConstraint(
+      '"${brick.name}: $constraint" '
+      "doesn't match any versions.",
+    );
   }
 
   Future<void> _download(Brick brick, Directory directory) async {

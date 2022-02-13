@@ -18,13 +18,6 @@ void main() {
       Directory.current = cwd;
     });
 
-    group('MasonYamlNameMismatch', () {
-      test('has the correct message', () {
-        const message = 'test message';
-        expect(MasonYamlNameMismatch(message).message, equals(message));
-      });
-    });
-
     group('MasonYamlNotFoundException', () {
       test('has the correct message', () {
         const message =

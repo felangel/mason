@@ -120,7 +120,7 @@ bricks:
                 simplePath,
             '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
                 todosPath,
-            widgetPath: masonUrl,
+            widgetPath: '$masonUrl/bricks/widget',
           }),
         ),
       );
@@ -227,9 +227,8 @@ bricks:
         logger: logger,
         pubUpdater: pubUpdater,
       );
-      final expectedErrorMessage = MasonYamlNameMismatch(
-        '''brick name "app_icon1" doesn't match provided name "app_icon" in mason.yaml.''',
-      ).message;
+      const expectedErrorMessage =
+          '''Brick name "app_icon1" doesn't match provided name "app_icon" in mason.yaml.''';
       final getResult = await commandRunner.run(['get']);
       expect(getResult, equals(ExitCode.usage.code));
       verify(() => logger.err(expectedErrorMessage)).called(1);

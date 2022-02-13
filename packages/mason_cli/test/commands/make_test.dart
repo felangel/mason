@@ -414,13 +414,15 @@ bricks:
       );
       final makeResult = await commandRunner.run(['make', 'app_icon1']);
       expect(makeResult, equals(ExitCode.usage.code));
-      final expectedErrorMessage = MasonYamlNameMismatch(
-        '''brick name "app_icon" doesn't match provided name "app_icon1" in mason.yaml.''',
-      ).message;
-      verify(() => logger.err(expectedErrorMessage)).called(1);
+      const expectedErrorMessage =
+          '''Could not find a subcommand named "app_icon1" for "mason make".''';
+
+      verify(
+        () => logger.err(any(that: contains(expectedErrorMessage))),
+      ).called(1);
     });
 
-    test('exits with code 64 when bricks.json contains mismatch', () async {
+    test('exits with code 64 when bricks.json contains bad path', () async {
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
           .writeAsStringSync(
         '''
@@ -433,9 +435,8 @@ bricks:
       );
       final makeResult = await commandRunner.run(['make', 'greeting']);
       expect(makeResult, equals(ExitCode.usage.code));
-      final expectedErrorMessage = MasonYamlNameMismatch(
-        '''bricks.json does not contain brick "app_icon". Did you forget to run "mason get"?''',
-      ).message;
+      const expectedErrorMessage =
+          '''Could not find brick at bricks/greeting/brick.yaml''';
       verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 

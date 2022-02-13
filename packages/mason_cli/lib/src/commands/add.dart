@@ -73,7 +73,7 @@ class AddCommand extends MasonCommand {
         brick = Brick.git(gitPath);
         try {
           final directory = await bricksJson.add(brick);
-          file = File(p.join(directory, gitPath.path, BrickYaml.file));
+          file = File(p.join(directory, BrickYaml.file));
         } catch (_) {
           throw UsageException('brick not found at url $location', usage);
         }

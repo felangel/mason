@@ -32,14 +32,6 @@ class BrickYamlParseException extends MasonException {
   const BrickYamlParseException(String message) : super(message);
 }
 
-/// {@template malformed_bricks_json}
-/// Thrown when a brick from mason.yaml cannot be found in bricks.json.
-/// {@endtemplate}
-class MalformedBricksJson extends MasonException {
-  /// {@macro malformed_bricks_json}
-  const MalformedBricksJson(String message) : super(message);
-}
-
 /// {@template mason_command}
 /// The base class for all mason executable commands.
 /// {@endtemplate}
@@ -90,9 +82,7 @@ abstract class MasonCommand extends Command<int> {
   /// Gets [BrickYaml] contents for bricks registered globally.
   Set<BrickYaml> get globalBricks {
     if (_globalBricks != null) return _globalBricks!;
-    return _globalBricks = _getBricks(
-      _getMasonYaml(_getMasonYamlFile(BricksJson.globalDir.path)),
-    );
+    return _globalBricks = _getBricks(globalBricksJson);
   }
 
   Set<BrickYaml>? _globalBricks;
@@ -101,7 +91,7 @@ abstract class MasonCommand extends Command<int> {
   Set<BrickYaml> get localBricks {
     if (_localBricks != null) return _localBricks!;
     return _localBricks = {
-      if (masonInitialized) ..._getBricks(masonYaml),
+      if (masonInitialized) ..._getBricks(localBricksJson!),
     };
   }
 
@@ -179,31 +169,12 @@ abstract class MasonCommand extends Command<int> {
   /// Return the current working directory.
   Directory get cwd => Directory.current;
 
-  /// The path to the cached brick directory if it exists.
-  /// Returns `null` if the brick is not cached.
-  String? _cacheDirectory(Brick brick) {
-    if (localBricksJson != null) {
-      final path = localBricksJson!.getPath(brick);
-      if (path != null) return path;
-    }
-    return globalBricksJson.getPath(brick);
-  }
-
   /// Gets all [BrickYaml] instances for the provided [masonYaml].
-  Set<BrickYaml> _getBricks(MasonYaml masonYaml) {
+  Set<BrickYaml> _getBricks(BricksJson bricksJson) {
     final bricks = <BrickYaml>{};
-    for (final entry in masonYaml.bricks.entries) {
-      final brick = Brick(name: entry.key, location: entry.value);
-      final dirPath = _cacheDirectory(brick);
-      if (dirPath == null) {
-        throw MalformedBricksJson(
-          'bricks.json does not contain brick "${brick.name}". '
-          'Did you forget to run "mason get"?',
-        );
-      }
-      final filePath = brick.location.path != null
-          ? p.join(dirPath, BrickYaml.file)
-          : p.join(dirPath, brick.location.git?.path ?? '', BrickYaml.file);
+    for (final entry in bricksJson.cache.entries) {
+      final dirPath = entry.value;
+      final filePath = p.join(dirPath, BrickYaml.file);
       final file = File(filePath);
       if (!file.existsSync()) throw BrickNotFoundException(filePath);
       try {
@@ -211,12 +182,6 @@ abstract class MasonCommand extends Command<int> {
           file.readAsStringSync(),
           (m) => BrickYaml.fromJson(m!),
         ).copyWith(path: filePath);
-        if (brickYaml.name != entry.key) {
-          throw MasonYamlNameMismatch(
-            'brick name "${brickYaml.name}" '
-            'doesn\'t match provided name "${entry.key}" in ${MasonYaml.file}.',
-          );
-        }
         bricks.add(brickYaml);
       } on ParsedYamlException catch (e) {
         throw BrickYamlParseException(
