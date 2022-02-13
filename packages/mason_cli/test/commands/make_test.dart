@@ -435,10 +435,9 @@ bricks:
       );
       final makeResult = await commandRunner.run(['make', 'greeting']);
       expect(makeResult, equals(ExitCode.usage.code));
-      const expectedErrorMessage = 'Could not find brick at ';
-      verify(
-        () => logger.err(any(that: contains(expectedErrorMessage))),
-      ).called(1);
+      const expectedErrorMessage =
+          'Could not find brick at bricks/greeting/brick.yaml';
+      verify(() => logger.err(expectedErrorMessage)).called(1);
     });
 
     test('exits with code 64 when variable input has type mismatch', () async {
