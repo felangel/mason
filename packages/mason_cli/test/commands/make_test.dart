@@ -423,10 +423,11 @@ bricks:
     });
 
     test('exits with code 64 when bricks.json contains bad path', () async {
+      final badPath = path.canonicalize(path.join('bricks', 'greeting'));
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
           .writeAsStringSync(
         '''
-{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"bricks/greeting"}
+{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"$badPath"}
 ''',
       );
       commandRunner = MasonCommandRunner(
@@ -435,7 +436,7 @@ bricks:
       );
       final makeResult = await commandRunner.run(['make', 'greeting']);
       expect(makeResult, equals(ExitCode.usage.code));
-      final resultPath = path.join('bricks', 'greeting', 'brick.yaml');
+      final resultPath = path.join(badPath, 'brick.yaml');
       final expectedErrorMessage = 'Could not find brick at $resultPath';
       verify(() => logger.err(expectedErrorMessage)).called(1);
     });

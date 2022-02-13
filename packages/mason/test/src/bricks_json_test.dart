@@ -45,6 +45,19 @@ void main() {
       expect(bricksJson, isNotNull);
     });
 
+    test('throws MalformedBricksJson when bricks.json is malformed', () {
+      final directory = Directory.systemTemp.createTempSync();
+      File(
+        path.join(directory.path, '.mason', 'bricks.json'),
+      )
+        ..createSync(recursive: true)
+        ..writeAsStringSync('[]');
+      expect(
+        () => BricksJson(directory: directory),
+        throwsA(isA<MalformedBricksJson>()),
+      );
+    });
+
     group('clear', () {
       test('clears cache and deletes existing bricks.json', () {
         final directory = Directory.systemTemp.createTempSync();
@@ -56,6 +69,7 @@ void main() {
         bricksJson.clear();
         expect(file.existsSync(), isFalse);
         expect(bricksJson.encode, equals('{}'));
+        expect(bricksJson.cache, isEmpty);
       });
     });
 
@@ -70,6 +84,36 @@ void main() {
         expect(bricksJson.encode, equals('{}'));
         final result = await bricksJson.add(
           Brick.version(name: 'greeting', version: '0.1.0+1'),
+        );
+        expect(result, isNotEmpty);
+        expect(bricksJson.encode, contains('greeting_'));
+      });
+
+      test('adds bricks to bricks.json with constraint (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        final result = await bricksJson.add(
+          Brick.version(name: 'greeting', version: '^0.1.0'),
+        );
+        expect(result, isNotEmpty);
+        expect(bricksJson.encode, contains('greeting_'));
+      });
+
+      test('adds bricks to bricks.json with constraint (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        final result = await bricksJson.add(
+          Brick.version(name: 'greeting', version: '>=0.1.0 <0.1.0+2'),
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('greeting_'));
@@ -140,7 +184,7 @@ void main() {
         final result1 = await bricksJson.add(brick);
         expect(result1, isNotEmpty);
         expect(bricksJson.encode, contains('simple_'));
-        Directory(result1)
+        Directory(result1).parent.parent
           ..deleteSync(recursive: true)
           ..createSync();
 
@@ -184,6 +228,135 @@ void main() {
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('simple_'));
+      });
+
+      test(
+          'throws BrickResolveVersionException when '
+          'brick does not exist (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'nonexistent_brick', version: '^99.99.99'),
+          ),
+          throwsA(isA<BrickResolveVersionException>()),
+        );
+      });
+
+      test(
+          'throws BrickResolveVersionException when '
+          'http request throws (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        BricksJson.testEnvironment = {
+          'MASON_HOSTED_URL': 'localhost:1234',
+          'MASON_CACHE': directory.path,
+        };
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'example', version: 'any'),
+          ),
+          throwsA(isA<BrickResolveVersionException>()),
+        );
+        BricksJson.testEnvironment = null;
+      });
+
+      test(
+          'throws BrickResolveVersionException when '
+          'http request returns non-200 (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        BricksJson.testEnvironment = {
+          'MASON_HOSTED_URL': 'httpstat.us/500',
+          'MASON_CACHE': directory.path,
+        };
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'example', version: 'any'),
+          ),
+          throwsA(isA<BrickResolveVersionException>()),
+        );
+        BricksJson.testEnvironment = null;
+      });
+
+      test(
+          'throws BrickResolveVersionException when '
+          'http request returns malformed body w/out latest version (registry)',
+          () async {
+        final directory = Directory.systemTemp.createTempSync();
+        BricksJson.testEnvironment = {
+          'MASON_HOSTED_URL': 'httpbin.org/anything',
+          'MASON_CACHE': directory.path,
+        };
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'example', version: 'any'),
+          ),
+          throwsA(isA<BrickResolveVersionException>()),
+        );
+        BricksJson.testEnvironment = null;
+      });
+
+      test(
+          'throws BrickResolveVersionException when '
+          'http request returns malformed body w/out versions (registry)',
+          () async {
+        final directory = Directory.systemTemp.createTempSync();
+        BricksJson.testEnvironment = {
+          'MASON_HOSTED_URL':
+              'mockbin.org/bin/d96f7700-a4ed-432c-a7b7-5a1f5305c2a4',
+          'MASON_CACHE': directory.path,
+        };
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'example', version: '^1.0.0'),
+          ),
+          throwsA(isA<BrickResolveVersionException>()),
+        );
+        BricksJson.testEnvironment = null;
+      });
+
+      test('throws BrickUnsatisfiedVersionConstraint (registry)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.version(name: 'greeting', version: '^99.99.99'),
+          ),
+          throwsA(isA<BrickUnsatisfiedVersionConstraint>()),
+        );
       });
 
       test(
@@ -260,6 +433,32 @@ void main() {
           throwsA(isA<MasonYamlNameMismatch>()),
         );
       });
+
+      test(
+          'throws MasonYamlNameMismatch when '
+          'brick name does not match (git)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick(
+              name: 'greetings',
+              location: BrickLocation(
+                git: GitPath(
+                  'https://github.com/felangel/mason',
+                  path: 'bricks/greeting',
+                ),
+              ),
+            ),
+          ),
+          throwsA(isA<MasonYamlNameMismatch>()),
+        );
+      });
     });
 
     group('flush', () {
@@ -298,6 +497,7 @@ void main() {
         expect(bricksJson.encode, contains('simple_'));
         bricksJson.remove(brick);
         expect(bricksJson.encode, equals('{}'));
+        expect(bricksJson.cache, isEmpty);
       });
     });
 

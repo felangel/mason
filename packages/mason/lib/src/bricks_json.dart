@@ -306,7 +306,6 @@ class BricksJson {
         'Unable to fetch versions for brick "${brick.name}".',
       );
     }
-
     if (response.statusCode == 404) {
       throw BrickResolveVersionException(
         'Brick "${brick.name}" does not exist.',
