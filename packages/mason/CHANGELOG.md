@@ -1,3 +1,13 @@
+# 0.1.0-dev.7
+
+- **BREAKING**: refactor: remove `WriteBrickException`
+- **BREAKING**: refactor: `Brick` named constructors
+  - `Brick.path`, `Brick.git`, `Brick.version`
+- feat: add `MasonGenerator.fromRegistry`
+- feat: add `fromUniversalBundle` and `toUniversalBundle` on `MasonBundle`
+- feat: add `BrickLocation`
+- feat: add `unpackBundle` to convert universal bundle bytes to a `MasonBundle`
+
 # 0.1.0-dev.6
 
 - **BREAKING** feat: return list of `GeneratedFile` from `generate`
