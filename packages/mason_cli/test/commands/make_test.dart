@@ -423,7 +423,7 @@ bricks:
     });
 
     test('exits with code 64 when bricks.json contains bad path', () async {
-      final badPath = path.canonicalize(path.join('bricks', 'greeting'));
+      final badPath = path.join('bricks', 'greeting');
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
           .writeAsStringSync(
         '''
