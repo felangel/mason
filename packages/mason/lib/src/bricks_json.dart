@@ -120,7 +120,9 @@ class BricksJson {
 
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
-  String? getPath(Brick brick) => _cache[brick.name];
+  String? getPath(Brick brick) {
+    return brick.name != null ? _cache[brick.name] : null;
+  }
 
   /// Caches brick if necessary and updates `bricks.json`.
   /// Returns the local path to the brick.
@@ -150,10 +152,11 @@ class BricksJson {
       brickYaml.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     );
+    final name = brick.name ?? yaml.name;
 
-    if (yaml.name != brick.name) {
+    if (yaml.name != name) {
       throw MasonYamlNameMismatch(
-        'Brick name "${brick.name}" '
+        'Brick name "$name" '
         'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
       );
     }
@@ -161,7 +164,7 @@ class BricksJson {
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
     final localPath = p.canonicalize(brick.location.path!);
-    _cache[brick.name] = localPath;
+    _cache[name] = localPath;
     return localPath;
   }
 
@@ -176,25 +179,22 @@ class BricksJson {
     final directoryIsNotEmpty =
         directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
-    void _ensureRemoteBrickExists(Directory directory, GitPath gitPath) {
+    BrickYaml _getBrickYaml(Directory directory) {
+      final gitPath = brick.location.git!;
       final brickYaml = File(
         p.join(directory.path, gitPath.path, BrickYaml.file),
       );
+
       if (!brickYaml.existsSync()) {
         if (directory.existsSync()) directory.deleteSync(recursive: true);
         throw BrickNotFoundException('${gitPath.url}/${gitPath.path}');
       }
+
       final yaml = checkedYamlDecode(
         brickYaml.readAsStringSync(),
         (m) => BrickYaml.fromJson(m!),
       );
-
-      if (yaml.name != brick.name) {
-        throw MasonYamlNameMismatch(
-          'Brick name "${brick.name}" '
-          'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
-        );
-      }
+      return yaml;
     }
 
     /// Even if a cached version exists, still try to update.
@@ -206,11 +206,21 @@ class BricksJson {
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
-      _ensureRemoteBrickExists(directory, gitPath);
+
+      final yaml = _getBrickYaml(directory);
+      final name = brick.name ?? yaml.name;
+
+      if (yaml.name != name) {
+        throw MasonYamlNameMismatch(
+          'Brick name "$name" '
+          'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
+        );
+      }
+
       final localPath = p
           .canonicalize(p.join(directory.path, gitPath.path))
           .replaceAll(r'\', '/');
-      _cache[brick.name] = localPath;
+      _cache[name] = localPath;
       return localPath;
     }
 
@@ -218,11 +228,21 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _clone(gitPath, directory);
-    _ensureRemoteBrickExists(directory, gitPath);
+
+    final yaml = _getBrickYaml(directory);
+    final name = brick.name ?? yaml.name;
+
+    if (yaml.name != name) {
+      throw MasonYamlNameMismatch(
+        'Brick name "$name" '
+        'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
+      );
+    }
+
     final localPath = p
         .canonicalize(p.join(directory.path, gitPath.path))
         .replaceAll(r'\', '/');
-    _cache[brick.name] = localPath;
+    _cache[name] = localPath;
     return localPath;
   }
 
@@ -239,9 +259,10 @@ class BricksJson {
   /// Writes remote brick from registry to cache
   /// and returns the local path to the brick.
   Future<String> _addRemoteBrickFromRegistry(Brick brick) async {
+    final name = brick.name!;
     final version = await _resolveBrickVersion(brick);
-    final resolvedBrick = Brick.version(name: brick.name, version: version);
-    final dirName = '${brick.name}_$version';
+    final resolvedBrick = Brick.version(name: name, version: version);
+    final dirName = '${name}_$version';
     final directory = Directory(
       p.join(rootDir.path, 'hosted', hostedUrl, dirName),
     );
@@ -251,7 +272,7 @@ class BricksJson {
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      _cache[brick.name] = directory.path;
+      _cache[name] = directory.path;
       return directory.path;
     }
 
@@ -259,7 +280,7 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
-    _cache[brick.name] = directory.path;
+    _cache[name] = directory.path;
     return directory.path;
   }
 

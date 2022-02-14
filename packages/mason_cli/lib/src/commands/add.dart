@@ -53,19 +53,16 @@ class AddCommand extends MasonCommand {
     }
 
     late final Brick brick;
+    late final File file;
 
     final installDone = logger.progress('Installing brick from $location');
     try {
       if (results['source'] == 'path') {
-        final file = File(p.join(location, BrickYaml.file));
+        file = File(p.join(location, BrickYaml.file));
         if (!file.existsSync()) {
           throw UsageException('brick not found at path $location', usage);
         }
-        final brickYaml = checkedYamlDecode(
-          file.readAsStringSync(),
-          (m) => BrickYaml.fromJson(m!),
-        ).copyWith(path: file.path);
-        brick = Brick.path(name: brickYaml.name, path: file.parent.path);
+        brick = Brick.path(file.parent.path);
         await bricksJson.add(brick);
       } else {
         final gitPath = GitPath(
@@ -75,7 +72,8 @@ class AddCommand extends MasonCommand {
         );
         brick = Brick.git(gitPath);
         try {
-          await bricksJson.add(brick);
+          final directory = await bricksJson.add(brick);
+          file = File(p.join(directory, BrickYaml.file));
         } catch (_) {
           throw UsageException('brick not found at url $location', usage);
         }
@@ -84,11 +82,16 @@ class AddCommand extends MasonCommand {
       installDone();
     }
 
+    final brickYaml = checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    ).copyWith(path: file.path);
+
     final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final bricks = Map.of(targetMasonYaml.bricks)
-      ..addAll({brick.name: brick.location});
-    final addDone = logger.progress('Adding ${brick.name}');
+      ..addAll({brickYaml.name: brick.location});
+    final addDone = logger.progress('Adding ${brickYaml.name}');
     try {
       if (!targetMasonYaml.bricks.containsKey(name)) {
         await targetMasonYamlFile.writeAsString(
@@ -97,7 +100,7 @@ class AddCommand extends MasonCommand {
       }
       await bricksJson.add(brick);
       await bricksJson.flush();
-      addDone('Added ${brick.name}');
+      addDone('Added ${brickYaml.name}');
     } catch (_) {
       addDone();
       rethrow;

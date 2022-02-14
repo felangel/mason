@@ -47,8 +47,7 @@ class NewCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(directory);
     final generator = _BrickGenerator(name, description);
     final newBrick = Brick.path(
-      name: name,
-      path: p.normalize(
+      p.normalize(
         p.relative(
           brickYaml.parent.path,
           from: entryPoint.path,
