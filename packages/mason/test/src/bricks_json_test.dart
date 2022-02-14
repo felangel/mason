@@ -212,7 +212,7 @@ void main() {
           ),
         );
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_master_'));
+        expect(bricksJson.encode, contains('"simple"'));
       });
 
       test('adds bricks to bricks.json (path)', () async {
