@@ -74,8 +74,7 @@ void main() {
         final masonYaml = File(p.join(Directory.current.path, 'mason.yaml'));
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
-        const key =
-            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
+        const key = 'widget';
         final value = p
             .canonicalize(
               p.join(
@@ -109,8 +108,7 @@ void main() {
         final masonYaml = File(p.join(Directory.current.path, 'mason.yaml'));
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
-        const key =
-            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
+        const key = 'widget';
         final value = p
             .canonicalize(
               p.join(
@@ -171,8 +169,7 @@ void main() {
         final masonYaml = File(p.join(BricksJson.globalDir.path, 'mason.yaml'));
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
-        const key =
-            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''';
+        const key = 'widget';
         final value = p
             .canonicalize(
               p.join(

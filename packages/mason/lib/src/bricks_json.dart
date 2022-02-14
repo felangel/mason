@@ -110,10 +110,7 @@ class BricksJson {
   String get encode => json.encode(_cache);
 
   /// Removes current [brick] from `bricks.json`.
-  void remove(Brick brick) {
-    final cacheKey = _getKey(brick);
-    if (cacheKey != null) _cache.remove(cacheKey);
-  }
+  void remove(Brick brick) => _cache.remove(brick.name);
 
   /// Flushes cache contents to `bricks.json`.
   Future<void> flush() async {
@@ -121,34 +118,9 @@ class BricksJson {
     await _bricksJsonFile.writeAsString(encode);
   }
 
-  /// Returns the cache key for the given [brick].
-  /// Return `null` if the [brick] does not have a valid path.
-  String? _getKey(Brick brick) {
-    final name = brick.name;
-    final location = brick.location;
-    if (location.path != null) {
-      final hash = sha256.convert(utf8.encode(location.path!));
-      final key = '${name}_$hash';
-      return key;
-    }
-    if (location.git != null) {
-      final path =
-          p.join(location.git!.url, location.git!.path).replaceAll(r'\', '/');
-      final hash = sha256.convert(utf8.encode(path));
-      final key = location.git!.ref != null
-          ? '${name}_${location.git!.ref}_$hash'
-          : '${name}_$hash';
-      return key;
-    }
-    if (location.version != null) {
-      return '${name}_${location.version}';
-    }
-    return null;
-  }
-
   /// Returns the local path to the brick if it is included in the cache.
   /// Returns `null` if the brick has not been cached.
-  String? getPath(Brick brick) => _cache[_getKey(brick)];
+  String? getPath(Brick brick) => _cache[brick.name];
 
   /// Caches brick if necessary and updates `bricks.json`.
   /// Returns the local path to the brick.
@@ -189,7 +161,7 @@ class BricksJson {
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
     final localPath = p.canonicalize(brick.location.path!);
-    _cache[_getKey(brick)!] = localPath;
+    _cache[brick.name] = localPath;
     return localPath;
   }
 
@@ -197,10 +169,8 @@ class BricksJson {
   /// and returns the local path to the brick.
   Future<String> _addRemoteBrickFromGit(Brick brick) async {
     final gitPath = brick.location.git!;
-    final key = _getKey(brick)!;
-    final dirName = _getKey(
-      Brick.git(GitPath(gitPath.url, ref: gitPath.ref)),
-    )!;
+    final dirName = _hashGitPath(gitPath);
+
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
     final directoryIsNotEmpty =
@@ -240,7 +210,7 @@ class BricksJson {
       final localPath = p
           .canonicalize(p.join(directory.path, gitPath.path))
           .replaceAll(r'\', '/');
-      _cache[key] = localPath;
+      _cache[brick.name] = localPath;
       return localPath;
     }
 
@@ -252,7 +222,7 @@ class BricksJson {
     final localPath = p
         .canonicalize(p.join(directory.path, gitPath.path))
         .replaceAll(r'\', '/');
-    _cache[key] = localPath;
+    _cache[brick.name] = localPath;
     return localPath;
   }
 
@@ -271,15 +241,17 @@ class BricksJson {
   Future<String> _addRemoteBrickFromRegistry(Brick brick) async {
     final version = await _resolveBrickVersion(brick);
     final resolvedBrick = Brick.version(name: brick.name, version: version);
-    final key = _getKey(resolvedBrick)!;
-    final directory = Directory(p.join(rootDir.path, 'hosted', hostedUrl, key));
+    final dirName = '${brick.name}_$version';
+    final directory = Directory(
+      p.join(rootDir.path, 'hosted', hostedUrl, dirName),
+    );
     final directoryExists = directory.existsSync();
     final directoryIsNotEmpty =
         directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      _cache[key] = directory.path;
+      _cache[brick.name] = directory.path;
       return directory.path;
     }
 
@@ -287,7 +259,7 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
-    _cache[key] = directory.path;
+    _cache[brick.name] = directory.path;
     return directory.path;
   }
 
@@ -399,4 +371,12 @@ class BricksJson {
       return Directory(p.join(environment['HOME']!, '.mason-cache'));
     }
   }
+}
+
+String _hashGitPath(GitPath git) {
+  final name = p.basenameWithoutExtension(git.url);
+  final path = git.url.replaceAll(r'\', '/');
+  final hash = sha256.convert(utf8.encode(path));
+  final key = git.ref != null ? '${name}_${git.ref}_$hash' : '${name}_$hash';
+  return key;
 }

@@ -3,6 +3,7 @@
 - **BREAKING**: refactor: remove `WriteBrickException`
 - **BREAKING**: refactor: `Brick` named constructors
   - `Brick.path`, `Brick.git`, `Brick.version`
+- **BREAKING**: refactor: simplify `bricks.json` format
 - feat: add `MasonGenerator.fromRegistry`
 - feat: add `fromUniversalBundle` and `toUniversalBundle` on `MasonBundle`
 - feat: add `BrickLocation`
