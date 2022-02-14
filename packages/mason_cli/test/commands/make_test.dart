@@ -113,30 +113,18 @@ bricks:
         ..createSync(recursive: true)
         ..writeAsStringSync(
           json.encode({
-            '''app_icon_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
-                appIconPath,
-            '''bio_bc2e238615f1a25f47d1561dc1d896de7c9496d221f3397625da4e3c9838d815''':
-                bioPath,
-            '''documentation_227871e1f882f1e60fbc26adaf0d5ea0f03616b24c54ce4ffc331ebcba54018a''':
-                docPath,
-            '''hello_world_cfb7bfe4be052f5e635f9291624c97e8c45ac933c18d1b8ee0e6a80fb81d491a''':
-                helloWorldPath,
-            '''hooks_a765dcb6544a44c14697c793e67ab2885f2efd292b8d619739aeef699c07af5b''':
-                hooksPath,
-            '''greeting_7271b59f2b3d670acfa5ed607915573ed3e66bf38b4bb2cd8a7972bb3e17b239''':
-                greetingPath,
-            '''legacy_c47d71be087d59069d8d6f3d85d7cac46b3972c8717c9cecf005eb56db8d1214''':
-                legacyPath,
-            '''plugin_40192192887515a0911c28a4738bb32229909ac5d7161c00b3d9bd41accf3485''':
-                pluginPath,
-            '''random_color_2f0793e6e68f849a8e6ee12f3a244b9ad5bce1c1a7579d5e3cf15fb2ea55b0bb''':
-                randomColorPath,
-            '''simple_6c33a2482d658c2355275550eb6960356ef483e03badf54b9e4f7daae613acd6''':
-                simplePath,
-            '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
-                todosPath,
-            '''widget_3e9a45e03a5fe88eed08372ea15dce0ce1b9e2685a75e62ebd4deac7563c8704''':
-                widgetPath,
+            'app_icon': appIconPath,
+            'bio': bioPath,
+            'documentation': docPath,
+            'hello_world': helloWorldPath,
+            'hooks': hooksPath,
+            'greeting': greetingPath,
+            'legacy': legacyPath,
+            'plugin': pluginPath,
+            'random_color': randomColorPath,
+            'simple': simplePath,
+            'todos': todosPath,
+            'widget': widgetPath,
           }),
         );
       printLogs = [];
@@ -401,12 +389,7 @@ bricks:
       File(
         path.join(Directory.current.path, '.mason', 'bricks.json'),
       ).writeAsStringSync(
-        json.encode(
-          {
-            '''app_icon1_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
-                '../../../../../bricks/app_icon'
-          },
-        ),
+        json.encode({'app_icon1': '../../../../../bricks/app_icon'}),
       );
       commandRunner = MasonCommandRunner(
         logger: logger,
@@ -424,11 +407,7 @@ bricks:
 
     test('exits with code 64 when bricks.json contains bad path', () async {
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
-          .writeAsStringSync(
-        '''
-{"greeting1_2ed43fe1a1c8b94465c0d608ba790a35bdc48fdd039be2d87807d5bc8196e54e":"bricks/greeting"}
-''',
-      );
+          .writeAsStringSync('''{"greeting1":"bricks/greeting"}''');
       commandRunner = MasonCommandRunner(
         logger: logger,
         pubUpdater: pubUpdater,

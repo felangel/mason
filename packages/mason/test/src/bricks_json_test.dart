@@ -27,12 +27,12 @@ void main() {
       final result = await bricksJson.add(brick);
 
       expect(result, isNotEmpty);
-      expect(bricksJson.encode, contains('simple_'));
+      expect(bricksJson.encode, contains('"simple":'));
 
       await bricksJson.flush();
 
       final newBricksJson = BricksJson(directory: directory);
-      expect(newBricksJson.encode, contains('simple_'));
+      expect(newBricksJson.encode, contains('"simple":'));
     });
 
     test('can be instantiated with global directory', () {
@@ -104,7 +104,7 @@ void main() {
         expect(bricksJson.encode, contains('greeting_'));
       });
 
-      test('adds bricks to bricks.json with constraint (registry)', () async {
+      test('adds bricks to bricks.json with range (registry)', () async {
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);
         final file = File(
@@ -161,7 +161,7 @@ void main() {
           ),
         );
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
       });
 
       test(
@@ -183,14 +183,14 @@ void main() {
 
         final result1 = await bricksJson.add(brick);
         expect(result1, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
         Directory(result1).parent.parent
           ..deleteSync(recursive: true)
           ..createSync();
 
         final result2 = await bricksJson.add(brick);
         expect(result2, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
         expect(result1, equals(result2));
       });
 
@@ -212,7 +212,7 @@ void main() {
           ),
         );
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_master_'));
+        expect(bricksJson.encode, contains('"simple"'));
       });
 
       test('adds bricks to bricks.json (path)', () async {
@@ -227,7 +227,7 @@ void main() {
           Brick.path(path.join('..', '..', 'bricks', 'simple')),
         );
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
       });
 
       test(
@@ -475,10 +475,10 @@ void main() {
           Brick.path(path.join('..', '..', 'bricks', 'simple')),
         );
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
         expect(file.readAsStringSync(), isEmpty);
         await bricksJson.flush();
-        expect(file.readAsStringSync(), contains('simple_'));
+        expect(file.readAsStringSync(), contains('"simple":'));
       });
     });
 
@@ -494,7 +494,7 @@ void main() {
         final brick = Brick.path(path.join('..', '..', 'bricks', 'simple'));
         final result = await bricksJson.add(brick);
         expect(result, isNotEmpty);
-        expect(bricksJson.encode, contains('simple_'));
+        expect(bricksJson.encode, contains('"simple":'));
         bricksJson.remove(brick);
         expect(bricksJson.encode, equals('{}'));
         expect(bricksJson.cache, isEmpty);

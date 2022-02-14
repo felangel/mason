@@ -114,18 +114,12 @@ bricks:
         File(expectedBrickJsonPath).readAsStringSync(),
         equals(
           json.encode({
-            '''app_icon_0e78d754325c0a6b74c6245089fa310fd32641cf1b9e1c30ce391c07a83dfcb0''':
-                appIconPath,
-            '''documentation_227871e1f882f1e60fbc26adaf0d5ea0f03616b24c54ce4ffc331ebcba54018a''':
-                docPath,
-            '''greeting_7271b59f2b3d670acfa5ed607915573ed3e66bf38b4bb2cd8a7972bb3e17b239''':
-                greetingPath,
-            '''simple_6c33a2482d658c2355275550eb6960356ef483e03badf54b9e4f7daae613acd6''':
-                simplePath,
-            '''todos_c8800221272babb429e8e7e5cbfce6912dcb605ea323643c52b1a9ea71f4f244''':
-                todosPath,
-            '''widget_536b4405bffd371ab46f0948d0a5b9a2ac2cddb270ebc3d6f684217f7741422f''':
-                widgetPath,
+            'app_icon': appIconPath,
+            'documentation': docPath,
+            'greeting': greetingPath,
+            'simple': simplePath,
+            'todos': todosPath,
+            'widget': widgetPath,
           }),
         ),
       );
