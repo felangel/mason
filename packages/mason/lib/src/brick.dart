@@ -12,9 +12,9 @@ class Brick {
   });
 
   /// Brick from a local path.
-  Brick.path(String path)
+  Brick.path({required String name, required String path})
       : this(
-          name: p.basenameWithoutExtension(path),
+          name: name,
           location: BrickLocation(path: path),
         );
 

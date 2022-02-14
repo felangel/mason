@@ -23,7 +23,10 @@ void main() {
 
       expect(bricksJson.encode, equals('{}'));
 
-      final brick = Brick.path(path.join('..', '..', 'bricks', 'simple'));
+      final brick = Brick.path(
+        name: 'simple',
+        path: path.join('..', '..', 'bricks', 'simple'),
+      );
       final result = await bricksJson.add(brick);
 
       expect(result, isNotEmpty);
@@ -224,7 +227,10 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         final result = await bricksJson.add(
-          Brick.path(path.join('..', '..', 'bricks', 'simple')),
+          Brick.path(
+            name: 'simple',
+            path: path.join('..', '..', 'bricks', 'simple'),
+          ),
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('"simple":'));
@@ -406,7 +412,7 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
         expect(
-          () => bricksJson.add(Brick.path('simple')),
+          () => bricksJson.add(Brick.path(name: 'simple', path: 'simple')),
           throwsA(isA<BrickNotFoundException>()),
         );
       });
@@ -472,7 +478,10 @@ void main() {
         expect(bricksJson.encode, equals('{}'));
         expect(file.readAsStringSync(), isEmpty);
         final result = await bricksJson.add(
-          Brick.path(path.join('..', '..', 'bricks', 'simple')),
+          Brick.path(
+            name: 'simple',
+            path: path.join('..', '..', 'bricks', 'simple'),
+          ),
         );
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('"simple":'));
@@ -491,7 +500,10 @@ void main() {
         ).createSync(recursive: true);
         expect(bricksJson.encode, equals('{}'));
 
-        final brick = Brick.path(path.join('..', '..', 'bricks', 'simple'));
+        final brick = Brick.path(
+          name: 'simple',
+          path: path.join('..', '..', 'bricks', 'simple'),
+        );
         final result = await bricksJson.add(brick);
         expect(result, isNotEmpty);
         expect(bricksJson.encode, contains('"simple":'));
