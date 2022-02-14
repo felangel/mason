@@ -1,5 +1,4 @@
 import 'package:mason/mason.dart';
-import 'package:path/path.dart' as p;
 
 /// {@template brick}
 /// Metadata for a brick template including the name and location.
@@ -7,25 +6,15 @@ import 'package:path/path.dart' as p;
 class Brick {
   /// {@macro brick}
   const Brick({
-    required this.name,
+    this.name,
     required this.location,
   });
 
   /// Brick from a local path.
-  Brick.path({required String name, required String path})
-      : this(
-          name: name,
-          location: BrickLocation(path: path),
-        );
+  Brick.path(String path) : this(location: BrickLocation(path: path));
 
   /// Brick from a git url.
-  Brick.git(GitPath git)
-      : this(
-          name: p.basenameWithoutExtension(
-            p.join(git.url, git.path),
-          ),
-          location: BrickLocation(git: git),
-        );
+  Brick.git(GitPath git) : this(location: BrickLocation(git: git));
 
   /// Brick from a version constraint.
   Brick.version({required String name, required String version})
@@ -35,7 +24,7 @@ class Brick {
         );
 
   /// The name of the brick.
-  final String name;
+  final String? name;
 
   /// The location of the brick.
   final BrickLocation location;
