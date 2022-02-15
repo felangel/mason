@@ -13,18 +13,15 @@ class MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
-    group('.fromBrickYaml', () {
+    group('.fromBrick (path)', () {
       test('handles malformed brick', () async {
         final tempDir = Directory.systemTemp.createTempSync();
-        final brickYaml = BrickYaml(
-          name: 'malformed',
-          description: 'A Malformed Template',
-          version: '1.0.0',
-          path: path.join(tempDir.path, 'malformed', 'brick.yaml'),
-        );
+        final brick = Brick.path(path.join(tempDir.path, 'malformed'));
         File(path.join(tempDir.path, 'malformed', 'brick.yaml'))
           ..createSync(recursive: true)
-          ..writeAsStringSync('name: malformed\ndescription: example');
+          ..writeAsStringSync(
+            'name: malformed\ndescription: example\nversion: 0.1.0+1',
+          );
         final brokenFile = File(
           path.join(tempDir.path, 'malformed', '__brick__', 'locked.txt'),
         )
@@ -32,7 +29,7 @@ void main() {
           ..writeAsStringSync('secret');
         await Process.run('chmod', ['000', brokenFile.path]);
 
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
         );
@@ -42,14 +39,10 @@ void main() {
 
       test('constructs an instance (hello_world)', () async {
         const name = 'Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -76,14 +69,10 @@ void main() {
       });
 
       test('constructs an instance (todos)', () async {
-        final brickYaml = BrickYaml(
-          name: 'todos',
-          description: 'A Todos Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'todos', 'brick.yaml'),
-          vars: const {'todos': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'todos'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -111,14 +100,10 @@ void main() {
 
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
-        final brickYaml = BrickYaml(
-          name: 'hooks',
-          description: 'A Hooks Example Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hooks', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hooks'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         await generator.hooks.preGen(
@@ -153,14 +138,10 @@ void main() {
 
       test('constructs an instance with random_color', () async {
         const name = 'Dash';
-        final brickYaml = BrickYaml(
-          name: 'random_color',
-          description: 'A Random Color Generator',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'random_color', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'random_color'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final updatedVars = <Map<String, dynamic>>[];
 
@@ -200,14 +181,10 @@ void main() {
           'constructs an instance multiple times '
           '(identical) (hello_world)', () async {
         const name = 'Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
 
@@ -271,14 +248,10 @@ void main() {
           'times w/skip (hello_world)', () async {
         const name = 'Dash';
         const otherName = 'Other Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
 
@@ -339,14 +312,10 @@ void main() {
           'times w/append (hello_world)', () async {
         const name = 'Dash';
         const otherName = 'Other Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
 
@@ -408,14 +377,10 @@ void main() {
           'times w/prompt - Y (hello_world)', () async {
         const name = 'Dash';
         const otherName = 'Other Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files1 = await generator.generate(
@@ -473,14 +438,10 @@ void main() {
           'and overwrites by default', () async {
         const name = 'Dash';
         const otherName = 'Other Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files1 = await generator.generate(
@@ -531,14 +492,10 @@ void main() {
       test('constructs an instance w/skip and no conflicts (hello_world)',
           () async {
         const name = 'Dash';
-        final brickYaml = BrickYaml(
-          name: 'hello_world',
-          description: 'A Simple Hello World Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'hello_world', 'brick.yaml'),
-          vars: const {'name': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'hello_world'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -651,15 +608,16 @@ void main() {
       });
     });
 
-    group('.fromGitPath', () {
+    group('.fromBrick (git)', () {
       test('constructs an instance', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromGitPath(
+        final brick = Brick.git(
           const GitPath(
             'https://github.com/felangel/mason',
             path: 'bricks/greeting',
           ),
         );
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -677,13 +635,11 @@ void main() {
       });
     });
 
-    group('.fromRegistry', () {
+    group('.fromBrick (version)', () {
       test('constructs an instance (exact version)', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromRegistry(
-          name: 'greeting',
-          version: '0.1.0+1',
-        );
+        final brick = Brick.version(name: 'greeting', version: '0.1.0+1');
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -702,10 +658,8 @@ void main() {
 
       test('constructs an instance (version constraint)', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromRegistry(
-          name: 'greeting',
-          version: '^0.1.0',
-        );
+        final brick = Brick.version(name: 'greeting', version: '^0.1.0');
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -724,10 +678,11 @@ void main() {
 
       test('constructs an instance (version range)', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromRegistry(
+        final brick = Brick.version(
           name: 'greeting',
           version: '>=0.1.0 <0.2.0',
         );
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -746,10 +701,8 @@ void main() {
 
       test('constructs an instance (any version)', () async {
         const name = 'Dash';
-        final generator = await MasonGenerator.fromRegistry(
-          name: 'greeting',
-          version: 'any',
-        );
+        final brick = Brick.version(name: 'greeting', version: 'any');
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -771,14 +724,10 @@ void main() {
       test('generates app_icon from remote url', () async {
         const url =
             'https://raw.githubusercontent.com/felangel/mason/master/assets/mason_logo.png';
-        final brickYaml = BrickYaml(
-          name: 'app_icon',
-          description: 'Create an app icon file from a URL',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
-          vars: const {'url': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'app_icon'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -796,14 +745,10 @@ void main() {
 
       test('generates app_icon from local url', () async {
         final url = path.join('..', '..', 'assets', 'mason_logo.png');
-        final brickYaml = BrickYaml(
-          name: 'app_icon',
-          description: 'Create an app icon file from a URL',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'app_icon', 'brick.yaml'),
-          vars: const {'url': BrickVariableProperties.string()},
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'app_icon'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -820,13 +765,10 @@ void main() {
       });
 
       test('generates photos', () async {
-        final brickYaml = BrickYaml(
-          name: 'photos',
-          description: 'A Photos Example Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'photos', 'brick.yaml'),
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'photos'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(
@@ -843,18 +785,10 @@ void main() {
       });
 
       test('generates bio', () async {
-        final brickYaml = BrickYaml(
-          name: 'bio',
-          description: 'A Bio Template',
-          version: '1.0.0',
-          path: path.join('..', '..', 'bricks', 'bio', 'brick.yaml'),
-          vars: const {
-            'name': BrickVariableProperties.string(),
-            'age': BrickVariableProperties.number(),
-            'isDeveloper': BrickVariableProperties.boolean(),
-          },
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'bio'),
         );
-        final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+        final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
         final files = await generator.generate(

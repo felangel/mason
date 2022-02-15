@@ -78,7 +78,8 @@ class _MakeCommand extends MasonCommand {
     final setExitIfChanged = results['set-exit-if-changed'] as bool;
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
-    final generator = await MasonGenerator.fromBrickYaml(_brick);
+    final path = File(_brick.path!).parent.path;
+    final generator = await MasonGenerator.fromBrick(Brick.path(path));
     final vars = <String, dynamic>{};
 
     try {
