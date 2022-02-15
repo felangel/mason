@@ -8,14 +8,10 @@ void main() {
     test(
         'throws HookInvalidCharactersException '
         'when containining non-ascii characters', () async {
-      final brickYaml = BrickYaml(
-        name: 'unicode_hook',
-        description: 'A Test Hook',
-        version: '1.0.0',
-        path: path.join('test', 'fixtures', 'unicode_hook', 'brick.yaml'),
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'unicode_hook'),
       );
-
-      final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+      final generator = await MasonGenerator.fromBrick(brick);
 
       try {
         await generator.hooks.preGen();
@@ -28,14 +24,10 @@ void main() {
     test(
         'throws HookDependencyInstallFailure '
         'when pubspec is malformed', () async {
-      final brickYaml = BrickYaml(
-        name: 'malformed_pubspec',
-        description: 'A Test Hook',
-        version: '1.0.0',
-        path: path.join('test', 'fixtures', 'malformed_pubspec', 'brick.yaml'),
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'malformed_pubspec'),
       );
-
-      final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+      final generator = await MasonGenerator.fromBrick(brick);
 
       try {
         await generator.hooks.preGen();
@@ -48,14 +40,10 @@ void main() {
     test(
         'throws HookMissingRunException '
         'when hook does not contain a valid run method', () async {
-      final brickYaml = BrickYaml(
-        name: 'missing_run',
-        description: 'A Test Hook',
-        version: '1.0.0',
-        path: path.join('test', 'fixtures', 'missing_run', 'brick.yaml'),
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'missing_run'),
       );
-
-      final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+      final generator = await MasonGenerator.fromBrick(brick);
 
       try {
         await generator.hooks.preGen();
@@ -66,14 +54,10 @@ void main() {
     });
 
     test('throws HookRunException when hook cannot be run', () async {
-      final brickYaml = BrickYaml(
-        name: 'run_exception',
-        description: 'A Test Hook',
-        version: '1.0.0',
-        path: path.join('test', 'fixtures', 'run_exception', 'brick.yaml'),
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'run_exception'),
       );
-
-      final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+      final generator = await MasonGenerator.fromBrick(brick);
 
       try {
         await generator.hooks.preGen();
@@ -84,19 +68,10 @@ void main() {
     });
 
     test('throws HookExecutionException when hook throws', () async {
-      final brickYaml = BrickYaml(
-        name: 'execution_exception',
-        description: 'A Test Hook',
-        version: '1.0.0',
-        path: path.join(
-          'test',
-          'fixtures',
-          'execution_exception',
-          'brick.yaml',
-        ),
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'execution_exception'),
       );
-
-      final generator = await MasonGenerator.fromBrickYaml(brickYaml);
+      final generator = await MasonGenerator.fromBrick(brick);
 
       try {
         await generator.hooks.preGen();

@@ -56,17 +56,33 @@ class MasonGenerator extends Generator {
   }
 
   /// Factory which creates a [MasonGenerator] based on
-  /// a configuration file for a [BrickYaml]:
-  ///
-  /// ```yaml
-  /// name: greetings
-  /// description: A Simple Greetings Template
-  /// vars:
-  ///   - name
-  /// ```
-  static Future<MasonGenerator> fromBrickYaml(BrickYaml brick) async {
-    final brickRoot = File(brick.path!).parent.path;
-    final brickDirectory = p.join(brickRoot, BrickYaml.dir);
+  /// a local [MasonBundle].
+  static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
+    return MasonGenerator(
+      bundle.name,
+      bundle.description,
+      vars: bundle.vars.keys.toList(),
+      files: _decodeConcatenatedData(bundle.files),
+      hooks: GeneratorHooks.fromBundle(bundle),
+    );
+  }
+
+  /// Factory which creates a [MasonGenerator] based on
+  /// a [GitPath] for a remote [BrickYaml] file.
+  static Future<MasonGenerator> fromBrick(Brick brick) async {
+    final path = brick.location.path != null
+        ? brick.location.path!
+        : await BricksJson.temp().add(brick);
+    return MasonGenerator._fromBrick(path);
+  }
+
+  static Future<MasonGenerator> _fromBrick(String path) async {
+    final file = File(p.join(path, BrickYaml.file));
+    final brickYaml = checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    ).copyWith(path: file.path);
+    final brickDirectory = p.join(path, BrickYaml.dir);
     final brickFiles = Directory(brickDirectory)
         .listSync(recursive: true)
         .whereType<File>()
@@ -85,53 +101,12 @@ class MasonGenerator extends Generator {
     });
 
     return MasonGenerator(
-      brick.name,
-      brick.description,
-      vars: brick.vars.keys.toList(),
+      brickYaml.name,
+      brickYaml.description,
+      vars: brickYaml.vars.keys.toList(),
       files: await Future.wait(brickFiles),
-      hooks: await GeneratorHooks.fromBrickYaml(brick),
+      hooks: await GeneratorHooks.fromBrickYaml(brickYaml),
     );
-  }
-
-  /// Factory which creates a [MasonGenerator] based on
-  /// a local [MasonBundle].
-  static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    return MasonGenerator(
-      bundle.name,
-      bundle.description,
-      vars: bundle.vars.keys.toList(),
-      files: _decodeConcatenatedData(bundle.files),
-      hooks: GeneratorHooks.fromBundle(bundle),
-    );
-  }
-
-  /// Factory which creates a [MasonGenerator] based on
-  /// a [GitPath] for a remote [BrickYaml] file.
-  static Future<MasonGenerator> fromGitPath(GitPath gitPath) async {
-    final directory = await BricksJson.temp().add(Brick.git(gitPath));
-    final file = File(p.join(directory, BrickYaml.file));
-    final brickYaml = checkedYamlDecode(
-      file.readAsStringSync(),
-      (m) => BrickYaml.fromJson(m!),
-    ).copyWith(path: file.path);
-    return MasonGenerator.fromBrickYaml(brickYaml);
-  }
-
-  /// Factory which creates a [MasonGenerator] based on
-  /// a brick [name] and [version] hosted in a registry.
-  static Future<MasonGenerator> fromRegistry({
-    required String name,
-    required String version,
-  }) async {
-    final directory = await BricksJson.temp().add(
-      Brick.version(name: name, version: version),
-    );
-    final file = File(p.join(directory, BrickYaml.file));
-    final brickYaml = checkedYamlDecode(
-      file.readAsStringSync(),
-      (m) => BrickYaml.fromJson(m!),
-    ).copyWith(path: file.path);
-    return MasonGenerator.fromBrickYaml(brickYaml);
   }
 
   /// Optional list of variables which will be used to populate
