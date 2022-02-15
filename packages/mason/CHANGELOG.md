@@ -8,6 +8,8 @@
 - feat: add `fromUniversalBundle` and `toUniversalBundle` on `MasonBundle`
 - feat: add `BrickLocation`
 - feat: add `unpackBundle` to convert universal bundle bytes to a `MasonBundle`
+- fix: yaml string encoding for semver
+- fix: `BrickNotFoundException` message when git path is empty
 
 # 0.1.0-dev.6
 
