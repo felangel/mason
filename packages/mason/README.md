@@ -22,7 +22,7 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 
 Future<void> main() async {
-   final brick = Brick.git(
+  final brick = Brick.git(
     const GitPath(
       'https://github.com/felangel/mason.git',
       path: 'bricks/greeting',
