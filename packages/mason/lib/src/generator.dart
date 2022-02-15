@@ -70,12 +70,9 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromBrick(Brick brick) async {
-    late String path;
-    if (brick.location.path != null) {
-      path = brick.location.path!;
-    } else {
-      path = await BricksJson.temp().add(brick);
-    }
+    final path = brick.location.path != null
+        ? brick.location.path!
+        : await BricksJson.temp().add(brick);
     return MasonGenerator._fromBrick(path);
   }
 
