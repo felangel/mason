@@ -78,7 +78,7 @@ bricks:
       );
       await expectLater(
         MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
-          ['add', '-g', '--source', 'path', greetingPath],
+          ['add', '-g', 'greeting', '--path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
@@ -124,7 +124,7 @@ bricks:
       );
       await expectLater(
         MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
-          ['add', '-g', '--source', 'path', greetingPath],
+          ['add', '-g', 'greeting', '--path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );
@@ -170,7 +170,7 @@ bricks:
       );
       await expectLater(
         MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
-          ['add', '-g', '--source', 'path', greetingPath],
+          ['add', '-g', 'greeting', '--path', greetingPath],
         ),
         completion(ExitCode.success.code),
       );

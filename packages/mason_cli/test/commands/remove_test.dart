@@ -67,7 +67,7 @@ void main() {
         });
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
-          ['add', '--source', 'git', url, '--path', 'bricks/widget'],
+          ['add', 'widget', '--git-url', url, '--git-path', 'bricks/widget'],
         );
         expect(addResult, equals(ExitCode.success.code));
 
@@ -101,7 +101,7 @@ void main() {
       test('removes successfully when brick exists', () async {
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
-          ['add', '--source', 'git', url, '--path', 'bricks/widget'],
+          ['add', 'widget', '--git-url', url, '--git-path', 'bricks/widget'],
         );
         expect(addResult, equals(ExitCode.success.code));
 
@@ -162,7 +162,15 @@ void main() {
       test('removes successfully when brick exists', () async {
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
-          ['add', '-g', '--source', 'git', url, '--path', 'bricks/widget'],
+          [
+            'add',
+            '-g',
+            'widget',
+            '--git-url',
+            url,
+            '--git-path',
+            'bricks/widget'
+          ],
         );
         expect(addResult, equals(ExitCode.success.code));
 
