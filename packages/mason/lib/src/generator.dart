@@ -70,32 +70,22 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
   static Future<MasonGenerator> fromBrick(Brick brick) async {
-    late File file;
+    late String path;
     if (brick.location.path != null) {
-      file = File(p.join(brick.location.path!, BrickYaml.file));
+      path = brick.location.path!;
     } else {
-      final directory = await BricksJson.temp().add(brick);
-      file = File(p.join(directory, BrickYaml.file));
+      path = await BricksJson.temp().add(brick);
     }
+    return MasonGenerator._fromBrick(path);
+  }
+
+  static Future<MasonGenerator> _fromBrick(String path) async {
+    final file = File(p.join(path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
-    return MasonGenerator._fromBrickYaml(brickYaml);
-  }
-
-  /// Factory which creates a [MasonGenerator] based on
-  /// a configuration file for a [BrickYaml]:
-  ///
-  /// ```yaml
-  /// name: greetings
-  /// description: A Simple Greetings Template
-  /// vars:
-  ///   - name
-  /// ```
-  static Future<MasonGenerator> _fromBrickYaml(BrickYaml brick) async {
-    final brickRoot = File(brick.path!).parent.path;
-    final brickDirectory = p.join(brickRoot, BrickYaml.dir);
+    final brickDirectory = p.join(path, BrickYaml.dir);
     final brickFiles = Directory(brickDirectory)
         .listSync(recursive: true)
         .whereType<File>()
@@ -114,11 +104,11 @@ class MasonGenerator extends Generator {
     });
 
     return MasonGenerator(
-      brick.name,
-      brick.description,
-      vars: brick.vars.keys.toList(),
+      brickYaml.name,
+      brickYaml.description,
+      vars: brickYaml.vars.keys.toList(),
       files: await Future.wait(brickFiles),
-      hooks: await GeneratorHooks.fromBrickYaml(brick),
+      hooks: await GeneratorHooks.fromBrickYaml(brickYaml),
     );
   }
 
