@@ -187,7 +187,10 @@ class BricksJson {
 
       if (!brickYaml.existsSync()) {
         if (directory.existsSync()) directory.deleteSync(recursive: true);
-        throw BrickNotFoundException('${gitPath.url}/${gitPath.path}');
+        final url = gitPath.path.isNotEmpty
+            ? '${gitPath.url}/${gitPath.path}'
+            : gitPath.url;
+        throw BrickNotFoundException(url);
       }
 
       final yaml = checkedYamlDecode(

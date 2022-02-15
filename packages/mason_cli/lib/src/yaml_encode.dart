@@ -23,8 +23,7 @@ String _formatValue(dynamic value, int nesting) {
     if (_isMultilineString(value)) {
       return ''' |\n${value.split('\n').map((s) => '${_indentation(nesting + 1)}$s').join('\n')}''';
     }
-    if (_containsSpecialCharacters(value) ||
-        _containsFloatingPointPattern(value)) {
+    if (_containsSpecialCharacters(value)) {
       return ' "$value"';
     }
   }
@@ -44,9 +43,6 @@ String _indentation(int nesting) => _spaces(nesting * 2);
 String _spaces(int n) => ''.padRight(n);
 
 bool _isMultilineString(String s) => s.contains('\n');
-
-bool _containsFloatingPointPattern(String s) =>
-    s.contains(RegExp(r'[0-9]\.[0-9]'));
 
 bool _containsSpecialCharacters(String s) =>
     _specialCharacters.any((c) => s.contains(c));

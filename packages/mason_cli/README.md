@@ -462,29 +462,35 @@ The `add` command allows developers to add brick templates locally or globally o
 ### Add Usage
 
 ```sh
+# add from registry
+mason add my_brick
+
+# add from registry (global)
+mason add --global my_brick
+
+# add from registry shorthand syntax (global)
+mason add -g my_brick
+
 # add from path
-mason add --source path ./path/to/brick
+mason add my_brick --path ./path/to/my_brick
 
 # add from path (global)
-mason add --global --source path ./path/to/brick
-
-# add from path shorthand syntax
-mason add ./path/to/brick
+mason add --global my_brick --path ./path/to/my_brick
 
 # add from path shorthand syntax (global)
-mason add -g ./path/to/brick
+mason add -g my_brick --path ./path/to/my_brick
 
 # add from git url
-mason add --source git https://github.com/user/repo
+mason add my_brick --git-url https://github.com/org/repo
 
 # add from git url (global)
-mason add -g --source git https://github.com/user/repo
+mason add -g my_brick --git-url https://github.com/org/repo
 
 # add from git url with path
-mason add --source git https://github.com/user/repo --path path/to/brick
+mason add my_brick --git-url https://github.com/org/repo --git-path path/to/my_brick
 
 # add from git url with path and ref
-mason add --source git https://github.com/user/repo --path path/to/brick --ref tag-name
+mason add my_brick --git-url https://github.com/org/repo --git-path path/to/my_brick --git-ref tag-name
 ```
 
 Once a brick is added it can be used via the `mason make` command:

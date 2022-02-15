@@ -16,6 +16,12 @@ void main() {
         expect(Yaml.encode(input), equals(expected));
       });
 
+      test('handles {string:string} correctly (semver)', () {
+        const input = <String, dynamic>{'key': '1.2.3'};
+        const expected = 'key: 1.2.3';
+        expect(Yaml.encode(input), equals(expected));
+      });
+
       test('handles {string:bool} correctly', () {
         const input = <String, dynamic>{'key': false};
         const expected = 'key: false';

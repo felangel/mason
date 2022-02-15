@@ -397,6 +397,29 @@ void main() {
 
       test(
           'throws BrickNotFoundException when '
+          'brick does not exist w/path (git)', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        expect(
+          () => bricksJson.add(
+            Brick.git(
+              GitPath(
+                'https://github.com/felangel/mason',
+                path: 'bricks/example',
+              ),
+            ),
+          ),
+          throwsA(isA<BrickNotFoundException>()),
+        );
+      });
+
+      test(
+          'throws BrickNotFoundException when '
           'brick does not exist (path)', () async {
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);

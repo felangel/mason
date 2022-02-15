@@ -18,19 +18,10 @@ class AddCommand extends MasonCommand {
         abbr: 'g',
         help: 'Adds the brick globally.',
       )
-      ..addOption(
-        'source',
-        abbr: 's',
-        defaultsTo: 'path',
-        allowed: ['git', 'path'],
-        allowedHelp: {
-          'git': 'git url for remote brick template',
-          'path': 'path to local brick template'
-        },
-        help: 'The location of the brick.',
-      )
-      ..addOption('path', help: 'Optional git path')
-      ..addOption('ref', help: 'Optional git ref (commit hash, tag, etc.)');
+      ..addOption('git-url', help: 'Git URL of the brick')
+      ..addOption('git-ref', help: 'Git branch or commit to be used')
+      ..addOption('git-path', help: 'Path of the brick in the git repository')
+      ..addOption('path', help: 'Local path of the brick');
   }
 
   @override
@@ -42,45 +33,49 @@ class AddCommand extends MasonCommand {
   @override
   Future<int> run() async {
     if (results.rest.isEmpty) {
-      throw UsageException('path to the brick is required.', usage);
+      throw UsageException('brick name is required.', usage);
     }
 
     final isGlobal = results['global'] == true;
-    final location = results.rest.first;
     final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
     if (bricksJson == null) {
       throw UsageException('bricks.json not found', usage);
     }
 
+    final name = results.rest.first;
+    final gitUrl = results['git-url'] as String?;
+    final path = results['path'] as String?;
+
     late final Brick brick;
+    if (path != null) {
+      brick = Brick(name: name, location: BrickLocation(path: path));
+    } else if (gitUrl != null) {
+      brick = Brick(
+        name: name,
+        location: BrickLocation(
+          git: GitPath(
+            gitUrl,
+            path: results['git-path'] as String?,
+            ref: results['git-ref'] as String?,
+          ),
+        ),
+      );
+    } else {
+      brick = Brick(name: name, location: const BrickLocation(version: 'any'));
+    }
+
     late final File file;
 
-    final installDone = logger.progress('Installing brick from $location');
+    final installDone = logger.progress('Installing $name');
     try {
-      if (results['source'] == 'path') {
-        file = File(p.join(location, BrickYaml.file));
-        if (!file.existsSync()) {
-          throw UsageException('brick not found at path $location', usage);
-        }
-        brick = Brick.path(file.parent.path);
-        await bricksJson.add(brick);
-      } else {
-        final gitPath = GitPath(
-          location,
-          path: results['path'] as String?,
-          ref: results['ref'] as String?,
-        );
-        brick = Brick.git(gitPath);
-        try {
-          final directory = await bricksJson.add(brick);
-          file = File(p.join(directory, BrickYaml.file));
-        } catch (_) {
-          throw UsageException('brick not found at url $location', usage);
-        }
-      }
-    } finally {
+      final directory = await bricksJson.add(brick);
+      await bricksJson.flush();
+      file = File(p.join(directory, BrickYaml.file));
+    } catch (_) {
       installDone();
+      rethrow;
     }
+    installDone();
 
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
@@ -89,8 +84,10 @@ class AddCommand extends MasonCommand {
 
     final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
-    final bricks = Map.of(targetMasonYaml.bricks)
-      ..addAll({brickYaml.name: brick.location});
+    final location = brick.location.version != null
+        ? BrickLocation(version: '^${brickYaml.version}')
+        : brick.location;
+    final bricks = Map.of(targetMasonYaml.bricks)..addAll({name: location});
     final addDone = logger.progress('Adding ${brickYaml.name}');
     try {
       if (!targetMasonYaml.bricks.containsKey(name)) {
@@ -98,8 +95,6 @@ class AddCommand extends MasonCommand {
           Yaml.encode(MasonYaml(bricks).toJson()),
         );
       }
-      await bricksJson.add(brick);
-      await bricksJson.flush();
       addDone('Added ${brickYaml.name}');
     } catch (_) {
       addDone();

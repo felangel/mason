@@ -47,7 +47,7 @@ void main() {
 
     test('exits with code 64 when bricks.json does not exist', () async {
       Directory.current = Directory.systemTemp.createTempSync();
-      final result = await commandRunner.run(['add', '--source', 'path', '.']);
+      final result = await commandRunner.run(['add', 'example', '--path', '.']);
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('bricks.json not found')).called(1);
     });
@@ -61,7 +61,7 @@ void main() {
       final brickPath =
           path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
       final result = await commandRunner.run(
-        ['add', '--source', 'path', brickPath],
+        ['add', 'greeting', '--path', brickPath],
       );
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('oops')).called(1);
@@ -69,50 +69,44 @@ void main() {
 
     group('local', () {
       test('exits with code 64 when brick is not provided', () async {
-        final result = await commandRunner.run(['add', '--source', 'path']);
+        final result = await commandRunner.run(['add']);
         expect(result, equals(ExitCode.usage.code));
-        verify(() => logger.err('path to the brick is required.')).called(1);
+        verify(() => logger.err('brick name is required.')).called(1);
       });
 
       group('path', () {
         test('exits with code 64 when brick does not exist', () async {
           final result = await commandRunner.run(
-            ['add', '--source', 'path', '.'],
+            ['add', 'example', '--path', '.'],
           );
           expect(result, equals(ExitCode.usage.code));
-          verify(() => logger.err('brick not found at path .')).called(1);
+          verify(
+            () => logger.err(
+              '''Could not find brick at ${path.canonicalize(Directory.current.path)}''',
+            ),
+          ).called(1);
+        });
+
+        test('exits with code 64 when name does not match', () async {
+          final brickPath =
+              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+          final result = await commandRunner.run(
+            ['add', 'example', '--path', brickPath],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err(
+              '''Brick name "example" doesn't match provided name "greeting" in mason.yaml.''',
+            ),
+          ).called(1);
         });
 
         test('adds brick successfully when brick exists', () async {
           final brickPath =
               path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(
-            ['add', '--source', 'path', brickPath],
+            ['add', 'greeting', '--path', brickPath],
           );
-          expect(result, equals(ExitCode.success.code));
-          final testDir = Directory(
-            path.join(Directory.current.path, 'greeting'),
-          )..createSync(recursive: true);
-          Directory.current = testDir.path;
-          final makeResult = await MasonCommandRunner(
-            logger: logger,
-            pubUpdater: pubUpdater,
-          ).run(['make', 'greeting', '--name', 'Dash']);
-          expect(makeResult, equals(ExitCode.success.code));
-
-          final actual = Directory(
-            path.join(testFixturesPath(cwd, suffix: '.add'), 'greeting'),
-          );
-          final expected = Directory(
-            path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
-          );
-          expect(directoriesDeepEqual(actual, expected), isTrue);
-        });
-
-        test('adds brick successfully when brick exists (shorthand)', () async {
-          final brickPath =
-              path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
-          final result = await commandRunner.run(['add', brickPath]);
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
             path.join(Directory.current.path, 'greeting'),
@@ -138,16 +132,41 @@ void main() {
         test('exits with code 64 when brick does not exist', () async {
           const url = 'https://github.com/felangel/mason';
           final result = await commandRunner.run(
-            ['add', '--source', 'git', url],
+            ['add', 'example', '--git-url', url],
           );
           expect(result, equals(ExitCode.usage.code));
-          verify(() => logger.err('brick not found at url $url')).called(1);
+          verify(() => logger.err('Could not find brick at $url')).called(1);
+        });
+
+        test('exits with code 64 when brick does not exist (path)', () async {
+          const url = 'https://github.com/felangel/mason';
+          const path = 'bricks/example';
+          final result = await commandRunner.run(
+            ['add', 'example', '--git-url', url, '--git-path', path],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err('Could not find brick at $url/$path'),
+          ).called(1);
+        });
+
+        test('exits with code 64 when name does not match', () async {
+          const url = 'https://github.com/felangel/mason';
+          final result = await commandRunner.run(
+            ['add', 'example', '--git-url', url, '--git-path', 'bricks/widget'],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err(
+              '''Brick name "example" doesn't match provided name "widget" in mason.yaml.''',
+            ),
+          ).called(1);
         });
 
         test('adds brick successfully when brick exists', () async {
           const url = 'https://github.com/felangel/mason';
           final result = await commandRunner.run(
-            ['add', '--source', 'git', url, '--path', 'bricks/widget'],
+            ['add', 'widget', '--git-url', url, '--git-path', 'bricks/widget'],
           );
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
@@ -165,6 +184,38 @@ void main() {
           );
           final expected = Directory(
             path.join(testFixturesPath(cwd, suffix: 'add'), 'widget'),
+          );
+          expect(directoriesDeepEqual(actual, expected), isTrue);
+        });
+      });
+
+      group('registry', () {
+        test('exits with code 64 when brick does not exist', () async {
+          final result = await commandRunner.run(['add', 'nonexistent-brick']);
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err('Brick "nonexistent-brick" does not exist.'),
+          ).called(1);
+        });
+
+        test('adds brick successfully when brick exists', () async {
+          final result = await commandRunner.run(['add', 'greeting']);
+          expect(result, equals(ExitCode.success.code));
+          final testDir = Directory(
+            path.join(Directory.current.path, 'greeting'),
+          )..createSync(recursive: true);
+          Directory.current = testDir.path;
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
+          expect(makeResult, equals(ExitCode.success.code));
+
+          final actual = Directory(
+            path.join(testFixturesPath(cwd, suffix: '.add'), 'greeting'),
+          );
+          final expected = Directory(
+            path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
           );
           expect(directoriesDeepEqual(actual, expected), isTrue);
         });
@@ -180,27 +231,29 @@ void main() {
       });
 
       test('exits with code 64 when brick is not provided', () async {
-        final result = await commandRunner.run(
-          ['add', '-g', '--source', 'path'],
-        );
+        final result = await commandRunner.run(['add', '-g']);
         expect(result, equals(ExitCode.usage.code));
-        verify(() => logger.err('path to the brick is required.')).called(1);
+        verify(() => logger.err('brick name is required.')).called(1);
       });
 
       group('path', () {
         test('exits with code 64 when brick does not exist', () async {
           final result = await commandRunner.run(
-            ['add', '--global', '--source', 'path', '.'],
+            ['add', '--global', 'example', '--path', '.'],
           );
           expect(result, equals(ExitCode.usage.code));
-          verify(() => logger.err('brick not found at path .')).called(1);
+          verify(
+            () => logger.err(
+              '''Could not find brick at ${path.canonicalize(Directory.current.path)}''',
+            ),
+          ).called(1);
         });
 
         test('adds brick successfully when brick exists', () async {
           final brickPath =
               path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
           final result = await commandRunner.run(
-            ['add', '-g', '--source', 'path', brickPath],
+            ['add', '--global', 'greeting', '--path', brickPath],
           );
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
@@ -225,7 +278,9 @@ void main() {
         test('adds brick successfully when brick exists (shorthand)', () async {
           final brickPath =
               path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
-          final result = await commandRunner.run(['add', '-g', brickPath]);
+          final result = await commandRunner.run(
+            ['add', '-g', 'greeting', '--path', brickPath],
+          );
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
             path.join(Directory.current.path, 'greeting'),
@@ -251,16 +306,24 @@ void main() {
         test('exits with code 64 when brick does not exist', () async {
           const url = 'https://github.com/felangel/mason';
           final result = await commandRunner.run(
-            ['add', '--global', '--source', 'git', url],
+            ['add', '--global', 'example', '--git-url', url],
           );
           expect(result, equals(ExitCode.usage.code));
-          verify(() => logger.err('brick not found at url $url')).called(1);
+          verify(() => logger.err('Could not find brick at $url')).called(1);
         });
 
         test('adds brick successfully when brick exists', () async {
           const url = 'https://github.com/felangel/mason';
           final result = await commandRunner.run(
-            ['add', '-g', '--source', 'git', url, '--path', 'bricks/widget'],
+            [
+              'add',
+              '-g',
+              'widget',
+              '--git-url',
+              url,
+              '--git-path',
+              'bricks/widget'
+            ],
           );
           expect(result, equals(ExitCode.success.code));
           final testDir = Directory(
@@ -278,6 +341,40 @@ void main() {
           );
           final expected = Directory(
             path.join(testFixturesPath(cwd, suffix: 'add'), 'widget'),
+          );
+          expect(directoriesDeepEqual(actual, expected), isTrue);
+        });
+      });
+
+      group('registry', () {
+        test('exits with code 64 when brick does not exist', () async {
+          final result = await commandRunner.run(
+            ['add', '-g', 'nonexistent-brick'],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err('Brick "nonexistent-brick" does not exist.'),
+          ).called(1);
+        });
+
+        test('adds brick successfully when brick exists', () async {
+          final result = await commandRunner.run(['add', '-g', 'greeting']);
+          expect(result, equals(ExitCode.success.code));
+          final testDir = Directory(
+            path.join(Directory.current.path, 'greeting'),
+          )..createSync(recursive: true);
+          Directory.current = testDir.path;
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
+          expect(makeResult, equals(ExitCode.success.code));
+
+          final actual = Directory(
+            path.join(testFixturesPath(cwd, suffix: '.add'), 'greeting'),
+          );
+          final expected = Directory(
+            path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
           );
           expect(directoriesDeepEqual(actual, expected), isTrue);
         });
