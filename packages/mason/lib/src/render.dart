@@ -23,42 +23,48 @@ String _sanitizeOutput(String output) {
 }
 
 /// [Map] of all the built-in lambda functions.
-final _builtInLambdas = <String, LambdaFunction>{
+final _builtInLambdas = <String, String Function(String)>{
   /// camelCase
-  'camelCase': (ctx) => ctx.renderString().camelCase,
+  'camelCase': (ctx) => ctx.camelCase,
 
   /// CONSTANT_CASE
-  'constantCase': (ctx) => ctx.renderString().constantCase,
+  'constantCase': (ctx) => ctx.constantCase,
 
   /// dot.case
-  'dotCase': (ctx) => ctx.renderString().dotCase,
+  'dotCase': (ctx) => ctx.dotCase,
 
   /// Header-Case
-  'headerCase': (ctx) => ctx.renderString().headerCase,
+  'headerCase': (ctx) => ctx.headerCase,
 
   /// lower case
-  'lowerCase': (ctx) => ctx.renderString().toLowerCase(),
+  'lowerCase': (ctx) => ctx.toLowerCase(),
 
   /// PascalCase
-  'pascalCase': (ctx) => ctx.renderString().pascalCase,
+  'pascalCase': (ctx) => ctx.pascalCase,
 
   /// param-case
-  'paramCase': (ctx) => ctx.renderString().paramCase,
+  'paramCase': (ctx) => ctx.paramCase,
 
   /// path/case
-  'pathCase': (ctx) => ctx.renderString().pathCase,
+  'pathCase': (ctx) => ctx.pathCase,
 
   /// Sentence case
-  'sentenceCase': (ctx) => ctx.renderString().sentenceCase,
+  'sentenceCase': (ctx) => ctx.sentenceCase,
 
   /// snake_case
-  'snakeCase': (ctx) => ctx.renderString().snakeCase,
+  'snakeCase': (ctx) => ctx.snakeCase,
 
   /// Title Case
-  'titleCase': (ctx) => ctx.renderString().titleCase,
+  'titleCase': (ctx) => ctx.titleCase,
 
   /// UPPER CASE
-  'upperCase': (ctx) => ctx.renderString().toUpperCase(),
+  'upperCase': (ctx) => ctx.toUpperCase(),
+};
+
+/// [Map] of all the built-in lambda functions transformed for mustache
+final _builtInMustacheLambdas = <String, LambdaFunction>{
+  for (final entry in _builtInLambdas.entries)
+    entry.key: (ctx) => entry.value(ctx.renderString()),
 };
 
 /// {@template render_template}
@@ -87,14 +93,17 @@ extension RenderTemplate on String {
     Map<String, dynamic> vars, [
     Map<String, List<int>>? partials = const {},
   ]) {
+    final thisWithShortcutsRendered = renderShortcuts(vars);
+
     final template = Template(
-      _sanitizeInput(this),
+      _sanitizeInput(thisWithShortcutsRendered),
       lenient: true,
       partialResolver: partials?.resolve,
     );
 
     return _sanitizeOutput(
-      template.renderString(<String, dynamic>{..._builtInLambdas, ...vars}),
+      template
+          .renderString(<String, dynamic>{..._builtInMustacheLambdas, ...vars}),
     );
   }
 }
@@ -112,4 +121,36 @@ extension ResolvePartial on Map<String, List<int>> {
     final sanitized = _sanitizeInput(decoded);
     return Template(sanitized, name: name, lenient: true);
   }
+}
+
+extension on String {
+  /// Renders shortcuts with the syntax `{{variable_name|lambda_name}}`
+  String renderShortcuts(Map<String, dynamic> vars) {
+    final lambdas = _builtInLambdas;
+
+    return replaceAllMapped(
+      RegExp(r'\{\{.+\|.+\}\}'),
+      (match) {
+        final matchString = match.group(0) ?? '';
+
+        final keywords = matchString.removeAll('{{').removeAll('}}');
+        final variableAndLambda = keywords.split('|');
+        final variableName = variableAndLambda.first;
+        final lambdaName = variableAndLambda.last;
+
+        final hasMatchingLambda = lambdas.containsKey(lambdaName);
+        final hasMatchingVar = vars.containsKey(variableName);
+
+        /// Guard no matching lambda or variable
+        if (!hasMatchingLambda || !hasMatchingVar) return matchString;
+
+        final variable = vars[variableName]! as String;
+        final lambda = lambdas[lambdaName]!;
+
+        return lambda(variable);
+      },
+    );
+  }
+
+  String removeAll(Pattern pattern) => replaceAll(pattern, '');
 }
