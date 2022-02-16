@@ -136,18 +136,27 @@ extension on String {
         final keywords = matchString.removeAll('{{').removeAll('}}');
         final variableAndLambda = keywords.split('|');
         final variableName = variableAndLambda.first;
-        final lambdaName = variableAndLambda.last;
+        final lambdaNames = variableAndLambda.sublist(1);
 
-        final hasMatchingLambda = lambdas.containsKey(lambdaName);
         final hasMatchingVar = vars.containsKey(variableName);
 
-        /// Guard no matching lambda or variable
-        if (!hasMatchingLambda || !hasMatchingVar) return matchString;
-
+        /// Guard no matching variable
+        if (!hasMatchingVar) return matchString;
         final variable = vars[variableName]! as String;
-        final lambda = lambdas[lambdaName]!;
 
-        return lambda(variable);
+        var transformedVariable = variable;
+
+        for (final lambdaName in lambdaNames) {
+          final hasMatchingLambda = lambdas.containsKey(lambdaName);
+
+          /// Guard no matching lambda
+          if (!hasMatchingLambda) return matchString;
+          final lambda = lambdas[lambdaName]!;
+
+          transformedVariable = lambda(transformedVariable);
+        }
+
+        return transformedVariable;
       },
     );
   }

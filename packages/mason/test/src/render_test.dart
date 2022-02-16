@@ -293,6 +293,16 @@ void main() {
           equals(expected),
         );
       });
+
+      test('support chaining', () {
+        const greeting = 'hello world';
+        const input = 'Greeting: {{greeting|dotCase|upperCase}}!';
+        const expected = 'Greeting: HELLO.WORLD!';
+        expect(
+          input.render(<String, dynamic>{'greeting': greeting}),
+          equals(expected),
+        );
+      });
     });
   });
 }
