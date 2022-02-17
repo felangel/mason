@@ -418,7 +418,7 @@ And `post_gen.dart` contains:
 import 'package:mason/mason.dart';
 
 void run(HookContext context) {
-  context.logger.info('hello {{name}}!');  
+  context.logger.info('hello {{name}}!');
 }
 ```
 
@@ -442,7 +442,7 @@ import 'package:mason/mason.dart';
 void run(HookContext context) {
   // Read/Write vars
   context.vars = {...context.vars, 'custom_var': 'foo'};
-  
+
   // Use the logger
   context.logger.info('hook says hi!');
 }
@@ -583,6 +583,8 @@ Available commands:
   get      Gets all bricks in the nearest mason.yaml.
   init     Initialize mason in the current directory.
   list     Lists installed bricks.
+  login    Log into brickhub.dev.
+  logout   Log out of brickhub.dev.
   make     Generate code using an existing brick template.
   new      Creates a new brick template.
   remove   Removes a brick.

@@ -6,6 +6,8 @@
     # add from registry
     mason add my_brick
     ```
+- feat: `mason login` command
+- feat: `mason logout` command
 - fix: clear `bricks.json` prior to fetching via `mason get`
 - fix: verify/validate brick name matches name in `mason.yaml` during `mason get`
 - refactor: populate bricks from `bricks.json` directly
