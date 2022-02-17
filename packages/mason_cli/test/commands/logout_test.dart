@@ -24,6 +24,10 @@ void main() {
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
     });
 
+    test('can be instantiated without any parameters', () {
+      expect(() => LogoutCommand(), returnsNormally);
+    });
+
     test('exits with code 0 when already logged out', () async {
       final result = await logoutCommand.run();
       expect(result, equals(ExitCode.success.code));
