@@ -23,5 +23,4 @@ Future<void> main() async {
   masonAuth.logout();
   print('Logged out!');
 }
-
 ```
