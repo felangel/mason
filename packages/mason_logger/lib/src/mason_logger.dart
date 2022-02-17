@@ -183,8 +183,6 @@ class Logger {
     const lineFeed = 10;
     const carriageReturn = 13;
     const delete = 127;
-    const space = 32;
-    const backspace = 8;
     final value = <int>[];
 
     try {
@@ -195,17 +193,8 @@ class Logger {
       do {
         char = _stdin.readByteSync();
         if (char != lineFeed && char != carriageReturn) {
-          if (char == delete) {
-            if (value.isNotEmpty) {
-              _stdout
-                ..writeCharCode(backspace)
-                ..writeCharCode(space)
-                ..writeCharCode(backspace);
-              value.removeLast();
-            }
-          } else {
-            value.add(char);
-          }
+          final shouldDelete = char == delete && value.isNotEmpty;
+          shouldDelete ? value.removeLast() : value.add(char);
         }
       } while (char != lineFeed && char != carriageReturn);
     } finally {
