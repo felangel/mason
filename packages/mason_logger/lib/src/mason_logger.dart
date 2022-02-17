@@ -155,7 +155,8 @@ class Logger {
     final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')}' : '';
     final _message = '$message$suffix ';
     _stdout.write(_message);
-    final input = hidden ? _readHidden() : _stdin.readLineSync()?.trim();
+    final input =
+        hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty ? _defaultValue : input;
     _stdout.writeln(
       '''\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
@@ -178,12 +179,12 @@ class Logger {
     return response;
   }
 
-  String _readHidden() {
+  String _readLineHiddenSync() {
     const lineFeed = 10;
     const carriageReturn = 13;
-    const _delete = 127;
-    const _space = 32;
-    const _backspace = 8;
+    const delete = 127;
+    const space = 32;
+    const backspace = 8;
     final value = <int>[];
 
     try {
@@ -194,12 +195,12 @@ class Logger {
       do {
         char = _stdin.readByteSync();
         if (char != lineFeed && char != carriageReturn) {
-          if (char == _delete) {
+          if (char == delete) {
             if (value.isNotEmpty) {
               _stdout
-                ..writeCharCode(_backspace)
-                ..writeCharCode(_space)
-                ..writeCharCode(_backspace);
+                ..writeCharCode(backspace)
+                ..writeCharCode(space)
+                ..writeCharCode(backspace);
               value.removeLast();
             }
           } else {
