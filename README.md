@@ -20,6 +20,7 @@ A collection of packages that enable developers to create and consume reusable t
 | Package                                                                             | Pub                                                                                                    |
 | ----------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------ |
 | [mason](https://github.com/felangel/mason/tree/master/packages/mason)               | [![pub package](https://img.shields.io/pub/v/mason.svg)](https://pub.dev/packages/mason)               |
+| [mason_auth](https://github.com/felangel/mason/tree/master/packages/mason_auth)     | [![pub package](https://img.shields.io/pub/v/mason_auth.svg)](https://pub.dev/packages/mason_auth)     |
 | [mason_cli](https://github.com/felangel/mason/tree/master/packages/mason_cli)       | [![pub package](https://img.shields.io/pub/v/mason_cli.svg)](https://pub.dev/packages/mason_cli)       |
 | [mason_logger](https://github.com/felangel/mason/tree/master/packages/mason_logger) | [![pub package](https://img.shields.io/pub/v/mason_logger.svg)](https://pub.dev/packages/mason_logger) |
 
