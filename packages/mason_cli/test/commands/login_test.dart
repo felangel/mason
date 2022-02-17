@@ -24,6 +24,10 @@ void main() {
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
     });
 
+    test('can be instantiated without any parameters', () {
+      expect(() => LoginCommand(), returnsNormally);
+    });
+
     test('exits with code 0 when already logged in', () async {
       const email = 'test@email.com';
       final user = MockUser();
