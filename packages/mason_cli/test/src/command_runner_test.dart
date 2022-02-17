@@ -29,6 +29,7 @@ const expectedUsage = [
       '  get      Gets all bricks in the nearest mason.yaml.\n'
       '  init     Initialize mason in the current directory.\n'
       '  list     Lists installed bricks.\n'
+      '  login    Log into brickhub.dev.\n'
       '  make     Generate code using an existing brick template.\n'
       '  new      Creates a new brick template.\n'
       '  remove   Removes a brick.\n'
