@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:cli_util/cli_util.dart';
 import 'package:http/http.dart' as http;
-import 'package:mason_auth/mason_auth.dart';
 import 'package:mason_auth/src/jwt_decode.dart';
 import 'package:mason_auth/src/models/models.dart';
 import 'package:path/path.dart' as p;
