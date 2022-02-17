@@ -25,6 +25,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
+    final _masonAuth = masonAuth ?? MasonAuth();
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
@@ -32,7 +33,8 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(GetCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
     addCommand(ListCommand(logger: _logger));
-    addCommand(LoginCommand(logger: _logger, masonAuth: masonAuth));
+    addCommand(LoginCommand(logger: _logger, masonAuth: _masonAuth));
+    addCommand(LogoutCommand(logger: _logger, masonAuth: _masonAuth));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
     addCommand(RemoveCommand(logger: _logger));

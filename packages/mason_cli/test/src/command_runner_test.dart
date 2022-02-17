@@ -30,6 +30,7 @@ const expectedUsage = [
       '  init     Initialize mason in the current directory.\n'
       '  list     Lists installed bricks.\n'
       '  login    Log into brickhub.dev.\n'
+      '  logout   Log out of brickhub.dev.\n'
       '  make     Generate code using an existing brick template.\n'
       '  new      Creates a new brick template.\n'
       '  remove   Removes a brick.\n'
