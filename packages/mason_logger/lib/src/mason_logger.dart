@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:convert';
 
 import 'package:mason_logger/src/io.dart';
 import 'package:meta/meta.dart';
@@ -146,16 +147,18 @@ class Logger {
   void success(String? message) => _stdout.writeln(lightGreen.wrap(message));
 
   /// Prompts user and returns response.
-  String prompt(String? message, {Object? defaultValue}) {
+  /// Provide a default value via [defaultValue].
+  /// Set [hidden] to `true` if you want to hide user input for sensitive info.
+  String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final _defaultValue = hasDefault ? '$defaultValue' : '';
     final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')}' : '';
     final _message = '$message$suffix ';
     _stdout.write(_message);
-    final input = _stdin.readLineSync()?.trim();
+    final input = hidden ? _readHidden() : _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty ? _defaultValue : input;
     _stdout.writeln(
-      '\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(response))}',
+      '''\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
   }
@@ -173,6 +176,44 @@ class Logger {
       '''\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
     return response;
+  }
+
+  String _readHidden() {
+    const lineFeed = 10;
+    const carriageReturn = 13;
+    const _delete = 127;
+    const _space = 32;
+    const _backspace = 8;
+    final value = <int>[];
+
+    try {
+      _stdin
+        ..echoMode = false
+        ..lineMode = false;
+      int char;
+      do {
+        char = _stdin.readByteSync();
+        if (char != lineFeed && char != carriageReturn) {
+          if (char == _delete) {
+            if (value.isNotEmpty) {
+              _stdout
+                ..writeCharCode(_backspace)
+                ..writeCharCode(_space)
+                ..writeCharCode(_backspace);
+              value.removeLast();
+            }
+          } else {
+            value.add(char);
+          }
+        }
+      } while (char != lineFeed && char != carriageReturn);
+    } finally {
+      _stdin
+        ..lineMode = true
+        ..echoMode = true;
+    }
+    _stdout.writeln();
+    return utf8.decode(value);
   }
 }
 

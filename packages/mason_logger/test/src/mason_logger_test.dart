@@ -190,6 +190,52 @@ void main() {
           stdin: () => stdin,
         );
       });
+
+      test('writes line to stdout and reads line from stdin hidden', () {
+        StdioOverrides.runZoned(
+          () {
+            const defaultValue = 'Dash';
+            const message = 'test message';
+            const response = 'test response';
+            final prompt = '$message ${darkGray.wrap('($defaultValue)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('******'))}''';
+            final bytes = [
+              116,
+              101,
+              115,
+              116,
+              32,
+              127,
+              32,
+              114,
+              101,
+              115,
+              112,
+              111,
+              110,
+              115,
+              101,
+              13,
+            ];
+            when(() => stdin.readByteSync()).thenAnswer(
+              (_) => bytes.removeAt(0),
+            );
+            final actual = Logger().prompt(
+              message,
+              defaultValue: defaultValue,
+              hidden: true,
+            );
+            expect(actual, equals(response));
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+            verify(() => stdout.writeln()).called(1);
+            verifyNever(() => stdout.write(any()));
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
     });
 
     group('.confirm', () {
