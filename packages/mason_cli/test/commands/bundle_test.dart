@@ -73,7 +73,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail('  ${path.canonicalize(file.path)}'),
+        () => logger.detail('  ${canonicalize(file.path)}'),
       ).called(1);
     });
 
@@ -130,7 +130,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail('  ${path.canonicalize(file.path)}'),
+        () => logger.detail('  ${canonicalize(file.path)}'),
       ).called(1);
     });
 
@@ -174,7 +174,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail('  ${path.canonicalize(file.path)}'),
+        () => logger.detail('  ${canonicalize(file.path)}'),
       ).called(1);
     });
 
@@ -244,7 +244,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail('  ${path.canonicalize(file.path)}'),
+        () => logger.detail('  ${canonicalize(file.path)}'),
       ).called(1);
     });
 

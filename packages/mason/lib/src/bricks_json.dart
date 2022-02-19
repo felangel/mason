@@ -144,7 +144,7 @@ class BricksJson {
     final brickYaml = File(p.join(path, BrickYaml.file));
 
     if (!brickYaml.existsSync()) {
-      throw BrickNotFoundException(p.canonicalize(path));
+      throw BrickNotFoundException(canonicalize(path));
     }
 
     final yaml = checkedYamlDecode(
@@ -162,7 +162,7 @@ class BricksJson {
 
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
-    final localPath = p.canonicalize(brick.location.path!);
+    final localPath = canonicalize(brick.location.path!);
     _cache[name] = localPath;
     return localPath;
   }
@@ -220,9 +220,7 @@ class BricksJson {
         );
       }
 
-      final localPath = p
-          .canonicalize(p.join(directory.path, gitPath.path))
-          .replaceAll(r'\', '/');
+      final localPath = canonicalize(p.join(directory.path, gitPath.path));
       _cache[name] = localPath;
       return localPath;
     }
@@ -242,9 +240,7 @@ class BricksJson {
       );
     }
 
-    final localPath = p
-        .canonicalize(p.join(directory.path, gitPath.path))
-        .replaceAll(r'\', '/');
+    final localPath = canonicalize(p.join(directory.path, gitPath.path));
     _cache[name] = localPath;
     return localPath;
   }
