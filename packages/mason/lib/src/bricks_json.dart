@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
-import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
@@ -172,7 +171,9 @@ class BricksJson {
   /// and returns the local path to the brick.
   Future<String> _addRemoteBrickFromGit(Brick brick) async {
     final gitPath = brick.location.git!;
-    final dirName = _hashGitPath(gitPath);
+    final tempDirectory = await _clone(gitPath);
+    final commitHash = await _revParse(tempDirectory);
+    final dirName = _encodedGitDir(gitPath, commitHash);
 
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
@@ -204,8 +205,6 @@ class BricksJson {
     /// Fall-back to cached version if update fails.
     if (directoryExists && directoryIsNotEmpty) {
       try {
-        final tempDirectory = Directory.systemTemp.createTempSync();
-        await _clone(gitPath, tempDirectory);
         await directory.delete(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
@@ -230,7 +229,7 @@ class BricksJson {
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
-    await _clone(gitPath, directory);
+    await tempDirectory.rename(directory.path);
 
     final yaml = _getBrickYaml(directory);
     final name = brick.name ?? yaml.name;
@@ -249,7 +248,8 @@ class BricksJson {
     return localPath;
   }
 
-  Future<void> _clone(GitPath gitPath, Directory directory) async {
+  Future<Directory> _clone(GitPath gitPath) async {
+    final directory = Directory.systemTemp.createTempSync();
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
       await Git.run(
@@ -257,6 +257,15 @@ class BricksJson {
         processWorkingDir: directory.path,
       );
     }
+    return directory;
+  }
+
+  Future<String> _revParse(Directory directory) async {
+    final result = await Git.run(
+      ['rev-parse', 'HEAD'],
+      processWorkingDir: directory.path,
+    );
+    return (result.stdout as String).trim();
   }
 
   /// Writes remote brick from registry to cache
@@ -399,10 +408,9 @@ class BricksJson {
   }
 }
 
-String _hashGitPath(GitPath git) {
+String _encodedGitDir(GitPath git, String commitHash) {
   final name = p.basenameWithoutExtension(git.url);
   final path = git.url.replaceAll(r'\', '/');
-  final hash = sha256.convert(utf8.encode(path));
-  final key = git.ref != null ? '${name}_${git.ref}_$hash' : '${name}_$hash';
-  return key;
+  final url = base64.encode(utf8.encode(path));
+  return '${name}_${url}_$commitHash';
 }
