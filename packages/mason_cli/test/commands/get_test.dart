@@ -99,7 +99,7 @@ bricks:
       final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path.canonicalize(
+      final widgetPath = canonicalize(
         path.join(
           BricksJson.rootDir.path,
           'git',
