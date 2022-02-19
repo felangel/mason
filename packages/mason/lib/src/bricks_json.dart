@@ -173,7 +173,7 @@ class BricksJson {
     final gitPath = brick.location.git!;
     final tempDirectory = await _clone(gitPath);
     final commitHash = await _revParse(tempDirectory);
-    final dirName = _hashGitPath(gitPath, commitHash);
+    final dirName = _encodedGitDir(gitPath, commitHash);
 
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
@@ -408,7 +408,7 @@ class BricksJson {
   }
 }
 
-String _hashGitPath(GitPath git, String commitHash) {
+String _encodedGitDir(GitPath git, String commitHash) {
   final name = p.basenameWithoutExtension(git.url);
   final path = git.url.replaceAll(r'\', '/');
   final url = base64.encode(utf8.encode(path));
