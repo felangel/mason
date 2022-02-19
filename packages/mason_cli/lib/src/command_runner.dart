@@ -94,14 +94,9 @@ class MasonCommandRunner extends CommandRunner<int> {
           ..info('')
           ..info(
             '''
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}  |
-|                             Run ${cyan.wrap('mason update')} to update                             |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''',
+${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
+${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+Run ${cyan.wrap('mason update')} to update''',
           );
       }
     } catch (_) {}
