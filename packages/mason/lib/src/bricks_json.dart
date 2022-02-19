@@ -206,6 +206,7 @@ class BricksJson {
     if (directoryExists && directoryIsNotEmpty) {
       try {
         await directory.delete(recursive: true);
+        await directory.parent.create(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
 
@@ -228,7 +229,7 @@ class BricksJson {
 
     if (directoryExists) await directory.delete(recursive: true);
 
-    await directory.create(recursive: true);
+    await directory.parent.create(recursive: true);
     await tempDirectory.rename(directory.path);
 
     final yaml = _getBrickYaml(directory);
