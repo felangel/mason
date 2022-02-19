@@ -267,7 +267,7 @@ class BricksJson {
     final resolvedBrick = Brick.version(name: name, version: version);
     final dirName = '${name}_$version';
     final directory = Directory(
-      p.join(rootDir.path, 'hosted', hostedUrl, dirName),
+      p.join(rootDir.path, 'hosted', hostedUri.authority, dirName),
     );
     final directoryExists = directory.existsSync();
     final directoryIsNotEmpty =
@@ -296,7 +296,7 @@ class BricksJson {
       } catch (_) {}
     }
     final constraint = VersionConstraint.parse(_version ?? 'any');
-    final uri = Uri.parse('https://$hostedUrl/api/v1/bricks/${brick.name}');
+    final uri = Uri.parse('$hostedUri/api/v1/bricks/${brick.name}');
 
     late final http.Response response;
     try {
@@ -359,7 +359,7 @@ class BricksJson {
 
   Future<void> _download(Brick brick, Directory directory) async {
     final uri = Uri.parse(
-      'https://$hostedUrl/api/v1/bricks/${brick.name}/versions/${brick.location.version}.bundle',
+      '$hostedUri/api/v1/bricks/${brick.name}/versions/${brick.location.version}.bundle',
     );
     final response = await http.get(uri);
     if (response.statusCode != 200) {
@@ -373,10 +373,12 @@ class BricksJson {
   /// Global subdirectory within the mason cache.
   static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
 
-  /// The location of the registry where bricks are hosted.
-  static String get hostedUrl {
+  /// The uri of the registry where bricks are hosted.
+  static Uri get hostedUri {
     final environment = testEnvironment ?? Platform.environment;
-    return environment['MASON_HOSTED_URL'] ?? 'registry.brickhub.dev';
+    return Uri.parse(
+      environment['MASON_HOSTED_URL'] ?? 'https://registry.brickhub.dev',
+    );
   }
 
   /// Root mason cache directory
