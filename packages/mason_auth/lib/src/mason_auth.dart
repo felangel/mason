@@ -27,6 +27,24 @@ class MasonAuthLoginFailure extends MasonAuthException {
       : super(message: message);
 }
 
+/// {@template mason_auth_refresh_failure}
+/// An exception thrown when an error occurs during `refresh`.
+/// {@endtemplate}
+class MasonAuthRefreshFailure extends MasonAuthException {
+  /// {@macro mason_auth_refresh_failure}
+  const MasonAuthRefreshFailure({required String message})
+      : super(message: message);
+}
+
+/// {@template mason_auth_publish_failure}
+/// An exception thrown when an error occurs during `publish`.
+/// {@endtemplate}
+class MasonAuthPublishFailure extends MasonAuthException {
+  /// {@macro mason_auth_publish_failure}
+  const MasonAuthPublishFailure({required String message})
+      : super(message: message);
+}
+
 /// {@template mason_auth}
 /// Authentication client for the [Mason CLI](https://github.com/felangel/mason).
 /// {@endtemplate}
@@ -111,6 +129,96 @@ class MasonAuth {
   /// Log out and clear credentials.
   void logout() => _clearCredentials();
 
+  /// Publish universal [bundle] to remote registry.
+  Future<void> publish({required List<int> bundle}) async {
+    final credentials = _credentials;
+
+    if (credentials == null) {
+      throw const MasonAuthPublishFailure(
+        message:
+            '''User not found. Please make sure you are logged in and try again.''',
+      );
+    }
+
+    if (credentials.areExpired) {
+      try {
+        await _refresh();
+      } on MasonAuthRefreshFailure catch (error) {
+        throw MasonAuthPublishFailure(
+          message: 'Refresh failure: ${error.message}',
+        );
+      }
+    }
+
+    final uri = Uri.https(_authority, 'api/v1/bricks');
+    final headers = {
+      'Authorization': '${credentials.tokenType} ${credentials.accessToken}',
+      'Content-Type': 'application/octet-stream',
+    };
+
+    late final http.Response response;
+    try {
+      response = await _httpClient.post(
+        uri,
+        headers: headers,
+        body: bundle,
+      );
+    } catch (error) {
+      throw MasonAuthPublishFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.created) {
+      var message = 'An unknown error occurred.';
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        message = body['message'] as String;
+      } catch (_) {}
+      throw MasonAuthPublishFailure(message: message);
+    }
+  }
+
+  /// Attempt to refresh the current credentials and return
+  /// a new [User] with refreshed credentials.
+  Future<User> _refresh() async {
+    late final http.Response response;
+    try {
+      response = await _httpClient.post(
+        Uri.https(_authority, 'api/v1/oauth/token'),
+        body: json.encode({
+          'grant_type': 'refresh_token',
+          'refresh_token': _credentials!.refreshToken,
+        }),
+      );
+    } catch (error) {
+      throw MasonAuthRefreshFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.ok) {
+      var message = 'An unknown error occurred.';
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        message = body['message'] as String;
+      } catch (_) {}
+      throw MasonAuthRefreshFailure(message: message);
+    }
+
+    late final Credentials credentials;
+    try {
+      credentials = Credentials.fromTokenResponse(
+        json.decode(response.body) as Map<String, dynamic>,
+      );
+      _flushCredentials(credentials);
+    } catch (error) {
+      throw MasonAuthRefreshFailure(message: '$error');
+    }
+
+    try {
+      return _currentUser = credentials.toUser();
+    } catch (error) {
+      throw MasonAuthRefreshFailure(message: '$error');
+    }
+  }
+
   void _loadCredentials() {
     final masonConfigDir = _masonConfigDir;
     if (masonConfigDir == null) return;
@@ -170,6 +278,11 @@ extension on Credentials {
     } catch (_) {
       throw Exception('Malformed Claims');
     }
+  }
+
+  /// Whether the credentials have expired.
+  bool get areExpired {
+    return DateTime.now().add(const Duration(minutes: 1)).isAfter(expiresAt);
   }
 }
 
