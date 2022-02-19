@@ -99,17 +99,15 @@ bricks:
       final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path
-          .canonicalize(
-            path.join(
-              BricksJson.rootDir.path,
-              'git',
-              '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
-              'bricks',
-              'widget',
-            ),
-          )
-          .replaceAll(r'\', '/');
+      final widgetPath = path.canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          'bricks',
+          'widget',
+        ),
+      );
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),

@@ -84,17 +84,15 @@ void main() {
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
         const key = 'widget';
-        final value = p
-            .canonicalize(
-              p.join(
-                BricksJson.rootDir.path,
-                'git',
-                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
-                'bricks',
-                'widget',
-              ),
-            )
-            .replaceAll(r'\', '/');
+        final value = canonicalize(
+          p.join(
+            BricksJson.rootDir.path,
+            'git',
+            '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+            'bricks',
+            'widget',
+          ),
+        );
         final bricksJson = File(
           p.join(Directory.current.path, '.mason', 'bricks.json'),
         );
@@ -127,17 +125,15 @@ void main() {
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
         const key = 'widget';
-        final value = p
-            .canonicalize(
-              p.join(
-                BricksJson.rootDir.path,
-                'git',
-                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
-                'bricks',
-                'widget',
-              ),
-            )
-            .replaceAll(r'\', '/');
+        final value = canonicalize(
+          p.join(
+            BricksJson.rootDir.path,
+            'git',
+            '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+            'bricks',
+            'widget',
+          ),
+        );
         final bricksJson = File(
           p.join(Directory.current.path, '.mason', 'bricks.json'),
         );
@@ -198,17 +194,15 @@ void main() {
         expect(masonYaml.readAsStringSync(), contains('widget:'));
 
         const key = 'widget';
-        final value = p
-            .canonicalize(
-              p.join(
-                BricksJson.rootDir.path,
-                'git',
-                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
-                'bricks',
-                'widget',
-              ),
-            )
-            .replaceAll(r'\', '/');
+        final value = canonicalize(
+          p.join(
+            BricksJson.rootDir.path,
+            'git',
+            '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+            'bricks',
+            'widget',
+          ),
+        );
         final bricksJson = File(
           p.join(BricksJson.globalDir.path, '.mason', 'bricks.json'),
         );

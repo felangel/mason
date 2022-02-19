@@ -54,9 +54,11 @@ class ListCommand extends MasonCommand {
 
 extension on BrickYaml {
   String prettyPrint() {
-    final brickPath = File(this.path!).parent.path;
-    final hostedPath = path.join(BricksJson.rootDir.path, 'hosted');
-    final gitPath = path.join(BricksJson.rootDir.path, 'git');
+    final brickPath = canonicalize(File(this.path!).parent.path);
+    final hostedPath = canonicalize(
+      path.join(BricksJson.rootDir.path, 'hosted'),
+    );
+    final gitPath = canonicalize(path.join(BricksJson.rootDir.path, 'git'));
     final isHosted = path.isWithin(hostedPath, brickPath);
     final isGit = path.isWithin(gitPath, brickPath);
     final isLocal = !isHosted && !isGit;

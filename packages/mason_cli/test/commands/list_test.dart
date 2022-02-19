@@ -57,13 +57,13 @@ void main() {
     test(
         'exits successfully and lists local bricks '
         'when local and global bricks are available', () async {
-      final greetingPath = p.canonicalize(
+      final greetingPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'greeting'),
       );
-      final documentationPath = p.canonicalize(
+      final documentationPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'documentation'),
       );
-      final todosPath = p.canonicalize(
+      final todosPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'todos'),
       );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
@@ -119,10 +119,10 @@ bricks:
         'sorted alphabetically', () async {
       final greetingPath =
           p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
-      final documentationPath = p.canonicalize(
+      final documentationPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'documentation'),
       );
-      final todosPath = p.canonicalize(
+      final todosPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'todos'),
       );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
@@ -172,7 +172,7 @@ bricks:
     test(
         'exits successfully and lists global bricks '
         'when local and global bricks are available', () async {
-      final greetingPath = p.canonicalize(
+      final greetingPath = canonicalize(
         p.join('..', '..', '..', '..', '..', 'bricks', 'greeting'),
       );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(

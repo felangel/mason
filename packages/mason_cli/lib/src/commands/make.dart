@@ -69,7 +69,7 @@ class _MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final outputDir = p.canonicalize(
+    final outputDir = canonicalize(
       p.join(cwd.path, results['output-dir'] as String),
     );
     final configPath = results['config-path'] as String?;

@@ -281,16 +281,18 @@ class BricksJson {
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      _cache[name] = directory.path;
-      return directory.path;
+      final localPath = canonicalize(directory.path);
+      _cache[name] = localPath;
+      return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
-    _cache[name] = directory.path;
-    return directory.path;
+    final localPath = canonicalize(directory.path);
+    _cache[name] = localPath;
+    return localPath;
   }
 
   Future<String> _resolveBrickVersion(Brick brick) async {
