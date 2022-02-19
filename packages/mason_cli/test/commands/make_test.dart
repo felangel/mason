@@ -73,40 +73,40 @@ bricks:
 ''',
       );
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final appIconPath = path.canonicalize(
+      final appIconPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
-      final bioPath = path.canonicalize(
+      final bioPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'bio'),
       );
-      final docPath = path.canonicalize(
+      final docPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
       );
-      final greetingPath = path.canonicalize(
+      final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
-      final legacyPath = path.canonicalize(
+      final legacyPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'legacy'),
       );
-      final helloWorldPath = path.canonicalize(
+      final helloWorldPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
       );
-      final hooksPath = path.canonicalize(
+      final hooksPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'hooks'),
       );
-      final pluginPath = path.canonicalize(
+      final pluginPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'plugin'),
       );
-      final randomColorPath = path.canonicalize(
+      final randomColorPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'random_color'),
       );
-      final simplePath = path.canonicalize(
+      final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
-      final todosPath = path.canonicalize(
+      final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path.canonicalize(
+      final widgetPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'widget'),
       );
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))

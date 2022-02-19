@@ -144,7 +144,7 @@ class BricksJson {
     final brickYaml = File(p.join(path, BrickYaml.file));
 
     if (!brickYaml.existsSync()) {
-      throw BrickNotFoundException(p.canonicalize(path));
+      throw BrickNotFoundException(canonicalize(path));
     }
 
     final yaml = checkedYamlDecode(
@@ -162,7 +162,7 @@ class BricksJson {
 
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
-    final localPath = p.canonicalize(brick.location.path!);
+    final localPath = canonicalize(brick.location.path!);
     _cache[name] = localPath;
     return localPath;
   }
@@ -206,6 +206,7 @@ class BricksJson {
     if (directoryExists && directoryIsNotEmpty) {
       try {
         await directory.delete(recursive: true);
+        await directory.parent.create(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
 
@@ -219,16 +220,14 @@ class BricksJson {
         );
       }
 
-      final localPath = p
-          .canonicalize(p.join(directory.path, gitPath.path))
-          .replaceAll(r'\', '/');
+      final localPath = canonicalize(p.join(directory.path, gitPath.path));
       _cache[name] = localPath;
       return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
-    await directory.create(recursive: true);
+    await directory.parent.create(recursive: true);
     await tempDirectory.rename(directory.path);
 
     final yaml = _getBrickYaml(directory);
@@ -241,9 +240,7 @@ class BricksJson {
       );
     }
 
-    final localPath = p
-        .canonicalize(p.join(directory.path, gitPath.path))
-        .replaceAll(r'\', '/');
+    final localPath = canonicalize(p.join(directory.path, gitPath.path));
     _cache[name] = localPath;
     return localPath;
   }
@@ -284,16 +281,18 @@ class BricksJson {
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      _cache[name] = directory.path;
-      return directory.path;
+      final localPath = canonicalize(directory.path);
+      _cache[name] = localPath;
+      return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
-    _cache[name] = directory.path;
-    return directory.path;
+    final localPath = canonicalize(directory.path);
+    _cache[name] = localPath;
+    return localPath;
   }
 
   Future<String> _resolveBrickVersion(Brick brick) async {

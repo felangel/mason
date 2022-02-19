@@ -56,6 +56,7 @@ bricks:
     git:
       url: https://github.com/felangel/mason
       path: bricks/widget
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
 ''',
       );
     });
@@ -83,32 +84,30 @@ bricks:
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final appIconPath = path.canonicalize(
+      final appIconPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
-      final docPath = path.canonicalize(
+      final docPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
       );
-      final greetingPath = path.canonicalize(
+      final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
-      final simplePath = path.canonicalize(
+      final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
-      final todosPath = path.canonicalize(
+      final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path
-          .canonicalize(
-            path.join(
-              BricksJson.rootDir.path,
-              'git',
-              '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
-              'bricks',
-              'widget',
-            ),
-          )
-          .replaceAll(r'\', '/');
+      final widgetPath = canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          'bricks',
+          'widget',
+        ),
+      );
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -165,7 +164,7 @@ bricks:
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err(
-          BrickNotFoundException(path.canonicalize('../../wrong/path')).message,
+          BrickNotFoundException(canonicalize('../../wrong/path')).message,
         ),
       ).called(1);
     });
