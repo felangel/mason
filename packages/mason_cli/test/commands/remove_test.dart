@@ -67,7 +67,16 @@ void main() {
         });
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
-          ['add', 'widget', '--git-url', url, '--git-path', 'bricks/widget'],
+          [
+            'add',
+            'widget',
+            '--git-url',
+            url,
+            '--git-path',
+            'bricks/widget',
+            '--git-ref',
+            '997bc878c93534fad17d965be7cafe948a1dbb53'
+          ],
         );
         expect(addResult, equals(ExitCode.success.code));
 
@@ -80,7 +89,7 @@ void main() {
               p.join(
                 BricksJson.rootDir.path,
                 'git',
-                '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
                 'bricks',
                 'widget',
               ),
@@ -101,7 +110,16 @@ void main() {
       test('removes successfully when brick exists', () async {
         const url = 'https://github.com/felangel/mason';
         final addResult = await commandRunner.run(
-          ['add', 'widget', '--git-url', url, '--git-path', 'bricks/widget'],
+          [
+            'add',
+            'widget',
+            '--git-url',
+            url,
+            '--git-path',
+            'bricks/widget',
+            '--git-ref',
+            '997bc878c93534fad17d965be7cafe948a1dbb53'
+          ],
         );
         expect(addResult, equals(ExitCode.success.code));
 
@@ -114,7 +132,7 @@ void main() {
               p.join(
                 BricksJson.rootDir.path,
                 'git',
-                '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
                 'bricks',
                 'widget',
               ),
@@ -169,7 +187,9 @@ void main() {
             '--git-url',
             url,
             '--git-path',
-            'bricks/widget'
+            'bricks/widget',
+            '--git-ref',
+            '997bc878c93534fad17d965be7cafe948a1dbb53',
           ],
         );
         expect(addResult, equals(ExitCode.success.code));
@@ -183,7 +203,7 @@ void main() {
               p.join(
                 BricksJson.rootDir.path,
                 'git',
-                '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
+                '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
                 'bricks',
                 'widget',
               ),

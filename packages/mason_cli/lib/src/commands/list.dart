@@ -1,6 +1,9 @@
+import 'dart:convert';
+
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
+import 'package:universal_io/io.dart';
 
 /// {@template list_command}
 /// `mason list` command which lists all available bricks.
@@ -42,11 +45,33 @@ class ListCommand extends MasonCommand {
       final brick = sortedBricks.elementAt(i);
       final prefix = i == sortedBricks.length - 1 ? '└──' : '├──';
 
-      logger.info(
-        '$prefix ${styleBold.wrap(brick.name)} - ${brick.description}',
-      );
+      logger.info('$prefix ${brick.prettyPrint()}');
     }
 
     return ExitCode.success.code;
+  }
+}
+
+extension on BrickYaml {
+  String prettyPrint() {
+    final brickPath = File(this.path!).parent.path;
+    final hostedPath = path.join(BricksJson.rootDir.path, 'hosted');
+    final gitPath = path.join(BricksJson.rootDir.path, 'git');
+    final isHosted = path.isWithin(hostedPath, brickPath);
+    final isGit = path.isWithin(gitPath, brickPath);
+    final isLocal = !isHosted && !isGit;
+    final nameAndVersion = '${styleBold.wrap(name)} $version';
+
+    if (isLocal) return '$nameAndVersion -> $brickPath';
+    if (isGit) {
+      final subPath = brickPath.split('$gitPath/').last;
+      final gitDirectory = path.split(subPath).first;
+      final gitSegments = gitDirectory.split('_');
+      final gitUrl = utf8.decode(base64.decode(gitSegments[1]));
+      final commitHash = gitSegments[2];
+      return '$nameAndVersion -> $gitUrl#$commitHash';
+    }
+    final hostedUrl = path.split(brickPath.split('$hostedPath/').last).first;
+    return '$nameAndVersion -> $hostedUrl';
   }
 }
