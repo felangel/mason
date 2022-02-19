@@ -129,12 +129,11 @@ class MasonAuth {
   /// Log out and clear credentials.
   void logout() => _clearCredentials();
 
-  /// Publish universal bundle [bundle] to remote registry.
+  /// Publish universal [bundle] to remote registry.
   Future<void> publish({required List<int> bundle}) async {
-    final user = currentUser;
     final credentials = _credentials;
 
-    if (user == null || credentials == null) {
+    if (credentials == null) {
       throw const MasonAuthPublishFailure(
         message:
             '''User not found. Please make sure you are logged in and try again.''',
