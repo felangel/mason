@@ -3,7 +3,6 @@ import 'dart:convert';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
-import 'package:universal_io/io.dart';
 
 /// {@template list_command}
 /// `mason list` command which lists all available bricks.
@@ -54,7 +53,7 @@ class ListCommand extends MasonCommand {
 
 extension on BrickYaml {
   String prettyPrint() {
-    final brickPath = canonicalize(File(this.path!).parent.path);
+    final brickPath = canonicalize(path.dirname(this.path!));
     final hostedPath = canonicalize(
       path.join(BricksJson.rootDir.path, 'hosted'),
     );
