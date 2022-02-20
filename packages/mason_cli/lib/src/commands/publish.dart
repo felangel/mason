@@ -48,13 +48,26 @@ class PublishCommand extends MasonCommand {
 
     final directory = Directory(directoryPath);
     final bundle = createBundle(directory);
-    final publishDone = logger.progress(
-      'Publishing ${bundle.name} v${bundle.version}',
+
+    logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
+
+    final confirmed = logger.confirm(
+      'Do you want to publish ${bundle.name} ${bundle.version}?',
     );
+
+    if (!confirmed) {
+      logger.err('Brick was not published.');
+      return ExitCode.software.code;
+    }
+
+    final publishDone = logger.progress('Publishing');
 
     try {
       await _masonApi.publish(bundle: bundle.toUniversalBundle());
-      publishDone('Published ${bundle.name} v${bundle.version}');
+      publishDone('Published');
+      logger.success(
+        '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
+      );
     } on MasonApiPublishFailure catch (error) {
       publishDone();
       logger.err(error.message);
