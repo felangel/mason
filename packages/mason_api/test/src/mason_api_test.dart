@@ -93,13 +93,31 @@ void main() {
     });
 
     group('login', () {
-      test('makes correct request', () async {
+      test('makes correct request (default)', () async {
         try {
           await masonApi.login(email: email, password: password);
         } catch (_) {}
         verify(
           () => httpClient.post(
             Uri.https(authority, 'api/v1/oauth/token'),
+            body: json.encode({
+              'grant_type': 'password',
+              'username': email,
+              'password': password,
+            }),
+          ),
+        ).called(1);
+      });
+
+      test('makes correct request (custom)', () async {
+        final customHostedUri = Uri.http('localhost:8080', '');
+        masonApi = MasonApi(httpClient: httpClient, hostedUri: customHostedUri);
+        try {
+          await masonApi.login(email: email, password: password);
+        } catch (_) {}
+        verify(
+          () => httpClient.post(
+            Uri.http(customHostedUri.authority, 'api/v1/oauth/token'),
             body: json.encode({
               'grant_type': 'password',
               'username': email,
