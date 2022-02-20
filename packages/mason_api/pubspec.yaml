@@ -1,6 +1,6 @@
 name: mason_api
 description: A Dart API client used by the Mason CLI (package:mason_cli).
-version: 0.1.0-dev.1
+version: 0.1.0-dev.2
 homepage: https://github.com/felangel/mason
 
 environment:
