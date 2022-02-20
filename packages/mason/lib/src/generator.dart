@@ -354,9 +354,9 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             _overwriteRule != OverwriteRule.alwaysAppend);
 
     if (shouldPrompt) {
-      logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
       _overwriteRule = logger
-          ?.prompt(
+          .prompt(
             yellow.wrap(
               styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
             ),

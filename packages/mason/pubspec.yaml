@@ -5,7 +5,7 @@ version: 0.1.0-dev.7
 homepage: https://github.com/felangel/mason
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
   archive: ^3.1.11
