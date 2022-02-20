@@ -1,25 +1,25 @@
-name: mason_auth
+name: mason_api
 
 on:
   push:
     branches:
       - master
     paths:
-      - .github/workflows/mason_auth.yaml
-      - packages/mason_auth/**
+      - .github/workflows/mason_api.yaml
+      - packages/mason_api/**
 
   pull_request:
     branches:
       - master
     paths:
-      - .github/workflows/mason_auth.yaml
-      - packages/mason_auth/**
+      - .github/workflows/mason_api.yaml
+      - packages/mason_api/**
 
 jobs:
   build:
     defaults:
       run:
-        working-directory: packages/mason_auth
+        working-directory: packages/mason_api
 
     runs-on: ubuntu-latest
 
@@ -45,12 +45,12 @@ jobs:
       - name: Check Code Coverage
         uses: VeryGoodOpenSource/very_good_coverage@v1
         with:
-          path: packages/mason_auth/coverage/lcov.info
+          path: packages/mason_api/coverage/lcov.info
 
   pana:
     defaults:
       run:
-        working-directory: packages/mason_auth
+        working-directory: packages/mason_api
 
     runs-on: ubuntu-latest
 

@@ -1,9 +1,9 @@
 import 'dart:convert';
 
 import 'package:http/http.dart' as http;
-import 'package:mason_auth/mason_auth.dart';
-import 'package:mason_auth/src/mason_auth.dart';
-import 'package:mason_auth/src/models/credentials.dart';
+import 'package:mason_api/mason_api.dart';
+import 'package:mason_api/src/mason_api.dart';
+import 'package:mason_api/src/models/credentials.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -19,34 +19,34 @@ const email = 'test@email.com';
 const password = 'T0pS3cret!';
 
 void main() {
-  group('MasonAuth', () {
+  group('MasonApi', () {
     final tempDir = Directory.systemTemp.createTempSync();
     final environment = {'_MASON_TEST_CONFIG_DIR': tempDir.path};
 
     late http.Client httpClient;
-    late MasonAuth masonAuth;
+    late MasonApi masonApi;
 
     setUp(() {
       testEnvironment = environment;
       httpClient = MockHttpClient();
-      masonAuth = MasonAuth(httpClient: httpClient);
+      masonApi = MasonApi(httpClient: httpClient);
     });
 
     test('can be instantiated without any parameters', () {
       testEnvironment = null;
-      expect(() => MasonAuth(), returnsNormally);
+      expect(() => MasonApi(), returnsNormally);
     });
 
     group('initialization', () {
       test('returns null user when credentials do not exist', () {
-        final masonAuth = MasonAuth(httpClient: httpClient);
-        expect(masonAuth.currentUser, isNull);
+        final masonApi = MasonApi(httpClient: httpClient);
+        expect(masonApi.currentUser, isNull);
       });
 
       test('returns null user when applicationConfigHome throws', () {
         testApplicationConfigHome = (String app) => throw Exception('oops');
-        final masonAuth = MasonAuth(httpClient: httpClient);
-        expect(masonAuth.currentUser, isNull);
+        final masonApi = MasonApi(httpClient: httpClient);
+        expect(masonApi.currentUser, isNull);
         testApplicationConfigHome = null;
       });
 
@@ -60,9 +60,9 @@ void main() {
         File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
           json.encode(credentials.toJson()),
         );
-        final masonAuth = MasonAuth(httpClient: httpClient);
+        final masonApi = MasonApi(httpClient: httpClient);
         expect(
-          masonAuth.currentUser,
+          masonApi.currentUser,
           isA<User>()
               .having((u) => u.email, 'email', email)
               .having((u) => u.emailVerified, 'emailVerified', false),
@@ -80,14 +80,14 @@ void main() {
         );
         final credentialsFile = File(p.join(tempDir.path, credentialsFileName))
           ..writeAsStringSync(json.encode(credentials.toJson()));
-        final masonAuth = MasonAuth(httpClient: httpClient);
+        final masonApi = MasonApi(httpClient: httpClient);
 
-        expect(masonAuth.currentUser, isNotNull);
+        expect(masonApi.currentUser, isNotNull);
         expect(credentialsFile.existsSync(), isTrue);
 
-        masonAuth.logout();
+        masonApi.logout();
 
-        expect(masonAuth.currentUser, isNull);
+        expect(masonApi.currentUser, isNull);
         expect(credentialsFile.existsSync(), isFalse);
       });
     });
@@ -95,7 +95,7 @@ void main() {
     group('login', () {
       test('makes correct request', () async {
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
         } catch (_) {}
         verify(
           () => httpClient.post(
@@ -109,7 +109,7 @@ void main() {
         ).called(1);
       });
 
-      test('throws MasonAuthLoginFailure when POST throws', () async {
+      test('throws MasonApiLoginFailure when POST throws', () async {
         final exception = Exception('oops');
         when(
           () => httpClient.post(
@@ -119,15 +119,15 @@ void main() {
         ).thenThrow(exception);
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals('$exception'));
         }
       });
 
       test(
-          'throws MasonAuthLoginFailure '
+          'throws MasonApiLoginFailure '
           'when status code != 200 (unknown)', () async {
         when(
           () => httpClient.post(
@@ -137,15 +137,15 @@ void main() {
         ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals('An unknown error occurred.'));
         }
       });
 
       test(
-          'throws MasonAuthLoginFailure '
+          'throws MasonApiLoginFailure '
           'when status code != 200 (w/message)', () async {
         const message = '__message__';
         when(
@@ -161,15 +161,15 @@ void main() {
         );
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals(message));
         }
       });
 
       test(
-          'throws MasonAuthLoginFailure '
+          'throws MasonApiLoginFailure '
           'when status code == 200 but body is malformed', () async {
         when(
           () => httpClient.post(
@@ -179,9 +179,9 @@ void main() {
         ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(
             error.message,
             equals(
@@ -192,7 +192,7 @@ void main() {
       });
 
       test(
-          'throws MasonAuthLoginFailure '
+          'throws MasonApiLoginFailure '
           'when status code == 200 but jwt is invalid', () async {
         when(
           () => httpClient.post(
@@ -212,15 +212,15 @@ void main() {
         );
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals('Exception: Invalid JWT'));
         }
       });
 
       test(
-          'throws MasonAuthLoginFailure '
+          'throws MasonApiLoginFailure '
           'when status code == 200 but claims are malformed', () async {
         when(
           () => httpClient.post(
@@ -241,9 +241,9 @@ void main() {
         );
 
         try {
-          await masonAuth.login(email: email, password: password);
+          await masonApi.login(email: email, password: password);
           fail('should throw');
-        } on MasonAuthLoginFailure catch (error) {
+        } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals('Exception: Malformed Claims'));
         }
       });
@@ -268,7 +268,7 @@ void main() {
           ),
         );
 
-        final user = await masonAuth.login(email: email, password: password);
+        final user = await masonApi.login(email: email, password: password);
         expect(user.email, equals(email));
         expect(user.emailVerified, isFalse);
 
@@ -295,12 +295,12 @@ void main() {
         File(
           p.join(tempDir.path, credentialsFileName),
         ).deleteSync(recursive: true);
-        final masonAuth = MasonAuth(httpClient: httpClient);
+        final masonApi = MasonApi(httpClient: httpClient);
 
         try {
-          await masonAuth.publish(bundle: bytes);
+          await masonApi.publish(bundle: bytes);
           fail('should throw');
-        } on MasonAuthPublishFailure catch (error) {
+        } on MasonApiPublishFailure catch (error) {
           expect(
             error.message,
             equals(
@@ -322,12 +322,12 @@ void main() {
           File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
             json.encode(credentials.toJson()),
           );
-          masonAuth = MasonAuth(httpClient: httpClient);
+          masonApi = MasonApi(httpClient: httpClient);
         });
 
         test('makes correct refresh request', () async {
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
           } catch (_) {}
           verify(
             () => httpClient.post(
@@ -350,9 +350,9 @@ void main() {
           ).thenThrow(exception);
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals('Refresh failure: $exception'));
           }
         });
@@ -368,9 +368,9 @@ void main() {
           ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: An unknown error occurred.'),
@@ -395,9 +395,9 @@ void main() {
           );
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals('Refresh failure: $message'));
           }
         });
@@ -413,9 +413,9 @@ void main() {
           ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(
               error.message,
               equals(
@@ -446,9 +446,9 @@ void main() {
           );
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: Exception: Invalid JWT'),
@@ -478,9 +478,9 @@ void main() {
           );
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: Exception: Malformed Claims'),
@@ -511,10 +511,10 @@ void main() {
           );
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
           } catch (_) {}
 
-          final user = masonAuth.currentUser!;
+          final user = masonApi.currentUser!;
           expect(user.email, equals(email));
           expect(user.emailVerified, isFalse);
 
@@ -547,12 +547,12 @@ void main() {
           File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
             json.encode(credentials.toJson()),
           );
-          masonAuth = MasonAuth(httpClient: httpClient);
+          masonApi = MasonApi(httpClient: httpClient);
         });
 
         test('does not attempt to refresh', () async {
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
           } catch (_) {}
 
           verifyNever(
@@ -568,7 +568,7 @@ void main() {
 
         test('makes correct publish request', () async {
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
           } catch (_) {}
 
           verify(
@@ -584,7 +584,7 @@ void main() {
           ).called(1);
         });
 
-        test('throws MasonAuthPublishFailure when POST throws', () async {
+        test('throws MasonApiPublishFailure when POST throws', () async {
           final exception = Exception('oops');
           when(
             () => httpClient.post(
@@ -595,15 +595,15 @@ void main() {
           ).thenThrow(exception);
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals('$exception'));
           }
         });
 
         test(
-            'throws MasonAuthPublishFailure '
+            'throws MasonApiPublishFailure '
             'when status code != 201 (unknown)', () async {
           when(
             () => httpClient.post(
@@ -614,15 +614,15 @@ void main() {
           ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals('An unknown error occurred.'));
           }
         });
 
         test(
-            'throws MasonAuthPublishFailure '
+            'throws MasonApiPublishFailure '
             'when status code != 201 (w/message)', () async {
           const message = '__message__';
           when(
@@ -639,9 +639,9 @@ void main() {
           );
 
           try {
-            await masonAuth.publish(bundle: bytes);
+            await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonAuthPublishFailure catch (error) {
+          } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals(message));
           }
         });
@@ -655,7 +655,7 @@ void main() {
             ),
           ).thenAnswer((_) async => http.Response('{}', HttpStatus.created));
 
-          expect(masonAuth.publish(bundle: bytes), completes);
+          expect(masonApi.publish(bundle: bytes), completes);
         });
       });
     });

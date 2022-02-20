@@ -1,7 +1,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:mason_auth/mason_auth.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -21,11 +21,11 @@ class MasonCommandRunner extends CommandRunner<int> {
   MasonCommandRunner({
     Logger? logger,
     PubUpdater? pubUpdater,
-    MasonAuth? masonAuth,
+    MasonApi? masonApi,
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
-    final _masonAuth = masonAuth ?? MasonAuth();
+    final _masonApi = masonApi ?? MasonApi();
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
@@ -33,8 +33,8 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(GetCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
     addCommand(ListCommand(logger: _logger));
-    addCommand(LoginCommand(logger: _logger, masonAuth: _masonAuth));
-    addCommand(LogoutCommand(logger: _logger, masonAuth: _masonAuth));
+    addCommand(LoginCommand(logger: _logger, masonApi: _masonApi));
+    addCommand(LogoutCommand(logger: _logger, masonApi: _masonApi));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
     addCommand(RemoveCommand(logger: _logger));

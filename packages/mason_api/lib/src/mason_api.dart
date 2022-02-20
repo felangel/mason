@@ -2,55 +2,55 @@ import 'dart:convert';
 
 import 'package:cli_util/cli_util.dart';
 import 'package:http/http.dart' as http;
-import 'package:mason_auth/src/jwt_decode.dart';
-import 'package:mason_auth/src/models/models.dart';
+import 'package:mason_api/src/jwt_decode.dart';
+import 'package:mason_api/src/models/models.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
 
-/// {@template mason_auth_exception}
-/// Base for all exceptions thrown by [MasonAuth].
+/// {@template mason_api_exception}
+/// Base for all exceptions thrown by [MasonApi].
 /// {@endtemplate}
-abstract class MasonAuthException implements Exception {
-  /// {@macro mason_auth_exception}
-  const MasonAuthException({required this.message});
+abstract class MasonApiException implements Exception {
+  /// {@macro mason_api_exception}
+  const MasonApiException({required this.message});
 
   /// The message associated with the exception.
   final String message;
 }
 
-/// {@template mason_auth_login_failure}
+/// {@template mason_api_login_failure}
 /// An exception thrown when an error occurs during `login`.
 /// {@endtemplate}
-class MasonAuthLoginFailure extends MasonAuthException {
-  /// {@macro mason_auth_login_failure}
-  const MasonAuthLoginFailure({required String message})
+class MasonApiLoginFailure extends MasonApiException {
+  /// {@macro mason_api_login_failure}
+  const MasonApiLoginFailure({required String message})
       : super(message: message);
 }
 
-/// {@template mason_auth_refresh_failure}
+/// {@template mason_api_refresh_failure}
 /// An exception thrown when an error occurs during `refresh`.
 /// {@endtemplate}
-class MasonAuthRefreshFailure extends MasonAuthException {
-  /// {@macro mason_auth_refresh_failure}
-  const MasonAuthRefreshFailure({required String message})
+class MasonApiRefreshFailure extends MasonApiException {
+  /// {@macro mason_api_refresh_failure}
+  const MasonApiRefreshFailure({required String message})
       : super(message: message);
 }
 
-/// {@template mason_auth_publish_failure}
+/// {@template mason_api_publish_failure}
 /// An exception thrown when an error occurs during `publish`.
 /// {@endtemplate}
-class MasonAuthPublishFailure extends MasonAuthException {
-  /// {@macro mason_auth_publish_failure}
-  const MasonAuthPublishFailure({required String message})
+class MasonApiPublishFailure extends MasonApiException {
+  /// {@macro mason_api_publish_failure}
+  const MasonApiPublishFailure({required String message})
       : super(message: message);
 }
 
-/// {@template mason_auth}
-/// Authentication client for the [Mason CLI](https://github.com/felangel/mason).
+/// {@template mason_api}
+/// API client for the [package:mason_cli](https://github.com/felangel/mason).
 /// {@endtemplate}
-class MasonAuth {
-  /// {@macro mason_auth}
-  MasonAuth({http.Client? httpClient})
+class MasonApi {
+  /// {@macro mason_api}
+  MasonApi({http.Client? httpClient})
       : _httpClient = httpClient ?? http.Client() {
     _loadCredentials();
   }
@@ -97,7 +97,7 @@ class MasonAuth {
         }),
       );
     } catch (error) {
-      throw MasonAuthLoginFailure(message: '$error');
+      throw MasonApiLoginFailure(message: '$error');
     }
 
     if (response.statusCode != HttpStatus.ok) {
@@ -106,7 +106,7 @@ class MasonAuth {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
       } catch (_) {}
-      throw MasonAuthLoginFailure(message: message);
+      throw MasonApiLoginFailure(message: message);
     }
 
     late final Credentials credentials;
@@ -116,13 +116,13 @@ class MasonAuth {
       );
       _flushCredentials(credentials);
     } catch (error) {
-      throw MasonAuthLoginFailure(message: '$error');
+      throw MasonApiLoginFailure(message: '$error');
     }
 
     try {
       return _currentUser = credentials.toUser();
     } catch (error) {
-      throw MasonAuthLoginFailure(message: '$error');
+      throw MasonApiLoginFailure(message: '$error');
     }
   }
 
@@ -131,20 +131,19 @@ class MasonAuth {
 
   /// Publish universal [bundle] to remote registry.
   Future<void> publish({required List<int> bundle}) async {
-    final credentials = _credentials;
-
-    if (credentials == null) {
-      throw const MasonAuthPublishFailure(
+    if (_credentials == null) {
+      throw const MasonApiPublishFailure(
         message:
             '''User not found. Please make sure you are logged in and try again.''',
       );
     }
 
+    var credentials = _credentials!;
     if (credentials.areExpired) {
       try {
-        await _refresh();
-      } on MasonAuthRefreshFailure catch (error) {
-        throw MasonAuthPublishFailure(
+        credentials = await _refresh();
+      } on MasonApiRefreshFailure catch (error) {
+        throw MasonApiPublishFailure(
           message: 'Refresh failure: ${error.message}',
         );
       }
@@ -164,7 +163,7 @@ class MasonAuth {
         body: bundle,
       );
     } catch (error) {
-      throw MasonAuthPublishFailure(message: '$error');
+      throw MasonApiPublishFailure(message: '$error');
     }
 
     if (response.statusCode != HttpStatus.created) {
@@ -173,13 +172,13 @@ class MasonAuth {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
       } catch (_) {}
-      throw MasonAuthPublishFailure(message: message);
+      throw MasonApiPublishFailure(message: message);
     }
   }
 
   /// Attempt to refresh the current credentials and return
-  /// a new [User] with refreshed credentials.
-  Future<User> _refresh() async {
+  /// refreshed credentials.
+  Future<Credentials> _refresh() async {
     late final http.Response response;
     try {
       response = await _httpClient.post(
@@ -190,7 +189,7 @@ class MasonAuth {
         }),
       );
     } catch (error) {
-      throw MasonAuthRefreshFailure(message: '$error');
+      throw MasonApiRefreshFailure(message: '$error');
     }
 
     if (response.statusCode != HttpStatus.ok) {
@@ -199,7 +198,7 @@ class MasonAuth {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
       } catch (_) {}
-      throw MasonAuthRefreshFailure(message: message);
+      throw MasonApiRefreshFailure(message: message);
     }
 
     late final Credentials credentials;
@@ -209,14 +208,16 @@ class MasonAuth {
       );
       _flushCredentials(credentials);
     } catch (error) {
-      throw MasonAuthRefreshFailure(message: '$error');
+      throw MasonApiRefreshFailure(message: '$error');
     }
 
     try {
-      return _currentUser = credentials.toUser();
+      _currentUser = credentials.toUser();
     } catch (error) {
-      throw MasonAuthRefreshFailure(message: '$error');
+      throw MasonApiRefreshFailure(message: '$error');
     }
+
+    return credentials;
   }
 
   void _loadCredentials() {

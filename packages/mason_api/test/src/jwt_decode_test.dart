@@ -1,4 +1,4 @@
-import 'package:mason_auth/src/jwt_decode.dart';
+import 'package:mason_api/src/jwt_decode.dart';
 import 'package:test/test.dart';
 
 void main() {
