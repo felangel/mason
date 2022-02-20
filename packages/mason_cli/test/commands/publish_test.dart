@@ -54,7 +54,7 @@ void main() {
     });
 
     test('can be instantiated without any parameters', () {
-      expect(() => PublishCommand(), returnsNormally);
+      expect(PublishCommand.new, returnsNormally);
     });
 
     test('exits with code 70 when brick could not be found', () async {

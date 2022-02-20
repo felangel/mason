@@ -25,7 +25,7 @@ void main() {
     });
 
     test('can be instantiated without any parameters', () {
-      expect(() => LoginCommand(), returnsNormally);
+      expect(LoginCommand.new, returnsNormally);
     });
 
     test('exits with code 0 when already logged in', () async {
