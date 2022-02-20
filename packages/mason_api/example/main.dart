@@ -1,6 +1,6 @@
 import 'package:mason_api/mason_api.dart';
 
-const email = 'me@email.com';
+const email = 'my@email.com';
 const password = 't0pS3cret!';
 
 Future<void> main() async {
