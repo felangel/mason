@@ -1,25 +1,25 @@
 import 'package:mason/mason.dart';
-import 'package:mason_auth/mason_auth.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class MockLogger extends Mock implements Logger {}
 
-class MockMasonAuth extends Mock implements MasonAuth {}
+class MockMasonApi extends Mock implements MasonApi {}
 
 class MockUser extends Mock implements User {}
 
 void main() {
   group('LogoutCommand', () {
     late Logger logger;
-    late MasonAuth masonAuth;
+    late MasonApi masonApi;
     late LogoutCommand logoutCommand;
 
     setUp(() {
       logger = MockLogger();
-      masonAuth = MockMasonAuth();
-      logoutCommand = LogoutCommand(logger: logger, masonAuth: masonAuth);
+      masonApi = MockMasonApi();
+      logoutCommand = LogoutCommand(logger: logger, masonApi: masonApi);
 
       when(() => logger.progress(any())).thenReturn(([String? _]) {});
     });
@@ -40,8 +40,8 @@ void main() {
     test('exits with code 70 when exception occurs', () async {
       final user = MockUser();
       final exception = Exception('oops');
-      when(() => masonAuth.currentUser).thenReturn(user);
-      when(() => masonAuth.logout()).thenThrow(exception);
+      when(() => masonApi.currentUser).thenReturn(user);
+      when(() => masonApi.logout()).thenThrow(exception);
 
       final result = await logoutCommand.run();
       expect(result, equals(ExitCode.software.code));
@@ -53,7 +53,7 @@ void main() {
     test('exits with code 0 when logged out successfully', () async {
       final user = MockUser();
       final progressDoneCalls = <String?>[];
-      when(() => masonAuth.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
 
       // ignore: unnecessary_lambdas
       when(() => logger.progress(any())).thenReturn(([String? _]) {
@@ -64,7 +64,7 @@ void main() {
       expect(result, equals(ExitCode.success.code));
 
       verify(() => logger.progress('Logging out of brickhub.dev.')).called(1);
-      verify(() => masonAuth.logout()).called(1);
+      verify(() => masonApi.logout()).called(1);
       expect(progressDoneCalls, equals(['Logged out of brickhub.dev']));
     });
   });

@@ -1,5 +1,5 @@
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:mason_auth/mason_auth.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
 
 /// {@template logout_command}
@@ -7,11 +7,11 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class LogoutCommand extends MasonCommand {
   /// {@macro logout_command}
-  LogoutCommand({Logger? logger, MasonAuth? masonAuth})
-      : _masonAuth = masonAuth ?? MasonAuth(),
+  LogoutCommand({Logger? logger, MasonApi? masonApi})
+      : _masonApi = masonApi ?? MasonApi(),
         super(logger: logger);
 
-  final MasonAuth _masonAuth;
+  final MasonApi _masonApi;
 
   @override
   final String description = 'Log out of brickhub.dev.';
@@ -21,7 +21,7 @@ class LogoutCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final user = _masonAuth.currentUser;
+    final user = _masonApi.currentUser;
     if (user == null) {
       logger.info('You are already logged out.');
       return ExitCode.success.code;
@@ -29,7 +29,7 @@ class LogoutCommand extends MasonCommand {
 
     final logoutDone = logger.progress('Logging out of brickhub.dev.');
     try {
-      _masonAuth.logout();
+      _masonApi.logout();
       logoutDone('Logged out of brickhub.dev');
       return ExitCode.success.code;
     } catch (error) {
