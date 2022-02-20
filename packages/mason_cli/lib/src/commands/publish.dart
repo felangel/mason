@@ -63,7 +63,7 @@ class PublishCommand extends MasonCommand {
     final publishDone = logger.progress('Publishing');
 
     try {
-      await _masonApi.publish(bundle: bundle.toUniversalBundle());
+      await _masonApi.publish(bundle: await bundle.toUniversalBundle());
       publishDone('Published');
       logger.success(
         '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
