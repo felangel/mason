@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:archive/archive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mason/src/brick_yaml.dart';
+import 'package:mason/src/compute.dart';
 
 part 'mason_bundle.g.dart';
 
@@ -85,7 +86,9 @@ class MasonBundle {
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);
 
   /// Converts a [MasonBundle] into universal bundle bytes.
-  List<int> toUniversalBundle() {
-    return BZip2Encoder().encode(utf8.encode(json.encode(toJson())));
+  Future<List<int>> toUniversalBundle() => compute(_encodeBundle, this);
+
+  Future<List<int>> _encodeBundle(MasonBundle bundle) async {
+    return BZip2Encoder().encode(utf8.encode(json.encode(bundle.toJson())));
   }
 }
