@@ -1,3 +1,6 @@
+import 'dart:math' as math;
+import 'dart:typed_data';
+
 import 'package:args/args.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_api/mason_api.dart';
@@ -5,18 +8,22 @@ import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
 
+const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
+
 /// {@template publish_command}
 /// `mason publish` command which publishes a brick.
 /// {@endtemplate}
 class PublishCommand extends MasonCommand {
   /// {@macro publish_command}
-  PublishCommand({Logger? logger, MasonApi? masonApi})
+  PublishCommand({Logger? logger, MasonApi? masonApi, int? maxBundleSize})
       : _masonApi = masonApi ?? MasonApi(),
+        _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes,
         super(logger: logger) {
     argParser.addOptions();
   }
 
   final MasonApi _masonApi;
+  final int _maxBundleSize;
 
   @override
   final String description = 'Publish the current brick to brickhub.dev.';
@@ -46,8 +53,20 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    final directory = Directory(directoryPath);
-    final bundle = createBundle(directory);
+    final bundle = createBundle(Directory(directoryPath));
+    final bundleDone = logger.progress('Bundling ${bundle.name}');
+    final universalBundle = await bundle.toUniversalBundle();
+    bundleDone('Bundled ${bundle.name}');
+
+    final sizeInBytes = Uint8List.fromList(universalBundle).lengthInBytes;
+    if (sizeInBytes > _maxBundleSize) {
+      final sizeInMb = sizeInBytes.toMegabytes().toStringAsPrecision(4);
+      final maxSizeInMb = _maxBundleSize.toMegabytes().toStringAsPrecision(2);
+      logger.err(
+        '''Your bundle is $sizeInMb MB. Hosted bricks must be smaller than $maxSizeInMb MB.''',
+      );
+      return ExitCode.software.code;
+    }
 
     logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
 
@@ -60,11 +79,13 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    final publishDone = logger.progress('Publishing');
+    final publishDone = logger.progress(
+      'Publishing ${bundle.name} ${bundle.version}',
+    );
 
     try {
-      await _masonApi.publish(bundle: await bundle.toUniversalBundle());
-      publishDone('Published');
+      await _masonApi.publish(bundle: universalBundle);
+      publishDone('Published ${bundle.name} ${bundle.version}');
       logger.success(
         '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
       );
@@ -79,6 +100,10 @@ class PublishCommand extends MasonCommand {
 
     return ExitCode.success.code;
   }
+}
+
+extension on int {
+  double toMegabytes() => this / math.pow(2, 20);
 }
 
 extension on ArgParser {
