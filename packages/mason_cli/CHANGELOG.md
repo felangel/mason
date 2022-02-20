@@ -1,13 +1,15 @@
 # 0.1.0-dev.11
 
 - **BREAKING**: feat: `mason add` support for hosted bricks
-  
-    ```sh
-    # add from registry
-    mason add my_brick
-    ```
+
+  ```sh
+  # add from registry
+  mason add my_brick
+  ```
+
 - feat: `mason login` command
 - feat: `mason logout` command
+- feat: `mason publish` command
 - fix: clear `bricks.json` prior to fetching via `mason get`
 - fix: verify/validate brick name matches name in `mason.yaml` during `mason get`
 - refactor: populate bricks from `bricks.json` directly
