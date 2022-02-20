@@ -577,18 +577,19 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  add      Adds a brick from a local or remote source.
-  bundle   Generates a bundle from a brick template.
-  cache    Interact with mason cache.
-  get      Gets all bricks in the nearest mason.yaml.
-  init     Initialize mason in the current directory.
-  list     Lists installed bricks.
-  login    Log into brickhub.dev.
-  logout   Log out of brickhub.dev.
-  make     Generate code using an existing brick template.
-  new      Creates a new brick template.
-  remove   Removes a brick.
-  update   Update mason.
+  add       Adds a brick from a local or remote source.
+  bundle    Generates a bundle from a brick template.
+  cache     Interact with mason cache.
+  get       Gets all bricks in the nearest mason.yaml.
+  init      Initialize mason in the current directory.
+  list      Lists installed bricks.
+  login     Log into brickhub.dev.
+  logout    Log out of brickhub.dev.
+  make      Generate code using an existing brick template.
+  new       Creates a new brick template.
+  publish   Publish the current brick to brickhub.dev.
+  remove    Removes a brick.
+  update    Update mason.
 
 Run "mason help <command>" for more information about a command.
 ```

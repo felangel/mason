@@ -8,5 +8,6 @@ export 'login.dart';
 export 'logout.dart';
 export 'make.dart';
 export 'new.dart';
+export 'publish.dart';
 export 'remove.dart';
 export 'update.dart';
