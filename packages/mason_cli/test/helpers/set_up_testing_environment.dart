@@ -8,9 +8,7 @@ String testFixturesPath(Directory cwd, {String suffix = ''}) {
 void setUpTestingEnvironment(Directory cwd, {String suffix = ''}) {
   try {
     final testDir = Directory(testFixturesPath(cwd, suffix: suffix));
-    if (testDir.existsSync()) {
-      testDir.deleteSync(recursive: true);
-    }
+    if (testDir.existsSync()) testDir.deleteSync(recursive: true);
     testDir.createSync(recursive: true);
     Directory.current = testDir.path;
     File(

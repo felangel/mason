@@ -41,7 +41,7 @@ void main() {
       );
     });
 
-    setUp(() async {
+    setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
       File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
