@@ -107,7 +107,7 @@ Future<String> _generateUniversalBundle(
 ) async {
   final file = File(path.join(outputDir, '${bundle.name}.bundle'));
   await file.create(recursive: true);
-  await file.writeAsBytes(bundle.toUniversalBundle());
+  await file.writeAsBytes(await bundle.toUniversalBundle());
   return canonicalize(file.path);
 }
 
