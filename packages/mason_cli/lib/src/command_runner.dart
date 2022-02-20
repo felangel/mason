@@ -25,7 +25,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
-    final _masonApi = masonApi ?? MasonApi();
+    final _masonApi = masonApi ?? MasonApi(hostedUri: BricksJson.hostedUri);
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
