@@ -34,7 +34,7 @@ void main() {
 
     test('can be instantiated without any parameters', () {
       testEnvironment = null;
-      expect(() => MasonApi(), returnsNormally);
+      expect(MasonApi.new, returnsNormally);
     });
 
     group('initialization', () {
