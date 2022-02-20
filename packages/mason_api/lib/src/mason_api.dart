@@ -50,15 +50,16 @@ class MasonApiPublishFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApi {
   /// {@macro mason_api}
-  MasonApi({http.Client? httpClient})
-      : _httpClient = httpClient ?? http.Client() {
+  MasonApi({http.Client? httpClient, Uri? hostedUri})
+      : _httpClient = httpClient ?? http.Client(),
+        _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev', '') {
     _loadCredentials();
   }
 
-  static const _authority = 'registry.brickhub.dev';
   static const _applicationName = 'mason';
   static const _credentialsFileName = 'mason-credentials.json';
 
+  final Uri _hostedUri;
   final http.Client _httpClient;
 
   /// The location for mason-specific configuration.
@@ -89,7 +90,7 @@ class MasonApi {
     late final http.Response response;
     try {
       response = await _httpClient.post(
-        Uri.https(_authority, 'api/v1/oauth/token'),
+        Uri.parse('$_hostedUri/api/v1/oauth/token'),
         body: json.encode({
           'grant_type': 'password',
           'username': email,
@@ -149,17 +150,15 @@ class MasonApi {
       }
     }
 
-    final uri = Uri.https(_authority, 'api/v1/bricks');
-    final headers = {
-      'Authorization': '${credentials.tokenType} ${credentials.accessToken}',
-      'Content-Type': 'application/octet-stream',
-    };
-
     late final http.Response response;
     try {
       response = await _httpClient.post(
-        uri,
-        headers: headers,
+        Uri.parse('$_hostedUri/api/v1/bricks'),
+        headers: {
+          'Authorization':
+              '${credentials.tokenType} ${credentials.accessToken}',
+          'Content-Type': 'application/octet-stream',
+        },
         body: bundle,
       );
     } catch (error) {
@@ -182,7 +181,7 @@ class MasonApi {
     late final http.Response response;
     try {
       response = await _httpClient.post(
-        Uri.https(_authority, 'api/v1/oauth/token'),
+        Uri.parse('$_hostedUri/api/v1/oauth/token'),
         body: json.encode({
           'grant_type': 'refresh_token',
           'refresh_token': _credentials!.refreshToken,
