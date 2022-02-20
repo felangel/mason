@@ -2,14 +2,9 @@ import 'package:mason/src/compute.dart';
 import 'package:test/test.dart';
 
 int test1(int value) => value + 1;
-
-// ignore: only_throw_errors
-int test2(int value) => throw 2;
-
+int test2(int value) => throw Exception();
 Future<int> test1Async(int value) async => value + 1;
-
-// ignore: only_throw_errors
-Future<int> test2Async(int value) async => throw 2;
+Future<int> test2Async(int value) async => throw Exception();
 
 void main() {
   test('compute()', () async {
