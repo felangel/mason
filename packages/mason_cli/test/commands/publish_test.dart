@@ -91,6 +91,24 @@ void main() {
       ).called(1);
     });
 
+    test('exits with code 70 when publish is aborted', () async {
+      final user = MockUser();
+      when(() => user.emailVerified).thenReturn(true);
+      when(() => masonApi.currentUser).thenReturn(user);
+      when(() => logger.confirm(any())).thenReturn(false);
+      final result = await commandRunner.run(['publish', '-C', brickPath]);
+      expect(result, equals(ExitCode.software.code));
+      verify(() {
+        logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
+      }).called(1);
+      verify(
+        () => logger.confirm('Do you want to publish greeting 0.1.0+1?'),
+      ).called(1);
+      verify(() => logger.err('Brick was not published.')).called(1);
+      verifyNever(() => logger.progress('Publishing'));
+      verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+    });
+
     test('exits with code 70 when publish fails', () async {
       final user = MockUser();
       const message = 'oops';
@@ -99,11 +117,12 @@ void main() {
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenThrow(const MasonApiPublishFailure(message: message));
+      when(() => logger.confirm(any())).thenReturn(true);
       final result = await commandRunner.run(['publish', '-C', brickPath]);
       expect(result, equals(ExitCode.software.code));
-      verify(() => logger.progress('Publishing greeting v0.1.0+1')).called(1);
-      verify(() => logger.err(message)).called(1);
+      verify(() => logger.progress('Publishing')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => logger.err(message)).called(1);
     });
 
     test('exits with code 70 when publish fails (generic)', () async {
@@ -113,11 +132,12 @@ void main() {
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenThrow(Exception('oops'));
+      when(() => logger.confirm(any())).thenReturn(true);
       final result = await commandRunner.run(['publish', '-C', brickPath]);
       expect(result, equals(ExitCode.software.code));
-      verify(() => logger.progress('Publishing greeting v0.1.0+1')).called(1);
-      verify(() => logger.err('Exception: oops')).called(1);
+      verify(() => logger.progress('Publishing')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => logger.err('Exception: oops')).called(1);
     });
 
     test('exits with code 0 when publish succeeds', () async {
@@ -131,10 +151,16 @@ void main() {
       when(() => logger.progress(any())).thenReturn(([String? _]) {
         if (_ != null) progressLogs.add(_);
       });
+      when(() => logger.confirm(any())).thenReturn(true);
       final result = await commandRunner.run(['publish', '-C', brickPath]);
       expect(result, equals(ExitCode.success.code));
-      expect(progressLogs, equals(['Published greeting v0.1.0+1']));
-      verify(() => logger.progress('Publishing greeting v0.1.0+1')).called(1);
+      expect(progressLogs, equals(['Published']));
+      verify(() => logger.progress('Publishing')).called(1);
+      verify(() {
+        logger.success(
+          '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
+        );
+      }).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
     });
   });
