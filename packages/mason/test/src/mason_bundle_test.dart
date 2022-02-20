@@ -124,7 +124,7 @@ void main() {
       );
     });
 
-    test('can be converted to/from universal bundle', () {
+    test('can be converted to/from universal bundle', () async {
       final instance = MasonBundle(
         name: 'name',
         description: 'description',
@@ -134,7 +134,7 @@ void main() {
         hooks: [],
       );
       expect(
-        MasonBundle.fromUniversalBundle(instance.toUniversalBundle()),
+        MasonBundle.fromUniversalBundle(await instance.toUniversalBundle()),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', instance.name)
             .having((file) => file.version, 'version', instance.version)
