@@ -1,3 +1,8 @@
+# 0.1.0-dev.5
+
+- feat: add `hidden` flag to `prompt`
+- chore: upgrade to Dart 2.16
+
 # 0.1.0-dev.4
 
 - fix: `progress` string truncation
