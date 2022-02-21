@@ -63,7 +63,7 @@ void main() {
         MasonBundle.fromUniversalBundle(file.readAsBytesSync()).toJson(),
       );
       const expected =
-          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
+          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
       expect(actual, equals(expected));
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(
@@ -119,7 +119,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
+          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
         ),
       );
       verify(() => logger.progress('Bundling hooks')).called(1);
@@ -163,7 +163,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
+          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
         ),
       );
       verify(() => logger.progress('Bundling greeting')).called(1);
@@ -233,7 +233,7 @@ void main() {
       expect(
         actual,
         contains(
-          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
+          '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
         ),
       );
       verify(() => logger.progress('Bundling hooks')).called(1);
