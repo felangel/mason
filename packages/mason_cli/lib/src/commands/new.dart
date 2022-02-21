@@ -104,6 +104,10 @@ class _BrickGenerator extends MasonGenerator {
 name: $name
 description: $description
 version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev <0.1.0"
+
 vars:
   name:
     type: string
