@@ -96,7 +96,7 @@ void main() {
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(
         () => logger.err(
-          '''Your bundle is 0.0002232 MB. Hosted bricks must be smaller than 0.000095 MB.''',
+          '''Your bundle is 0.0002384 MB. Hosted bricks must be smaller than 0.000095 MB.''',
         ),
       ).called(1);
     });
