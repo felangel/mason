@@ -83,7 +83,7 @@ void main() {
         expect(
           yaml.readAsStringSync(),
           equals(
-            '''{"name":"simple","description":"A Simple Static Template","version":"0.1.0+1","vars":{}}''',
+            '''{"name":"simple","description":"A Simple Static Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{}}''',
           ),
         );
         final file = File(path.join(tempDir.path, '__brick__', 'HELLO.md'));
@@ -102,7 +102,7 @@ void main() {
         expect(
           yaml.readAsStringSync(),
           equals(
-            '''{"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
+            '''{"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
           ),
         );
         final file = File(path.join(tempDir.path, '__brick__', 'hooks.md'));

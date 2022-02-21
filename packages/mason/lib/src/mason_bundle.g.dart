@@ -42,6 +42,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
             'name',
             'description',
             'version',
+            'environment',
             'vars'
           ],
         );
@@ -49,6 +50,11 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
           name: $checkedConvert('name', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String),
           version: $checkedConvert('version', (v) => v as String),
+          environment: $checkedConvert(
+              'environment',
+              (v) => v == null
+                  ? const BrickEnvironment()
+                  : BrickEnvironment.fromJson(v as Map)),
           vars: $checkedConvert(
               'vars',
               (v) => v == null
@@ -69,7 +75,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
                       ?.map((e) => MasonBundledFile.fromJson(
                           Map<String, dynamic>.from(e as Map)))
                       .toList() ??
-                  []),
+                  const []),
         );
         return val;
       },
@@ -82,6 +88,7 @@ Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
     'name': instance.name,
     'description': instance.description,
     'version': instance.version,
+    'environment': instance.environment.toJson(),
   };
 
   void writeNotNull(String key, dynamic value) {
