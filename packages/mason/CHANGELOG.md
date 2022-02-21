@@ -7,11 +7,14 @@
   - `Brick.path`, `Brick.git`, `Brick.version`
 - **BREAKING**: refactor: remove `WriteBrickException`
 - **BREAKING**: refactor: simplify `bricks.json` format
+- refactor: git cache directory location
 - feat: add `fromUniversalBundle` and `toUniversalBundle` on `MasonBundle`
 - feat: add `BrickLocation`
 - feat: add `unpackBundle` to convert universal bundle bytes to a `MasonBundle`
 - fix: yaml string encoding for semver
 - fix: `BrickNotFoundException` message when git path is empty
+- chore: upgrade to `mason_logger ^0.1.0-dev.5`
+- chore: upgrade to Dart 2.16
 
 # 0.1.0-dev.6
 
