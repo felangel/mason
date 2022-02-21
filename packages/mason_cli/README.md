@@ -58,6 +58,12 @@ mason make hello
   - [List Usage](#list-usage)
 - [Bundling](#bundling)
   - [Bundle Usage](#bundle-usage)
+- [Login](#login)
+  - [Login Usage](#login-usage)
+- [Logout](#logout)
+  - [Logout Usage](#logout-usage)
+- [Publishing Bricks](#publishing-bricks)
+  - [Publish Usage](#publish-usage)
 - [Complete Usage](#complete-usage)
 - [Video Tutorial](#video-tutorial)
 
@@ -562,6 +568,47 @@ final generator = MasonGenerator.fromBundle(...);
 
 // Generate code based on the bundled brick.
 await generator.generate(...);
+```
+
+## Login
+
+You can login with a registered account via the `login` command.
+
+### Login Usage
+
+```sh
+# login with email and password
+mason login
+```
+
+## Logout
+
+You can logout of an account via the `logout` command.
+
+### Logout Usage
+
+```sh
+# logout of the current account
+mason logout
+```
+
+## Publishing Bricks
+
+You can publish a brick via the `publish` command. You must be logged in to an account with a verified email address in order to publish.
+
+❗ **Note: once a brick has been published, it can never be unpublished.**
+
+### Publish Usage
+
+```sh
+# publish brick in the current directory
+mason publish
+
+# publish brick from custom path
+mason publish --directory ./path/to/brick
+
+# publish brick from custom path shorthand syntax
+mason publish -C ./path/to/brick
 ```
 
 ## Complete Usage

@@ -10,10 +10,15 @@
 - feat: `mason login` command
 - feat: `mason logout` command
 - feat: `mason publish` command
+- feat: `mason list` includes brick source
 - fix: clear `bricks.json` prior to fetching via `mason get`
 - fix: verify/validate brick name matches name in `mason.yaml` during `mason get`
+- fix: simplify update prompt styling
 - refactor: populate bricks from `bricks.json` directly
 - refactor: remove dependency on `package:archive`
+- docs: update `README` to include new commands
+- chore: upgrade to `mason ^0.1.0-dev.7`
+- chore: upgrade to Dart 2.16
 
 # 0.1.0-dev.10
 
