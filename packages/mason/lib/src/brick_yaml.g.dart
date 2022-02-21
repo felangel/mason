@@ -12,12 +12,24 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['name', 'description', 'version', 'vars', 'path'],
+          allowedKeys: const [
+            'name',
+            'description',
+            'version',
+            'environment',
+            'vars',
+            'path'
+          ],
         );
         final val = BrickYaml(
           name: $checkedConvert('name', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String),
           version: $checkedConvert('version', (v) => v as String),
+          environment: $checkedConvert(
+              'environment',
+              (v) => v == null
+                  ? const BrickEnvironment()
+                  : BrickEnvironment.fromJson(v as Map)),
           vars: $checkedConvert(
               'vars',
               (v) => v == null
@@ -34,6 +46,7 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
     'name': instance.name,
     'description': instance.description,
     'version': instance.version,
+    'environment': instance.environment.toJson(),
   };
 
   void writeNotNull(String key, dynamic value) {
@@ -91,3 +104,23 @@ const _$BrickVariableTypeEnumMap = {
   BrickVariableType.string: 'string',
   BrickVariableType.boolean: 'boolean',
 };
+
+BrickEnvironment _$BrickEnvironmentFromJson(Map json) => $checkedCreate(
+      'BrickEnvironment',
+      json,
+      ($checkedConvert) {
+        $checkKeys(
+          json,
+          allowedKeys: const ['mason'],
+        );
+        final val = BrickEnvironment(
+          mason: $checkedConvert('mason', (v) => v as String? ?? 'any'),
+        );
+        return val;
+      },
+    );
+
+Map<String, dynamic> _$BrickEnvironmentToJson(BrickEnvironment instance) =>
+    <String, dynamic>{
+      'mason': instance.mason,
+    };

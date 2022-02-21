@@ -42,6 +42,7 @@ class MasonBundle {
     required this.name,
     required this.description,
     required this.version,
+    this.environment = const BrickEnvironment(),
     this.vars = const <String, BrickVariableProperties>{},
     this.files = const [],
     this.hooks = const [],
@@ -55,9 +56,7 @@ class MasonBundle {
   factory MasonBundle.fromUniversalBundle(List<int> bytes) {
     return MasonBundle.fromJson(
       json.decode(
-        utf8.decode(
-          BZip2Decoder().decodeBytes(bytes),
-        ),
+        utf8.decode(BZip2Decoder().decodeBytes(bytes)),
       ) as Map<String, dynamic>,
     );
   }
@@ -66,7 +65,6 @@ class MasonBundle {
   final List<MasonBundledFile> files;
 
   /// List of all [MasonBundledFile] instances within the `hooks` directory.
-  @JsonKey(defaultValue: <MasonBundledFile>[])
   final List<MasonBundledFile> hooks;
 
   /// Name of the brick (from the `brick.yaml`).
@@ -77,6 +75,9 @@ class MasonBundle {
 
   /// The brick version (from the `brick.yaml`).
   final String version;
+
+  /// The brick environment (from the `brick.yaml`).
+  final BrickEnvironment environment;
 
   /// All required variables for the brick (from the `brick.yaml`).
   @VarsConverter()

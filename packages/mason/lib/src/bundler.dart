@@ -25,6 +25,7 @@ void unpackBundle(MasonBundle bundle, Directory target) {
     name: bundle.name,
     description: bundle.description,
     version: bundle.version,
+    environment: bundle.environment,
     vars: bundle.vars,
   );
   File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
@@ -60,6 +61,7 @@ MasonBundle createBundle(Directory brick) {
     name: brickYaml.name,
     description: brickYaml.description,
     version: brickYaml.version,
+    environment: brickYaml.environment,
     vars: brickYaml.vars,
     files: files..sort(_comparePaths),
     hooks: hooks..sort(_comparePaths),
