@@ -7,6 +7,7 @@ library mason;
 export 'package:mason_logger/mason_logger.dart';
 
 export 'src/brick.dart' show Brick;
+export 'src/brick_compatibility.dart' show isBrickCompatibleWithMason;
 export 'src/brick_yaml.dart'
     show
         BrickYaml,

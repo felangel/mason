@@ -5,7 +5,6 @@ import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
-import 'package:pub_semver/pub_semver.dart';
 import 'package:universal_io/io.dart';
 
 /// {@template make_command}
@@ -70,17 +69,11 @@ class _MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final currentMasonVersion = Version.parse(packageVersion);
-    final masonVersionConstraint = VersionConstraint.parse(
-      _brick.environment.mason,
-    );
+    if (!isBrickCompatibleWithMason(_brick)) {
+      logger.err(
+        '''The current mason version is $packageVersion.\nBecause $name requires mason version ${_brick.environment.mason}, version solving failed.''',
+      );
 
-    if (!masonVersionConstraint.allows(currentMasonVersion)) {
-      logger
-        ..err('The current mason version is $currentMasonVersion.')
-        ..err(
-          '''Because $name requires mason version $masonVersionConstraint, version solving failed.''',
-        );
       return ExitCode.software.code;
     }
 
