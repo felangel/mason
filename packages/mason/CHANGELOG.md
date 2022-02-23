@@ -1,3 +1,18 @@
+# 0.1.0-dev.8
+
+- feat: add environment to `brick.yaml`
+
+  ```yaml
+  name: example
+  description: An example brick
+  version: 0.1.0+1
+
+  environment:
+    mason: ">=0.1.0-dev.1 <0.1.0"
+  ```
+
+- feat: add `isBrickCompatibleWithMason`
+
 # 0.1.0-dev.7
 
 - **BREAKING**: feat: add `MasonGenerator.fromBrick`
