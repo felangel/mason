@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason/mason.dart' as mason show packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -325,6 +326,36 @@ bricks:
       verify(
         () => logger.err(
           'Could not find a subcommand named "garbage" for "mason make".',
+        ),
+      ).called(1);
+    });
+
+    test('exits with code 64 when mason version constraint cannot be resolved',
+        () async {
+      await commandRunner.run(['new', 'example']);
+      final brickYaml = File(path.join('bricks', 'example', 'brick.yaml'));
+      brickYaml.writeAsStringSync(
+        brickYaml.readAsStringSync().replaceFirst(
+              'mason: ">=0.1.0-dev <0.1.0"',
+              'mason: ">=99.99.99 <100.0.0"',
+            ),
+      );
+
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+
+      final result = await commandRunner.run(['make', 'example']);
+      expect(result, equals(ExitCode.software.code));
+      verify(
+        () => logger.err(
+          'The current mason version is ${mason.packageVersion}.',
+        ),
+      ).called(1);
+      verify(
+        () => logger.err(
+          '''Because example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
         ),
       ).called(1);
     });
