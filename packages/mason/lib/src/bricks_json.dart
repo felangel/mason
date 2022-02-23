@@ -42,6 +42,19 @@ class MalformedBricksJson extends MasonException {
   const MalformedBricksJson(String message) : super(message);
 }
 
+/// {@template brick_incompatible_mason_version}
+/// Thrown when the current mason version is incompatible with the brick.
+/// {@endtemplate}
+class BrickIncompatibleMasonVersion extends MasonException {
+  /// {@macro brick_incompatible_mason_version}
+  BrickIncompatibleMasonVersion({
+    required String brickName,
+    required String constraint,
+  }) : super(
+          '''The current mason version is $packageVersion.\nBecause $brickName requires mason version $constraint, version solving failed.''',
+        );
+}
+
 /// {@template bricks_json}
 /// A local cache for mason bricks.
 ///
@@ -151,14 +164,16 @@ class BricksJson {
       brickYaml.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     );
-    final name = brick.name ?? yaml.name;
 
+    final name = brick.name ?? yaml.name;
     if (yaml.name != name) {
       throw MasonYamlNameMismatch(
         'Brick name "$name" '
         'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
       );
     }
+
+    _verifyMasonVersionConstraint(yaml);
 
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
@@ -198,6 +213,7 @@ class BricksJson {
         brickYaml.readAsStringSync(),
         (m) => BrickYaml.fromJson(m!),
       );
+
       return yaml;
     }
 
@@ -220,6 +236,8 @@ class BricksJson {
         );
       }
 
+      _verifyMasonVersionConstraint(yaml);
+
       final localPath = canonicalize(p.join(directory.path, gitPath.path));
       _cache[name] = localPath;
       return localPath;
@@ -239,6 +257,8 @@ class BricksJson {
         'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
       );
     }
+
+    _verifyMasonVersionConstraint(yaml);
 
     final localPath = canonicalize(p.join(directory.path, gitPath.path));
     _cache[name] = localPath;
@@ -290,6 +310,15 @@ class BricksJson {
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
+
+    final brickYaml = File(p.join(directory.path, BrickYaml.file));
+    final yaml = checkedYamlDecode(
+      brickYaml.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    _verifyMasonVersionConstraint(yaml);
+
     final localPath = canonicalize(directory.path);
     _cache[name] = localPath;
     return localPath;
@@ -375,6 +404,7 @@ class BricksJson {
     }
 
     final bundle = MasonBundle.fromUniversalBundle(response.bodyBytes);
+
     unpackBundle(bundle, directory);
   }
 
@@ -412,4 +442,13 @@ String _encodedGitDir(GitPath git, String commitHash) {
   final path = git.url.replaceAll(r'\', '/');
   final url = base64.encode(utf8.encode(path));
   return '${name}_${url}_$commitHash';
+}
+
+void _verifyMasonVersionConstraint(BrickYaml brickYaml) {
+  if (!isBrickCompatibleWithMason(brickYaml)) {
+    throw BrickIncompatibleMasonVersion(
+      brickName: brickYaml.name,
+      constraint: brickYaml.environment.mason,
+    );
+  }
 }

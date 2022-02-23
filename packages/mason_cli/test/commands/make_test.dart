@@ -330,7 +330,7 @@ bricks:
       ).called(1);
     });
 
-    test('exits with code 64 when mason version constraint cannot be resolved',
+    test('exits with code 70 when mason version constraint cannot be resolved',
         () async {
       await commandRunner.run(['new', 'example']);
       final brickYaml = File(path.join('bricks', 'example', 'brick.yaml'));
@@ -350,12 +350,7 @@ bricks:
       expect(result, equals(ExitCode.software.code));
       verify(
         () => logger.err(
-          'The current mason version is ${mason.packageVersion}.',
-        ),
-      ).called(1);
-      verify(
-        () => logger.err(
-          '''Because example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
+          '''The current mason version is ${mason.packageVersion}.\nBecause example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
         ),
       ).called(1);
     });

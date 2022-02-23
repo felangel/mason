@@ -231,6 +231,44 @@ void main() {
       });
 
       test(
+          'throws BrickIncompatibleMasonVersion '
+          'when brick is incompatible with mason version.', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+
+        final brickDirectory = Directory(path.join(directory.path, 'example'))
+          ..createSync(recursive: true);
+        File(path.join(brickDirectory.path, BrickYaml.file)).writeAsStringSync(
+          '''
+name: example
+description: example
+version: 0.1.0+1
+
+environment:
+  mason: ">=99.99.99 <100.0.0"
+''',
+        );
+        try {
+          await bricksJson.add(Brick.path(brickDirectory.path));
+          fail('should throw');
+        } on BrickIncompatibleMasonVersion catch (error) {
+          expect(
+            error.message,
+            equals(
+              '''The current mason version is $packageVersion.\nBecause example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
+            ),
+          );
+        }
+
+        expect(bricksJson.encode, equals('{}'));
+      });
+
+      test(
           'throws BrickResolveVersionException when '
           'brick does not exist (registry)', () async {
         final directory = Directory.systemTemp.createTempSync();
