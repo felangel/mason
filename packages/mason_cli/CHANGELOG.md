@@ -1,3 +1,13 @@
+# 0.1.0-dev.12
+
+- feat: support for environment in `brick.yaml`
+  - `mason init` includes `environment`
+  - `mason new` includes `environment`
+- feat: verify brick compatibility
+  - `mason get` ensures bricks are compatible
+  - `mason add` ensures bricks are compatible
+  - `mason make` ensures bricks are compatible
+
 # 0.1.0-dev.11
 
 - **BREAKING**: feat: `mason add` support for hosted bricks
