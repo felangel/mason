@@ -26,7 +26,7 @@ export 'src/generator.dart'
         HookContext,
         MasonGenerator,
         TemplateFile;
-export 'src/mason_bundle.dart' show MasonBundle;
+export 'src/mason_bundle.dart' show MasonBundle, MasonBundledFile;
 export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/path.dart' show canonicalize;
 export 'src/render.dart' show RenderTemplate;
