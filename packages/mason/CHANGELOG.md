@@ -1,3 +1,7 @@
+# 0.1.0-dev.9
+
+- feat: expose `MasonBundledFile`
+
 # 0.1.0-dev.8
 
 - feat: add environment to `brick.yaml`
