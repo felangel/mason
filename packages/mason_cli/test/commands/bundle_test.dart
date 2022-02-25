@@ -269,7 +269,7 @@ void main() {
 
     test('exists with code 64 when exception occurs during bundling', () async {
       when(() => logger.progress(any())).thenReturn(([update]) {
-        if (update == null) throw const MasonException('oops');
+        if (update == 'Bundled greeting') throw const MasonException('oops');
       });
       final brickPath =
           path.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
