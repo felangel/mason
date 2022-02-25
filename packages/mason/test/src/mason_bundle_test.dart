@@ -1,6 +1,5 @@
 // ignore_for_file: prefer_const_constructors
 import 'package:mason/mason.dart';
-import 'package:mason/src/mason_bundle.dart';
 import 'package:test/test.dart';
 
 void main() {
