@@ -1,3 +1,8 @@
+# 0.1.0-dev.13
+
+- feat: improve stdout for `mason bundle`
+- fix: mason list git path parsing
+
 # 0.1.0-dev.12
 
 - feat: support for environment in `brick.yaml`
