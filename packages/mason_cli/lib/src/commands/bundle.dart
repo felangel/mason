@@ -73,7 +73,7 @@ class BundleCommand extends MasonCommand {
           bundlePath = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
-      bundleDone();
+      bundleDone('Bundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
