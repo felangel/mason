@@ -68,8 +68,9 @@ extension on BrickYaml {
       final subPath = brickPath.split('$gitPath/').last;
       final gitDirectory = path.split(subPath).first;
       final gitSegments = gitDirectory.split('_');
-      final gitUrl = utf8.decode(base64.decode(gitSegments[1]));
-      final commitHash = gitSegments[2];
+      final gitUrlSegment = gitSegments[gitSegments.length - 2];
+      final gitUrl = utf8.decode(base64.decode(gitUrlSegment));
+      final commitHash = gitSegments.last;
       return '$nameAndVersion -> $gitUrl#$commitHash';
     }
     final hostedUrl = path.split(brickPath.split('$hostedPath/').last).first;

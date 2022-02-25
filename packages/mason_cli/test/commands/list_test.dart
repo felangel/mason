@@ -132,10 +132,10 @@ bricks:
     path: ../../../../../bricks/todos
   documentation:
     path: ../../../../../bricks/documentation
-  widget:
+  hello_world:
     git:
       url: https://github.com/felangel/mason
-      path: bricks/widget
+      path: bricks/hello_world
       ref: 997bc878c93534fad17d965be7cafe948a1dbb53
 ''',
       );
@@ -161,10 +161,10 @@ bricks:
               '''├── ${styleBold.wrap('documentation')} 0.1.0+1 -> $documentationPath''',
             ),
         () => logger.info(
-              '├── ${styleBold.wrap('todos')} 0.1.0+1 -> $todosPath',
+              '''├── ${styleBold.wrap('hello_world')} 0.1.0+1 -> https://github.com/felangel/mason#997bc878c93534fad17d965be7cafe948a1dbb53''',
             ),
         () => logger.info(
-              '''└── ${styleBold.wrap('widget')} 0.1.0+1 -> https://github.com/felangel/mason#997bc878c93534fad17d965be7cafe948a1dbb53''',
+              '└── ${styleBold.wrap('todos')} 0.1.0+1 -> $todosPath',
             ),
       ]);
     });
