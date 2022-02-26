@@ -38,6 +38,14 @@ void main() {
       });
     });
 
+    group('BundleNotFoundException', () {
+      test('can be instantiated', () {
+        const path = 'test path';
+        final exception = BundleNotFoundException(path);
+        expect(exception.message, equals('Could not find bundle at $path'));
+      });
+    });
+
     group('MasonYamlNameMismatch', () {
       test('has the correct message', () {
         const message = 'test message';
