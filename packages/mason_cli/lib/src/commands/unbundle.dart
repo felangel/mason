@@ -72,7 +72,7 @@ class UnbundleCommand extends MasonCommand {
           '${lightGreen.wrap('✓')} '
           'Generated 1 brick:',
         )
-        ..detail('  ${bundle.name} ➤ $outputDir');
+        ..detail('  ${bundle.name} ➤ ${canonicalize(outputDir)}');
     } catch (_) {
       unbundleDone();
       rethrow;
