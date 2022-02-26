@@ -16,7 +16,8 @@ export 'src/brick_yaml.dart'
         BrickVariableType;
 export 'src/bricks_json.dart' show BricksJson;
 export 'src/bundler.dart' show createBundle, unpackBundle;
-export 'src/exception.dart' show BrickNotFoundException, MasonException;
+export 'src/exception.dart'
+    show BrickNotFoundException, BundleNotFoundException, MasonException;
 export 'src/generator.dart'
     show
         DirectoryGeneratorTarget,

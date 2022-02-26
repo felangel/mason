@@ -17,3 +17,12 @@ class BrickNotFoundException extends MasonException {
   const BrickNotFoundException(String path)
       : super('Could not find brick at $path');
 }
+
+/// {@template bundle_not_found_exception}
+/// Thrown when a bundle cannot be found locally.
+/// {@endtemplate}
+class BundleNotFoundException extends MasonException {
+  /// {@macro bundle_not_found_exception}
+  const BundleNotFoundException(String path)
+      : super('Could not find bundle at $path');
+}
