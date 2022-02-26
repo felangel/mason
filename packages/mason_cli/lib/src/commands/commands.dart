@@ -10,4 +10,5 @@ export 'make.dart';
 export 'new.dart';
 export 'publish.dart';
 export 'remove.dart';
+export 'unbundle.dart';
 export 'update.dart';
