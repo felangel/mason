@@ -4,6 +4,7 @@ import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/commands/bundle.dart';
+import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
 
 /// {@template unbundle_command}
@@ -50,7 +51,9 @@ class UnbundleCommand extends MasonCommand {
 
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
-    final unbundleDone = logger.progress('Unbundling');
+
+    final bundleName = path.basenameWithoutExtension(file.path);
+    final unbundleDone = logger.progress('Unbundling $bundleName');
 
     try {
       late final MasonBundle bundle;
