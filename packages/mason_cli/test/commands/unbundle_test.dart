@@ -77,7 +77,7 @@ void main() {
       ).called(1);
       verify(
         () => logger.detail(
-          '  greeting ➤ ${canonicalize(actual.path)}',
+          '  ${canonicalize(actual.path)}',
         ),
       ).called(1);
     });
@@ -120,7 +120,7 @@ void main() {
       ).called(1);
       verify(
         () => logger.detail(
-          '  greeting ➤ ${canonicalize(actual.path)}',
+          '  ${canonicalize(actual.path)}',
         ),
       ).called(1);
     });
