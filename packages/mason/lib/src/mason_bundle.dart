@@ -61,6 +61,16 @@ class MasonBundle {
     );
   }
 
+  /// Converts a dart bundle into a [MasonBundle] instance.
+  static Future<MasonBundle> fromDartBundle(String content) async {
+    final bundleJsonString = content.substring(
+      content.indexOf('{'),
+      content.lastIndexOf('}') + 1,
+    );
+    final bundleJson = await compute(_decodeBundleJsonString, bundleJsonString);
+    return MasonBundle.fromJson(bundleJson);
+  }
+
   /// List of all [MasonBundledFile] instances within the `__brick__` directory.
   final List<MasonBundledFile> files;
 
@@ -91,5 +101,11 @@ class MasonBundle {
 
   Future<List<int>> _encodeBundle(MasonBundle bundle) async {
     return BZip2Encoder().encode(utf8.encode(json.encode(bundle.toJson())));
+  }
+
+  static Future<Map<String, dynamic>> _decodeBundleJsonString(
+    String jsonString,
+  ) async {
+    return json.decode(jsonString) as Map<String, dynamic>;
   }
 }
