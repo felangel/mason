@@ -49,10 +49,7 @@ void main() {
         '..',
         '..',
         '..',
-        '..',
-        '..',
-        '..',
-        'bundles/universal',
+        'bundles',
         'greeting.bundle',
       );
       Directory.current = testDir.path;
@@ -90,10 +87,7 @@ void main() {
         '..',
         '..',
         '..',
-        '..',
-        '..',
-        '..',
-        'bundles/dart',
+        'bundles',
         'greeting_bundle.dart',
       );
       Directory.current = testDir.path;
