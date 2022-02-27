@@ -171,7 +171,9 @@ void main() {
         hooks: [],
       );
       expect(
-        MasonBundle.fromUniversalBundle(await instance.toUniversalBundle()),
+        await MasonBundle.fromUniversalBundle(
+          await instance.toUniversalBundle(),
+        ),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', instance.name)
             .having((file) => file.version, 'version', instance.version)
