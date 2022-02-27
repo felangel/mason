@@ -53,12 +53,14 @@ class MasonBundle {
       _$MasonBundleFromJson(json);
 
   /// Converts a universal bundle into a [MasonBundle] instance.
-  factory MasonBundle.fromUniversalBundle(List<int> bytes) {
-    return MasonBundle.fromJson(
-      json.decode(
+  static Future<MasonBundle> fromUniversalBundle(List<int> bytes) async {
+    final bundleJson = await compute(
+      (List<int> bytes) => json.decode(
         utf8.decode(BZip2Decoder().decodeBytes(bytes)),
       ) as Map<String, dynamic>,
+      bytes,
     );
+    return MasonBundle.fromJson(bundleJson);
   }
 
   /// Converts a dart bundle into a [MasonBundle] instance.
@@ -67,7 +69,10 @@ class MasonBundle {
       content.indexOf('{'),
       content.lastIndexOf('}') + 1,
     );
-    final bundleJson = await compute(_decodeBundleJsonString, bundleJsonString);
+    final bundleJson = await compute(
+      (String jsonString) => json.decode(jsonString) as Map<String, dynamic>,
+      bundleJsonString,
+    );
     return MasonBundle.fromJson(bundleJson);
   }
 
@@ -101,11 +106,5 @@ class MasonBundle {
 
   Future<List<int>> _encodeBundle(MasonBundle bundle) async {
     return BZip2Encoder().encode(utf8.encode(json.encode(bundle.toJson())));
-  }
-
-  static Future<Map<String, dynamic>> _decodeBundleJsonString(
-    String jsonString,
-  ) async {
-    return json.decode(jsonString) as Map<String, dynamic>;
   }
 }
