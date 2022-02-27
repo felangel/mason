@@ -570,6 +570,18 @@ final generator = MasonGenerator.fromBundle(...);
 await generator.generate(...);
 ```
 
+### Unbundling
+
+To generate a brick template from an existing bundle:
+
+```sh
+# Universal Bundle
+mason unbundle ./path/to/bundle -o ./path/to/destination/
+
+# Dart Bundle
+mason unbundle ./path/to/bundle -t dart -o ./path/to/destination/
+```
+
 ## Login
 
 You can login with a registered account via the `login` command.

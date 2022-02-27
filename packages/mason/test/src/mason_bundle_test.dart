@@ -1,4 +1,6 @@
 // ignore_for_file: prefer_const_constructors
+import 'dart:convert';
+
 import 'package:mason/mason.dart';
 import 'package:test/test.dart';
 
@@ -170,6 +172,31 @@ void main() {
       );
       expect(
         MasonBundle.fromUniversalBundle(await instance.toUniversalBundle()),
+        isA<MasonBundle>()
+            .having((file) => file.name, 'name', instance.name)
+            .having((file) => file.version, 'version', instance.version)
+            .having((file) => file.vars, 'vars', instance.vars)
+            .having((file) => file.files, 'files', instance.files)
+            .having((file) => file.hooks, 'hooks', instance.hooks)
+            .having(
+              (file) => file.description,
+              'description',
+              instance.description,
+            ),
+      );
+    });
+
+    test('can be converted to/from dart bundle', () async {
+      final instance = MasonBundle(
+        name: 'name',
+        description: 'description',
+        version: '1.0.0',
+        vars: {},
+        files: [],
+        hooks: [],
+      );
+      expect(
+        await MasonBundle.fromDartBundle(jsonEncode(instance.toJson())),
         isA<MasonBundle>()
             .having((file) => file.name, 'name', instance.name)
             .having((file) => file.version, 'version', instance.version)

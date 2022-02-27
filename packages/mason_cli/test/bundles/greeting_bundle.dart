@@ -10,8 +10,14 @@ final greetingBundle = MasonBundle.fromJson(<String, dynamic>{
   "hooks": [],
   "name": "greeting",
   "description": "A Simple Greeting Template",
-  "version": "1.0.0",
+  "version": "0.1.0+1",
+  "environment": {"mason": "any"},
   "vars": {
-    "name": {"type": "string"}
+    "name": {
+      "type": "string",
+      "description": "Your name",
+      "default": "Dash",
+      "prompt": "What is your name?"
+    }
   }
 });
