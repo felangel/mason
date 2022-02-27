@@ -58,6 +58,8 @@ mason make hello
   - [List Usage](#list-usage)
 - [Bundling](#bundling)
   - [Bundle Usage](#bundle-usage)
+- [Unbundling](#unbundling)
+  - [Unbundle Usage](#unbundle-usage)
 - [Login](#login)
   - [Login Usage](#login-usage)
 - [Logout](#logout)
@@ -570,7 +572,11 @@ final generator = MasonGenerator.fromBundle(...);
 await generator.generate(...);
 ```
 
-### Unbundling
+## Unbundling
+
+You can use mason to generate a brick from an existing bundle. Unbundling is useful in cases where you want to make changes to an existing bundle because you can first unbundle, make the changes to the template, and generate a new bundle.
+
+### Unbundle Usage
 
 To generate a brick template from an existing bundle:
 
