@@ -1,4 +1,4 @@
-import 'package:mason_cli/src/yaml_encode.dart';
+import 'package:mason/src/yaml_encode.dart';
 import 'package:test/test.dart';
 
 void main() {

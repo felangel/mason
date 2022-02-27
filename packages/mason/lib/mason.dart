@@ -31,3 +31,4 @@ export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/path.dart' show canonicalize;
 export 'src/render.dart' show RenderTemplate;
 export 'src/version.dart' show packageVersion;
+export 'src/yaml_encode.dart' show Yaml;
