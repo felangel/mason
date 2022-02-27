@@ -45,7 +45,7 @@ class UnbundleCommand extends MasonCommand {
     final file = File(results.rest.first);
     if (!file.existsSync()) {
       logger.err('Could not find bundle at ${file.path}');
-      return ExitCode.software.code;
+      return ExitCode.usage.code;
     }
 
     final outputDir = results['output-dir'] as String;

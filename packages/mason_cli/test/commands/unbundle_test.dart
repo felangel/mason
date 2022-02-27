@@ -118,5 +118,40 @@ void main() {
         ),
       ).called(1);
     });
+
+    test('exits with code 64 when no bundle path is provided', () async {
+      final result = await commandRunner.run(['unbundle']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err('path to the bundle must be provided'),
+      ).called(1);
+      verifyNever(() => logger.progress(any()));
+    });
+
+    test('exits with code 64 when no bundle exists at path', () async {
+      final bundlePath = path.join('path', 'to', 'bundle');
+      final result = await commandRunner.run(['unbundle', bundlePath]);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err('Could not find bundle at $bundlePath'),
+      ).called(1);
+      verifyNever(() => logger.progress(any()));
+    });
+
+    test('exists with code 64 when exception occurs during unbundling',
+        () async {
+      when(() => logger.progress(any())).thenReturn(([update]) {
+        if (update == 'Unbundled greeting') throw const MasonException('oops');
+      });
+      final bundlePath = path.join(
+        '..',
+        '..',
+        'bundles',
+        'greeting.bundle',
+      );
+      final result = await commandRunner.run(['unbundle', bundlePath]);
+      expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.err('oops')).called(1);
+    });
   });
 }
