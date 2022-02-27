@@ -1,5 +1,3 @@
-import 'dart:convert';
-
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -85,13 +83,7 @@ class UnbundleCommand extends MasonCommand {
 
 Future<MasonBundle> _parseDartBundle(File bundleFile) async {
   final rawBundle = await bundleFile.readAsString();
-  final bundleJson = json.decode(
-    rawBundle.substring(
-      rawBundle.indexOf('{'),
-      rawBundle.lastIndexOf('}') + 1,
-    ),
-  ) as Map<String, dynamic>;
-  return MasonBundle.fromJson(bundleJson);
+  return MasonBundle.fromDartBundle(rawBundle);
 }
 
 Future<MasonBundle> _parseUniversalBundle(File bundleFile) async {
