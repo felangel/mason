@@ -28,7 +28,7 @@ void unpackBundle(MasonBundle bundle, Directory target) {
     vars: bundle.vars,
   );
   File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
-    json.encode(brickYaml.toJson()),
+    Yaml.encode(brickYaml.toJson()),
   );
 }
 
