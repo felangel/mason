@@ -403,7 +403,7 @@ class BricksJson {
       throw BrickNotFoundException(uri.toString());
     }
 
-    final bundle = MasonBundle.fromUniversalBundle(response.bodyBytes);
+    final bundle = await MasonBundle.fromUniversalBundle(response.bodyBytes);
 
     unpackBundle(bundle, directory);
   }

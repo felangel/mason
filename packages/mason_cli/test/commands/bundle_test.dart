@@ -60,7 +60,8 @@ void main() {
         ),
       );
       final actual = json.encode(
-        MasonBundle.fromUniversalBundle(file.readAsBytesSync()).toJson(),
+        (await MasonBundle.fromUniversalBundle(file.readAsBytesSync()))
+            .toJson(),
       );
       const expected =
           '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
@@ -94,7 +95,8 @@ void main() {
         ),
       );
       final actual = json.encode(
-        MasonBundle.fromUniversalBundle(file.readAsBytesSync()).toJson(),
+        (await MasonBundle.fromUniversalBundle(file.readAsBytesSync()))
+            .toJson(),
       );
       expect(
         actual,
