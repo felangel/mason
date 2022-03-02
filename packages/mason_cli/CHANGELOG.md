@@ -1,3 +1,8 @@
+# 0.1.0-dev.14
+
+- feat: add `mason unbundle` command
+- chore: upgrade to `mason ^0.1.0-dev.10`
+
 # 0.1.0-dev.13
 
 - feat: improve stdout for `mason bundle`
