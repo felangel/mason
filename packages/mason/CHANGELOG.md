@@ -1,3 +1,9 @@
+# 0.1.0-dev.10
+
+- **BREAKING**: feat: run `fromUniversalBundle` in `Isolate` (async)
+- feat: expose `Yaml` encoding utility
+- feat: add `fromDartBundle` to `MasonBundle`
+
 # 0.1.0-dev.9
 
 - feat: expose `MasonBundledFile`
