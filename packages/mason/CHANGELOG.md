@@ -1,3 +1,7 @@
+# 0.1.0-dev.11
+
+- fix: `Yaml.encode` handle escape characters
+
 # 0.1.0-dev.10
 
 - **BREAKING**: feat: run `fromUniversalBundle` in `Isolate` (async)
