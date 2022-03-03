@@ -17,6 +17,7 @@ class BrickYaml {
     required this.name,
     required this.description,
     required this.version,
+    this.environment = const BrickEnvironment(),
     this.vars = const <String, BrickVariableProperties>{},
     this.path,
   });
@@ -49,6 +50,9 @@ class BrickYaml {
   /// Version of the brick (semver).
   final String version;
 
+  /// Environment of the brick.
+  final BrickEnvironment environment;
+
   /// Map of variable properties used when templating a brick.
   @VarsConverter()
   final Map<String, BrickVariableProperties> vars;
@@ -64,6 +68,7 @@ class BrickYaml {
       description: description,
       version: version,
       vars: vars,
+      environment: environment,
       path: path ?? this.path,
     );
   }
@@ -203,4 +208,25 @@ class VarsConverter
     }
     throw const FormatException();
   }
+}
+
+/// {@template brick_environment}
+/// An object representing the environment for a given brick.
+/// {@endtemplate}
+@immutable
+@JsonSerializable()
+class BrickEnvironment {
+  /// {@macro brick_environment}
+  const BrickEnvironment({this.mason = 'any'});
+
+  /// Converts [Map] to [BrickYaml]
+  factory BrickEnvironment.fromJson(Map<dynamic, dynamic> json) =>
+      _$BrickEnvironmentFromJson(json);
+
+  /// Converts [BrickEnvironment] to [Map]
+  Map<dynamic, dynamic> toJson() => _$BrickEnvironmentToJson(this);
+
+  /// Mason version constraint (semver).
+  /// Defaults to 'any'.
+  final String mason;
 }

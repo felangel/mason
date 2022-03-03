@@ -2,6 +2,7 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason/mason.dart' as mason show packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -41,7 +42,7 @@ void main() {
       );
     });
 
-    setUp(() async {
+    setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
       File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
@@ -73,40 +74,40 @@ bricks:
 ''',
       );
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final appIconPath = path.canonicalize(
+      final appIconPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
-      final bioPath = path.canonicalize(
+      final bioPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'bio'),
       );
-      final docPath = path.canonicalize(
+      final docPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
       );
-      final greetingPath = path.canonicalize(
+      final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
-      final legacyPath = path.canonicalize(
+      final legacyPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'legacy'),
       );
-      final helloWorldPath = path.canonicalize(
+      final helloWorldPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'hello_world'),
       );
-      final hooksPath = path.canonicalize(
+      final hooksPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'hooks'),
       );
-      final pluginPath = path.canonicalize(
+      final pluginPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'plugin'),
       );
-      final randomColorPath = path.canonicalize(
+      final randomColorPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'random_color'),
       );
-      final simplePath = path.canonicalize(
+      final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
-      final todosPath = path.canonicalize(
+      final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path.canonicalize(
+      final widgetPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'widget'),
       );
       File(path.join(Directory.current.path, '.mason', 'bricks.json'))
@@ -325,6 +326,31 @@ bricks:
       verify(
         () => logger.err(
           'Could not find a subcommand named "garbage" for "mason make".',
+        ),
+      ).called(1);
+    });
+
+    test('exits with code 70 when mason version constraint cannot be resolved',
+        () async {
+      await commandRunner.run(['new', 'example']);
+      final brickYaml = File(path.join('bricks', 'example', 'brick.yaml'));
+      brickYaml.writeAsStringSync(
+        brickYaml.readAsStringSync().replaceFirst(
+              'mason: ">=0.1.0-dev <0.1.0"',
+              'mason: ">=99.99.99 <100.0.0"',
+            ),
+      );
+
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+
+      final result = await commandRunner.run(['make', 'example']);
+      expect(result, equals(ExitCode.software.code));
+      verify(
+        () => logger.err(
+          '''The current mason version is ${mason.packageVersion}.\nBecause example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
         ),
       ).called(1);
     });

@@ -69,7 +69,15 @@ class _MakeCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final outputDir = p.canonicalize(
+    if (!isBrickCompatibleWithMason(_brick)) {
+      logger.err(
+        '''The current mason version is $packageVersion.\nBecause $name requires mason version ${_brick.environment.mason}, version solving failed.''',
+      );
+
+      return ExitCode.software.code;
+    }
+
+    final outputDir = canonicalize(
       p.join(cwd.path, results['output-dir'] as String),
     );
     final configPath = results['config-path'] as String?;

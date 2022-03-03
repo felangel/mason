@@ -2,6 +2,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
 
@@ -39,8 +40,12 @@ abstract class MasonCommand extends Command<int> {
   /// {@macro mason_command}
   MasonCommand({Logger? logger}) : _logger = logger;
 
+  /// [ArgResults] used for testing purposes only.
+  @visibleForTesting
+  ArgResults? testArgResults;
+
   /// [ArgResults] for the current command.
-  ArgResults get results => argResults!;
+  ArgResults get results => testArgResults ?? argResults!;
 
   /// [BricksJson] which contains all local bricks.
   BricksJson? get localBricksJson => _localBricksJson;

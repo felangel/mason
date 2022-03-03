@@ -28,7 +28,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
-        run: pub get
+        run: dart pub get
 
       - name: Format
         run: dart format --set-exit-if-changed lib

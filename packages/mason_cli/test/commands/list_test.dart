@@ -57,19 +57,28 @@ void main() {
     test(
         'exits successfully and lists local bricks '
         'when local and global bricks are available', () async {
-      final greetingPath =
-          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      final greetingPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'greeting'),
+      );
+      final documentationPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'documentation'),
+      );
+      final todosPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'todos'),
+      );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
 bricks:
   documentation:
     path: ../../../../../bricks/documentation
+  greeting: ^0.1.0
   todos:
     path: ../../../../../bricks/todos
   widget:
     git:
       url: https://github.com/felangel/mason
       path: bricks/widget
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
 ''',
       );
       await expectLater(
@@ -91,11 +100,16 @@ bricks:
 
       verifyInOrder([
         () => logger.info(
-              '''├── ${styleBold.wrap('documentation')} - Create Documentation Markdown Files''',
+              '''├── ${styleBold.wrap('documentation')} 0.1.0+1 -> $documentationPath''',
             ),
-        () => logger.info('├── ${styleBold.wrap('todos')} - A Todos Template'),
         () => logger.info(
-              '''└── ${styleBold.wrap('widget')} - Create a Simple Flutter Widget''',
+              '''├── ${styleBold.wrap('greeting')} 0.1.0+2 -> registry.brickhub.dev''',
+            ),
+        () => logger.info(
+              '├── ${styleBold.wrap('todos')} 0.1.0+1 -> $todosPath',
+            ),
+        () => logger.info(
+              '''└── ${styleBold.wrap('widget')} 0.1.0+1 -> https://github.com/felangel/mason#997bc878c93534fad17d965be7cafe948a1dbb53''',
             ),
       ]);
     });
@@ -105,6 +119,12 @@ bricks:
         'sorted alphabetically', () async {
       final greetingPath =
           p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      final documentationPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'documentation'),
+      );
+      final todosPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'todos'),
+      );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
 bricks:
@@ -112,10 +132,11 @@ bricks:
     path: ../../../../../bricks/todos
   documentation:
     path: ../../../../../bricks/documentation
-  widget:
+  hello_world:
     git:
       url: https://github.com/felangel/mason
-      path: bricks/widget
+      path: bricks/hello_world
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
 ''',
       );
       await expectLater(
@@ -137,11 +158,13 @@ bricks:
 
       verifyInOrder([
         () => logger.info(
-              '''├── ${styleBold.wrap('documentation')} - Create Documentation Markdown Files''',
+              '''├── ${styleBold.wrap('documentation')} 0.1.0+1 -> $documentationPath''',
             ),
-        () => logger.info('├── ${styleBold.wrap('todos')} - A Todos Template'),
         () => logger.info(
-              '''└── ${styleBold.wrap('widget')} - Create a Simple Flutter Widget''',
+              '''├── ${styleBold.wrap('hello_world')} 0.1.0+1 -> https://github.com/felangel/mason#997bc878c93534fad17d965be7cafe948a1dbb53''',
+            ),
+        () => logger.info(
+              '└── ${styleBold.wrap('todos')} 0.1.0+1 -> $todosPath',
             ),
       ]);
     });
@@ -149,8 +172,9 @@ bricks:
     test(
         'exits successfully and lists global bricks '
         'when local and global bricks are available', () async {
-      final greetingPath =
-          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
+      final greetingPath = canonicalize(
+        p.join('..', '..', '..', '..', '..', 'bricks', 'greeting'),
+      );
       File(p.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
 bricks:
@@ -183,7 +207,7 @@ bricks:
 
       verify(
         () => logger.info(
-          '└── ${styleBold.wrap('greeting')} - A Simple Greeting Template',
+          '└── ${styleBold.wrap('greeting')} 0.1.0+1 -> $greetingPath',
         ),
       ).called(1);
     });

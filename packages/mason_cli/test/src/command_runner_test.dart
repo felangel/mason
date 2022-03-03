@@ -23,16 +23,20 @@ const expectedUsage = [
       '    --version    Print the current version.\n'
       '\n'
       'Available commands:\n'
-      '  add      Adds a brick from a local or remote source.\n'
-      '  bundle   Generates a bundle from a brick template.\n'
-      '  cache    Interact with mason cache.\n'
-      '  get      Gets all bricks in the nearest mason.yaml.\n'
-      '  init     Initialize mason in the current directory.\n'
-      '  list     Lists installed bricks.\n'
-      '  make     Generate code using an existing brick template.\n'
-      '  new      Creates a new brick template.\n'
-      '  remove   Removes a brick.\n'
-      '  update   Update mason.\n'
+      '  add        Adds a brick from a local or remote source.\n'
+      '  bundle     Generates a bundle from a brick template.\n'
+      '  cache      Interact with mason cache.\n'
+      '  get        Gets all bricks in the nearest mason.yaml.\n'
+      '  init       Initialize mason in the current directory.\n'
+      '  list       Lists installed bricks.\n'
+      '  login      Log into brickhub.dev.\n'
+      '  logout     Log out of brickhub.dev.\n'
+      '  make       Generate code using an existing brick template.\n'
+      '  new        Creates a new brick template.\n'
+      '  publish    Publish the current brick to brickhub.dev.\n'
+      '  remove     Removes a brick.\n'
+      '  unbundle   Generates a brick template from a bundle.\n'
+      '  update     Update mason.\n'
       '\n'
       'Run "mason help <command>" for more information about a command.'
 ];
@@ -40,14 +44,9 @@ const expectedUsage = [
 const latestVersion = '0.0.0';
 
 final updateMessage = '''
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}  |
-|                             Run ${cyan.wrap('mason update')} to update                             |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''';
+${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
+${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+Run ${cyan.wrap('mason update')} to update''';
 
 void main() {
   group('MasonCommandRunner', () {

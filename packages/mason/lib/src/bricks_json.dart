@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
-import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
@@ -41,6 +40,19 @@ class BrickUnsatisfiedVersionConstraint extends MasonException {
 class MalformedBricksJson extends MasonException {
   /// {@macro malformed_bricks_json}
   const MalformedBricksJson(String message) : super(message);
+}
+
+/// {@template brick_incompatible_mason_version}
+/// Thrown when the current mason version is incompatible with the brick.
+/// {@endtemplate}
+class BrickIncompatibleMasonVersion extends MasonException {
+  /// {@macro brick_incompatible_mason_version}
+  BrickIncompatibleMasonVersion({
+    required String brickName,
+    required String constraint,
+  }) : super(
+          '''The current mason version is $packageVersion.\nBecause $brickName requires mason version $constraint, version solving failed.''',
+        );
 }
 
 /// {@template bricks_json}
@@ -145,15 +157,15 @@ class BricksJson {
     final brickYaml = File(p.join(path, BrickYaml.file));
 
     if (!brickYaml.existsSync()) {
-      throw BrickNotFoundException(p.canonicalize(path));
+      throw BrickNotFoundException(canonicalize(path));
     }
 
     final yaml = checkedYamlDecode(
       brickYaml.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     );
-    final name = brick.name ?? yaml.name;
 
+    final name = brick.name ?? yaml.name;
     if (yaml.name != name) {
       throw MasonYamlNameMismatch(
         'Brick name "$name" '
@@ -161,9 +173,11 @@ class BricksJson {
       );
     }
 
+    _verifyMasonVersionConstraint(yaml);
+
     final remoteDir = getPath(brick);
     if (remoteDir != null) return remoteDir;
-    final localPath = p.canonicalize(brick.location.path!);
+    final localPath = canonicalize(brick.location.path!);
     _cache[name] = localPath;
     return localPath;
   }
@@ -172,7 +186,9 @@ class BricksJson {
   /// and returns the local path to the brick.
   Future<String> _addRemoteBrickFromGit(Brick brick) async {
     final gitPath = brick.location.git!;
-    final dirName = _hashGitPath(gitPath);
+    final tempDirectory = await _clone(gitPath);
+    final commitHash = await _revParse(tempDirectory);
+    final dirName = _encodedGitDir(gitPath, commitHash);
 
     final directory = Directory(p.join(rootDir.path, 'git', dirName));
     final directoryExists = directory.existsSync();
@@ -197,6 +213,7 @@ class BricksJson {
         brickYaml.readAsStringSync(),
         (m) => BrickYaml.fromJson(m!),
       );
+
       return yaml;
     }
 
@@ -204,9 +221,8 @@ class BricksJson {
     /// Fall-back to cached version if update fails.
     if (directoryExists && directoryIsNotEmpty) {
       try {
-        final tempDirectory = Directory.systemTemp.createTempSync();
-        await _clone(gitPath, tempDirectory);
         await directory.delete(recursive: true);
+        await directory.parent.create(recursive: true);
         await tempDirectory.rename(directory.path);
       } catch (_) {}
 
@@ -220,17 +236,17 @@ class BricksJson {
         );
       }
 
-      final localPath = p
-          .canonicalize(p.join(directory.path, gitPath.path))
-          .replaceAll(r'\', '/');
+      _verifyMasonVersionConstraint(yaml);
+
+      final localPath = canonicalize(p.join(directory.path, gitPath.path));
       _cache[name] = localPath;
       return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
-    await directory.create(recursive: true);
-    await _clone(gitPath, directory);
+    await directory.parent.create(recursive: true);
+    await tempDirectory.rename(directory.path);
 
     final yaml = _getBrickYaml(directory);
     final name = brick.name ?? yaml.name;
@@ -242,14 +258,15 @@ class BricksJson {
       );
     }
 
-    final localPath = p
-        .canonicalize(p.join(directory.path, gitPath.path))
-        .replaceAll(r'\', '/');
+    _verifyMasonVersionConstraint(yaml);
+
+    final localPath = canonicalize(p.join(directory.path, gitPath.path));
     _cache[name] = localPath;
     return localPath;
   }
 
-  Future<void> _clone(GitPath gitPath, Directory directory) async {
+  Future<Directory> _clone(GitPath gitPath) async {
+    final directory = Directory.systemTemp.createTempSync();
     await Git.run(['clone', gitPath.url, directory.path]);
     if (gitPath.ref != null) {
       await Git.run(
@@ -257,6 +274,15 @@ class BricksJson {
         processWorkingDir: directory.path,
       );
     }
+    return directory;
+  }
+
+  Future<String> _revParse(Directory directory) async {
+    final result = await Git.run(
+      ['rev-parse', 'HEAD'],
+      processWorkingDir: directory.path,
+    );
+    return (result.stdout as String).trim();
   }
 
   /// Writes remote brick from registry to cache
@@ -267,7 +293,7 @@ class BricksJson {
     final resolvedBrick = Brick.version(name: name, version: version);
     final dirName = '${name}_$version';
     final directory = Directory(
-      p.join(rootDir.path, 'hosted', hostedUrl, dirName),
+      p.join(rootDir.path, 'hosted', hostedUri.authority, dirName),
     );
     final directoryExists = directory.existsSync();
     final directoryIsNotEmpty =
@@ -275,16 +301,27 @@ class BricksJson {
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
-      _cache[name] = directory.path;
-      return directory.path;
+      final localPath = canonicalize(directory.path);
+      _cache[name] = localPath;
+      return localPath;
     }
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.create(recursive: true);
     await _download(resolvedBrick, directory);
-    _cache[name] = directory.path;
-    return directory.path;
+
+    final brickYaml = File(p.join(directory.path, BrickYaml.file));
+    final yaml = checkedYamlDecode(
+      brickYaml.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    _verifyMasonVersionConstraint(yaml);
+
+    final localPath = canonicalize(directory.path);
+    _cache[name] = localPath;
+    return localPath;
   }
 
   Future<String> _resolveBrickVersion(Brick brick) async {
@@ -296,7 +333,7 @@ class BricksJson {
       } catch (_) {}
     }
     final constraint = VersionConstraint.parse(_version ?? 'any');
-    final uri = Uri.parse('https://$hostedUrl/api/v1/bricks/${brick.name}');
+    final uri = Uri.parse('$hostedUri/api/v1/bricks/${brick.name}');
 
     late final http.Response response;
     try {
@@ -359,24 +396,27 @@ class BricksJson {
 
   Future<void> _download(Brick brick, Directory directory) async {
     final uri = Uri.parse(
-      'https://$hostedUrl/api/v1/bricks/${brick.name}/versions/${brick.location.version}.bundle',
+      '$hostedUri/api/v1/bricks/${brick.name}/versions/${brick.location.version}.bundle',
     );
     final response = await http.get(uri);
     if (response.statusCode != 200) {
       throw BrickNotFoundException(uri.toString());
     }
 
-    final bundle = MasonBundle.fromUniversalBundle(response.bodyBytes);
+    final bundle = await MasonBundle.fromUniversalBundle(response.bodyBytes);
+
     unpackBundle(bundle, directory);
   }
 
   /// Global subdirectory within the mason cache.
   static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
 
-  /// The location of the registry where bricks are hosted.
-  static String get hostedUrl {
+  /// The uri of the registry where bricks are hosted.
+  static Uri get hostedUri {
     final environment = testEnvironment ?? Platform.environment;
-    return environment['MASON_HOSTED_URL'] ?? 'registry.brickhub.dev';
+    return Uri.parse(
+      environment['MASON_HOSTED_URL'] ?? 'https://registry.brickhub.dev',
+    );
   }
 
   /// Root mason cache directory
@@ -397,10 +437,18 @@ class BricksJson {
   }
 }
 
-String _hashGitPath(GitPath git) {
+String _encodedGitDir(GitPath git, String commitHash) {
   final name = p.basenameWithoutExtension(git.url);
   final path = git.url.replaceAll(r'\', '/');
-  final hash = sha256.convert(utf8.encode(path));
-  final key = git.ref != null ? '${name}_${git.ref}_$hash' : '${name}_$hash';
-  return key;
+  final url = base64.encode(utf8.encode(path));
+  return '${name}_${url}_$commitHash';
+}
+
+void _verifyMasonVersionConstraint(BrickYaml brickYaml) {
+  if (!isBrickCompatibleWithMason(brickYaml)) {
+    throw BrickIncompatibleMasonVersion(
+      brickName: brickYaml.name,
+      constraint: brickYaml.environment.mason,
+    );
+  }
 }

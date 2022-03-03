@@ -1,3 +1,32 @@
+# 0.1.0-dev.11
+
+- fix: `Yaml.encode` handle escape characters
+
+# 0.1.0-dev.10
+
+- **BREAKING**: feat: run `fromUniversalBundle` in `Isolate` (async)
+- feat: expose `Yaml` encoding utility
+- feat: add `fromDartBundle` to `MasonBundle`
+
+# 0.1.0-dev.9
+
+- feat: expose `MasonBundledFile`
+
+# 0.1.0-dev.8
+
+- feat: add environment to `brick.yaml`
+
+  ```yaml
+  name: example
+  description: An example brick
+  version: 0.1.0+1
+
+  environment:
+    mason: ">=0.1.0-dev.1 <0.1.0"
+  ```
+
+- feat: add `isBrickCompatibleWithMason`
+
 # 0.1.0-dev.7
 
 - **BREAKING**: feat: add `MasonGenerator.fromBrick`
@@ -7,11 +36,14 @@
   - `Brick.path`, `Brick.git`, `Brick.version`
 - **BREAKING**: refactor: remove `WriteBrickException`
 - **BREAKING**: refactor: simplify `bricks.json` format
+- refactor: git cache directory location
 - feat: add `fromUniversalBundle` and `toUniversalBundle` on `MasonBundle`
 - feat: add `BrickLocation`
 - feat: add `unpackBundle` to convert universal bundle bytes to a `MasonBundle`
 - fix: yaml string encoding for semver
 - fix: `BrickNotFoundException` message when git path is empty
+- chore: upgrade to `mason_logger ^0.1.0-dev.5`
+- chore: upgrade to Dart 2.16
 
 # 0.1.0-dev.6
 

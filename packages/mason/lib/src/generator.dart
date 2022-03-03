@@ -7,7 +7,6 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
-import 'package:mason/src/mason_bundle.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
@@ -354,9 +353,9 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             _overwriteRule != OverwriteRule.alwaysAppend);
 
     if (shouldPrompt) {
-      logger?.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
       _overwriteRule = logger
-          ?.prompt(
+          .prompt(
             yellow.wrap(
               styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
             ),

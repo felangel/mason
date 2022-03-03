@@ -82,7 +82,7 @@ void main() {
           expect(result, equals(ExitCode.usage.code));
           verify(
             () => logger.err(
-              '''Could not find brick at ${path.canonicalize(Directory.current.path)}''',
+              '''Could not find brick at ${canonicalize(Directory.current.path)}''',
             ),
           ).called(1);
         });
@@ -244,7 +244,7 @@ void main() {
           expect(result, equals(ExitCode.usage.code));
           verify(
             () => logger.err(
-              '''Could not find brick at ${path.canonicalize(Directory.current.path)}''',
+              '''Could not find brick at ${canonicalize(Directory.current.path)}''',
             ),
           ).called(1);
         });

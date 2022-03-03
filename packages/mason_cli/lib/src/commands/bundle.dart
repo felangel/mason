@@ -73,7 +73,7 @@ class BundleCommand extends MasonCommand {
           bundlePath = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
-      bundleDone();
+      bundleDone('Bundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -98,7 +98,7 @@ Future<String> _generateDartBundle(
   await file.writeAsString(
     "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal, implicit_dynamic_map_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
   );
-  return path.canonicalize(file.path);
+  return canonicalize(file.path);
 }
 
 Future<String> _generateUniversalBundle(
@@ -107,8 +107,8 @@ Future<String> _generateUniversalBundle(
 ) async {
   final file = File(path.join(outputDir, '${bundle.name}.bundle'));
   await file.create(recursive: true);
-  await file.writeAsBytes(bundle.toUniversalBundle());
-  return path.canonicalize(file.path);
+  await file.writeAsBytes(await bundle.toUniversalBundle());
+  return canonicalize(file.path);
 }
 
 extension on String {

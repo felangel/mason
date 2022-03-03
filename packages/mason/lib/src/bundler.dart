@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
-import 'package:mason/src/mason_bundle.dart';
 import 'package:path/path.dart' as path;
 import 'package:universal_io/io.dart';
 
@@ -25,10 +24,11 @@ void unpackBundle(MasonBundle bundle, Directory target) {
     name: bundle.name,
     description: bundle.description,
     version: bundle.version,
+    environment: bundle.environment,
     vars: bundle.vars,
   );
   File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
-    json.encode(brickYaml.toJson()),
+    Yaml.encode(brickYaml.toJson()),
   );
 }
 
@@ -60,6 +60,7 @@ MasonBundle createBundle(Directory brick) {
     name: brickYaml.name,
     description: brickYaml.description,
     version: brickYaml.version,
+    environment: brickYaml.environment,
     vars: brickYaml.vars,
     files: files..sort(_comparePaths),
     hooks: hooks..sort(_comparePaths),

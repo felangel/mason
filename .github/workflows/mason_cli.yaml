@@ -28,7 +28,7 @@ jobs:
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
-        run: pub get
+        run: dart pub get
 
       - name: Format
         run: dart format --set-exit-if-changed lib
@@ -85,4 +85,4 @@ jobs:
           dart pub global activate pana
 
       - name: Verify Pub Score
-        run: ../../tool/verify_pub_score.sh 90
+        run: ../../tool/verify_pub_score.sh

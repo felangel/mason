@@ -1,0 +1,67 @@
+name: mason_api
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - .github/workflows/mason_api.yaml
+      - packages/mason_api/**
+
+  pull_request:
+    branches:
+      - master
+    paths:
+      - .github/workflows/mason_api.yaml
+      - packages/mason_api/**
+
+jobs:
+  build:
+    defaults:
+      run:
+        working-directory: packages/mason_api
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install Dependencies
+        run: dart pub get
+
+      - name: Format
+        run: dart format --set-exit-if-changed lib
+
+      - name: Analyze
+        run: dart analyze --fatal-infos --fatal-warnings .
+
+      - name: Run Tests
+        run: |
+          dart pub global activate test_coverage
+          export PATH=$PATH:$HOME/.pub-cache/bin
+          test_coverage
+
+      - name: Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v1
+        with:
+          path: packages/mason_api/coverage/lcov.info
+
+  pana:
+    defaults:
+      run:
+        working-directory: packages/mason_api
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install Dependencies
+        run: |
+          dart pub get
+          dart pub global activate pana
+
+      - name: Verify Pub Score
+        run: ../../tool/verify_pub_score.sh

@@ -1,7 +1,6 @@
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
-import 'package:mason_cli/src/yaml_encode.dart';
 
 /// {@template remove_command}
 /// `mason remove` command which removes a brick.

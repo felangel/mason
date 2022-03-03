@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason/mason.dart' as mason show packageVersion;
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
@@ -56,6 +57,7 @@ bricks:
     git:
       url: https://github.com/felangel/mason
       path: bricks/widget
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
 ''',
       );
     });
@@ -83,32 +85,30 @@ bricks:
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
 
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final appIconPath = path.canonicalize(
+      final appIconPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'app_icon'),
       );
-      final docPath = path.canonicalize(
+      final docPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
       );
-      final greetingPath = path.canonicalize(
+      final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
-      final simplePath = path.canonicalize(
+      final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
-      final todosPath = path.canonicalize(
+      final todosPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'todos'),
       );
-      final widgetPath = path
-          .canonicalize(
-            path.join(
-              BricksJson.rootDir.path,
-              'git',
-              '''mason_60e936dbe81fab0463b4efd5a396c50e4fcf52484fe2aa189d46874215a10b52''',
-              'bricks',
-              'widget',
-            ),
-          )
-          .replaceAll(r'\', '/');
+      final widgetPath = canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          'bricks',
+          'widget',
+        ),
+      );
 
       expect(
         File(expectedBrickJsonPath).readAsStringSync(),
@@ -165,7 +165,7 @@ bricks:
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err(
-          BrickNotFoundException(path.canonicalize('../../wrong/path')).message,
+          BrickNotFoundException(canonicalize('../../wrong/path')).message,
         ),
       ).called(1);
     });
@@ -231,6 +231,31 @@ bricks:
       final getResult = await commandRunner.run(['get']);
       expect(getResult, equals(ExitCode.usage.code));
       verify(() => logger.err(expectedErrorMessage)).called(1);
+    });
+
+    test('exits with code 64 when mason version constraint cannot be resolved',
+        () async {
+      await commandRunner.run(['new', 'example']);
+      final brickYaml = File(path.join('bricks', 'example', 'brick.yaml'));
+      brickYaml.writeAsStringSync(
+        brickYaml.readAsStringSync().replaceFirst(
+              'mason: ">=0.1.0-dev <0.1.0"',
+              'mason: ">=99.99.99 <100.0.0"',
+            ),
+      );
+
+      commandRunner = MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      );
+
+      final result = await commandRunner.run(['get']);
+      expect(result, equals(ExitCode.usage.code));
+      verify(
+        () => logger.err(
+          '''The current mason version is ${mason.packageVersion}.\nBecause example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
+        ),
+      ).called(1);
     });
 
     test('throws ProcessException when remote does not exist', () async {

@@ -1,6 +1,7 @@
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:pub_updater/pub_updater.dart';
@@ -17,10 +18,14 @@ const executableName = 'mason';
 /// {@endtemplate}
 class MasonCommandRunner extends CommandRunner<int> {
   /// {@macro mason_command_runner}
-  MasonCommandRunner({Logger? logger, PubUpdater? pubUpdater})
-      : _logger = logger ?? Logger(),
+  MasonCommandRunner({
+    Logger? logger,
+    PubUpdater? pubUpdater,
+    MasonApi? masonApi,
+  })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
+    final _masonApi = masonApi ?? MasonApi(hostedUri: BricksJson.hostedUri);
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
@@ -28,9 +33,13 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(GetCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
     addCommand(ListCommand(logger: _logger));
+    addCommand(LoginCommand(logger: _logger, masonApi: _masonApi));
+    addCommand(LogoutCommand(logger: _logger, masonApi: _masonApi));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
+    addCommand(PublishCommand(logger: _logger, masonApi: _masonApi));
     addCommand(RemoveCommand(logger: _logger));
+    addCommand(UnbundleCommand(logger: _logger));
     addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
   }
 
@@ -87,14 +96,9 @@ class MasonCommandRunner extends CommandRunner<int> {
           ..info('')
           ..info(
             '''
-+------------------------------------------------------------------------------------+
-|                                                                                    |
-|                   ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}                      |
-|  ${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}  |
-|                             Run ${cyan.wrap('mason update')} to update                             |
-|                                                                                    |
-+------------------------------------------------------------------------------------+
-''',
+${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
+${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+Run ${cyan.wrap('mason update')} to update''',
           );
       }
     } catch (_) {}

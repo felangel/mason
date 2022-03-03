@@ -1,15 +1,44 @@
+# 0.1.0-dev.14
+
+- feat: add `mason unbundle` command
+- chore: upgrade to `mason ^0.1.0-dev.10`
+
+# 0.1.0-dev.13
+
+- feat: improve stdout for `mason bundle`
+- fix: mason list git path parsing
+
+# 0.1.0-dev.12
+
+- feat: support for environment in `brick.yaml`
+  - `mason init` includes `environment`
+  - `mason new` includes `environment`
+- feat: verify brick compatibility
+  - `mason get` ensures bricks are compatible
+  - `mason add` ensures bricks are compatible
+  - `mason make` ensures bricks are compatible
+
 # 0.1.0-dev.11
 
 - **BREAKING**: feat: `mason add` support for hosted bricks
-  
-    ```sh
-    # add from registry
-    mason add my_brick
-    ```
+
+  ```sh
+  # add from registry
+  mason add my_brick
+  ```
+
+- feat: `mason login` command
+- feat: `mason logout` command
+- feat: `mason publish` command
+- feat: `mason list` includes brick source
 - fix: clear `bricks.json` prior to fetching via `mason get`
 - fix: verify/validate brick name matches name in `mason.yaml` during `mason get`
+- fix: simplify update prompt styling
 - refactor: populate bricks from `bricks.json` directly
 - refactor: remove dependency on `package:archive`
+- docs: update `README` to include new commands
+- chore: upgrade to `mason ^0.1.0-dev.7`
+- chore: upgrade to Dart 2.16
 
 # 0.1.0-dev.10
 

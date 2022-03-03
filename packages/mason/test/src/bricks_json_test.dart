@@ -231,6 +231,44 @@ void main() {
       });
 
       test(
+          'throws BrickIncompatibleMasonVersion '
+          'when brick is incompatible with mason version.', () async {
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+
+        final brickDirectory = Directory(path.join(directory.path, 'example'))
+          ..createSync(recursive: true);
+        File(path.join(brickDirectory.path, BrickYaml.file)).writeAsStringSync(
+          '''
+name: example
+description: example
+version: 0.1.0+1
+
+environment:
+  mason: ">=99.99.99 <100.0.0"
+''',
+        );
+        try {
+          await bricksJson.add(Brick.path(brickDirectory.path));
+          fail('should throw');
+        } on BrickIncompatibleMasonVersion catch (error) {
+          expect(
+            error.message,
+            equals(
+              '''The current mason version is $packageVersion.\nBecause example requires mason version >=99.99.99 <100.0.0, version solving failed.''',
+            ),
+          );
+        }
+
+        expect(bricksJson.encode, equals('{}'));
+      });
+
+      test(
           'throws BrickResolveVersionException when '
           'brick does not exist (registry)', () async {
         final directory = Directory.systemTemp.createTempSync();
@@ -274,9 +312,17 @@ void main() {
       test(
           'throws BrickResolveVersionException when '
           'http request returns non-200 (registry)', () async {
+        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final uri = 'http://${server.address.host}:${server.port}';
+        final subscription = server.listen((request) {
+          request.response
+            ..statusCode = 500
+            ..write('')
+            ..close();
+        });
         final directory = Directory.systemTemp.createTempSync();
         BricksJson.testEnvironment = {
-          'MASON_HOSTED_URL': 'httpstat.us/500',
+          'MASON_HOSTED_URL': uri,
           'MASON_CACHE': directory.path,
         };
         final bricksJson = BricksJson(directory: directory);
@@ -285,22 +331,38 @@ void main() {
         )..createSync(recursive: true);
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
-        expect(
+        await expectLater(
           () => bricksJson.add(
             Brick.version(name: 'example', version: 'any'),
           ),
-          throwsA(isA<BrickResolveVersionException>()),
+          throwsA(
+            isA<BrickResolveVersionException>().having(
+              (e) => e.message,
+              'message',
+              'Unable to fetch versions for brick "example".',
+            ),
+          ),
         );
         BricksJson.testEnvironment = null;
+        await subscription.cancel();
+        await server.close();
       });
 
       test(
           'throws BrickResolveVersionException when '
           'http request returns malformed body w/out latest version (registry)',
           () async {
+        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final uri = 'http://${server.address.host}:${server.port}';
+        final subscription = server.listen((request) {
+          request.response
+            ..statusCode = 200
+            ..write('{}')
+            ..close();
+        });
         final directory = Directory.systemTemp.createTempSync();
         BricksJson.testEnvironment = {
-          'MASON_HOSTED_URL': 'httpbin.org/anything',
+          'MASON_HOSTED_URL': uri,
           'MASON_CACHE': directory.path,
         };
         final bricksJson = BricksJson(directory: directory);
@@ -309,23 +371,38 @@ void main() {
         )..createSync(recursive: true);
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
-        expect(
+        await expectLater(
           () => bricksJson.add(
             Brick.version(name: 'example', version: 'any'),
           ),
-          throwsA(isA<BrickResolveVersionException>()),
+          throwsA(
+            isA<BrickResolveVersionException>().having(
+              (e) => e.message,
+              'message',
+              'Unable to parse latest version of brick "example".',
+            ),
+          ),
         );
         BricksJson.testEnvironment = null;
+        await subscription.cancel();
+        await server.close();
       });
 
       test(
           'throws BrickResolveVersionException when '
           'http request returns malformed body w/out versions (registry)',
           () async {
+        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final uri = 'http://${server.address.host}:${server.port}';
+        final subscription = server.listen((request) {
+          request.response
+            ..statusCode = 200
+            ..write('{"latest": {"version": "42.0.0"}}')
+            ..close();
+        });
         final directory = Directory.systemTemp.createTempSync();
         BricksJson.testEnvironment = {
-          'MASON_HOSTED_URL':
-              'mockbin.org/bin/d96f7700-a4ed-432c-a7b7-5a1f5305c2a4',
+          'MASON_HOSTED_URL': uri,
           'MASON_CACHE': directory.path,
         };
         final bricksJson = BricksJson(directory: directory);
@@ -334,13 +411,21 @@ void main() {
         )..createSync(recursive: true);
         expect(file.existsSync(), isTrue);
         expect(bricksJson.encode, equals('{}'));
-        expect(
+        await expectLater(
           () => bricksJson.add(
             Brick.version(name: 'example', version: '^1.0.0'),
           ),
-          throwsA(isA<BrickResolveVersionException>()),
+          throwsA(
+            isA<BrickResolveVersionException>().having(
+              (e) => e.message,
+              'message',
+              'Unable to parse available versions for brick "example".',
+            ),
+          ),
         );
         BricksJson.testEnvironment = null;
+        await subscription.cancel();
+        await server.close();
       });
 
       test('throws BrickUnsatisfiedVersionConstraint (registry)', () async {

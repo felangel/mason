@@ -58,6 +58,14 @@ mason make hello
   - [List Usage](#list-usage)
 - [Bundling](#bundling)
   - [Bundle Usage](#bundle-usage)
+- [Unbundling](#unbundling)
+  - [Unbundle Usage](#unbundle-usage)
+- [Login](#login)
+  - [Login Usage](#login-usage)
+- [Logout](#logout)
+  - [Logout Usage](#logout-usage)
+- [Publishing Bricks](#publishing-bricks)
+  - [Publish Usage](#publish-usage)
 - [Complete Usage](#complete-usage)
 - [Video Tutorial](#video-tutorial)
 
@@ -418,7 +426,7 @@ And `post_gen.dart` contains:
 import 'package:mason/mason.dart';
 
 void run(HookContext context) {
-  context.logger.info('hello {{name}}!');  
+  context.logger.info('hello {{name}}!');
 }
 ```
 
@@ -442,7 +450,7 @@ import 'package:mason/mason.dart';
 void run(HookContext context) {
   // Read/Write vars
   context.vars = {...context.vars, 'custom_var': 'foo'};
-  
+
   // Use the logger
   context.logger.info('hook says hi!');
 }
@@ -564,6 +572,63 @@ final generator = MasonGenerator.fromBundle(...);
 await generator.generate(...);
 ```
 
+## Unbundling
+
+You can use mason to generate a brick from an existing bundle. Unbundling is useful in cases where you want to make changes to an existing bundle because you can first unbundle, make the changes to the template, and generate a new bundle.
+
+### Unbundle Usage
+
+To generate a brick template from an existing bundle:
+
+```sh
+# Universal Bundle
+mason unbundle ./path/to/bundle -o ./path/to/destination/
+
+# Dart Bundle
+mason unbundle ./path/to/bundle -t dart -o ./path/to/destination/
+```
+
+## Login
+
+You can login with a registered account via the `login` command.
+
+### Login Usage
+
+```sh
+# login with email and password
+mason login
+```
+
+## Logout
+
+You can logout of an account via the `logout` command.
+
+### Logout Usage
+
+```sh
+# logout of the current account
+mason logout
+```
+
+## Publishing Bricks
+
+You can publish a brick via the `publish` command. You must be logged in to an account with a verified email address in order to publish.
+
+❗ **Note: once a brick has been published, it can never be unpublished.**
+
+### Publish Usage
+
+```sh
+# publish brick in the current directory
+mason publish
+
+# publish brick from custom path
+mason publish --directory ./path/to/brick
+
+# publish brick from custom path shorthand syntax
+mason publish -C ./path/to/brick
+```
+
 ## Complete Usage
 
 ```sh
@@ -577,16 +642,20 @@ Global options:
     --version    Print the current version.
 
 Available commands:
-  add      Adds a brick from a local or remote source.
-  bundle   Generates a bundle from a brick template.
-  cache    Interact with mason cache.
-  get      Gets all bricks in the nearest mason.yaml.
-  init     Initialize mason in the current directory.
-  list     Lists installed bricks.
-  make     Generate code using an existing brick template.
-  new      Creates a new brick template.
-  remove   Removes a brick.
-  update   Update mason.
+  add        Adds a brick from a local or remote source.
+  bundle     Generates a bundle from a brick template.
+  cache      Interact with mason cache.
+  get        Gets all bricks in the nearest mason.yaml.
+  init       Initialize mason in the current directory.
+  list       Lists installed bricks.
+  login      Log into brickhub.dev.
+  logout     Log out of brickhub.dev.
+  make       Generate code using an existing brick template.
+  new        Creates a new brick template.
+  publish    Publish the current brick to brickhub.dev.
+  remove     Removes a brick.
+  unbundle   Generates a brick template from a bundle.
+  update     Update mason.
 
 Run "mason help <command>" for more information about a command.
 ```
