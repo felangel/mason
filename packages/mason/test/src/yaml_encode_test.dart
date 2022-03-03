@@ -46,11 +46,43 @@ key:
 
       test('handles {string:map} correctly (complex)', () {
         const input = <String, dynamic>{
-          'key': {'foo': '[{"todo":"Walk Dog","done":false}]'}
+          'name': 'todos',
+          'description': 'A Todos Template',
+          'version': '0.1.0+2',
+          'environment': {'mason': 'any'},
+          'vars': <String, dynamic>{
+            'todos': {
+              'type': 'string',
+              'description':
+                  'JSON Array of todos ([{"todo":"Walk Dog","done":false}])',
+              'default': '[{"todo":"Walk Dog","done":false}]',
+              'prompt': 'What is the list of todos?'
+            },
+            'developers': <String, dynamic>{
+              'type': 'string',
+              'description': 'JSON Array of developers ([{"name": "Dash"}])',
+              'default': '[{"name": "Dash"}]',
+              'prompt': 'What is the list of developers?'
+            }
+          }
         };
         const expected = r'''
-key:
-  foo: "[{\"todo\":\"Walk Dog\",\"done\":false}]"''';
+name: todos
+description: A Todos Template
+version: 0.1.0+2
+environment:
+  mason: any
+vars:
+  todos:
+    type: string
+    description: "JSON Array of todos ([{\"todo\":\"Walk Dog\",\"done\":false}])"
+    default: "[{\"todo\":\"Walk Dog\",\"done\":false}]"
+    prompt: "What is the list of todos?"
+  developers:
+    type: string
+    description: "JSON Array of developers ([{\"name\": \"Dash\"}])"
+    default: "[{\"name\": \"Dash\"}]"
+    prompt: "What is the list of developers?"''';
         expect(Yaml.encode(input), equals(expected));
       });
 
