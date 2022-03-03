@@ -44,6 +44,16 @@ key:
         expect(Yaml.encode(input), equals(expected));
       });
 
+      test('handles {string:map} correctly (complex)', () {
+        const input = <String, dynamic>{
+          'key': {'foo': '[{"todo":"Walk Dog","done":false}]'}
+        };
+        const expected = r'''
+key:
+  foo: "[{\"todo\":\"Walk Dog\",\"done\":false}]"''';
+        expect(Yaml.encode(input), equals(expected));
+      });
+
       test('handles {string:list} correctly', () {
         const input = <String, dynamic>{
           'key': ['a', 1, false]

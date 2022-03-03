@@ -23,6 +23,9 @@ String _formatValue(dynamic value, int nesting) {
     if (_isMultilineString(value)) {
       return ''' |\n${value.split('\n').map((s) => '${_indentation(nesting + 1)}$s').join('\n')}''';
     }
+    if (_containsEscapeCharacters(value)) {
+      return ' "${_withEscapes(value)}"';
+    }
     if (_containsSpecialCharacters(value)) {
       return ' "$value"';
     }
@@ -48,3 +51,26 @@ bool _containsSpecialCharacters(String s) =>
     _specialCharacters.any((c) => s.contains(c));
 
 final _specialCharacters = ':{}[],&*#?|-<>=!%@'.split('');
+
+bool _containsEscapeCharacters(String s) =>
+    _escapeCharacters.any((c) => s.contains(c));
+
+final _escapeCharacters = [
+  r'\',
+  '\r',
+  '\t',
+  '\n',
+  '"',
+  "'",
+  '',
+  '',
+];
+
+String _withEscapes(String s) => s
+    .replaceAll(r'\', r'\\')
+    .replaceAll('\r', r'\r')
+    .replaceAll('\t', r'\t')
+    .replaceAll('\n', r'\n')
+    .replaceAll('"', r'\"')
+    .replaceAll('', '\x99')
+    .replaceAll('', '\x9D');
