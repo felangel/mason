@@ -11,12 +11,19 @@ import 'package:universal_io/io.dart';
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
   NewCommand({Logger? logger}) : super(logger: logger) {
-    argParser.addOption(
-      'desc',
-      abbr: 'd',
-      help: 'Description of the new brick template',
-      defaultsTo: 'A new brick created with the Mason CLI.',
-    );
+    argParser
+      ..addOption(
+        'desc',
+        abbr: 'd',
+        help: 'Description of the new brick template',
+        defaultsTo: 'A new brick created with the Mason CLI.',
+      )
+      ..addOption(
+        'output-dir',
+        abbr: 'o',
+        help: 'Directory where to output the new brick.',
+        defaultsTo: '.',
+      );
   }
 
   @override
@@ -30,11 +37,12 @@ class NewCommand extends MasonCommand {
     if (results.rest.isEmpty) {
       throw UsageException('Name of the new brick is required.', usage);
     }
-    final bricksJson = localBricksJson;
-    if (bricksJson == null) throw const MasonYamlNotFoundException();
     final name = results.rest.first.snakeCase;
     final description = results['desc'] as String;
-    final directory = Directory(p.join(entryPoint.path, 'bricks'));
+    final outputDir = canonicalize(
+      p.join(cwd.path, results['output-dir'] as String),
+    );
+    final directory = Directory(outputDir);
     final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
 
     if (brickYaml.existsSync()) {
@@ -45,30 +53,13 @@ class NewCommand extends MasonCommand {
     final done = logger.progress('Creating new brick: $name.');
     final target = DirectoryGeneratorTarget(directory);
     final generator = _BrickGenerator(name, description);
-    final newBrick = Brick.path(
-      p
-          .normalize(
-            p.relative(
-              brickYaml.parent.path,
-              from: entryPoint.path,
-            ),
-          )
-          .replaceAll(r'\', '/'),
-    );
-    final bricks = Map.of(masonYaml.bricks)..addAll({name: newBrick.location});
 
     try {
-      await Future.wait([
-        generator.generate(
-          target,
-          vars: <String, dynamic>{'name': '{{name}}'},
-          logger: logger,
-        ),
-        if (!masonYaml.bricks.containsKey(name))
-          masonYamlFile.writeAsString(Yaml.encode(MasonYaml(bricks).toJson())),
-      ]);
-      await bricksJson.add(newBrick);
-      await bricksJson.flush();
+      await generator.generate(
+        target,
+        vars: <String, dynamic>{'name': '{{name}}'},
+        logger: logger,
+      );
 
       done('Created new brick: $name');
       logger
