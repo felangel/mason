@@ -107,7 +107,7 @@ class _BrickGenerator extends MasonGenerator {
               _brickLicenseContent,
             ),
             TemplateFile(
-              p.join(brickName, BrickYaml.dir, 'hello.md'),
+              p.join(brickName, BrickYaml.dir, 'HELLO.md'),
               'Hello {{name}}!',
             ),
           ],
