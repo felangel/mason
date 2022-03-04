@@ -50,17 +50,13 @@ class NewCommand extends MasonCommand {
       return ExitCode.usage.code;
     }
 
-    final done = logger.progress('Creating new brick: $name.');
     final target = DirectoryGeneratorTarget(directory);
+    const vars = <String, dynamic>{'name': '{{name}}'};
     final generator = _BrickGenerator(name, description);
+    final done = logger.progress('Creating new brick: $name.');
 
     try {
-      await generator.generate(
-        target,
-        vars: <String, dynamic>{'name': '{{name}}'},
-        logger: logger,
-      );
-
+      await generator.generate(target, vars: vars, logger: logger);
       done('Created new brick: $name');
       logger
         ..info(
