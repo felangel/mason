@@ -1,6 +1,5 @@
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
-import 'package:path/path.dart' as p;
 
 /// {@template init_command}
 /// `mason init` command which initializes a new `mason.yaml`.
@@ -64,47 +63,8 @@ class _MasonYamlGenerator extends MasonGenerator {
       : super(
           '__mason_init__',
           'Initialize a new ${MasonYaml.file}',
-          files: [
-            TemplateFile(MasonYaml.file, _masonYamlContent),
-            TemplateFile(
-              p.join('bricks', 'hello', BrickYaml.file),
-              _brickYamlContent,
-            ),
-            TemplateFile(
-              p.join('bricks', 'hello', BrickYaml.dir, 'HELLO.md'),
-              'Hello {{name}}!',
-            ),
-          ],
+          files: [TemplateFile(MasonYaml.file, _masonYamlContent)],
         );
-
-  static const _brickYamlContent = '''
-name: hello
-description: An example hello brick.
-
-# The following defines the version and build number for your brick.
-# A version number is three numbers separated by dots, like 1.2.34
-# followed by an optional build number (separated by a +).
-version: 0.1.0+1
-
-# The following defines the environment for the current brick.
-# It includes the version of mason that the brick requires.
-environment:
-  mason: ">=0.1.0-dev <0.1.0"
-
-# Variables specify dynamic values that your brick depends on.
-# Zero or more variables can be specified for a given brick.
-# Each variable has:
-#  * a type (string, number, or boolean)
-#  * an optional short description
-#  * an optional default value
-#  * an optional prompt phrase used when asking for the variable.
-vars:
-  name:
-    type: string
-    description: Your name
-    default: Dash
-    prompt: What is your name?
-''';
 
   static const _masonYamlContent = '''
 # Register bricks which can be consumed via the Mason CLI.
@@ -112,8 +72,7 @@ vars:
 bricks:
   # Sample Brick
   # Run `mason make hello` to try it out.
-  hello:
-    path: bricks/hello
+  hello: any
   # Bricks can also be imported via git url.
   # Uncomment the following lines to import
   # a brick from a remote git url.
