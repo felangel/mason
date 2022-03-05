@@ -189,10 +189,18 @@ mason make hello --name Felix --on-conflict append
 Create a new brick using the `mason new` command.
 
 ```sh
+# Generate a new brick in the current directory.
 mason new <BRICK_NAME>
-```
 
-The above command will generate a new brick in the `bricks` directory with a `brick.yaml` and `__brick__` template directory.
+# Generate a new brick with a custom description.
+mason new <BRICK_NAME> --desc "My awesome, new brick!"
+
+# Generate a new brick in custom path.
+mason new <BRICK_NAME> --output-dir ./path/to/brick
+
+# Generate a new brick in custom path shorthand syntax.
+mason new <BRICK_NAME> -o ./path/to/brick
+```
 
 ### Brick YAML
 
