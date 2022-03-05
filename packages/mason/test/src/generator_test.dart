@@ -1,5 +1,7 @@
 // ignore_for_file: missing_whitespace_between_adjacent_strings
 
+import 'dart:convert';
+
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:mocktail/mocktail.dart';
@@ -44,6 +46,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
+        const splitter = LineSplitter();
 
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -52,20 +55,22 @@ void main() {
 
         final file = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile = files.first;
+
+        final actualLines = splitter.convert(file.readAsStringSync());
+        final expectedLines = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files.length, equals(1));
         expect(generatedFile.status, equals(GeneratedFileStatus.created));
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
-        expect(
-          file.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines, expectedLines);
       });
 
       test('constructs an instance (todos)', () async {
@@ -173,7 +178,10 @@ void main() {
         expect(file.existsSync(), isTrue);
         expect(
           file.readAsStringSync(),
-          contains('Hi $name!\nYour favorite color is'),
+          allOf([
+            contains('Hi $name!'),
+            contains('Your favorite color is'),
+          ]),
         );
       });
 
@@ -187,6 +195,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
+        const splitter = LineSplitter();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -196,20 +205,22 @@ void main() {
 
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile1 = files1.first;
+
+        final actualLines1 = splitter.convert(file1.readAsStringSync());
+        final expectedLines1 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files1.length, equals(1));
         expect(generatedFile1.status, equals(GeneratedFileStatus.created));
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
-        expect(
-          file1.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines1, expectedLines1);
         verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
         verifyNever(
           () => logger.delayed(any(that: contains('(identical)'))),
@@ -223,20 +234,22 @@ void main() {
 
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile2 = files2.first;
+
+        final actualLines2 = splitter.convert(file2.readAsStringSync());
+        final expectedLines2 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files2.length, equals(1));
         expect(generatedFile2.status, equals(GeneratedFileStatus.identical));
         expect(generatedFile2.path, equals(file1.path));
         expect(file2.existsSync(), isTrue);
-        expect(
-          file2.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines2, expectedLines2);
         verify(
           () => logger.delayed(any(that: contains('(identical)'))),
         ).called(1);
@@ -254,6 +267,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
+        const splitter = LineSplitter();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -263,20 +277,22 @@ void main() {
 
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile1 = files1.first;
+
+        final actualLines1 = splitter.convert(file1.readAsStringSync());
+        final expectedLines1 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files1.length, equals(1));
         expect(generatedFile1.status, equals(GeneratedFileStatus.created));
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
-        expect(
-          file1.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines1, expectedLines1);
         verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
         verifyNever(() => logger.delayed(any(that: contains('(skip)'))));
 
@@ -289,20 +305,22 @@ void main() {
 
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile2 = files2.first;
+
+        final actualLines2 = splitter.convert(file2.readAsStringSync());
+        final expectedLines2 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files2.length, equals(1));
         expect(generatedFile2.status, equals(GeneratedFileStatus.skipped));
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
-        expect(
-          file2.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines2, expectedLines2);
         verify(() => logger.delayed(any(that: contains('(skip)')))).called(1);
         verifyNever(() => logger.delayed(any(that: contains('(new)'))));
       });
@@ -318,6 +336,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
         final logger = MockLogger();
+        const splitter = LineSplitter();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -327,20 +346,22 @@ void main() {
 
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile1 = files1.first;
+
+        final actualLines1 = splitter.convert(file1.readAsStringSync());
+        final expectedLines1 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files1.length, equals(1));
         expect(generatedFile1.status, equals(GeneratedFileStatus.created));
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
-        expect(
-          file1.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines1, expectedLines1);
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -351,25 +372,26 @@ void main() {
 
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile2 = files2.first;
+
+        final actualLines2 = splitter.convert(file2.readAsStringSync());
+        final expectedLines2 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_# 🧱 $otherName
+
+Hello $otherName!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files2.length, equals(1));
         expect(generatedFile2.status, equals(GeneratedFileStatus.appended));
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
-        expect(
-          file2.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_'
-            '# 🧱 $otherName\n'
-            '\n'
-            'Hello $otherName!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines2, expectedLines2);
       });
 
       test(
@@ -382,6 +404,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
+        const splitter = LineSplitter();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -390,20 +413,22 @@ void main() {
 
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile1 = files1.first;
+
+        final actualLines1 = splitter.convert(file1.readAsStringSync());
+        final expectedLines1 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files1.length, equals(1));
         expect(generatedFile1.status, equals(GeneratedFileStatus.created));
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
-        expect(
-          file1.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines1, expectedLines1);
 
         final logger = MockLogger();
         when(() => logger.prompt(any())).thenReturn('Y');
@@ -417,20 +442,22 @@ void main() {
 
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile2 = files2.first;
+
+        final actualLines2 = splitter.convert(file2.readAsStringSync());
+        final expectedLines2 = splitter.convert(
+          '''
+# 🧱 $otherName
+
+Hello $otherName!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files2.length, equals(1));
         expect(generatedFile2.status, equals(GeneratedFileStatus.overwritten));
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
-        expect(
-          file2.readAsStringSync(),
-          equals(
-            '# 🧱 $otherName\n'
-            '\n'
-            'Hello $otherName!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines2, expectedLines2);
       });
 
       test(
@@ -443,6 +470,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
+        const splitter = LineSplitter();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -451,20 +479,22 @@ void main() {
 
         final file1 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile1 = files1.first;
+
+        final actualLines1 = splitter.convert(file1.readAsStringSync());
+        final expectedLines1 = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files1.length, equals(1));
         expect(generatedFile1.status, equals(GeneratedFileStatus.created));
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
-        expect(
-          file1.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines1, expectedLines1);
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -473,20 +503,22 @@ void main() {
 
         final file2 = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile2 = files2.first;
+
+        final actualLines2 = splitter.convert(file2.readAsStringSync());
+        final expectedLines2 = splitter.convert(
+          '''
+# 🧱 $otherName
+
+Hello $otherName!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files2.length, equals(1));
         expect(generatedFile2.status, equals(GeneratedFileStatus.overwritten));
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
-        expect(
-          file2.readAsStringSync(),
-          equals(
-            '# 🧱 $otherName\n'
-            '\n'
-            'Hello $otherName!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines2, expectedLines2);
       });
 
       test('constructs an instance w/skip and no conflicts (hello_world)',
@@ -497,6 +529,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
+        const splitter = LineSplitter();
 
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -506,20 +539,22 @@ void main() {
 
         final file = File(path.join(tempDir.path, 'HELLO.md'));
         final generatedFile = files.first;
+
+        final actualLines = splitter.convert(file.readAsStringSync());
+        final expectedLines = splitter.convert(
+          '''
+# 🧱 $name
+
+Hello $name!
+
+_made with 💖 by mason_''',
+        );
+
         expect(files.length, equals(1));
         expect(generatedFile.status, equals(GeneratedFileStatus.created));
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
-        expect(
-          file.readAsStringSync(),
-          equals(
-            '# 🧱 $name\n'
-            '\n'
-            'Hello $name!\n'
-            '\n'
-            '_made with 💖 by mason_',
-          ),
-        );
+        expect(actualLines, expectedLines);
       });
     });
 
