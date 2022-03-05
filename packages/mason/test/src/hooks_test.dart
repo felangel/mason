@@ -7,7 +7,7 @@ void main() {
   group('Hooks', () {
     test(
         'throws HookInvalidCharactersException '
-        'when containining non-ascii characters', () async {
+        'when containing non-ASCII characters', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'unicode_hook'),
       );
