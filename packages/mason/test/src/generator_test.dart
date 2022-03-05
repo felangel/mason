@@ -29,7 +29,19 @@ void main() {
         )
           ..createSync(recursive: true)
           ..writeAsStringSync('secret');
-        await Process.run('chmod', ['000', brokenFile.path]);
+        if (Platform.isWindows) {
+          await Process.run(
+            'icacls',
+            [
+              brokenFile.path,
+              '/inheritance:r',
+              '/deny',
+              '*S-1-1-0:(OI)(CI)(F)',
+            ],
+          );
+        } else {
+          await Process.run('chmod', ['000', brokenFile.path]);
+        }
 
         final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
