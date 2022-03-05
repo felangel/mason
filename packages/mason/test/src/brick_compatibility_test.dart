@@ -33,7 +33,9 @@ void main() {
       );
     });
 
-    test('returns true when constraint is ">={currentVersion}"', () {
+    // Avoid using double quotes in test descriptions.
+    // Ref: https://github.com/Dart-Code/Dart-Code/issues/3863
+    test("returns true when constraint is '>={currentVersion}'", () {
       expect(
         isBrickCompatibleWithMason(getBrickYaml('>=$packageVersion')),
         isTrue,
