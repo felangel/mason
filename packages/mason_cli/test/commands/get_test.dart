@@ -158,7 +158,7 @@ bricks:
         '''
 bricks:
   app_icon:
-    path: ../../wrong/path  
+    path: ../../wrong/path
 ''',
       );
       final result = await commandRunner.run(['get']);
