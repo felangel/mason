@@ -116,10 +116,12 @@ void main() {
 
       final secondResult = await commandRunner.run(['new', 'hello world']);
       expect(secondResult, equals(ExitCode.usage.code));
-      final expectedBrickYamlPath = path.join(
-        Directory.current.path,
-        'hello_world',
-        'brick.yaml',
+      final expectedBrickYamlPath = canonicalize(
+        path.join(
+          Directory.current.path,
+          'hello_world',
+          'brick.yaml',
+        ),
       );
       verify(
         () => logger.err(
