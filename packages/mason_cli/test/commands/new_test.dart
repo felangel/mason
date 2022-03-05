@@ -116,17 +116,11 @@ void main() {
 
       final secondResult = await commandRunner.run(['new', 'hello world']);
       expect(secondResult, equals(ExitCode.usage.code));
-      final expectedBrickYamlPath = canonicalize(
-        path.join(
-          Directory.current.path,
-          'hello_world',
-          'brick.yaml',
-        ),
+      final expectedBrickPath = canonicalize(
+        path.join(Directory.current.path, 'hello_world'),
       );
       verify(
-        () => logger.err(
-          'Existing brick: hello_world at $expectedBrickYamlPath',
-        ),
+        () => logger.err('Existing brick: hello_world at $expectedBrickPath'),
       ).called(1);
     });
   });

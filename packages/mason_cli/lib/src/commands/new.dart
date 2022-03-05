@@ -46,7 +46,9 @@ class NewCommand extends MasonCommand {
     final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
 
     if (brickYaml.existsSync()) {
-      logger.err('Existing brick: $name at ${canonicalize(brickYaml.path)}');
+      logger.err(
+        'Existing brick: $name at ${canonicalize(brickYaml.parent.path)}',
+      );
       return ExitCode.usage.code;
     }
 
