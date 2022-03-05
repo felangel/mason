@@ -1,5 +1,4 @@
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -42,12 +41,12 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('exits with code 64 when mason.yaml does not exist', () async {
-      final result = await commandRunner.run(['new', 'hello world']);
+    test('exits with code 64 when name is missing', () async {
+      File(path.join(Directory.current.path, 'mason.yaml'))
+          .writeAsStringSync('bricks:\n');
+      final result = await commandRunner.run(['new']);
       expect(result, equals(ExitCode.usage.code));
-      verify(
-        () => logger.err(const MasonYamlNotFoundException().message),
-      ).called(1);
+      verify(() => logger.err('Name of the new brick is required.')).called(1);
     });
 
     test(
@@ -58,67 +57,70 @@ void main() {
           throw const MasonException('oops');
         }
       });
-      File(path.join(Directory.current.path, 'mason.yaml'))
-          .writeAsStringSync('bricks:\n');
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('oops')).called(1);
     });
 
     test('creates a new brick when it does not exist', () async {
-      File(path.join(Directory.current.path, 'mason.yaml'))
-          .writeAsStringSync('bricks:\n');
+      final testDir = Directory(
+        path.join(Directory.current.path, 'simple'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.success.code));
       final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.new')),
+        path.join(testFixturesPath(cwd, suffix: '.new'), 'simple'),
       );
       final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'new')),
+        path.join(testFixturesPath(cwd, suffix: 'new'), 'simple'),
       );
-      expect(
-        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
-        isTrue,
-      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
       verify(() => logger.flush(logger.detail)).called(1);
     });
 
-    test('exits with code 64 when name is missing', () async {
-      File(path.join(Directory.current.path, 'mason.yaml'))
-          .writeAsStringSync('bricks:\n');
-      final result = await commandRunner.run(['new']);
-      expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('Name of the new brick is required.')).called(1);
+    test('creates a new brick w/custom output-dir', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'custom'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final outputDir = path.join(testDir.path, 'bricks');
+      final result = await commandRunner.run(
+        ['new', 'hello world', '-o', outputDir],
+      );
+      expect(result, equals(ExitCode.success.code));
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.new'), 'custom'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'new'), 'custom'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+      verify(() => logger.flush(logger.detail)).called(1);
     });
 
     test('exits with code 64 when brick already exists', () async {
-      File(path.join(Directory.current.path, 'mason.yaml'))
-          .writeAsStringSync('bricks:\n');
+      final testDir = Directory(
+        path.join(Directory.current.path, 'simple'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.success.code));
       final actual = Directory(
-        path.join(testFixturesPath(cwd, suffix: '.new')),
+        path.join(testFixturesPath(cwd, suffix: '.new'), 'simple'),
       );
       final expected = Directory(
-        path.join(testFixturesPath(cwd, suffix: 'new')),
+        path.join(testFixturesPath(cwd, suffix: 'new'), 'simple'),
       );
-      expect(
-        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
-        isTrue,
-      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
 
       final secondResult = await commandRunner.run(['new', 'hello world']);
       expect(secondResult, equals(ExitCode.usage.code));
-      final expectedBrickYamlPath = path.join(
-        Directory.current.path,
-        'bricks',
-        'hello_world',
-        'brick.yaml',
+      final expectedBrickPath = canonicalize(
+        path.join(Directory.current.path, 'hello_world'),
       );
       verify(
-        () => logger.err(
-          'Existing brick: hello_world at $expectedBrickYamlPath',
-        ),
+        () => logger.err('Existing brick: hello_world at $expectedBrickPath'),
       ).called(1);
     });
   });
