@@ -352,7 +352,10 @@ environment:
           'throws BrickResolveVersionException when '
           'http request returns malformed body w/out latest version (registry)',
           () async {
-        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final server = await HttpServer.bind(
+          InternetAddress.loopbackIPv4,
+          8080,
+        );
         final uri = 'http://${server.address.host}:${server.port}';
         final subscription = server.listen((request) {
           request.response
@@ -392,7 +395,10 @@ environment:
           'throws BrickResolveVersionException when '
           'http request returns malformed body w/out versions (registry)',
           () async {
-        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final server = await HttpServer.bind(
+          InternetAddress.loopbackIPv4,
+          8080,
+        );
         final uri = 'http://${server.address.host}:${server.port}';
         final subscription = server.listen((request) {
           request.response
