@@ -13,14 +13,19 @@ part 'mason_bundle.g.dart';
 @JsonSerializable()
 class MasonBundledFile {
   /// {@macro mason_bundled_file}
-  const MasonBundledFile(this.path, this.data, this.type);
+  const MasonBundledFile(this._path, this.data, this.type);
 
   /// Converts a [Map<String, dynamic>] into a [MasonBundledFile].
   factory MasonBundledFile.fromJson(Map<String, dynamic> json) =>
       _$MasonBundledFileFromJson(json);
 
+  /// {@template mason_bundled_file_path}
   /// The relative file path
-  final String path;
+  /// {@endtemplate}
+  final String _path;
+
+  /// {@macro mason_bundled_file_path}
+  String get path => _path.replaceAll(r'\', '/');
 
   /// The encoded contents of the file
   final String data;
