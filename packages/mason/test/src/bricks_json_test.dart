@@ -312,7 +312,10 @@ environment:
       test(
           'throws BrickResolveVersionException when '
           'http request returns non-200 (registry)', () async {
-        final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
+        final server = await HttpServer.bind(
+          InternetAddress.loopbackIPv4,
+          8080,
+        );
         final uri = 'http://${server.address.host}:${server.port}';
         final subscription = server.listen((request) {
           request.response
