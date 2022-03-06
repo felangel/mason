@@ -333,7 +333,15 @@ bricks:
     test('exits with code 70 when mason version constraint cannot be resolved',
         () async {
       await commandRunner.run(['new', 'example']);
-      final brickYaml = File(path.join('bricks', 'example', 'brick.yaml'));
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+  example:
+    path:  ./example
+''',
+        mode: FileMode.append,
+      );
+      await commandRunner.run(['get']);
+      final brickYaml = File(path.join('example', 'brick.yaml'));
       brickYaml.writeAsStringSync(
         brickYaml.readAsStringSync().replaceFirst(
               'mason: ">=0.1.0-dev <0.1.0"',
