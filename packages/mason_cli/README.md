@@ -90,12 +90,22 @@ mason init
 
 `mason init` initializes the Mason CLI in the current directory.
 
-Running `mason init` generates a `mason.yaml` and an example `brick` so that you can get started immediately.
+Running `mason init` generates a `mason.yaml` so that you can get started immediately.
 
 ```yaml
+# Register bricks which can be consumed via the Mason CLI.
+# https://github.com/felangel/mason
 bricks:
-  hello:
-    path: bricks/hello
+  # Sample Brick
+  # Run `mason make hello` to try it out.
+  hello: any
+  # Bricks can also be imported via git url.
+  # Uncomment the following lines to import
+  # a brick from a remote git url.
+  # widget:
+  #   git:
+  #     url: https://github.com/felangel/mason.git
+  #     path: bricks/widget
 ```
 
 To get all bricks registered in `mason.yaml` run:
@@ -189,10 +199,18 @@ mason make hello --name Felix --on-conflict append
 Create a new brick using the `mason new` command.
 
 ```sh
+# Generate a new brick in the current directory.
 mason new <BRICK_NAME>
-```
 
-The above command will generate a new brick in the `bricks` directory with a `brick.yaml` and `__brick__` template directory.
+# Generate a new brick with a custom description.
+mason new <BRICK_NAME> --desc "My awesome, new brick!"
+
+# Generate a new brick in custom path.
+mason new <BRICK_NAME> --output-dir ./path/to/brick
+
+# Generate a new brick in custom path shorthand syntax.
+mason new <BRICK_NAME> -o ./path/to/brick
+```
 
 ### Brick YAML
 
@@ -201,7 +219,24 @@ The `brick.yaml` contains metadata for a `brick` template.
 ```yaml
 name: example
 description: An example brick
-version: 1.0.0
+
+# The following defines the version and build number for your brick.
+# A version number is three numbers separated by dots, like 1.2.34
+# followed by an optional build number (separated by a +).
+version: 0.1.0+1
+
+# The following defines the environment for the current brick.
+# It includes the version of mason that the brick requires.
+environment:
+  mason: ">=0.1.0-dev <0.1.0"
+
+# Variables specify dynamic values that your brick depends on.
+# Zero or more variables can be specified for a given brick.
+# Each variable has:
+#  * a type (string, number, or boolean)
+#  * an optional short description
+#  * an optional default value
+#  * an optional prompt phrase used when asking for the variable.
 vars:
   name:
     type: string

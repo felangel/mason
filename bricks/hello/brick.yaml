@@ -1,5 +1,5 @@
-name: hello_world
-description: A new brick created with the Mason CLI.
+name: hello
+description: An example brick.
 version: 0.1.0+1
 
 environment:
