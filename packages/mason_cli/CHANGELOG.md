@@ -1,3 +1,11 @@
+# 0.1.0-dev.15
+
+- **BREAKING**: feat: `mason new` only generates new brick w/custom output-dir
+- feat: `mason init` only generate `mason.yaml`
+- feat: `mason new` adjust generated file name
+- feat: `mason new` add inline comments `brick.yaml`
+- feat: `mason new` include `README`, `CHANGELOG`, and `LICENSE`
+
 # 0.1.0-dev.14
 
 - feat: add `mason unbundle` command
