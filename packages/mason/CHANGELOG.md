@@ -1,3 +1,7 @@
+# 0.1.0-dev.12
+
+- feat: include `README`, `CHANGELOG`, and `LICENSE` in `MasonBundle`
+
 # 0.1.0-dev.11
 
 - fix: `Yaml.encode` handle escape characters
