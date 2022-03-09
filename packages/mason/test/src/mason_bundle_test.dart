@@ -161,6 +161,41 @@ void main() {
       );
     });
 
+    test('can be deserialized w/readme, changelog, and license', () {
+      const name = 'name';
+      const description = 'description';
+      const version = '1.0.0';
+      final bundledFile = MasonBundledFile('.', 'data', 'text');
+
+      final isBundledFile = isA<MasonBundledFile>()
+          .having((b) => b.path, 'path', bundledFile.path)
+          .having((b) => b.data, 'data', bundledFile.data)
+          .having((b) => b.type, 'type', bundledFile.type);
+
+      expect(
+        MasonBundle.fromJson(<String, dynamic>{
+          'name': name,
+          'description': description,
+          'version': version,
+          'files': <MasonBundledFile>[],
+          'vars': <String>[],
+          'readme': bundledFile.toJson(),
+          'changelog': bundledFile.toJson(),
+          'license': bundledFile.toJson(),
+        }),
+        isA<MasonBundle>()
+            .having((file) => file.name, 'name', name)
+            .having((file) => file.version, 'version', version)
+            .having((file) => file.vars, 'vars', isEmpty)
+            .having((file) => file.files, 'files', isEmpty)
+            .having((file) => file.hooks, 'hooks', isEmpty)
+            .having((file) => file.description, 'description', description)
+            .having((file) => file.readme, 'readme', isBundledFile)
+            .having((file) => file.changelog, 'changelog', isBundledFile)
+            .having((file) => file.license, 'license', isBundledFile),
+      );
+    });
+
     test('can be converted to/from universal bundle', () async {
       final instance = MasonBundle(
         name: 'name',
