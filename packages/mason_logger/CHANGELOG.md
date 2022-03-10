@@ -1,3 +1,7 @@
+# 0.1.0-dev.6
+
+- feat: add `write`
+
 # 0.1.0-dev.5
 
 - feat: add `hidden` flag to `prompt`
