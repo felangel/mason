@@ -97,6 +97,9 @@ class Logger {
     _queue.clear();
   }
 
+  /// Write message via `stdout.write`.
+  void write(String? message) => _stdout.write(message);
+
   /// Writes info message to stdout.
   void info(String? message) => _stdout.writeln(message);
 
