@@ -17,6 +17,19 @@ void main() {
       stdin = MockStdin();
     });
 
+    group('.write', () {
+      test('writes to stdout', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().write(message);
+            verify(() => stdout.write(message)).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+    });
+
     group('.info', () {
       test('writes line to stdout', () {
         StdioOverrides.runZoned(
