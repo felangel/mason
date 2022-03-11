@@ -12,10 +12,16 @@ import 'package:universal_io/io.dart';
 /// {@endtemplate}
 abstract class MasonApiException implements Exception {
   /// {@macro mason_api_exception}
-  const MasonApiException({required this.message});
+  const MasonApiException({required this.message, this.details});
 
   /// The message associated with the exception.
   final String message;
+
+  /// The details associated with the exception.
+  final String? details;
+
+  @override
+  String toString() => '$message${details != null ? '\n$details' : ''}';
 }
 
 /// {@template mason_api_login_failure}
@@ -23,8 +29,8 @@ abstract class MasonApiException implements Exception {
 /// {@endtemplate}
 class MasonApiLoginFailure extends MasonApiException {
   /// {@macro mason_api_login_failure}
-  const MasonApiLoginFailure({required String message})
-      : super(message: message);
+  const MasonApiLoginFailure({required String message, String? details})
+      : super(message: message, details: details);
 }
 
 /// {@template mason_api_refresh_failure}
@@ -32,8 +38,8 @@ class MasonApiLoginFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApiRefreshFailure extends MasonApiException {
   /// {@macro mason_api_refresh_failure}
-  const MasonApiRefreshFailure({required String message})
-      : super(message: message);
+  const MasonApiRefreshFailure({required String message, String? details})
+      : super(message: message, details: details);
 }
 
 /// {@template mason_api_publish_failure}
@@ -41,8 +47,8 @@ class MasonApiRefreshFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApiPublishFailure extends MasonApiException {
   /// {@macro mason_api_publish_failure}
-  const MasonApiPublishFailure({required String message})
-      : super(message: message);
+  const MasonApiPublishFailure({required String message, String? details})
+      : super(message: message, details: details);
 }
 
 /// {@template mason_api}
@@ -103,11 +109,13 @@ class MasonApi {
 
     if (response.statusCode != HttpStatus.ok) {
       var message = 'An unknown error occurred.';
+      String? details;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
+        details = body['details'] as String?;
       } catch (_) {}
-      throw MasonApiLoginFailure(message: message);
+      throw MasonApiLoginFailure(message: message, details: details);
     }
 
     late final Credentials credentials;
@@ -167,11 +175,13 @@ class MasonApi {
 
     if (response.statusCode != HttpStatus.created) {
       var message = 'An unknown error occurred.';
+      String? details;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
+        details = body['details'] as String?;
       } catch (_) {}
-      throw MasonApiPublishFailure(message: message);
+      throw MasonApiPublishFailure(message: message, details: details);
     }
   }
 
@@ -193,11 +203,13 @@ class MasonApi {
 
     if (response.statusCode != HttpStatus.ok) {
       var message = 'An unknown error occurred.';
+      String? details;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         message = body['message'] as String;
+        details = body['details'] as String?;
       } catch (_) {}
-      throw MasonApiRefreshFailure(message: message);
+      throw MasonApiRefreshFailure(message: message, details: details);
     }
 
     late final Credentials credentials;

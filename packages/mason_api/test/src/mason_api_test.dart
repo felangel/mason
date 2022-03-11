@@ -18,6 +18,11 @@ const credentialsFileName = 'mason-credentials.json';
 const email = 'test@email.com';
 const password = 'T0pS3cret!';
 
+class TestMasonApiException extends MasonApiException {
+  const TestMasonApiException({required String message, String? details})
+      : super(message: message, details: details);
+}
+
 void main() {
   group('MasonApi', () {
     final tempDir = Directory.systemTemp.createTempSync();
@@ -30,6 +35,18 @@ void main() {
       testEnvironment = environment;
       httpClient = MockHttpClient();
       masonApi = MasonApi(httpClient: httpClient);
+    });
+
+    test('MasonApiException overrides toString', () {
+      const message = '__message';
+      const details = '__details__';
+      const exceptionA = TestMasonApiException(message: message);
+      const exceptionB = TestMasonApiException(
+        message: message,
+        details: details,
+      );
+      expect(exceptionA.toString(), equals(message));
+      expect(exceptionB.toString(), equals('$message\n$details'));
     });
 
     test('can be instantiated without any parameters', () {
@@ -164,8 +181,9 @@ void main() {
 
       test(
           'throws MasonApiLoginFailure '
-          'when status code != 200 (w/message)', () async {
+          'when status code != 200 (w/message & details)', () async {
         const message = '__message__';
+        const details = '__details__';
         when(
           () => httpClient.post(
             Uri.https(authority, 'api/v1/oauth/token'),
@@ -173,7 +191,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => http.Response(
-            '{"message": "$message"}',
+            '{"message": "$message", "details": "$details"}',
             HttpStatus.badRequest,
           ),
         );
@@ -183,6 +201,7 @@ void main() {
           fail('should throw');
         } on MasonApiLoginFailure catch (error) {
           expect(error.message, equals(message));
+          expect(error.details, equals(details));
         }
       });
 
@@ -641,8 +660,9 @@ void main() {
 
         test(
             'throws MasonApiPublishFailure '
-            'when status code != 201 (w/message)', () async {
+            'when status code != 201 (w/message & details)', () async {
           const message = '__message__';
+          const details = '__details__';
           when(
             () => httpClient.post(
               Uri.https(authority, 'api/v1/bricks'),
@@ -651,7 +671,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => http.Response(
-              '{"message": "$message"}',
+              '{"message": "$message", "details": "$details"}',
               HttpStatus.badRequest,
             ),
           );
@@ -661,6 +681,7 @@ void main() {
             fail('should throw');
           } on MasonApiPublishFailure catch (error) {
             expect(error.message, equals(message));
+            expect(error.details, equals(details));
           }
         });
 
