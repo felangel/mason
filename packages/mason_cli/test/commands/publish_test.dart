@@ -124,18 +124,19 @@ void main() {
     test('exits with code 70 when publish fails', () async {
       final user = MockUser();
       const message = 'oops';
+      const exception = MasonApiPublishFailure(message: message);
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
-      ).thenThrow(const MasonApiPublishFailure(message: message));
+      ).thenThrow(exception);
       when(() => logger.confirm(any())).thenReturn(true);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => logger.err(message)).called(1);
+      verify(() => logger.err('$exception')).called(1);
     });
 
     test('exits with code 70 when publish fails (generic)', () async {
