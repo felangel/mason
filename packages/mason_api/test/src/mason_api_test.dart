@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_api/src/mason_api.dart';
-import 'package:mason_api/src/models/credentials.dart';
+import 'package:mason_api/src/models/models.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
@@ -182,6 +182,7 @@ void main() {
       test(
           'throws MasonApiLoginFailure '
           'when status code != 200 (w/message & details)', () async {
+        const code = '__code__';
         const message = '__message__';
         const details = '__details__';
         when(
@@ -191,7 +192,7 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => http.Response(
-            '{"message": "$message", "details": "$details"}',
+            '{"code": "$code", "message": "$message", "details": "$details"}',
             HttpStatus.badRequest,
           ),
         );
@@ -418,6 +419,7 @@ void main() {
         test(
             'throws MasonAuthRefreshFailure '
             'when status code != 200 (w/message)', () async {
+          const code = '__code__';
           const message = '__message__';
           when(
             () => httpClient.post(
@@ -426,7 +428,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => http.Response(
-              '{"message": "$message"}',
+              '{"code": "$code", "message": "$message"}',
               HttpStatus.badRequest,
             ),
           );
@@ -661,6 +663,7 @@ void main() {
         test(
             'throws MasonApiPublishFailure '
             'when status code != 201 (w/message & details)', () async {
+          const code = '__code__';
           const message = '__message__';
           const details = '__details__';
           when(
@@ -671,7 +674,7 @@ void main() {
             ),
           ).thenAnswer(
             (_) async => http.Response(
-              '{"message": "$message", "details": "$details"}',
+              '{"code": "$code", "message": "$message", "details": "$details"}',
               HttpStatus.badRequest,
             ),
           );
