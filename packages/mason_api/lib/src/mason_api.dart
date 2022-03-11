@@ -64,6 +64,7 @@ class MasonApi {
 
   static const _applicationName = 'mason';
   static const _credentialsFileName = 'mason-credentials.json';
+  static const _unknownErrorMessage = 'An unknown error occurred.';
 
   final Uri _hostedUri;
   final http.Client _httpClient;
@@ -108,14 +109,17 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.ok) {
-      var message = 'An unknown error occurred.';
-      String? details;
+      late final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
-        message = body['message'] as String;
-        details = body['details'] as String?;
-      } catch (_) {}
-      throw MasonApiLoginFailure(message: message, details: details);
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiLoginFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiLoginFailure(
+        message: error.message,
+        details: error.details,
+      );
     }
 
     late final Credentials credentials;
@@ -174,14 +178,17 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.created) {
-      var message = 'An unknown error occurred.';
-      String? details;
+      late final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
-        message = body['message'] as String;
-        details = body['details'] as String?;
-      } catch (_) {}
-      throw MasonApiPublishFailure(message: message, details: details);
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiPublishFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiPublishFailure(
+        message: error.message,
+        details: error.details,
+      );
     }
   }
 
@@ -202,14 +209,17 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.ok) {
-      var message = 'An unknown error occurred.';
-      String? details;
+      late final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
-        message = body['message'] as String;
-        details = body['details'] as String?;
-      } catch (_) {}
-      throw MasonApiRefreshFailure(message: message, details: details);
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiRefreshFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiRefreshFailure(
+        message: error.message,
+        details: error.details,
+      );
     }
 
     late final Credentials credentials;
