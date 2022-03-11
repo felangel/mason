@@ -91,7 +91,7 @@ class PublishCommand extends MasonCommand {
       );
     } on MasonApiPublishFailure catch (error) {
       publishDone();
-      logger.err(error.message);
+      logger.err('$error');
       return ExitCode.software.code;
     } catch (_) {
       publishDone();
