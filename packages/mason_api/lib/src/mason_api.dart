@@ -94,7 +94,7 @@ class MasonApi {
 
   /// Log in with the provided [email] and [password].
   Future<User> login({required String email, required String password}) async {
-    late final http.Response response;
+    final http.Response response;
     try {
       response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/oauth/token'),
@@ -109,7 +109,7 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.ok) {
-      late final ErrorResponse error;
+      final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         error = ErrorResponse.fromJson(body);
@@ -122,7 +122,7 @@ class MasonApi {
       );
     }
 
-    late final Credentials credentials;
+    final Credentials credentials;
     try {
       credentials = Credentials.fromTokenResponse(
         json.decode(response.body) as Map<String, dynamic>,
@@ -162,7 +162,7 @@ class MasonApi {
       }
     }
 
-    late final http.Response response;
+    final http.Response response;
     try {
       response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/bricks'),
@@ -178,7 +178,7 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.created) {
-      late final ErrorResponse error;
+      final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         error = ErrorResponse.fromJson(body);
@@ -195,7 +195,7 @@ class MasonApi {
   /// Attempt to refresh the current credentials and return
   /// refreshed credentials.
   Future<Credentials> _refresh() async {
-    late final http.Response response;
+    final http.Response response;
     try {
       response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/oauth/token'),
@@ -209,7 +209,7 @@ class MasonApi {
     }
 
     if (response.statusCode != HttpStatus.ok) {
-      late final ErrorResponse error;
+      final ErrorResponse error;
       try {
         final body = json.decode(response.body) as Map<String, dynamic>;
         error = ErrorResponse.fromJson(body);
@@ -222,7 +222,7 @@ class MasonApi {
       );
     }
 
-    late final Credentials credentials;
+    final Credentials credentials;
     try {
       credentials = Credentials.fromTokenResponse(
         json.decode(response.body) as Map<String, dynamic>,
