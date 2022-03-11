@@ -63,9 +63,22 @@ void main() {
         (await MasonBundle.fromUniversalBundle(file.readAsBytesSync()))
             .toJson(),
       );
-      const expected =
-          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''';
-      expect(actual, equals(expected));
+
+      expect(
+        actual,
+        contains(
+          '''{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},''',
+        ),
+      );
+      expect(actual, contains('"readme":{"path":"README.md","data":"'));
+      expect(actual, contains('"changelog":{"path":"CHANGELOG.md","data":"'));
+      expect(actual, contains('"license":{"path":"LICENSE","data":"'));
+      expect(
+        actual,
+        contains(
+          '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
+        ),
+      );
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(
         () => logger.info(
@@ -165,7 +178,16 @@ void main() {
       expect(
         actual,
         contains(
-          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
+          '''final greetingBundle = MasonBundle.fromJson(<String, dynamic>{"files":[{"path":"GREETINGS.md","data":"SGkge3tuYW1lfX0h","type":"text"}],"hooks":[],"name":"greeting","description":"A Simple Greeting Template","version":"0.1.0+1","environment":{"mason":"any"},''',
+        ),
+      );
+      expect(actual, contains('"readme":{"path":"README.md","data":"'));
+      expect(actual, contains('"changelog":{"path":"CHANGELOG.md","data":"'));
+      expect(actual, contains('"license":{"path":"LICENSE","data":"'));
+      expect(
+        actual,
+        contains(
+          '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
         ),
       );
       verify(() => logger.progress('Bundling greeting')).called(1);
