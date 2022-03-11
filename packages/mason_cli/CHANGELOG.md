@@ -1,3 +1,8 @@
+# 0.1.0-dev.16
+
+- feat: upgrade to `mason_api ^v0.1.0-dev.4`
+  - improve error messages for `mason publish`
+
 # 0.1.0-dev.15
 
 - **BREAKING**: feat: `mason new` only generates new brick w/custom output-dir
