@@ -72,7 +72,7 @@ class _MasonYamlGenerator extends MasonGenerator {
 bricks:
   # Sample Brick
   # Run `mason make hello` to try it out.
-  hello: any
+  hello: 0.1.0+1
   # Bricks can also be imported via git url.
   # Uncomment the following lines to import
   # a brick from a remote git url.
