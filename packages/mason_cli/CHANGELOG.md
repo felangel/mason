@@ -1,3 +1,7 @@
+# 0.1.0-dev.17
+
+- chore: use fixed version of `hello` brick in `mason init`
+
 # 0.1.0-dev.16
 
 - feat: upgrade to `mason_api ^v0.1.0-dev.4`
