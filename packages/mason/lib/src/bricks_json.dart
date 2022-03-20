@@ -62,7 +62,7 @@ class CachedBrick {
   /// {@macro cached_brick}
   const CachedBrick({required this.brick, required this.path});
 
-  /// The resolve brick with a fixed [BrickLocation].
+  /// The resolved brick with a fixed [BrickLocation].
   final Brick brick;
 
   /// The brick's local path.
@@ -151,7 +151,7 @@ class BricksJson {
   }
 
   /// Caches brick if necessary and updates `bricks.json`.
-  /// Returns the [CachedBrick] which includes the resolved location
+  /// Returns the [CachedBrick] which includes the resolved brick
   /// and local path.
   Future<CachedBrick> add(Brick brick) async {
     if (brick.location.path != null) {
