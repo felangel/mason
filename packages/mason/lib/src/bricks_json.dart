@@ -56,17 +56,17 @@ class BrickIncompatibleMasonVersion extends MasonException {
 
 /// {@template cached_brick}
 /// A cached brick is an object which includes a resolved
-/// [brick] (strict location) and the local location of the brick.
+/// [brick] (strict location) and the local path of the brick.
 /// {@endtemplate}
 class CachedBrick {
   /// {@macro cached_brick}
-  const CachedBrick({required this.brick, required this.location});
+  const CachedBrick({required this.brick, required this.path});
 
   /// The resolve brick with a fixed [BrickLocation].
   final Brick brick;
 
-  /// The brick local location.
-  final String location;
+  /// The brick's local path.
+  final String path;
 }
 
 /// {@template bricks_json}
@@ -192,7 +192,7 @@ class BricksJson {
 
     final localPath = getPath(brick) ?? canonicalize(brick.location.path!);
     _cache[name] = localPath;
-    return CachedBrick(brick: brick, location: localPath);
+    return CachedBrick(brick: brick, path: localPath);
   }
 
   /// Writes remote brick via git url to cache
@@ -256,7 +256,7 @@ class BricksJson {
 
       final localPath = canonicalize(p.join(directory.path, gitPath.path));
       _cache[name] = localPath;
-      return CachedBrick(brick: resolvedBrick, location: localPath);
+      return CachedBrick(brick: resolvedBrick, path: localPath);
     }
 
     if (directoryExists) await directory.delete(recursive: true);
@@ -278,7 +278,7 @@ class BricksJson {
 
     final localPath = canonicalize(p.join(directory.path, gitPath.path));
     _cache[name] = localPath;
-    return CachedBrick(brick: resolvedBrick, location: localPath);
+    return CachedBrick(brick: resolvedBrick, path: localPath);
   }
 
   Future<Directory> _clone(GitPath gitPath) async {
@@ -319,7 +319,7 @@ class BricksJson {
     if (directoryExists && directoryIsNotEmpty) {
       final localPath = canonicalize(directory.path);
       _cache[name] = localPath;
-      return CachedBrick(brick: resolvedBrick, location: localPath);
+      return CachedBrick(brick: resolvedBrick, path: localPath);
     }
 
     if (directoryExists) await directory.delete(recursive: true);
@@ -337,7 +337,7 @@ class BricksJson {
 
     final localPath = canonicalize(directory.path);
     _cache[name] = localPath;
-    return CachedBrick(brick: resolvedBrick, location: localPath);
+    return CachedBrick(brick: resolvedBrick, path: localPath);
   }
 
   Future<String> _resolveBrickVersion(Brick brick) async {
