@@ -9,9 +9,8 @@ part 'mason_lock_json.g.dart';
 @JsonSerializable()
 class MasonLockJson {
   /// {@macro mason_lock}
-  const MasonLockJson({
-    Map<String, BrickLocation>? bricks,
-  }) : bricks = bricks ?? const <String, BrickLocation>{};
+  const MasonLockJson({Map<String, BrickLocation>? bricks})
+      : bricks = bricks ?? const <String, BrickLocation>{};
 
   /// Converts [Map] to [MasonLockJson]
   factory MasonLockJson.fromJson(Map<dynamic, dynamic> json) =>

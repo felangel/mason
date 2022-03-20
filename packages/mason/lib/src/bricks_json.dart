@@ -151,7 +151,8 @@ class BricksJson {
   }
 
   /// Caches brick if necessary and updates `bricks.json`.
-  /// Returns the local path to the brick.
+  /// Returns the [CachedBrick] which includes the resolved location
+  /// and local path.
   Future<CachedBrick> add(Brick brick) async {
     if (brick.location.path != null) {
       return _addLocalBrick(brick);
