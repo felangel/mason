@@ -1,5 +1,4 @@
 import 'package:mason/mason.dart';
-import 'package:pub_semver/pub_semver.dart';
 
 /// Returns whether the current [brickYaml] is compatible
 /// with the current version of mason.

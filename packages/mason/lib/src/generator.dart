@@ -71,7 +71,7 @@ class MasonGenerator extends Generator {
   static Future<MasonGenerator> fromBrick(Brick brick) async {
     final path = brick.location.path != null
         ? brick.location.path!
-        : await BricksJson.temp().add(brick);
+        : (await BricksJson.temp().add(brick)).location;
     return MasonGenerator._fromBrick(path);
   }
 
