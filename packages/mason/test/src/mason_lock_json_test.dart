@@ -18,14 +18,5 @@ void main() {
         isA<BrickLocation>().having((b) => b.path, 'path', brickLocation.path),
       );
     });
-
-    test('copyWith creates a copy with new bricks', () {
-      final brickLocation = BrickLocation(path: '.');
-      final bricks = {'example': brickLocation};
-      expect(
-        MasonLockJson().copyWith(bricks: bricks),
-        isA<MasonLockJson>().having((m) => m.bricks, 'bricks', equals(bricks)),
-      );
-    });
   });
 }

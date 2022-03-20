@@ -25,9 +25,4 @@ class MasonLockJson {
 
   /// [Map] of [BrickLocation] alias to [BrickLocation] instances.
   final Map<String, BrickLocation> bricks;
-
-  /// Create a copy of the current [MasonLockJson].
-  MasonLockJson copyWith({Map<String, BrickLocation>? bricks}) {
-    return MasonLockJson(bricks: bricks ?? this.bricks);
-  }
 }
