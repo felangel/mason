@@ -1,3 +1,7 @@
+# 0.1.0-dev.13
+
+- chore: expose `GeneratorHooks`
+
 # 0.1.0-dev.12
 
 - feat: include `README`, `CHANGELOG`, and `LICENSE` in `MasonBundle`
