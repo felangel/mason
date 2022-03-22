@@ -15,6 +15,7 @@ doc/api/
 
 # Local Mason Files
 .mason/
+mason-lock.json
 
 # Test Related Files
 coverage/

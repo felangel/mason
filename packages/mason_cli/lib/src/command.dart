@@ -166,6 +166,38 @@ abstract class MasonCommand extends Command<int> {
     }
   }
 
+  /// Gets the nearest `mason-lock.json` file.
+  File get masonLockJsonFile {
+    if (_masonLockJsonFile != null) return _masonLockJsonFile!;
+    final file = File(p.join(entryPoint.path, MasonLockJson.file));
+    return _masonLockJsonFile = file;
+  }
+
+  File? _masonLockJsonFile;
+
+  MasonLockJson? _masonLockJson;
+
+  MasonLockJson? _getMasonLockJson(File? file) {
+    if (file == null) return null;
+    if (!file.existsSync()) return null;
+    final masonLockContent = file.readAsStringSync();
+    try {
+      _masonLockJson = checkedYamlDecode(
+        masonLockContent,
+        (m) => MasonLockJson.fromJson(m!),
+      );
+      return _masonLockJson!;
+    } catch (_) {
+      return null;
+    }
+  }
+
+  /// Gets the nearest [MasonLockJson].
+  MasonLockJson? get masonLockJson {
+    if (_masonLockJson != null) return _masonLockJson!;
+    return _masonLockJson = _getMasonLockJson(masonLockJsonFile);
+  }
+
   /// [Logger] instance used to wrap stdout.
   Logger get logger => _logger ??= Logger();
 

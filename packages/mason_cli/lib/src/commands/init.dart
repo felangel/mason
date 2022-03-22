@@ -1,10 +1,11 @@
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/get_bricks.dart';
 
 /// {@template init_command}
 /// `mason init` command which initializes a new `mason.yaml`.
 /// {@endtemplate}
-class InitCommand extends MasonCommand {
+class InitCommand extends MasonCommand with GetBricksMixin {
   /// {@macro init_command}
   InitCommand({Logger? logger}) : super(logger: logger);
 
@@ -30,22 +31,7 @@ class InitCommand extends MasonCommand {
     );
     fetchDone();
 
-    final getDone = logger.progress('Getting brick');
-    final bricksJson = localBricksJson;
-    if (bricksJson == null) throw const MasonYamlNotFoundException();
-    try {
-      if (masonYaml.bricks.entries.isNotEmpty) {
-        await Future.forEach<MapEntry<String, BrickLocation>>(
-          masonYaml.bricks.entries,
-          (entry) => bricksJson.add(
-            Brick(name: entry.key, location: entry.value),
-          ),
-        );
-      }
-    } finally {
-      await bricksJson.flush();
-      getDone();
-    }
+    await getBricks();
 
     logger
       ..info(

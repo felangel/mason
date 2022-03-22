@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
@@ -67,9 +69,19 @@ class AddCommand extends MasonCommand {
 
     final installDone = logger.progress('Installing $name');
     try {
-      final directory = await bricksJson.add(brick);
+      final cachedBrick = await bricksJson.add(brick);
       await bricksJson.flush();
-      file = File(p.join(directory, BrickYaml.file));
+      await masonLockJsonFile.writeAsString(
+        json.encode(
+          MasonLockJson(
+            bricks: {
+              ...?masonLockJson?.bricks,
+              name: cachedBrick.brick.location
+            },
+          ),
+        ),
+      );
+      file = File(p.join(cachedBrick.path, BrickYaml.file));
     } catch (_) {
       installDone();
       rethrow;
