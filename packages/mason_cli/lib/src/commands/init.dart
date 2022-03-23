@@ -1,11 +1,11 @@
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
-import 'package:mason_cli/src/get_bricks.dart';
+import 'package:mason_cli/src/install_brick.dart';
 
 /// {@template init_command}
 /// `mason init` command which initializes a new `mason.yaml`.
 /// {@endtemplate}
-class InitCommand extends MasonCommand with GetBricksMixin {
+class InitCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro init_command}
   InitCommand({Logger? logger}) : super(logger: logger);
 

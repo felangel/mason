@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -46,7 +48,17 @@ class RemoveCommand extends MasonCommand {
       targetMasonYamlFile.writeAsStringSync(
         Yaml.encode(MasonYaml(bricks).toJson()),
       );
+
       await bricksJson.flush();
+
+      if (masonLockJson.bricks.containsKey(brickName)) {
+        final lockedBricks = {...masonLockJson.bricks}
+          ..removeWhere((key, value) => key == brickName);
+        await masonLockJsonFile.writeAsString(
+          json.encode(MasonLockJson(bricks: lockedBricks).toJson()),
+        );
+      }
+
       removeDone('Removed $brickName');
     } catch (_) {
       removeDone();

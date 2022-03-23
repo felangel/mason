@@ -1,16 +1,15 @@
-import 'dart:convert';
-
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/install_brick.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart';
 
 /// {@template add_command}
 /// `mason add` command which adds a brick.
 /// {@endtemplate}
-class AddCommand extends MasonCommand {
+class AddCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro add_command}
   AddCommand({Logger? logger}) : super(logger: logger) {
     argParser
@@ -37,15 +36,10 @@ class AddCommand extends MasonCommand {
       throw UsageException('brick name is required.', usage);
     }
 
-    final isGlobal = results['global'] == true;
-    final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) {
-      throw UsageException('bricks.json not found', usage);
-    }
-
     final name = results.rest.first;
     final gitUrl = results['git-url'] as String?;
     final path = results['path'] as String?;
+    final isGlobal = results['global'] == true;
 
     late final Brick brick;
     if (path != null) {
@@ -65,28 +59,8 @@ class AddCommand extends MasonCommand {
       brick = Brick(name: name, location: const BrickLocation(version: 'any'));
     }
 
-    late final File file;
-
-    final installDone = logger.progress('Installing $name');
-    try {
-      final cachedBrick = await bricksJson.add(brick);
-      await bricksJson.flush();
-      await masonLockJsonFile.writeAsString(
-        json.encode(
-          MasonLockJson(
-            bricks: {
-              ...?masonLockJson?.bricks,
-              name: cachedBrick.brick.location
-            },
-          ),
-        ),
-      );
-      file = File(p.join(cachedBrick.path, BrickYaml.file));
-    } catch (_) {
-      installDone();
-      rethrow;
-    }
-    installDone();
+    final cachedBrick = await addBrick(brick, global: isGlobal);
+    final file = File(p.join(cachedBrick.path, BrickYaml.file));
 
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
