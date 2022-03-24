@@ -69,7 +69,7 @@ void main() {
         isTrue,
       );
       verify(() => logger.progress('Initializing')).called(1);
-      verify(() => logger.progress('Getting brick')).called(1);
+      verify(() => logger.progress('Getting bricks')).called(1);
       verify(
         () => logger.info('Run "mason make hello" to use your first brick.'),
       ).called(1);

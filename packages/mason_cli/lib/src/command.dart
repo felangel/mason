@@ -175,8 +175,8 @@ abstract class MasonCommand extends Command<int> {
   /// Gets the nearest `mason-lock.json` file.
   File get masonLockJsonFile {
     if (_masonLockJsonFile != null) return _masonLockJsonFile!;
-    final file = File(p.join(entryPoint.path, MasonLockJson.file));
-    if (!file.existsSync()) throw const MasonYamlNotFoundException();
+    final file = File(p.join(entryPoint.path, MasonLockJson.file))
+      ..createSync(recursive: true);
     return _masonLockJsonFile = file;
   }
 
@@ -187,7 +187,7 @@ abstract class MasonCommand extends Command<int> {
     if (_globalMasonLockJsonFile != null) return _globalMasonLockJsonFile!;
     return _globalMasonLockJsonFile = _getMasonLockJsonFile(
       BricksJson.globalDir.path,
-    );
+    )..createSync(recursive: true);
   }
 
   MasonLockJson? _globalMasonLockJson;

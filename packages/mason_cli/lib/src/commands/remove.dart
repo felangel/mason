@@ -38,6 +38,9 @@ class RemoveCommand extends MasonCommand {
       throw UsageException('no brick named $brickName was found', usage);
     }
 
+    final lockFile = isGlobal ? globalMasonLockJsonFile : masonLockJsonFile;
+    final lockJson = isGlobal ? globalMasonLockJson : masonLockJson;
+
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final removeDone = logger.progress('Removing $brickName');
     try {
@@ -51,10 +54,10 @@ class RemoveCommand extends MasonCommand {
 
       await bricksJson.flush();
 
-      if (masonLockJson.bricks.containsKey(brickName)) {
-        final lockedBricks = {...masonLockJson.bricks}
+      if (lockJson.bricks.containsKey(brickName)) {
+        final lockedBricks = {...lockJson.bricks}
           ..removeWhere((key, value) => key == brickName);
-        await masonLockJsonFile.writeAsString(
+        await lockFile.writeAsString(
           json.encode(MasonLockJson(bricks: lockedBricks).toJson()),
         );
       }

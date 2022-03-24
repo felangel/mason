@@ -29,7 +29,7 @@ mixin InstallBrickMixin on MasonCommand {
         json.encode(
           MasonLockJson(
             bricks: {
-              ...masonLockJson.bricks,
+              ...lockJson.bricks,
               brick.name!: cachedBrick.brick.location
             },
           ),
