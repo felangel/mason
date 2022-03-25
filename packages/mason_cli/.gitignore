@@ -23,3 +23,4 @@ test/fixtures/.*/
 
 # Exceptions to the above rules
 !test/fixtures/*/.mason/
+!test/fixtures/*/mason-lock.json
