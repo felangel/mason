@@ -1,3 +1,7 @@
+# 0.1.0-dev.18
+
+- feat: generate `mason-lock.json` to lock brick versions
+
 # 0.1.0-dev.17
 
 - chore: use fixed version of `hello` brick in `mason init`
