@@ -17,7 +17,7 @@ mixin InstallBrickMixin on MasonCommand {
     final lockJson = global ? globalMasonLockJson : masonLockJson;
     final installDone = logger.progress('Installing $name');
     try {
-      final location = _resolveBrickLocation(
+      final location = resolveBrickLocation(
         location: brick.location,
         lockedLocation: lockJson.bricks[brick.name],
       );
@@ -54,7 +54,7 @@ mixin InstallBrickMixin on MasonCommand {
         await Future.forEach<MapEntry<String, BrickLocation>>(
           masonYaml.bricks.entries,
           (entry) async {
-            final location = _resolveBrickLocation(
+            final location = resolveBrickLocation(
               location: entry.value,
               lockedLocation: lockJson.bricks[entry.key],
             );
@@ -77,12 +77,13 @@ mixin InstallBrickMixin on MasonCommand {
   }
 }
 
-BrickLocation _resolveBrickLocation({
+/// Resolves the correct [BrickLocation] given the
+/// provided [location] (mason.yaml) and [lockedLocation] (mason-lock.json).
+BrickLocation resolveBrickLocation({
   required BrickLocation location,
   required BrickLocation? lockedLocation,
 }) {
   if (lockedLocation == null) return location;
-
   if (location.path != null) return location;
 
   if (location.git != null) {
