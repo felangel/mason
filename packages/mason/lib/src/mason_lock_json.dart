@@ -23,6 +23,9 @@ class MasonLockJson {
   /// `mason-lock.json`
   static const file = 'mason-lock.json';
 
+  /// static constant for an empty `mason-lock.yaml` file.
+  static const empty = MasonLockJson();
+
   /// [Map] of [BrickLocation] alias to [BrickLocation] instances.
   final Map<String, BrickLocation> bricks;
 }
