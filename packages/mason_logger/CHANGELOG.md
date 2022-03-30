@@ -1,3 +1,8 @@
+# 0.1.0-dev.7
+
+- fix: multiline prompts are outputting twice
+  - when using `confirm` and `prompt`
+
 # 0.1.0-dev.6
 
 - feat: add `write`
