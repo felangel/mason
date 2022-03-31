@@ -120,6 +120,8 @@ Then you can use `mason make` to generate your first file:
 mason make hello
 ```
 
+❗ Note: `mason init` generates `.mason` and `mason-lock.json`. `.mason` **should not** be included in version control. Include `mason-lock.json` in version control if you are using git/hosted bricks; otherwise, `mason-lock.json` can be ignore when only using local bricks.
+
 ### Command Line Variables
 
 Any variables can be passed as command line args.
