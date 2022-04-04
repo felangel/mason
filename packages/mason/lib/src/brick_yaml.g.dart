@@ -17,6 +17,7 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
             'description',
             'version',
             'environment',
+            'repository',
             'vars',
             'path'
           ],
@@ -35,6 +36,7 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
               (v) => v == null
                   ? const <String, BrickVariableProperties>{}
                   : const VarsConverter().fromJson(v)),
+          repository: $checkedConvert('repository', (v) => v as String?),
           path: $checkedConvert('path', (v) => v as String?),
         );
         return val;
@@ -55,6 +57,7 @@ Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
     }
   }
 
+  writeNotNull('repository', instance.repository);
   writeNotNull('vars', const VarsConverter().toJson(instance.vars));
   writeNotNull('path', instance.path);
   return val;
