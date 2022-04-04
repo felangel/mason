@@ -1,3 +1,7 @@
+# 0.1.0-dev.14
+
+- feat: add optional `repository` field to `brick.yaml`
+
 # 0.1.0-dev.13
 
 - **BREAKING**: feat: `BricksJson.add` returns `CachedBrick` instead of `String` location.
