@@ -30,6 +30,16 @@ void main() {
         expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
       });
 
+      test('can be (de)serialized correctly with repository', () {
+        final instance = BrickYaml(
+          name: 'A',
+          description: 'descriptionA',
+          version: '1.0.0',
+          repository: 'https://github.com/felangel/mason',
+        );
+        expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
+      });
+
       test('can be (de)serialized correctly with vars', () {
         final instance = BrickYaml(
           name: 'A',

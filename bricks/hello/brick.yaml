@@ -1,5 +1,6 @@
 name: hello
 description: An example brick.
+repository: https://github.com/felangel/mason/tree/master/bricks/hello
 version: 0.1.0+1
 
 environment:

@@ -28,6 +28,7 @@ void main() {
         expect(bundle.name, equals('simple'));
         expect(bundle.description, equals('A Simple Static Template'));
         expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -49,6 +50,10 @@ void main() {
         expect(bundle.name, equals('hello'));
         expect(bundle.description, equals('An example brick.'));
         expect(bundle.version, equals('0.1.0+1'));
+        expect(
+          bundle.repository,
+          equals('https://github.com/felangel/mason/tree/master/bricks/hello'),
+        );
         expect(bundle.readme, isBundledFile('README.md'));
         expect(bundle.changelog, isBundledFile('CHANGELOG.md'));
         expect(bundle.license, isBundledFile('LICENSE'));
@@ -63,6 +68,7 @@ void main() {
         expect(bundle.name, equals('hooks'));
         expect(bundle.description, equals('A Hooks Example Template'));
         expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -93,6 +99,7 @@ void main() {
         expect(bundle.name, equals('plugin'));
         expect(bundle.description, equals('An example plugin template'));
         expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -145,6 +152,7 @@ void main() {
             'version: 0.1.0+1\n'
             'environment:\n'
             '  mason: ">=0.1.0-dev <0.1.0"\n'
+            'repository: "https://github.com/felangel/mason/tree/master/bricks/hello"\n'
             'vars:\n'
             '  name:\n'
             '    type: string\n'
