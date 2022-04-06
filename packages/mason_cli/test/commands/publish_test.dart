@@ -115,6 +115,9 @@ void main() {
       verify(() {
         logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
       }).called(1);
+      verify(() {
+        logger.info('See policy details at https://brickhub.dev/policy\n');
+      }).called(1);
       verify(
         () => logger.confirm('Do you want to publish greeting 0.1.0+1?'),
       ).called(1);
