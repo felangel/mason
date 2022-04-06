@@ -1,3 +1,7 @@
+# 0.1.0-dev.20
+
+- fix: `mason add` fix progress logging typo
+
 # 0.1.0-dev.19
 
 - docs: add note regarding `.mason` and `mason-lock.json`
