@@ -1,3 +1,9 @@
+# 0.1.0-dev.19
+
+- docs: add note regarding `.mason` and `mason-lock.json`
+- chore: upgrade to `mason 0.1.0-dev.14`
+- chore: add policy details on publish
+
 # 0.1.0-dev.18
 
 - feat: generate `mason-lock.json` to lock brick versions
