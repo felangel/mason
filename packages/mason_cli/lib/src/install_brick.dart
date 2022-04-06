@@ -15,7 +15,7 @@ mixin InstallBrickMixin on MasonCommand {
 
     final lockFile = global ? globalMasonLockJsonFile : masonLockJsonFile;
     final lockJson = global ? globalMasonLockJson : masonLockJson;
-    final installDone = logger.progress('Installing $name');
+    final installDone = logger.progress('Installing ${brick.name}');
     try {
       final location = resolveBrickLocation(
         location: brick.location,
