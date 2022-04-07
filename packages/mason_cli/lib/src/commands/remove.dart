@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -36,6 +38,9 @@ class RemoveCommand extends MasonCommand {
       throw UsageException('no brick named $brickName was found', usage);
     }
 
+    final lockFile = isGlobal ? globalMasonLockJsonFile : masonLockJsonFile;
+    final lockJson = isGlobal ? globalMasonLockJson : masonLockJson;
+
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final removeDone = logger.progress('Removing $brickName');
     try {
@@ -46,7 +51,17 @@ class RemoveCommand extends MasonCommand {
       targetMasonYamlFile.writeAsStringSync(
         Yaml.encode(MasonYaml(bricks).toJson()),
       );
+
       await bricksJson.flush();
+
+      if (lockJson.bricks.containsKey(brickName)) {
+        final lockedBricks = {...lockJson.bricks}
+          ..removeWhere((key, value) => key == brickName);
+        await lockFile.writeAsString(
+          json.encode(MasonLockJson(bricks: lockedBricks).toJson()),
+        );
+      }
+
       removeDone('Removed $brickName');
     } catch (_) {
       removeDone();

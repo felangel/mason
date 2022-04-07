@@ -64,6 +64,7 @@ void main() {
         ['add', 'greeting', '--path', brickPath],
       );
       expect(result, equals(ExitCode.usage.code));
+      verify(() => logger.progress('Installing greeting')).called(1);
       verify(() => logger.err('oops')).called(1);
     });
 
@@ -94,6 +95,7 @@ void main() {
             ['add', 'example', '--path', brickPath],
           );
           expect(result, equals(ExitCode.usage.code));
+          verify(() => logger.progress('Installing example')).called(1);
           verify(
             () => logger.err(
               '''Brick name "example" doesn't match provided name "greeting" in mason.yaml.''',
@@ -117,6 +119,8 @@ void main() {
             pubUpdater: pubUpdater,
           ).run(['make', 'greeting', '--name', 'Dash']);
           expect(makeResult, equals(ExitCode.success.code));
+
+          verify(() => logger.progress('Installing greeting')).called(1);
 
           final actual = Directory(
             path.join(testFixturesPath(cwd, suffix: '.add'), 'greeting'),

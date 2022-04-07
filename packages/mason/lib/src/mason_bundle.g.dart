@@ -43,6 +43,10 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
             'description',
             'version',
             'environment',
+            'repository',
+            'readme',
+            'changelog',
+            'license',
             'vars'
           ],
         );
@@ -76,6 +80,25 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
                           Map<String, dynamic>.from(e as Map)))
                       .toList() ??
                   const []),
+          repository: $checkedConvert('repository', (v) => v as String?),
+          readme: $checkedConvert(
+              'readme',
+              (v) => v == null
+                  ? null
+                  : MasonBundledFile.fromJson(
+                      Map<String, dynamic>.from(v as Map))),
+          changelog: $checkedConvert(
+              'changelog',
+              (v) => v == null
+                  ? null
+                  : MasonBundledFile.fromJson(
+                      Map<String, dynamic>.from(v as Map))),
+          license: $checkedConvert(
+              'license',
+              (v) => v == null
+                  ? null
+                  : MasonBundledFile.fromJson(
+                      Map<String, dynamic>.from(v as Map))),
         );
         return val;
       },
@@ -97,6 +120,10 @@ Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
     }
   }
 
+  writeNotNull('repository', instance.repository);
+  writeNotNull('readme', instance.readme?.toJson());
+  writeNotNull('changelog', instance.changelog?.toJson());
+  writeNotNull('license', instance.license?.toJson());
   writeNotNull('vars', const VarsConverter().toJson(instance.vars));
   return val;
 }

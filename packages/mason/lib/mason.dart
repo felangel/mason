@@ -5,6 +5,8 @@
 library mason;
 
 export 'package:mason_logger/mason_logger.dart';
+export 'package:pub_semver/pub_semver.dart'
+    show Version, VersionConstraint, VersionRange;
 
 export 'src/brick.dart' show Brick;
 export 'src/brick_compatibility.dart' show isBrickCompatibleWithMason;
@@ -14,7 +16,7 @@ export 'src/brick_yaml.dart'
         BrickEnvironment,
         BrickVariableProperties,
         BrickVariableType;
-export 'src/bricks_json.dart' show BricksJson;
+export 'src/bricks_json.dart' show BricksJson, CachedBrick;
 export 'src/bundler.dart' show createBundle, unpackBundle;
 export 'src/exception.dart' show BrickNotFoundException, MasonException;
 export 'src/generator.dart'
@@ -23,10 +25,12 @@ export 'src/generator.dart'
         FileConflictResolution,
         GeneratedFile,
         GeneratedFileStatus,
+        GeneratorHooks,
         HookContext,
         MasonGenerator,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle, MasonBundledFile;
+export 'src/mason_lock_json.dart' show MasonLockJson;
 export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/path.dart' show canonicalize;
 export 'src/render.dart' show RenderTemplate;

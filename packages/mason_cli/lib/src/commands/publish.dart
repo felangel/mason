@@ -68,7 +68,9 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
+    logger
+      ..alert('\nPublishing is forever; bricks cannot be unpublished.')
+      ..info('See policy details at https://brickhub.dev/policy\n');
 
     final confirmed = logger.confirm(
       'Do you want to publish ${bundle.name} ${bundle.version}?',
@@ -91,7 +93,7 @@ class PublishCommand extends MasonCommand {
       );
     } on MasonApiPublishFailure catch (error) {
       publishDone();
-      logger.err(error.message);
+      logger.err('$error');
       return ExitCode.software.code;
     } catch (_) {
       publishDone();

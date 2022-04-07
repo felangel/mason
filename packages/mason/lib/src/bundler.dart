@@ -26,10 +26,20 @@ void unpackBundle(MasonBundle bundle, Directory target) {
     version: bundle.version,
     environment: bundle.environment,
     vars: bundle.vars,
+    repository: bundle.repository,
   );
   File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
     Yaml.encode(brickYaml.toJson()),
   );
+
+  final readme = bundle.readme;
+  if (readme != null) _unbundleFile(readme, target.path);
+
+  final changelog = bundle.changelog;
+  if (changelog != null) _unbundleFile(changelog, target.path);
+
+  final license = bundle.license;
+  if (license != null) _unbundleFile(license, target.path);
 }
 
 /// Generates a [MasonBundle] from the provided [brick] directory.
@@ -62,13 +72,24 @@ MasonBundle createBundle(Directory brick) {
     version: brickYaml.version,
     environment: brickYaml.environment,
     vars: brickYaml.vars,
+    repository: brickYaml.repository,
     files: files..sort(_comparePaths),
     hooks: hooks..sort(_comparePaths),
+    readme: _bundleTopLevelFile(brick, 'README.md'),
+    changelog: _bundleTopLevelFile(brick, 'CHANGELOG.md'),
+    license: _bundleTopLevelFile(brick, 'LICENSE'),
   );
 }
 
 int _comparePaths(MasonBundledFile a, MasonBundledFile b) {
   return a.path.toLowerCase().compareTo(b.path.toLowerCase());
+}
+
+MasonBundledFile? _bundleTopLevelFile(Directory brick, String fileName) {
+  final file = File(path.join(brick.path, fileName));
+  if (!file.existsSync()) return null;
+  final data = base64.encode(file.readAsBytesSync());
+  return MasonBundledFile(path.basename(file.path), data, 'text');
 }
 
 MasonBundledFile _bundleBrickFile(File file) {

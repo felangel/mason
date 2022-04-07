@@ -120,6 +120,8 @@ Then you can use `mason make` to generate your first file:
 mason make hello
 ```
 
+❗ Note: **DO NOT** commit the `.mason` directory. **DO** commit the `mason-lock.json` file when working with versioned bricks (git/hosted).
+
 ### Command Line Variables
 
 Any variables can be passed as command line args.

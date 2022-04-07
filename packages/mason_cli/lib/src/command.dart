@@ -112,6 +112,12 @@ abstract class MasonCommand extends Command<int> {
     return false;
   }
 
+  File _getMasonYamlFile(String entryPointPath) {
+    return File(p.join(entryPointPath, MasonYaml.file));
+  }
+
+  File? _masonYamlFile;
+
   /// Gets the nearest `mason.yaml` file.
   File get masonYamlFile {
     if (_masonYamlFile != null) return _masonYamlFile!;
@@ -120,7 +126,7 @@ abstract class MasonCommand extends Command<int> {
     return _masonYamlFile = file;
   }
 
-  File? _masonYamlFile;
+  File? _globalMasonYamlFile;
 
   /// Gets the global `mason.yaml` file.
   File get globalMasonYamlFile {
@@ -128,11 +134,7 @@ abstract class MasonCommand extends Command<int> {
     return _globalMasonYamlFile = _getMasonYamlFile(BricksJson.globalDir.path);
   }
 
-  File? _globalMasonYamlFile;
-
-  File _getMasonYamlFile(String entryPointPath) {
-    return File(p.join(entryPointPath, MasonYaml.file));
-  }
+  MasonYaml? _globalMasonYaml;
 
   /// Gets the global [MasonYaml].
   MasonYaml get globalMasonYaml {
@@ -140,15 +142,13 @@ abstract class MasonCommand extends Command<int> {
     return _globalMasonYaml = _getMasonYaml(globalMasonYamlFile);
   }
 
-  MasonYaml? _globalMasonYaml;
+  MasonYaml? _masonYaml;
 
   /// Gets the nearest [MasonYaml].
   MasonYaml get masonYaml {
     if (_masonYaml != null) return _masonYaml!;
     return _masonYaml = _getMasonYaml(masonYamlFile);
   }
-
-  MasonYaml? _masonYaml;
 
   MasonYaml _getMasonYaml(File file) {
     if (!file.existsSync()) return MasonYaml.empty;
@@ -163,6 +163,60 @@ abstract class MasonCommand extends Command<int> {
       throw MasonYamlParseException(
         'Malformed ${MasonYaml.file} at ${file.path}\n${e.message}',
       );
+    }
+  }
+
+  File _getMasonLockJsonFile(String entryPointPath) {
+    return File(p.join(entryPointPath, MasonLockJson.file));
+  }
+
+  File? _masonLockJsonFile;
+
+  /// Gets the nearest `mason-lock.json` file.
+  File get masonLockJsonFile {
+    if (_masonLockJsonFile != null) return _masonLockJsonFile!;
+    final file = File(p.join(entryPoint.path, MasonLockJson.file))
+      ..createSync(recursive: true);
+    return _masonLockJsonFile = file;
+  }
+
+  File? _globalMasonLockJsonFile;
+
+  /// Gets the global `mason-lock.json` file.
+  File get globalMasonLockJsonFile {
+    if (_globalMasonLockJsonFile != null) return _globalMasonLockJsonFile!;
+    return _globalMasonLockJsonFile = _getMasonLockJsonFile(
+      BricksJson.globalDir.path,
+    )..createSync(recursive: true);
+  }
+
+  MasonLockJson? _globalMasonLockJson;
+
+  /// Gets the global [MasonLockJson].
+  MasonLockJson get globalMasonLockJson {
+    if (_globalMasonLockJson != null) return _globalMasonLockJson!;
+    return _globalMasonLockJson = _getMasonLockJson(globalMasonLockJsonFile);
+  }
+
+  MasonLockJson? _masonLockJson;
+
+  /// Gets the nearest [MasonLockJson].
+  MasonLockJson get masonLockJson {
+    if (_masonLockJson != null) return _masonLockJson!;
+    return _masonLockJson = _getMasonLockJson(masonLockJsonFile);
+  }
+
+  MasonLockJson _getMasonLockJson(File file) {
+    if (!file.existsSync()) return MasonLockJson.empty;
+    final masonLockContent = file.readAsStringSync();
+    try {
+      _masonLockJson = checkedYamlDecode(
+        masonLockContent,
+        (m) => MasonLockJson.fromJson(m!),
+      );
+      return _masonLockJson!;
+    } catch (_) {
+      return MasonLockJson.empty;
     }
   }
 

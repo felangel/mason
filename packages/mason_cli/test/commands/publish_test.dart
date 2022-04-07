@@ -96,7 +96,9 @@ void main() {
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(
         () => logger.err(
-          '''Your bundle is 0.0002384 MB. Hosted bricks must be smaller than 0.000095 MB.''',
+          any(
+            that: contains('Hosted bricks must be smaller than 0.000095 MB.'),
+          ),
         ),
       ).called(1);
     });
@@ -113,6 +115,9 @@ void main() {
       verify(() {
         logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
       }).called(1);
+      verify(() {
+        logger.info('See policy details at https://brickhub.dev/policy\n');
+      }).called(1);
       verify(
         () => logger.confirm('Do you want to publish greeting 0.1.0+1?'),
       ).called(1);
@@ -124,18 +129,19 @@ void main() {
     test('exits with code 70 when publish fails', () async {
       final user = MockUser();
       const message = 'oops';
+      const exception = MasonApiPublishFailure(message: message);
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
-      ).thenThrow(const MasonApiPublishFailure(message: message));
+      ).thenThrow(exception);
       when(() => logger.confirm(any())).thenReturn(true);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => logger.err(message)).called(1);
+      verify(() => logger.err('$exception')).called(1);
     });
 
     test('exits with code 70 when publish fails (generic)', () async {

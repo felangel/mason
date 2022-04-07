@@ -1,3 +1,8 @@
+# 0.1.0-dev.4
+
+- feat: add `details` to `MasonApiException`
+- refactor: define internal `ErrorResponse` with `JsonSerializable`
+
 # 0.1.0-dev.3
 
 - chore: upgrade to Dart 2.16

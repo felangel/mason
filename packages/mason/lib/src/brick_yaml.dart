@@ -19,6 +19,7 @@ class BrickYaml {
     required this.version,
     this.environment = const BrickEnvironment(),
     this.vars = const <String, BrickVariableProperties>{},
+    this.repository,
     this.path,
   });
 
@@ -53,6 +54,9 @@ class BrickYaml {
   /// Environment of the brick.
   final BrickEnvironment environment;
 
+  /// Optional url pointing to the brick's source code repository.
+  final String? repository;
+
   /// Map of variable properties used when templating a brick.
   @VarsConverter()
   final Map<String, BrickVariableProperties> vars;
@@ -69,6 +73,7 @@ class BrickYaml {
       version: version,
       vars: vars,
       environment: environment,
+      repository: repository,
       path: path ?? this.path,
     );
   }

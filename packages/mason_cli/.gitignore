@@ -15,6 +15,7 @@ doc/api/
 
 # Local Mason Files
 .mason/
+mason-lock.json
 
 # Test Related Files
 coverage/
@@ -22,3 +23,4 @@ test/fixtures/.*/
 
 # Exceptions to the above rules
 !test/fixtures/*/.mason/
+!test/fixtures/*/mason-lock.json

@@ -66,11 +66,16 @@ bricks:
       Directory.current = cwd;
     });
 
-    test('creates .mason/brick.json when mason.yaml exists', () async {
+    test('creates .mason/brick.json and mason-lock.json when mason.yaml exists',
+        () async {
       final expectedBrickJsonPath = path.join(
         Directory.current.path,
         '.mason',
         'bricks.json',
+      );
+      final expectedMasonLockJsonPath = path.join(
+        Directory.current.path,
+        'mason-lock.json',
       );
       var doneCallCount = 0;
       when(() => logger.progress(any())).thenReturn(
@@ -78,11 +83,13 @@ bricks:
       );
 
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
+      expect(File(expectedMasonLockJsonPath).existsSync(), isFalse);
 
       final result = await commandRunner.run(['get']);
       expect(result, equals(ExitCode.success.code));
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
+      expect(File(expectedMasonLockJsonPath).existsSync(), isTrue);
 
       final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
       final appIconPath = canonicalize(
@@ -123,6 +130,27 @@ bricks:
           }),
         ),
       );
+      expect(
+        File(expectedMasonLockJsonPath).readAsStringSync(),
+        equals(
+          json.encode({
+            'bricks': {
+              'app_icon': {'path': '../../../../../bricks/app_icon'},
+              'documentation': {'path': '../../../../../bricks/documentation'},
+              'greeting': {'path': '../../../../../bricks/greeting'},
+              'simple': {'path': '../../../../../bricks/simple'},
+              'todos': {'path': '../../../../../bricks/todos'},
+              'widget': {
+                'git': {
+                  'url': 'https://github.com/felangel/mason',
+                  'path': 'bricks/widget',
+                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53'
+                }
+              }
+            }
+          }),
+        ),
+      );
 
       verify(() => logger.progress('Getting bricks')).called(1);
       expect(doneCallCount, equals(1));
@@ -142,6 +170,50 @@ bricks:
       expect(resultB, equals(ExitCode.success.code));
 
       expect(File(expectedBrickJsonPath).existsSync(), isTrue);
+    });
+
+    test('does not error when mason-lock.json already exists', () async {
+      final expectedMasonLockJsonPath = path.join(
+        Directory.current.path,
+        'mason-lock.json',
+      );
+
+      final resultA = await commandRunner.run(['get']);
+      expect(resultA, equals(ExitCode.success.code));
+
+      final resultB = await commandRunner.run(['get']);
+      expect(resultB, equals(ExitCode.success.code));
+
+      expect(File(expectedMasonLockJsonPath).existsSync(), isTrue);
+    });
+
+    test('resolves git and hosted versions', () async {
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  hello: ^0.1.0-dev
+  widget:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/widget
+''',
+      );
+      final expectedMasonLockJsonPath = path.join(
+        Directory.current.path,
+        'mason-lock.json',
+      );
+
+      final resultA = await commandRunner.run(['get']);
+      expect(resultA, equals(ExitCode.success.code));
+      expect(File(expectedMasonLockJsonPath).existsSync(), isTrue);
+      final lockA = File(expectedMasonLockJsonPath).readAsStringSync();
+
+      final resultB = await commandRunner.run(['get']);
+      expect(resultB, equals(ExitCode.success.code));
+      expect(File(expectedMasonLockJsonPath).existsSync(), isTrue);
+      final lockB = File(expectedMasonLockJsonPath).readAsStringSync();
+
+      expect(lockA, equals(lockB));
     });
 
     test('exits with code 64 when mason.yaml does not exist', () async {

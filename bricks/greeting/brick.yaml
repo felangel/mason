@@ -1,5 +1,6 @@
 name: greeting
 description: A Simple Greeting Template
+repository: https://github.com/felangel/mason/tree/master/bricks/greeting
 version: 0.1.0+1
 vars:
   name:
