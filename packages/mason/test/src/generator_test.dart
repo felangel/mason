@@ -38,6 +38,7 @@ void main() {
               '/deny',
               '*S-1-1-0:(OI)(CI)(F)',
             ],
+            runInShell: true,
           );
         } else {
           await Process.run('chmod', ['000', brokenFile.path]);
