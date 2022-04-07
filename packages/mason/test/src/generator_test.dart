@@ -31,7 +31,7 @@ void main() {
           ..writeAsStringSync('secret');
         if (Platform.isWindows) {
           await Process.run(
-            'icacls',
+            'icacls.exe',
             [
               brokenFile.path,
               '/inheritance:r',
