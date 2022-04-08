@@ -162,8 +162,10 @@ class Logger {
         hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty ? _defaultValue : input;
     final lines = _message.split('\n').length - 1;
+    final prefix =
+        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''\x1b[A\u001B[2K\u001B[${lines}A$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
+      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
   }
@@ -178,8 +180,10 @@ class Logger {
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
     final lines = _message.split('\n').length - 1;
+    final prefix =
+        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''\x1b[A\u001B[2K\u001B[${lines}A$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
+      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
     return response;
   }
