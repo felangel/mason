@@ -207,6 +207,9 @@ mason new <BRICK_NAME>
 # Generate a new brick with a custom description.
 mason new <BRICK_NAME> --desc "My awesome, new brick!"
 
+# Generate a new brick with hooks.
+mason new <BRICK_NAME> --hooks
+
 # Generate a new brick in custom path.
 mason new <BRICK_NAME> --output-dir ./path/to/brick
 
