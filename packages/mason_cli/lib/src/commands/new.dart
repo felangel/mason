@@ -12,6 +12,11 @@ class NewCommand extends MasonCommand {
   /// {@macro new_command}
   NewCommand({Logger? logger}) : super(logger: logger) {
     argParser
+      ..addFlag(
+        'hooks',
+        help: 'Generate hooks as part of the new brick.',
+        negatable: false,
+      )
       ..addOption(
         'desc',
         abbr: 'd',
@@ -42,6 +47,7 @@ class NewCommand extends MasonCommand {
     final outputDir = canonicalize(
       p.join(cwd.path, results['output-dir'] as String),
     );
+    final createHooks = results['hooks'] == true;
     final directory = Directory(outputDir);
     final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
 
@@ -54,7 +60,11 @@ class NewCommand extends MasonCommand {
 
     final target = DirectoryGeneratorTarget(directory);
     const vars = <String, dynamic>{'name': '{{name}}'};
-    final generator = _BrickGenerator(name, description);
+    final generator = _BrickGenerator(
+      name,
+      description,
+      createHooks: createHooks,
+    );
     final done = logger.progress('Creating new brick: $name.');
 
     try {
@@ -74,8 +84,11 @@ class NewCommand extends MasonCommand {
 }
 
 class _BrickGenerator extends MasonGenerator {
-  _BrickGenerator(this.brickName, this.brickDescription)
-      : super(
+  _BrickGenerator(
+    this.brickName,
+    this.brickDescription, {
+    this.createHooks = false,
+  }) : super(
           '__new_brick__',
           'Creates a new brick.',
           files: [
@@ -99,6 +112,24 @@ class _BrickGenerator extends MasonGenerator {
               p.join(brickName, BrickYaml.dir, 'HELLO.md'),
               'Hello {{name}}!',
             ),
+            if (createHooks) ...[
+              TemplateFile(
+                p.join(brickName, BrickYaml.hooks, 'pubspec.yaml'),
+                _hooksPubspecContent(brickName),
+              ),
+              TemplateFile(
+                p.join(brickName, BrickYaml.hooks, 'pre_gen.dart'),
+                _hooksPreGenContent,
+              ),
+              TemplateFile(
+                p.join(brickName, BrickYaml.hooks, 'post_gen.dart'),
+                _hooksPostGenContent,
+              ),
+              TemplateFile(
+                p.join(brickName, BrickYaml.hooks, '.gitignore'),
+                _hooksGitignoreContent,
+              ),
+            ]
           ],
         );
 
@@ -163,6 +194,38 @@ A few resources to get you started if this is your first brick template:
 TODO: Add your license here.
 ''';
 
+  static String _hooksPubspecContent(String name) => '''
+name: ${name}_hooks
+
+environment:
+  sdk: ">=2.12.0 <3.0.0"
+
+dependencies:
+  mason: ^0.1.0-dev
+''';
+
+  static const _hooksGitignoreContent = '''
+.dart_tool
+.packages
+pubspec.lock
+''';
+
+  static const _hooksPreGenContent = '''
+import 'package:mason/mason.dart';
+
+void run(HookContext context) {
+  // TODO: add pre-generation logic.
+}
+''';
+  static const _hooksPostGenContent = '''
+import 'package:mason/mason.dart';
+
+void run(HookContext context) {
+  // TODO: add post-generation logic.
+}
+''';
+
   final String brickName;
   final String brickDescription;
+  final bool createHooks;
 }
