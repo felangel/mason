@@ -173,7 +173,7 @@ void main() {
       });
     });
 
-    group('lambda shortcuts', () {
+    group('lambda shorthand', () {
       test('camelCase outputs correct string', () {
         const greeting = 'hello world';
         const input = 'Greeting: {{greeting.camelCase()}}!';
