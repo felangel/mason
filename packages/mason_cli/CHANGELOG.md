@@ -1,3 +1,38 @@
+# 0.1.0-dev.21
+
+- feat: add `--hooks` flag to `mason new` command
+
+# 0.1.0-dev.20
+
+- fix: `mason add` fix progress logging typo
+
+# 0.1.0-dev.19
+
+- docs: add note regarding `.mason` and `mason-lock.json`
+- chore: upgrade to `mason 0.1.0-dev.14`
+- chore: add policy details on publish
+
+# 0.1.0-dev.18
+
+- feat: generate `mason-lock.json` to lock brick versions
+
+# 0.1.0-dev.17
+
+- chore: use fixed version of `hello` brick in `mason init`
+
+# 0.1.0-dev.16
+
+- feat: upgrade to `mason_api ^v0.1.0-dev.4`
+  - improve error messages for `mason publish`
+
+# 0.1.0-dev.15
+
+- **BREAKING**: feat: `mason new` only generates new brick w/custom output-dir
+- feat: `mason init` only generate `mason.yaml`
+- feat: `mason new` adjust generated file name
+- feat: `mason new` add inline comments `brick.yaml`
+- feat: `mason new` include `README`, `CHANGELOG`, and `LICENSE`
+
 # 0.1.0-dev.14
 
 - feat: add `mason unbundle` command

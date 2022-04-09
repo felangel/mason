@@ -99,6 +99,23 @@ void main() {
       verify(() => logger.flush(logger.detail)).called(1);
     });
 
+    test('creates a new brick w/hooks', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hooks'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(['new', 'hooks', '--hooks']);
+      expect(result, equals(ExitCode.success.code));
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.new'), 'hooks'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'new'), 'hooks'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+      verify(() => logger.flush(logger.detail)).called(1);
+    });
+
     test('exits with code 64 when brick already exists', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'simple'),

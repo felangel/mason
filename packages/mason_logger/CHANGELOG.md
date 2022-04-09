@@ -1,3 +1,17 @@
+# 0.1.0-dev.8
+
+- fix: single line prompts are overwritten
+  - when using `confirm` and `prompt`
+
+# 0.1.0-dev.7
+
+- fix: multiline prompts are outputting twice
+  - when using `confirm` and `prompt`
+
+# 0.1.0-dev.6
+
+- feat: add `write`
+
 # 0.1.0-dev.5
 
 - feat: add `hidden` flag to `prompt`

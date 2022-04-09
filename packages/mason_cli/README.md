@@ -120,6 +120,8 @@ Then you can use `mason make` to generate your first file:
 mason make hello
 ```
 
+❗ Note: **DO NOT** commit the `.mason` directory. **DO** commit the `mason-lock.json` file when working with versioned bricks (git/hosted).
+
 ### Command Line Variables
 
 Any variables can be passed as command line args.
@@ -204,6 +206,9 @@ mason new <BRICK_NAME>
 
 # Generate a new brick with a custom description.
 mason new <BRICK_NAME> --desc "My awesome, new brick!"
+
+# Generate a new brick with hooks.
+mason new <BRICK_NAME> --hooks
 
 # Generate a new brick in custom path.
 mason new <BRICK_NAME> --output-dir ./path/to/brick

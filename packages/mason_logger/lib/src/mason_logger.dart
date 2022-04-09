@@ -97,6 +97,9 @@ class Logger {
     _queue.clear();
   }
 
+  /// Write message via `stdout.write`.
+  void write(String? message) => _stdout.write(message);
+
   /// Writes info message to stdout.
   void info(String? message) => _stdout.writeln(message);
 
@@ -158,8 +161,11 @@ class Logger {
     final input =
         hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty ? _defaultValue : input;
+    final lines = _message.split('\n').length - 1;
+    final prefix =
+        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
+      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
   }
@@ -173,8 +179,11 @@ class Logger {
     final response = input == null || input.isEmpty
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
+    final lines = _message.split('\n').length - 1;
+    final prefix =
+        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''\x1b[A\u001B[2K$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
+      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
     return response;
   }

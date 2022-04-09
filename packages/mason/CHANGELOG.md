@@ -1,3 +1,17 @@
+# 0.1.0-dev.14
+
+- feat: add optional `repository` field to `brick.yaml`
+
+# 0.1.0-dev.13
+
+- **BREAKING**: feat: `BricksJson.add` returns `CachedBrick` instead of `String` location.
+- feat: add `MasonLockJson`
+- feat: export `CachedBrick`, `GeneratorHooks`, `MasonLockJson`, `Version`, `VersionConstraint`, and `VersionRange`
+
+# 0.1.0-dev.12
+
+- feat: include `README`, `CHANGELOG`, and `LICENSE` in `MasonBundle`
+
 # 0.1.0-dev.11
 
 - fix: `Yaml.encode` handle escape characters

@@ -46,6 +46,10 @@ class MasonBundle {
     this.vars = const <String, BrickVariableProperties>{},
     this.files = const [],
     this.hooks = const [],
+    this.repository,
+    this.readme,
+    this.changelog,
+    this.license,
   });
 
   /// Converts a [Map<String, dynamic>] into a [MasonBundle] instance.
@@ -93,6 +97,18 @@ class MasonBundle {
 
   /// The brick environment (from the `brick.yaml`).
   final BrickEnvironment environment;
+
+  /// Optional url pointing to the brick's source code repository.
+  final String? repository;
+
+  /// The brick's README.md file.
+  final MasonBundledFile? readme;
+
+  /// The brick's CHANGELOG.md file.
+  final MasonBundledFile? changelog;
+
+  /// The brick's LICENSE file.
+  final MasonBundledFile? license;
 
   /// All required variables for the brick (from the `brick.yaml`).
   @VarsConverter()

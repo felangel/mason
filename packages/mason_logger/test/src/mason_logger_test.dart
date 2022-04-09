@@ -17,6 +17,19 @@ void main() {
       stdin = MockStdin();
     });
 
+    group('.write', () {
+      test('writes to stdout', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().write(message);
+            verify(() => stdout.write(message)).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+    });
+
     group('.info', () {
       test('writes line to stdout', () {
         StdioOverrides.runZoned(
@@ -231,6 +244,26 @@ void main() {
             verify(() => stdout.writeln(promptWithResponse)).called(1);
             verify(() => stdout.writeln()).called(1);
             verifyNever(() => stdout.write(any()));
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('writes multi line to stdout and resets after response', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message\nwith more\nlines';
+            final lines = message.split('\n').length - 1;
+            const response = 'test response';
+            const prompt = '$message ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K\u001B[${lines}A$message ${styleDim.wrap(lightCyan.wrap(response))}''';
+            when(() => stdin.readLineSync()).thenReturn(response);
+            final actual = Logger().prompt(message);
+            expect(actual, equals(response));
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
           },
           stdout: () => stdout,
           stdin: () => stdin,
