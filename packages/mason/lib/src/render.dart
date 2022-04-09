@@ -88,7 +88,7 @@ extension RenderTemplate on String {
     Map<String, List<int>>? partials = const {},
   ]) {
     final template = Template(
-      _sanitizeInput(this),
+      _sanitizeInput(transpiled(vars)),
       lenient: true,
       partialResolver: partials?.resolve,
     );
@@ -96,6 +96,47 @@ extension RenderTemplate on String {
     return _sanitizeOutput(
       template.renderString(<String, dynamic>{..._builtInLambdas, ...vars}),
     );
+  }
+}
+
+extension on String {
+  String transpiled(Map<String, dynamic> vars) {
+    final delimeterRegExp = RegExp('({?{{.*?}}}?)');
+    final lambdasRegExp = RegExp(
+      r'''((.*).(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)\(\))''',
+    );
+
+    final containsLambdas = lambdasRegExp.hasMatch(this);
+    if (!containsLambdas) return this;
+
+    return replaceAllMapped(delimeterRegExp, (match) {
+      final group = match.group(1);
+      if (group == null) return this;
+
+      final isTriple = group.startsWith('{{{') && group.endsWith('}}}');
+      final groupContents = isTriple
+          ? group.substring(3, group.length - 3)
+          : group.substring(2, group.length - 2);
+
+      return groupContents.replaceAllMapped(lambdasRegExp, (lambdaMatch) {
+        final lambdaGroup = lambdaMatch.group(1);
+        if (lambdaGroup == null) return groupContents;
+
+        final segments = lambdaGroup.split('.');
+        if (segments.length == 1) return groupContents;
+
+        final variable = segments.first;
+        if (!vars.containsKey(variable)) return groupContents;
+
+        var output = isTriple ? '{{{$variable}}}' : '{{$variable}}';
+        for (var i = 1; i < segments.length; i++) {
+          final lambda = segments[i].replaceFirst('()', '');
+          output = '{{#$lambda}}$output{{/$lambda}}';
+        }
+
+        return output;
+      });
+    });
   }
 }
 
