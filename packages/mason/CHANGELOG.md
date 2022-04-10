@@ -1,3 +1,9 @@
+# 0.1.0-dev.15
+
+- feat: introduce shorthand lambda syntax
+  - `{{name.upperCase()}}` <-> `{{#upperCase}}{{name}}{{/upperCase}}`
+- chore: use `mason_logger ^0.1.0-dev.8`
+
 # 0.1.0-dev.14
 
 - feat: add optional `repository` field to `brick.yaml`
