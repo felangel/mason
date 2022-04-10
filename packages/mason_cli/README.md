@@ -337,20 +337,20 @@ Running `mason make app_icon --url path/to/icon.png` will generate `icon.png` wi
 
 Mason supports a handful of built-in lambdas that can help with customizing generated code:
 
-| Name           | Example       | Usage                                            |
-| -------------- | ------------- | ------------------------------------------------ |
-| `camelCase`    | `helloWorld`  | `{{#camelCase}}{{variable}}{{/camelCase}}`       |
-| `constantCase` | `HELLO_WORLD` | `{{#constantCase}}{{variable}}{{/constantCase}}` |
-| `dotCase`      | `hello.world` | `{{#dotCase}}{{variable}}{{/dotCase}}`           |
-| `headerCase`   | `Hello-World` | `{{#headerCase}}{{variable}}{{/headerCase}}`     |
-| `lowerCase`    | `hello world` | `{{#lowerCase}}{{variable}}{{/lowerCase}}`       |
-| `pascalCase`   | `HelloWorld`  | `{{#pascalCase}}{{variable}}{{/pascalCase}}`     |
-| `paramCase`    | `hello-world` | `{{#paramCase}}{{variable}}{{/paramCase}}`       |
-| `pathCase`     | `hello/world` | `{{#pathCase}}{{variable}}{{/pathCase}}`         |
-| `sentenceCase` | `Hello world` | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}` |
-| `snakeCase`    | `hello_world` | `{{#snakeCase}}{{variable}}{{/snakeCase}}`       |
-| `titleCase`    | `Hello World` | `{{#titleCase}}{{variable}}{{/titleCase}}`       |
-| `upperCase`    | `HELLO WORLD` | `{{#upperCase}}{{variable}}{{/upperCase}}`       |
+| Name           | Example       | Shorthand Syntax              | Full Syntax                                      |
+| -------------- | ------------- | ----------------------------- | ------------------------------------------------ |
+| `camelCase`    | `helloWorld`  | `{{variable.camelCase()}}`    | `{{#camelCase}}{{variable}}{{/camelCase}}`       |
+| `constantCase` | `HELLO_WORLD` | `{{variable.constantCase()}}` | `{{#constantCase}}{{variable}}{{/constantCase}}` |
+| `dotCase`      | `hello.world` | `{{variable.dotCase()}}`      | `{{#dotCase}}{{variable}}{{/dotCase}}`           |
+| `headerCase`   | `Hello-World` | `{{variable.headerCase()}}`   | `{{#headerCase}}{{variable}}{{/headerCase}}`     |
+| `lowerCase`    | `hello world` | `{{variable.lowerCase()}}`    | `{{#lowerCase}}{{variable}}{{/lowerCase}}`       |
+| `pascalCase`   | `HelloWorld`  | `{{variable.pascalCase()}}`   | `{{#pascalCase}}{{variable}}{{/pascalCase}}`     |
+| `paramCase`    | `hello-world` | `{{variable.paramCase()}}`    | `{{#paramCase}}{{variable}}{{/paramCase}}`       |
+| `pathCase`     | `hello/world` | `{{variable.pathCase()}}`     | `{{#pathCase}}{{variable}}{{/pathCase}}`         |
+| `sentenceCase` | `Hello world` | `{{variable.sentenceCase()}}` | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}` |
+| `snakeCase`    | `hello_world` | `{{variable.snakeCase()}}`    | `{{#snakeCase}}{{variable}}{{/snakeCase}}`       |
+| `titleCase`    | `Hello World` | `{{variable.titleCase()}}`    | `{{#titleCase}}{{variable}}{{/titleCase}}`       |
+| `upperCase`    | `HELLO WORLD` | `{{variable.upperCase()}}`    | `{{#upperCase}}{{variable}}{{/upperCase}}`       |
 
 _Example Usage_
 
@@ -358,8 +358,8 @@ Given the following example brick:
 
 ```
 __brick__
-  ├── {{#snakeCase}}{{name}}{{/snakeCase}}.md
-  └── {{#pascalCase}}{{name}}{{/pascalCase}}.java
+  ├── {{name.snakeCase()}}.md
+  └── {{name.pascalCase()}}.java
 ```
 
 `brick.yaml`:
