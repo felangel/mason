@@ -1,3 +1,7 @@
+# 0.1.0-dev.22
+
+- feat: upgrade to `mason: ^0.1.0-dev.15`
+
 # 0.1.0-dev.21
 
 - feat: add `--hooks` flag to `mason new` command
