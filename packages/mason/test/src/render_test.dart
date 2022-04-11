@@ -326,16 +326,16 @@ void main() {
         );
       });
 
-      test('mixed with regular mustache syntax', () {
+      test('mixed with regular mustache syntax after', () {
         const greeting = 'hello world';
         const input =
-            'Greeting: {{greeting.upperCase()}}{{#is_yelling}}!{{/is_yelling}}';
+            'Greeting: {{greeting.upperCase()}}{{#is_suffixed}}!{{/is_suffixed}}';
         var expected = 'Greeting: HELLO WORLD!';
         expect(
           input.render(
             <String, dynamic>{
               'greeting': greeting,
-              'is_yelling': true,
+              'is_suffixed': true,
             },
           ),
           equals(expected),
@@ -345,7 +345,33 @@ void main() {
           input.render(
             <String, dynamic>{
               'greeting': greeting,
-              'is_yelling': false,
+              'is_suffixed': false,
+            },
+          ),
+          equals(expected),
+        );
+      });
+
+      test('mixed with regular mustache syntax before', () {
+        const greeting = 'hello world';
+        const input =
+            '{{#is_prefixed}}Greeting: {{/is_prefixed}}{{greeting.upperCase()}}!';
+        var expected = 'Greeting: HELLO WORLD!';
+        expect(
+          input.render(
+            <String, dynamic>{
+              'greeting': greeting,
+              'is_prefixed': true,
+            },
+          ),
+          equals(expected),
+        );
+        expected = 'HELLO WORLD!';
+        expect(
+          input.render(
+            <String, dynamic>{
+              'greeting': greeting,
+              'is_prefixed': false,
             },
           ),
           equals(expected),
