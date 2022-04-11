@@ -40,7 +40,9 @@
     "compile": "webpack",
     "watch": "webpack --watch",
     "package": "webpack --mode production --devtool hidden-source-map",
-    "lint": "eslint src --ext ts"
+    "lint": "eslint src --ext ts",
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "devDependencies": {
     "@types/vscode": "^1.66.0",
@@ -51,6 +53,7 @@
     "@typescript-eslint/parser": "^5.16.0",
     "eslint": "^8.11.0",
     "glob": "^7.2.0",
+    "prettier": "2.6.0",
     "typescript": "^4.5.5",
     "ts-loader": "^9.2.8",
     "webpack": "^5.70.0",

@@ -4,7 +4,9 @@ import { isMasonInstalled } from "./mason";
 
 export async function activate(context: vscode.ExtensionContext) {
   const masonInstalled = await isMasonInstalled();
-  if (!masonInstalled) return showMissingInstallationWarning();
+  if (!masonInstalled) {
+    return showMissingInstallationWarning();
+  }
 
   context.subscriptions.push(
     vscode.workspace.onDidSaveTextDocument(onFileSaved)
