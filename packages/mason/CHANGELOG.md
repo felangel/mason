@@ -1,3 +1,7 @@
+# 0.1.0-dev.16
+
+- fix: lamdba shorthand syntax interop
+
 # 0.1.0-dev.15
 
 - feat: introduce shorthand lambda syntax
