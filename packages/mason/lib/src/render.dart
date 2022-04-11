@@ -101,7 +101,7 @@ extension RenderTemplate on String {
 
 extension on String {
   String transpiled(Map<String, dynamic> vars) {
-    final delimeterRegExp = RegExp('({?{{.*?}}}?)');
+    final delimeterRegExp = RegExp(r'''({?{{.*?\(\)}}}?)''');
     final lambdasRegExp = RegExp(
       r'''((.*).(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)\(\))''',
     );

@@ -325,6 +325,32 @@ void main() {
           equals(expected),
         );
       });
+
+      test('mixed with regular mustache syntax', () {
+        const greeting = 'hello world';
+        const input =
+            'Greeting: {{greeting.upperCase()}}{{#is_yelling}}!{{/is_yelling}}';
+        var expected = 'Greeting: HELLO WORLD!';
+        expect(
+          input.render(
+            <String, dynamic>{
+              'greeting': greeting,
+              'is_yelling': true,
+            },
+          ),
+          equals(expected),
+        );
+        expected = 'Greeting: HELLO WORLD';
+        expect(
+          input.render(
+            <String, dynamic>{
+              'greeting': greeting,
+              'is_yelling': false,
+            },
+          ),
+          equals(expected),
+        );
+      });
     });
   });
 }
