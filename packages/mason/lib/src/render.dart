@@ -114,7 +114,9 @@ extension on String {
       if (group == null) return this;
 
       final isTriple = group.startsWith('{{{') && group.endsWith('}}}');
-      final groupContents = isTriple ? group.substring(3, group.length - 3) : group.substring(2, group.length - 2);
+      final groupContents = isTriple
+          ? group.substring(3, group.length - 3)
+          : group.substring(2, group.length - 2);
 
       return groupContents.replaceAllMapped(lambdasRegExp, (lambdaMatch) {
         final lambdaGroup = lambdaMatch.group(1);
