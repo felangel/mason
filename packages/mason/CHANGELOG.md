@@ -1,3 +1,8 @@
+# 0.1.0-dev.17
+
+- fix: lambda shorthand conditional interop
+- fix: lambda shorthand partials interop
+
 # 0.1.0-dev.16
 
 - fix: lamdba shorthand syntax interop
