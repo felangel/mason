@@ -90,7 +90,7 @@ extension RenderTemplate on String {
     final template = Template(
       _sanitizeInput(transpiled(vars)),
       lenient: true,
-      partialResolver: partials?.resolve,
+      partialResolver: (name) => partials?.resolve(name, vars: vars),
     );
 
     return _sanitizeOutput(
@@ -146,11 +146,14 @@ extension on String {
 /// {@endtemplate}
 extension ResolvePartial on Map<String, List<int>> {
   /// {@macro resolve_partial}
-  Template? resolve(final String name) {
+  Template? resolve(
+    final String name, {
+    Map<String, dynamic> vars = const <String, dynamic>{},
+  }) {
     final content = this['{{~ $name }}'];
     if (content == null) return null;
     final decoded = utf8.decode(content);
-    final sanitized = _sanitizeInput(decoded);
+    final sanitized = _sanitizeInput(decoded.transpiled(vars));
     return Template(sanitized, name: name, lenient: true);
   }
 }

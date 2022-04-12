@@ -47,6 +47,37 @@ void main() {
               .having((template) => template.source, 'source', content),
         );
       });
+
+      test('resolve outputs correct template w/lambda', () {
+        const name = 'header';
+        const content = 'Hello {{#upperCase}}{{name}}{{/upperCase}}!';
+        final source = utf8.encode(content);
+        expect(
+          {'{{~ $name }}': source}.resolve(
+            name,
+            vars: <String, dynamic>{'name': 'dash'},
+          ),
+          isA<Template>()
+              .having((template) => template.name, 'name', name)
+              .having((template) => template.source, 'source', content),
+        );
+      });
+
+      test('resolve outputs correct template w/lambda shorthand', () {
+        const name = 'header';
+        const content = 'Hello {{name.upperCase()}}!';
+        final source = utf8.encode(content);
+        const expected = 'Hello {{#upperCase}}{{name}}{{/upperCase}}!';
+        expect(
+          {'{{~ $name }}': source}.resolve(
+            name,
+            vars: <String, dynamic>{'name': 'dash'},
+          ),
+          isA<Template>()
+              .having((template) => template.name, 'name', name)
+              .having((template) => template.source, 'source', expected),
+        );
+      });
     });
 
     group('lambdas', () {
