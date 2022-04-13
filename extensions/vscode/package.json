@@ -29,11 +29,37 @@
   ],
   "icon": "assets/logo.png",
   "activationEvents": [
-    "workspaceContains:**/mason.yaml"
+    "workspaceContains:**/mason.yaml",
+    "onCommand:mason.init",
+    "onCommand:mason.add-local-brick",
+    "onCommand:mason.add-global-brick",
+    "onCommand:mason.remove-local-brick",
+    "onCommand:mason.remove-global-brick"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "commands": []
+    "commands": [
+      {
+        "command": "mason.init",
+        "title": "Mason: Init"
+      },
+      {
+        "command": "mason.add-local-brick",
+        "title": "Mason: Add Local Brick"
+      },
+      {
+        "command": "mason.add-global-brick",
+        "title": "Mason: Add Global Brick"
+      },
+      {
+        "command": "mason.remove-local-brick",
+        "title": "Mason: Remove Local Brick"
+      },
+      {
+        "command": "mason.remove-global-brick",
+        "title": "Mason: Remove Global Brick"
+      }
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",

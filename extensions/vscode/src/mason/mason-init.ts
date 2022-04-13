@@ -1,18 +1,18 @@
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
-export const masonGet = async ({ cwd }: { cwd: string }): Promise<void> => {
+export const masonInit = async ({ cwd }: { cwd: string }): Promise<void> => {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Window,
-      title: "mason get",
+      title: "mason init",
     },
     async (_) => {
       try {
-        await masonExec("get", {
+        await masonExec("init", {
           cwd: cwd,
         });
-        vscode.window.setStatusBarMessage("✓ mason get", statusBarTimeout);
+        vscode.window.setStatusBarMessage("✓ mason init", statusBarTimeout);
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }

@@ -1,7 +1,7 @@
 import * as cp from "child_process";
 
 export interface ExecOptions {
-  cwd: string;
+  cwd?: string | undefined;
 }
 
 export const exec = (cmd: string, options?: ExecOptions) =>
