@@ -1,11 +1,12 @@
-import * as path from "path";
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
 export const masonRemove = async ({
+  cwd,
   brick,
   global = false,
 }: {
+  cwd: string;
   brick: string;
   global?: boolean;
 }): Promise<void> => {
@@ -19,7 +20,7 @@ export const masonRemove = async ({
       if (!document) return;
       try {
         await masonExec(`remove ${global ? "-g" : ""} ${brick}`, {
-          cwd: path.join(document.uri.fsPath, ".."),
+          cwd: cwd,
         });
         vscode.window.setStatusBarMessage(
           `✓ mason remove ${global ? "-g" : ""} ${brick}`,

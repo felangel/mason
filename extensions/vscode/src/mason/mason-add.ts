@@ -1,11 +1,12 @@
-import * as path from "path";
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
 export const masonAdd = async ({
+  cwd,
   brick,
   global = false,
 }: {
+  cwd: string;
   brick: string;
   global?: boolean;
 }): Promise<void> => {
@@ -15,11 +16,9 @@ export const masonAdd = async ({
       title: "mason add",
     },
     async (_) => {
-      const document = vscode.window.activeTextEditor?.document;
-      if (!document) return;
       try {
         await masonExec(`add ${global ? "-g" : ""} ${brick}`, {
-          cwd: path.join(document.uri.fsPath, ".."),
+          cwd: cwd,
         });
         vscode.window.setStatusBarMessage(
           `✓ mason add ${global ? "-g" : ""} ${brick}`,
