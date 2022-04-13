@@ -20,6 +20,7 @@ export const masonRemove = async ({
       if (!document) {
         return;
       }
+
       try {
         await masonExec(`remove${global ? " -g " : " "}${brick}`, {
           cwd: cwd,
