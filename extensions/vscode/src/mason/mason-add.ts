@@ -13,15 +13,15 @@ export const masonAdd = async ({
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Window,
-      title: "mason add",
+      title: `mason add${global ? " -g " : " "}${brick}`,
     },
     async (_) => {
       try {
-        await masonExec(`add ${global ? "-g" : ""} ${brick}`, {
+        await masonExec(`add${global ? " -g " : " "}${brick}`, {
           cwd: cwd,
         });
         vscode.window.setStatusBarMessage(
-          `✓ mason add ${global ? "-g" : ""} ${brick}`,
+          `✓ mason add${global ? " -g " : " "}${brick}`,
           statusBarTimeout
         );
       } catch (err) {

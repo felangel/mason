@@ -13,17 +13,17 @@ export const masonRemove = async ({
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Window,
-      title: "mason remove",
+      title: `mason remove${global ? " -g " : " "}${brick}`,
     },
     async (_) => {
       const document = vscode.window.activeTextEditor?.document;
       if (!document) return;
       try {
-        await masonExec(`remove ${global ? "-g" : ""} ${brick}`, {
+        await masonExec(`remove${global ? " -g " : " "}${brick}`, {
           cwd: cwd,
         });
         vscode.window.setStatusBarMessage(
-          `✓ mason remove ${global ? "-g" : ""} ${brick}`,
+          `✓ mason remove${global ? " -g " : " "}${brick}`,
           statusBarTimeout
         );
       } catch (err) {
