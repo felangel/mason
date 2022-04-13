@@ -10,7 +10,6 @@ export const removeLocalBrick = async () => {
 
   try {
     const masonYamlPath = path.join(cwd, "mason.yaml");
-    console.log(masonYamlPath);
     await vscode.workspace.fs.stat(vscode.Uri.file(masonYamlPath));
   } catch (_) {
     vscode.window.showErrorMessage(
