@@ -4,7 +4,9 @@ import { masonAdd } from "../mason";
 
 export const addLocalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) return;
+  if (!cwd) {
+    return;
+  }
 
   try {
     const masonYamlPath = path.join(cwd, "mason.yaml");
@@ -17,17 +19,23 @@ export const addLocalBrick = async () => {
   }
 
   const brick = await promptForBrickName();
-  if (!brick) return;
+  if (!brick) {
+    return;
+  }
 
   await masonAdd({ cwd, brick });
 };
 
 export const addGlobalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) return;
+  if (!cwd) {
+    return;
+  }
 
   const brick = await promptForBrickName();
-  if (!brick) return;
+  if (!brick) {
+    return;
+  }
 
   await masonAdd({ cwd, brick, global: true });
 };

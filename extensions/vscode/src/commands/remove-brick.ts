@@ -4,7 +4,9 @@ import { masonRemove } from "../mason";
 
 export const removeLocalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) return;
+  if (!cwd) {
+    return;
+  }
 
   try {
     const masonYamlPath = path.join(cwd, "mason.yaml");
@@ -18,17 +20,23 @@ export const removeLocalBrick = async () => {
   }
 
   const brick = await promptForBrickName();
-  if (!brick) return;
+  if (!brick) {
+    return;
+  }
 
   await masonRemove({ cwd, brick });
 };
 
 export const removeGlobalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) return;
+  if (!cwd) {
+    return;
+  }
 
   const brick = await promptForBrickName();
-  if (!brick) return;
+  if (!brick) {
+    return;
+  }
 
   await masonRemove({ cwd, brick, global: true });
 };

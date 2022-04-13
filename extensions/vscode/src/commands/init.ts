@@ -4,7 +4,9 @@ import { masonInit } from "../mason";
 
 export const init = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) return;
+  if (!cwd) {
+    return;
+  }
 
   try {
     const masonYamlPath = path.join(cwd, "mason.yaml");
