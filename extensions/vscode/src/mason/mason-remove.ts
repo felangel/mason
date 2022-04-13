@@ -17,7 +17,10 @@ export const masonRemove = async ({
     },
     async (_) => {
       const document = vscode.window.activeTextEditor?.document;
-      if (!document) return;
+      if (!document) {
+        return;
+      }
+
       try {
         await masonExec(`remove${global ? " -g " : " "}${brick}`, {
           cwd: cwd,
