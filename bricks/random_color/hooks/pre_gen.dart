@@ -19,5 +19,5 @@ Future<void> run(HookContext context) async {
   await Future<void>.delayed(Duration(seconds: 1));
   done('Generated');
   final randomSeed = Random().nextInt(colors.length);
-  context.vars = {...context.vars, 'favorite_color': colors[randomSeed]};
+  context.vars['favorite_color'] = colors[randomSeed];
 }
