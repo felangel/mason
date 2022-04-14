@@ -466,9 +466,7 @@ class _Vars with MapMixin<String, dynamic> {
   final Map<String, dynamic> _vars;
 
   @override
-  dynamic operator [](Object? key) {
-    return _vars[key];
-  }
+  dynamic operator [](Object? key) => _vars[key];
 
   @override
   void operator []=(String key, dynamic value) {
