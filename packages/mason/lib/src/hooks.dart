@@ -435,10 +435,8 @@ void main(List<String> args, SendPort port) {
 }
 
 class _HookContext implements HookContext {
-  _HookContext._(
-    this._port, {
-    Map<String, dynamic>? vars,
-  }) : _vars = _Vars(_port, vars: vars ?? <String, dynamic>{});
+  _HookContext._(this._port, {Map<String, dynamic>? vars})
+      : _vars = _Vars(_port, vars: vars);
 
   final SendPort _port;
   _Vars _vars;
