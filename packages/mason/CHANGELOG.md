@@ -1,3 +1,15 @@
+# 0.1.0-dev.19
+
+- refactor: improve brick location serialization for hosted bricks
+  ```yaml
+  # before
+  hello:
+    version: ^0.1.0
+
+  # after
+  hello: ^0.1.0
+  ```
+
 # 0.1.0-dev.18
 
 - fix: `HookContext` vars mutation
