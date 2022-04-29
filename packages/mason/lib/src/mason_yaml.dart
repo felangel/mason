@@ -63,7 +63,10 @@ class BrickLocation {
   }
 
   /// Converts [BrickLocation] to [Map]
-  Map<dynamic, dynamic> toJson() => _$BrickLocationToJson(this);
+  dynamic toJson() {
+    if (version != null) return version;
+    return _$BrickLocationToJson(this);
+  }
 
   /// The local brick template path.
   final String? path;
