@@ -1,3 +1,7 @@
+# 0.1.0-dev.18
+
+- fix: `HookContext` vars mutation
+
 # 0.1.0-dev.17
 
 - fix: lambda shorthand conditional interop
