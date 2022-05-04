@@ -43,8 +43,8 @@ View the full documentation [here](https://github.com/felangel/mason/tree/master
 
 ## Video Tutorial
 
-[![Mason Video Tutorial](https://img.youtube.com/vi/SnrHoN632NU/0.jpg)](https://www.youtube.com/watch?v=SnrHoN632NU)
+[![Mason Video Tutorial](https://img.youtube.com/vi/G4PTjA6tpTU/0.jpg)](https://www.youtube.com/watch?v=G4PTjA6tpTU)
 
-**Say HI to Mason Package! - The Top Tier Code Generation Tool | Complete Tutorial** by [_Flutterly_](https://www.youtube.com/channel/UC5PYcSe3to4mtm3SPCUmjvw)
+**Very Good Livestream: Felix Angelov Demos Mason** by [_Very Good Ventures_](https://www.youtube.com/channel/UCMEL3IZanJyEmU9ycwnAGNA)
 
 [mason_demo]: https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif
