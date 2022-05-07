@@ -26,6 +26,7 @@ export 'src/generator.dart'
         GeneratedFile,
         GeneratedFileStatus,
         GeneratorHooks,
+        GeneratorTarget,
         HookContext,
         MasonGenerator,
         TemplateFile;
