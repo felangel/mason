@@ -1,6 +1,11 @@
+# 0.1.0-dev.20
+
+- feat: expose `GeneratorTarget`
+
 # 0.1.0-dev.19
 
 - refactor: improve brick location serialization for hosted bricks
+
   ```yaml
   # before
   hello:
