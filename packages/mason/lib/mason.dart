@@ -29,6 +29,7 @@ export 'src/generator.dart'
         GeneratorTarget,
         HookContext,
         MasonGenerator,
+        OverwriteRule,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle, MasonBundledFile;
 export 'src/mason_lock_json.dart' show MasonLockJson;
