@@ -1,3 +1,11 @@
+# 0.1.0-dev.23
+
+- feat: add mason badge to new bricks
+
+  ```md
+  ![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)
+  ```
+
 # 0.1.0-dev.22
 
 - feat: upgrade to `mason: ^0.1.0-dev.15`
