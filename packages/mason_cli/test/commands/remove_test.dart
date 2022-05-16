@@ -21,6 +21,23 @@ void main() {
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
+    setUpAll(() async {
+      registerFallbackValue(Object());
+      logger = MockLogger();
+      pubUpdater = MockPubUpdater();
+
+      when(
+        () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn('');
+      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+      await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+        ['cache', 'clear'],
+      );
+    });
+
     setUp(() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
