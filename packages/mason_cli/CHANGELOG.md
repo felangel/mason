@@ -1,3 +1,7 @@
+# 0.1.0-dev.24
+
+- fix: add link to mason badge in new brick READMEs
+
 # 0.1.0-dev.23
 
 - feat: add mason badge to new bricks
