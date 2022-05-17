@@ -42,12 +42,16 @@ mixin InstallBrickMixin on MasonCommand {
   }
 
   /// Installs all bricks registered in nearest `mason.yaml`.
-  Future<void> getBricks() async {
+  /// If [upgrade] is true, bricks are upgraded to the latest version
+  /// and the lock file is regenerated.
+  Future<void> getBricks({bool upgrade = false}) async {
     final bricksJson = localBricksJson;
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final lockJson = masonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
-    final getDone = logger.progress('Getting bricks');
+    final getDone = logger.progress(
+      upgrade ? 'Upgrading bricks' : 'Getting bricks',
+    );
     try {
       bricksJson.clear();
       if (masonYaml.bricks.entries.isNotEmpty) {
@@ -56,7 +60,7 @@ mixin InstallBrickMixin on MasonCommand {
           (entry) async {
             final location = resolveBrickLocation(
               location: entry.value,
-              lockedLocation: lockJson.bricks[entry.key],
+              lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
             );
             final cachedBrick = await bricksJson.add(
               Brick(name: entry.key, location: location),
