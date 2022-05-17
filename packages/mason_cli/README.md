@@ -591,7 +591,7 @@ Installed bricks can be upgraded to their latest versions via the `upgrade` comm
 ### Upgrade Usage
 
 ```sh
-# upgrade all bricks and regenerate a new mason-lock.json
+# upgrade all bricks and generate a new mason-lock.json
 mason upgrade
 ```
 

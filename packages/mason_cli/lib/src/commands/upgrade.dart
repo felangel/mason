@@ -3,8 +3,7 @@ import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/install_brick.dart';
 
 /// {@template upgrade_command}
-/// `mason upgrade` command which upgrades dependencies
-/// to their latest versions.
+/// `mason upgrade` command which upgrades bricks to their latest versions.
 /// {@endtemplate}
 class UpgradeCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro upgrade_command}
