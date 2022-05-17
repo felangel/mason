@@ -1,3 +1,7 @@
+# 0.1.0-dev.25
+
+- feat: add `mason upgrade` command to upgrade bricks to their latest versions
+
 # 0.1.0-dev.24
 
 - fix: add link to mason badge in new brick READMEs
