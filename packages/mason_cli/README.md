@@ -57,6 +57,8 @@ mason make hello
   - [Remove Usage](#remove-usage)
 - [List Installed Bricks](#list-installed-bricks)
   - [List Usage](#list-usage)
+- [Upgrade Bricks](#upgrade-bricks)
+  - [Upgrade Usage](#upgrade-usage)
 - [Bundling](#bundling)
   - [Bundle Usage](#bundle-usage)
 - [Unbundling](#unbundling)
@@ -582,6 +584,17 @@ mason ls
 mason ls -g
 ```
 
+## Upgrade Bricks
+
+Installed bricks can be upgraded to their latest versions via the `upgrade` command.
+
+### Upgrade Usage
+
+```sh
+# upgrade all bricks and regenerate a new mason-lock.json
+mason upgrade
+```
+
 ## Bundling
 
 You can use mason to generate a bundle for an existing template. Bundles are convenient for cases where you want to include your template as part of a standalone CLI. [Very Good CLI](https://github.com/VeryGoodOpenSource/very_good_cli) is a great example.
@@ -697,6 +710,7 @@ Available commands:
   remove     Removes a brick.
   unbundle   Generates a brick template from a bundle.
   update     Update mason.
+  upgrade    Upgrade bricks to their latest versions.
 
 Run "mason help <command>" for more information about a command.
 ```

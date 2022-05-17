@@ -37,6 +37,7 @@ const expectedUsage = [
       '  remove     Removes a brick.\n'
       '  unbundle   Generates a brick template from a bundle.\n'
       '  update     Update mason.\n'
+      '  upgrade    Upgrade bricks to their latest versions.\n'
       '\n'
       'Run "mason help <command>" for more information about a command.'
 ];

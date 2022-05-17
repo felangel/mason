@@ -12,3 +12,4 @@ export 'publish.dart';
 export 'remove.dart';
 export 'unbundle.dart';
 export 'update.dart';
+export 'upgrade.dart';
