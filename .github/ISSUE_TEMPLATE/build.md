@@ -7,7 +7,7 @@ labels: build
 
 **Description**
 
-Describe what changes need to be done to the build system and why
+Describe what changes need to be done to the build system and why.
 
 **Requirements**
 
