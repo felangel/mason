@@ -7,7 +7,7 @@ labels: ci
 
 **Description**
 
-Describe what changes need to be done to the ci/cd system and why
+Describe what changes need to be done to the ci/cd system and why.
 
 **Requirements**
 
