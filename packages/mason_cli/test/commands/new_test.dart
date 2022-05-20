@@ -13,6 +13,8 @@ class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   final cwd = Directory.current;
 
@@ -25,7 +27,7 @@ void main() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -52,11 +54,14 @@ void main() {
     test(
         'exits with code 64 when '
         'exception occurs during generation', () async {
-      when(() => logger.progress(any())).thenReturn(([update]) {
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
         if (update?.startsWith('Created new brick:') == true) {
           throw const MasonException('oops');
         }
       });
+      when(() => logger.progress(any())).thenReturn(progress);
       final result = await commandRunner.run(['new', 'hello world']);
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.err('oops')).called(1);

@@ -17,6 +17,8 @@ class MockUser extends Mock implements User {}
 
 class MockArgResults extends Mock implements ArgResults {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   final cwd = Directory.current;
 
@@ -34,7 +36,7 @@ void main() {
       argResults = MockArgResults();
       publishCommand = PublishCommand(logger: logger, masonApi: masonApi)
         ..testArgResults = argResults;
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
       setUpTestingEnvironment(cwd, suffix: '.publish');
     });
 
@@ -167,9 +169,12 @@ void main() {
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
-      when(() => logger.progress(any())).thenReturn(([String? _]) {
-        if (_ != null) progressLogs.add(_);
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
+        if (update != null) progressLogs.add(update);
       });
+      when(() => logger.progress(any())).thenReturn(progress);
       when(() => logger.confirm(any())).thenReturn(true);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();

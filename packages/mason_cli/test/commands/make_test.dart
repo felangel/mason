@@ -17,6 +17,8 @@ class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   final cwd = Directory.current;
 
@@ -33,7 +35,7 @@ void main() {
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -135,7 +137,7 @@ bricks:
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -478,9 +480,12 @@ bricks:
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn(url);
-      when(() => logger.progress(any())).thenReturn(([update]) {
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
         if (update == 'Made brick app_icon') throw Exception('oops');
       });
+      when(() => logger.progress(any())).thenReturn(progress);
       final result = await commandRunner.run(['make', 'app_icon']);
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.err('Exception: oops')).called(1);

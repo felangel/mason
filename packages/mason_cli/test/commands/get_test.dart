@@ -17,6 +17,8 @@ class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   final cwd = Directory.current;
 
@@ -29,7 +31,7 @@ void main() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -78,9 +80,11 @@ bricks:
         'mason-lock.json',
       );
       var doneCallCount = 0;
-      when(() => logger.progress(any())).thenReturn(
-        ([String? _]) => doneCallCount++,
-      );
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        doneCallCount++;
+      });
+      when(() => logger.progress(any())).thenReturn(progress);
 
       expect(File(expectedBrickJsonPath).existsSync(), isFalse);
       expect(File(expectedMasonLockJsonPath).existsSync(), isFalse);
