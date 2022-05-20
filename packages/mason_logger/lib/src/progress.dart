@@ -67,6 +67,7 @@ class Progress {
     _stopwatch.stop();
   }
 
+  /// Cancel the progress and remove the written line.
   void cancel() {
     _timer.cancel();
     _stdout.write('\b${'\b' * (_message.length + 4)}');
