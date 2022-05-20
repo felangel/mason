@@ -38,9 +38,8 @@ class Progress {
 
   int _index = 0;
 
-  @Deprecated('Please use [Progress.complete] instead.')
-
   /// End the progress and mark it as completed.
+  @Deprecated('Please use [Progress.complete] instead.')
   void call([String? update]) {
     return complete(update);
   }
