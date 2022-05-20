@@ -62,9 +62,9 @@ class RemoveCommand extends MasonCommand {
         );
       }
 
-      removeDone('Removed $brickName');
+      removeDone.complete('Removed $brickName');
     } catch (_) {
-      removeDone();
+      removeDone.fail();
       rethrow;
     }
 

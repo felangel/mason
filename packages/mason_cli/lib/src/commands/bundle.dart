@@ -73,7 +73,7 @@ class BundleCommand extends MasonCommand {
           bundlePath = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
-      bundleDone('Bundled ${bundle.name}');
+      bundleDone.complete('Bundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -81,7 +81,7 @@ class BundleCommand extends MasonCommand {
         )
         ..detail('  $bundlePath');
     } catch (_) {
-      bundleDone();
+      bundleDone.fail();
       rethrow;
     }
 

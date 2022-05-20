@@ -80,9 +80,9 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
           Yaml.encode(MasonYaml(bricks).toJson()),
         );
       }
-      addDone('Added ${brickYaml.name}');
+      addDone.complete('Added ${brickYaml.name}');
     } catch (_) {
-      addDone();
+      addDone.fail();
       rethrow;
     }
     return ExitCode.success.code;

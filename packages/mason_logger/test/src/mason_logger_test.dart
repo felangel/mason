@@ -394,7 +394,7 @@ void main() {
             const message = 'test message';
             final done = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
-            done();
+            done.complete();
             verify(
               () {
                 stdout.write(

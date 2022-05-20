@@ -29,7 +29,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       vars: <String, String>{'name': '{{name}}'},
       logger: logger,
     );
-    fetchDone();
+    fetchDone.complete();
 
     await getBricks();
 

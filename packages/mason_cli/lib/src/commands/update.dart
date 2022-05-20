@@ -30,11 +30,11 @@ class UpdateCommand extends MasonCommand {
     try {
       latestVersion = await _pubUpdater.getLatestVersion(packageName);
     } catch (error) {
-      updateCheckDone();
+      updateCheckDone.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateCheckDone('Checked for updates');
+    updateCheckDone.complete('Checked for updates');
 
     final isUpToDate = packageVersion == latestVersion;
     if (isUpToDate) {
@@ -46,11 +46,11 @@ class UpdateCommand extends MasonCommand {
     try {
       await _pubUpdater.update(packageName: packageName);
     } catch (error) {
-      updateDone();
+      updateDone.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateDone('Updated to $latestVersion');
+    updateDone.complete('Updated to $latestVersion');
 
     return ExitCode.success.code;
   }

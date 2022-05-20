@@ -37,7 +37,7 @@ mixin InstallBrickMixin on MasonCommand {
       );
       return cachedBrick;
     } finally {
-      installDone();
+      installDone.complete();
     }
   }
 
@@ -72,7 +72,7 @@ mixin InstallBrickMixin on MasonCommand {
         );
       }
     } finally {
-      getDone();
+      getDone.complete();
       await bricksJson.flush();
       await masonLockJsonFile.writeAsString(
         json.encode(MasonLockJson(bricks: resolvedBricks)),

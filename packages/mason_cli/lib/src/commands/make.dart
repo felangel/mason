@@ -156,7 +156,7 @@ class _MakeCommand extends MasonCommand {
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
-      generateDone('Made brick ${_brick.name}');
+      generateDone.complete('Made brick ${_brick.name}');
       logger.logFilesGenerated(files.length);
 
       if (!disableHooks) {
@@ -174,7 +174,7 @@ class _MakeCommand extends MasonCommand {
 
       return ExitCode.success.code;
     } catch (_) {
-      generateDone.call();
+      generateDone.fail();
       rethrow;
     }
   }

@@ -39,7 +39,7 @@ class ClearCacheCommand extends MasonCommand {
       BricksJson.rootDir.deleteSync(recursive: true);
     } catch (_) {}
 
-    clearDone();
+    clearDone.complete();
     return ExitCode.success.code;
   }
 }

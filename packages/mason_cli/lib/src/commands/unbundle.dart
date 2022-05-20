@@ -65,7 +65,7 @@ class UnbundleCommand extends MasonCommand {
           break;
       }
       unpackBundle(bundle, Directory(outputDir));
-      unbundleDone('Unbundled ${bundle.name}');
+      unbundleDone.complete('Unbundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -73,7 +73,7 @@ class UnbundleCommand extends MasonCommand {
         )
         ..detail('  ${canonicalize(outputDir)}');
     } catch (_) {
-      unbundleDone();
+      unbundleDone.fail();
       rethrow;
     }
 

@@ -69,7 +69,7 @@ class NewCommand extends MasonCommand {
 
     try {
       await generator.generate(target, vars: vars, logger: logger);
-      done('Created new brick: $name');
+      done.complete('Created new brick: $name');
       logger
         ..info(
           '''${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):''',
@@ -77,7 +77,7 @@ class NewCommand extends MasonCommand {
         ..flush(logger.detail);
       return ExitCode.success.code;
     } catch (_) {
-      done();
+      done.fail();
       rethrow;
     }
   }

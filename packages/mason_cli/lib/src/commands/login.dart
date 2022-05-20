@@ -35,11 +35,11 @@ class LoginCommand extends MasonCommand {
     final loginDone = logger.progress('Logging into brickhub.dev');
     try {
       final user = await _masonApi.login(email: email, password: password);
-      loginDone('Logged into brickhub.dev');
+      loginDone.complete('Logged into brickhub.dev');
       logger.success('You are now logged in as <${user.email}>');
       return ExitCode.success.code;
     } on MasonApiLoginFailure catch (error) {
-      loginDone();
+      loginDone.complete();
       logger.err(error.message);
       return ExitCode.software.code;
     }
