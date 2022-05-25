@@ -39,6 +39,9 @@ final _builtInLambdas = <String, LambdaFunction>{
   /// lower case
   'lowerCase': (ctx) => ctx.renderString().toLowerCase(),
 
+  /// {{ mustache case }}
+  'mustacheCase': (ctx) => '{{ ${ctx.renderString()} }}',
+
   /// PascalCase
   'pascalCase': (ctx) => ctx.renderString().pascalCase,
 
@@ -103,7 +106,7 @@ extension on String {
   String transpiled(Map<String, dynamic> vars) {
     final delimeterRegExp = RegExp(r'''({?{{[^{{]*?\(\)}}}?)''');
     final lambdasRegExp = RegExp(
-      r'''((.*).(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)\(\))''',
+      r'''((.*).(camelCase|constantCase|dotCase|headerCase|lowerCase|mustacheCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)\(\))''',
     );
 
     final containsLambdas = lambdasRegExp.hasMatch(this);
