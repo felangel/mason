@@ -1,3 +1,7 @@
+# 0.1.0-dev.22
+
+- feat: add `mustacheCase` lambda
+
 # 0.1.0-dev.21
 
 - feat: expose `OverwriteRule`
