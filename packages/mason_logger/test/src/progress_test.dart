@@ -91,7 +91,7 @@ void main() {
               },
             ).called(1);
             verify(
-              () => stdout.write('\b${'\b' * (message.length + 4)}'),
+              () => stdout.write('\b${'\b' * (message.length + 4)}\u001b[2K'),
             ).called(1);
           },
           stdout: () => stdout,
