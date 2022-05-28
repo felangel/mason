@@ -1,3 +1,8 @@
+# 0.1.0-dev.26
+
+- feat: upgrade to `mason: ^0.1.0-dev.23`
+  - includes `mason_logger: ^0.1.0-dev.9`
+
 # 0.1.0-dev.25
 
 - feat: add `mason upgrade` command to upgrade bricks to their latest versions
