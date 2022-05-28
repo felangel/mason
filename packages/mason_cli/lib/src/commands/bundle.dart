@@ -61,7 +61,7 @@ class BundleCommand extends MasonCommand {
     final bundle = createBundle(brick);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
-    final bundleDone = logger.progress('Bundling ${bundle.name}');
+    final bundleProgress = logger.progress('Bundling ${bundle.name}');
 
     try {
       late final String bundlePath;
@@ -73,7 +73,7 @@ class BundleCommand extends MasonCommand {
           bundlePath = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
-      bundleDone.complete('Bundled ${bundle.name}');
+      bundleProgress.complete('Bundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -81,7 +81,7 @@ class BundleCommand extends MasonCommand {
         )
         ..detail('  $bundlePath');
     } catch (_) {
-      bundleDone.fail();
+      bundleProgress.fail();
       rethrow;
     }
 

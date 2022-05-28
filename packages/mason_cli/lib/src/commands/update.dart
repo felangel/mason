@@ -25,16 +25,16 @@ class UpdateCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final updateCheckDone = logger.progress('Checking for updates');
+    final updateCheckProgress = logger.progress('Checking for updates');
     late final String latestVersion;
     try {
       latestVersion = await _pubUpdater.getLatestVersion(packageName);
     } catch (error) {
-      updateCheckDone.fail();
+      updateCheckProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateCheckDone.complete('Checked for updates');
+    updateCheckProgress.complete('Checked for updates');
 
     final isUpToDate = packageVersion == latestVersion;
     if (isUpToDate) {
@@ -42,15 +42,15 @@ class UpdateCommand extends MasonCommand {
       return ExitCode.success.code;
     }
 
-    final updateDone = logger.progress('Updating to $latestVersion');
+    final updateProgress = logger.progress('Updating to $latestVersion');
     try {
       await _pubUpdater.update(packageName: packageName);
     } catch (error) {
-      updateDone.fail();
+      updateProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateDone.complete('Updated to $latestVersion');
+    updateProgress.complete('Updated to $latestVersion');
 
     return ExitCode.success.code;
   }

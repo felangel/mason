@@ -52,7 +52,7 @@ class UnbundleCommand extends MasonCommand {
     final bundleType = (results['type'] as String).toBundleType();
 
     final bundleName = path.basenameWithoutExtension(file.path);
-    final unbundleDone = logger.progress('Unbundling $bundleName');
+    final unbundleProgress = logger.progress('Unbundling $bundleName');
 
     try {
       late final MasonBundle bundle;
@@ -65,7 +65,7 @@ class UnbundleCommand extends MasonCommand {
           break;
       }
       unpackBundle(bundle, Directory(outputDir));
-      unbundleDone.complete('Unbundled ${bundle.name}');
+      unbundleProgress.complete('Unbundled ${bundle.name}');
       logger
         ..info(
           '${lightGreen.wrap('✓')} '
@@ -73,7 +73,7 @@ class UnbundleCommand extends MasonCommand {
         )
         ..detail('  ${canonicalize(outputDir)}');
     } catch (_) {
-      unbundleDone.fail();
+      unbundleProgress.fail();
       rethrow;
     }
 

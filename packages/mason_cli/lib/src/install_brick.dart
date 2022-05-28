@@ -49,7 +49,7 @@ mixin InstallBrickMixin on MasonCommand {
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final lockJson = masonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
-    final getDone = logger.progress(
+    final getBricksProgress = logger.progress(
       upgrade ? 'Upgrading bricks' : 'Getting bricks',
     );
     try {
@@ -72,7 +72,7 @@ mixin InstallBrickMixin on MasonCommand {
         );
       }
     } finally {
-      getDone.complete();
+      getBricksProgress.complete();
       await bricksJson.flush();
       await masonLockJsonFile.writeAsString(
         json.encode(MasonLockJson(bricks: resolvedBricks)),

@@ -26,7 +26,7 @@ Future<void> main() async {
   await Future<void>.delayed(const Duration(seconds: 1));
   failing.fail('See I failed!');
 
-  final canceling = logger.progress('I am gonna try and cancel now!');
+  final canceling = logger.progress('Trying to cancel now!');
   await Future<void>.delayed(const Duration(seconds: 1));
   canceling.cancel();
   logger.info('Done!');

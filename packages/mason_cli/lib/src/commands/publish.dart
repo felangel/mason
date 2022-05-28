@@ -54,9 +54,9 @@ class PublishCommand extends MasonCommand {
     }
 
     final bundle = createBundle(Directory(directoryPath));
-    final bundleDone = logger.progress('Bundling ${bundle.name}');
+    final bundleProgress = logger.progress('Bundling ${bundle.name}');
     final universalBundle = await bundle.toUniversalBundle();
-    bundleDone.complete('Bundled ${bundle.name}');
+    bundleProgress.complete('Bundled ${bundle.name}');
 
     final sizeInBytes = Uint8List.fromList(universalBundle).lengthInBytes;
     if (sizeInBytes > _maxBundleSize) {
@@ -81,22 +81,22 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    final publishDone = logger.progress(
+    final publishProgress = logger.progress(
       'Publishing ${bundle.name} ${bundle.version}',
     );
 
     try {
       await _masonApi.publish(bundle: universalBundle);
-      publishDone.complete('Published ${bundle.name} ${bundle.version}');
+      publishProgress.complete('Published ${bundle.name} ${bundle.version}');
       logger.success(
         '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
       );
     } on MasonApiPublishFailure catch (error) {
-      publishDone.fail();
+      publishProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     } catch (_) {
-      publishDone.fail();
+      publishProgress.fail();
       rethrow;
     }
 

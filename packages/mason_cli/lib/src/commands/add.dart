@@ -73,16 +73,16 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
         ? BrickLocation(version: '^${brickYaml.version}')
         : brick.location;
     final bricks = Map.of(targetMasonYaml.bricks)..addAll({name: location});
-    final addDone = logger.progress('Adding ${brickYaml.name}');
+    final addProgress = logger.progress('Adding ${brickYaml.name}');
     try {
       if (!targetMasonYaml.bricks.containsKey(name)) {
         await targetMasonYamlFile.writeAsString(
           Yaml.encode(MasonYaml(bricks).toJson()),
         );
       }
-      addDone.complete('Added ${brickYaml.name}');
+      addProgress.complete('Added ${brickYaml.name}');
     } catch (_) {
-      addDone.fail();
+      addProgress.fail();
       rethrow;
     }
     return ExitCode.success.code;
