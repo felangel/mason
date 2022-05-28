@@ -42,7 +42,7 @@ class RemoveCommand extends MasonCommand {
     final lockJson = isGlobal ? globalMasonLockJson : masonLockJson;
 
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
-    final removeDone = logger.progress('Removing $brickName');
+    final removeProgress = logger.progress('Removing $brickName');
     try {
       bricksJson.remove(Brick(name: brickName, location: brickLocation));
       final bricks = Map.of(targetMasonYaml.bricks)
@@ -62,9 +62,9 @@ class RemoveCommand extends MasonCommand {
         );
       }
 
-      removeDone('Removed $brickName');
+      removeProgress.complete('Removed $brickName');
     } catch (_) {
-      removeDone();
+      removeProgress.fail();
       rethrow;
     }
 

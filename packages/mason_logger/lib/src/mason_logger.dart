@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 
 import 'package:mason_logger/src/io.dart';
+import 'package:mason_logger/src/progress.dart';
 import 'package:meta/meta.dart';
 import 'package:universal_io/io.dart' as io;
 
@@ -65,28 +66,11 @@ class _StdioOverridesScope extends StdioOverrides {
 
 /// A basic Logger which wraps `stdio` and applies various styles.
 class Logger {
-  static const List<String> _progressAnimation = [
-    '⠋',
-    '⠙',
-    '⠹',
-    '⠸',
-    '⠼',
-    '⠴',
-    '⠦',
-    '⠧',
-    '⠇',
-    '⠏'
-  ];
-
   final _queue = <String?>[];
-  final _stopwatch = Stopwatch();
   final StdioOverrides? _overrides = StdioOverrides.current;
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
-
-  Timer? _timer;
-  int _index = 0;
 
   /// Flushes internal message queue.
   void flush([Function(String?)? print]) {
@@ -107,27 +91,8 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  void Function([String? update]) progress(String message) {
-    _stopwatch
-      ..reset()
-      ..start();
-    _timer?.cancel();
-    _timer = Timer.periodic(const Duration(milliseconds: 80), (t) {
-      _index++;
-      final char = _progressAnimation[_index % _progressAnimation.length];
-      _stdout.write(
-        '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}$char')} $message...''',
-      );
-    });
-    return ([String? update]) {
-      _stopwatch.stop();
-      final time =
-          (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
-      _stdout.write(
-        '''\b${'\b' * (message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} ${update ?? message} ${darkGray.wrap('(${time}s)')}\n''',
-      );
-      _timer?.cancel();
-    };
+  Progress progress(String message) {
+    return Progress(message, _stdout);
   }
 
   /// Writes error message to stdout.

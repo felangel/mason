@@ -10,6 +10,8 @@ class MockMasonApi extends Mock implements MasonApi {}
 
 class MockUser extends Mock implements User {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   group('LoginCommand', () {
     late Logger logger;
@@ -21,7 +23,7 @@ void main() {
       masonApi = MockMasonApi();
       loginCommand = LoginCommand(logger: logger, masonApi: masonApi);
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
     });
 
     test('can be instantiated without any parameters', () {

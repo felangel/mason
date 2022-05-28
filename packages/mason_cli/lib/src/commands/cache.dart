@@ -32,14 +32,14 @@ class ClearCacheCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final clearDone = logger.progress('clearing cache');
+    final clearProgress = logger.progress('clearing cache');
 
     localBricksJson?.clear();
     try {
       BricksJson.rootDir.deleteSync(recursive: true);
     } catch (_) {}
 
-    clearDone();
+    clearProgress.complete();
     return ExitCode.success.code;
   }
 }

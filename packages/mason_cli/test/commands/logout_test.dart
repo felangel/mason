@@ -10,6 +10,8 @@ class MockMasonApi extends Mock implements MasonApi {}
 
 class MockUser extends Mock implements User {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   group('LogoutCommand', () {
     late Logger logger;
@@ -21,7 +23,7 @@ void main() {
       masonApi = MockMasonApi();
       logoutCommand = LogoutCommand(logger: logger, masonApi: masonApi);
 
-      when(() => logger.progress(any())).thenReturn(([String? _]) {});
+      when(() => logger.progress(any())).thenReturn(MockProgress());
     });
 
     test('can be instantiated without any parameters', () {
@@ -55,10 +57,12 @@ void main() {
       final progressDoneCalls = <String?>[];
       when(() => masonApi.currentUser).thenReturn(user);
 
-      // ignore: unnecessary_lambdas
-      when(() => logger.progress(any())).thenReturn(([String? _]) {
-        progressDoneCalls.add(_);
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
+        progressDoneCalls.add(update);
       });
+      when(() => logger.progress(any())).thenReturn(progress);
 
       final result = await logoutCommand.run();
       expect(result, equals(ExitCode.success.code));

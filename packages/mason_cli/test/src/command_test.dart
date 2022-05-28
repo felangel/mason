@@ -10,6 +10,8 @@ import 'package:universal_io/io.dart';
 
 class MockLogger extends Mock implements Logger {}
 
+class MockProgress extends Mock implements Progress {}
+
 void main() {
   group('Command', () {
     final cwd = Directory.current;
@@ -54,7 +56,7 @@ bricks:
         );
         Directory.current = directory;
         final logger = MockLogger();
-        when(() => logger.progress(any())).thenReturn(([_]) {});
+        when(() => logger.progress(any())).thenReturn(MockProgress());
         final command = GetCommand(logger: logger);
         await command.run();
         brickYaml.writeAsStringSync('{]');

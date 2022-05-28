@@ -134,7 +134,8 @@ void main() {
 
       test('mustacheCase outputs correct string', () {
         const greeting = 'Hello World';
-        const input = 'Greeting: {{#mustacheCase}}{{greeting}}{{/mustacheCase}}!';
+        const input =
+            'Greeting: {{#mustacheCase}}{{greeting}}{{/mustacheCase}}!';
         const expected = 'Greeting: {{ Hello World }}!';
         expect(
           input.render(<String, dynamic>{'greeting': greeting}),

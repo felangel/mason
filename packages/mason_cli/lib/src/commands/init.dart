@@ -21,7 +21,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       logger.err('Existing ${MasonYaml.file} at ${masonYamlFile.path}');
       return ExitCode.usage.code;
     }
-    final fetchDone = logger.progress('Initializing');
+    final fetchProgress = logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd);
     final generator = _MasonYamlGenerator();
     await generator.generate(
@@ -29,7 +29,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       vars: <String, String>{'name': '{{name}}'},
       logger: logger,
     );
-    fetchDone();
+    fetchProgress.complete();
 
     await getBricks();
 

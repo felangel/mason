@@ -148,7 +148,7 @@ class _MakeCommand extends MasonCommand {
       );
     }
 
-    final generateDone = logger.progress('Making ${generator.id}');
+    final generateProgress = logger.progress('Making ${generator.id}');
     try {
       final files = await generator.generate(
         target,
@@ -156,7 +156,7 @@ class _MakeCommand extends MasonCommand {
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
-      generateDone('Made brick ${_brick.name}');
+      generateProgress.complete('Made brick ${_brick.name}');
       logger.logFilesGenerated(files.length);
 
       if (!disableHooks) {
@@ -174,7 +174,7 @@ class _MakeCommand extends MasonCommand {
 
       return ExitCode.success.code;
     } catch (_) {
-      generateDone.call();
+      generateProgress.fail();
       rethrow;
     }
   }

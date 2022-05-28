@@ -27,13 +27,13 @@ class LogoutCommand extends MasonCommand {
       return ExitCode.success.code;
     }
 
-    final logoutDone = logger.progress('Logging out of brickhub.dev.');
+    final logoutProgress = logger.progress('Logging out of brickhub.dev.');
     try {
       _masonApi.logout();
-      logoutDone('Logged out of brickhub.dev');
+      logoutProgress.complete('Logged out of brickhub.dev');
       return ExitCode.success.code;
     } catch (error) {
-      logoutDone();
+      logoutProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
