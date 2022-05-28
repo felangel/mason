@@ -1,3 +1,7 @@
+# 0.1.0-dev.23
+
+- chore: use `mason_logger ^0.1.0-dev.9`
+
 # 0.1.0-dev.22
 
 - feat: add `mustacheCase` lambda
