@@ -31,11 +31,11 @@ Future<void> main() async {
   final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
 
   // Show a progress message while performing an asynchronous operation.
-  final done = logger.progress('Calculating');
+  final progress = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
 
   // Show a completion message when the asynchronous operation has completed.
-  done('Done!');
+  progress.complete('Done!');
 
   // Use the user provided input.
   logger
