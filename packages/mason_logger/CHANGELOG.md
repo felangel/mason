@@ -1,3 +1,18 @@
+# 0.1.0-dev.9
+
+- feat: `progress` API enhancements
+  ```dart
+  final progress = Logger().progress('calculating');
+  try {
+    await _performCalculation();
+    // Complete progress successfully.
+    progress.complete();
+  } catch (error, stackTrace) {
+    // Terminate progress unsuccessfully.
+    progress.fail();
+  }
+  ```
+
 # 0.1.0-dev.8
 
 - fix: single line prompts are overwritten
