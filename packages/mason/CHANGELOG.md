@@ -1,3 +1,7 @@
+# 0.1.0-dev.24
+
+- fix: rendering shorthand lambdas within loops
+
 # 0.1.0-dev.23
 
 - chore: use `mason_logger ^0.1.0-dev.9`
