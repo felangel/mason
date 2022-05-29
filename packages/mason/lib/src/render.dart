@@ -125,18 +125,20 @@ extension on String {
         final lambdaGroup = lambdaMatch.group(1);
         if (lambdaGroup == null) return groupContents;
 
-        final segments = lambdaGroup.split('.');
+        var segments = lambdaGroup.split('.');
         if (segments.length == 1) return groupContents;
+        if (segments.length == 3 &&
+            segments[0].isEmpty &&
+            segments[1].isEmpty) {
+          segments = ['.', segments[2]];
+        }
 
         final variable = segments.first;
-        if (!vars.containsKey(variable)) return groupContents;
-
         var output = isTriple ? '{{{$variable}}}' : '{{$variable}}';
         for (var i = 1; i < segments.length; i++) {
           final lambda = segments[i].replaceFirst('()', '');
           output = '{{#$lambda}}$output{{/$lambda}}';
         }
-
         return output;
       });
     });

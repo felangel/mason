@@ -419,6 +419,34 @@ void main() {
           equals(expected),
         );
       });
+
+      test('mixed within loop (List<String>)', () {
+        const values = 'RED,GREEN,BLUE,';
+        const input = 'Greeting: {{#colors}}{{..upperCase()}},{{/colors}}!';
+        const expected = 'Greeting: $values!';
+        expect(
+          input.render(<String, dynamic>{
+            'colors': ['red', 'green', 'blue']
+          }),
+          equals(expected),
+        );
+      });
+
+      test('mixed within loop (List<Map>)', () {
+        const values = 'RED,GREEN,BLUE,';
+        const input = 'Greeting: {{#colors}}{{name.upperCase()}},{{/colors}}!';
+        const expected = 'Greeting: $values!';
+        expect(
+          input.render(<String, dynamic>{
+            'colors': [
+              {'name': 'red'},
+              {'name': 'green'},
+              {'name': 'blue'}
+            ]
+          }),
+          equals(expected),
+        );
+      });
     });
   });
 }
