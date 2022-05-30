@@ -10,6 +10,14 @@ Future<void> main() async {
     ..detail('detail')
     ..info('');
 
+  final favoriteColor = logger.pickOne(
+    'What is your favorite color?',
+    choices: ['red', 'green', 'blue'],
+    defaultValue: 'blue',
+  );
+
+  logger.info('Got it, $favoriteColor it is!');
+
   final favoriteAnimal = logger.prompt(
     'What is your favorite animal?',
     defaultValue: '🐈',
