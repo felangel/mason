@@ -1,7 +1,6 @@
 import 'dart:convert';
 
 import 'package:args/args.dart';
-import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
@@ -36,9 +35,8 @@ class MakeCommand extends MasonCommand {
     // ignore: only_throw_errors
     if (_exception != null) throw _exception!;
     final subcommand = results.rest.isNotEmpty ? results.rest.first : '';
-    throw UsageException(
+    usageException(
       '''Could not find a subcommand named "$subcommand" for "mason make".''',
-      usage,
     );
   }
 }
