@@ -51,6 +51,15 @@ class MasonApiPublishFailure extends MasonApiException {
       : super(message: message, details: details);
 }
 
+/// {@template mason_api_search_failure}
+/// An exception thrown when an error occurs during `search`.
+/// {@endtemplate}
+class MasonApiSearchFailure extends MasonApiException {
+  /// {@macro mason_api_search_failure}
+  const MasonApiSearchFailure({required String message, String? details})
+      : super(message: message, details: details);
+}
+
 /// {@template mason_api}
 /// API client for the [package:mason_cli](https://github.com/felangel/mason).
 /// {@endtemplate}
