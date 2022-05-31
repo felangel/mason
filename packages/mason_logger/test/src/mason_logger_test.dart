@@ -416,7 +416,7 @@ void main() {
       });
     });
 
-    group('.pickOne', () {
+    group('.chooseOne', () {
       test(
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
@@ -425,7 +425,10 @@ void main() {
             const message = 'test message';
             const expected = 'a';
             when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().pickOne(message, choices: ['a', 'b', 'c']);
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
             expect(actual, equals(expected));
             verifyInOrder([
               () => stdout.write('\x1b7'),
@@ -451,7 +454,7 @@ void main() {
             const message = 'test message';
             const expected = 'b';
             when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().pickOne(
+            final actual = Logger().chooseOne(
               message,
               choices: ['a', 'b', 'c'],
               defaultValue: 'b',
@@ -484,7 +487,10 @@ void main() {
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
-            final actual = Logger().pickOne(message, choices: ['a', 'b', 'c']);
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
             expect(actual, equals(expected));
             verifyInOrder([
               () => stdout.write('\x1b7'),
@@ -523,7 +529,7 @@ void main() {
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
-            final actual = Logger().pickOne(
+            final actual = Logger().chooseOne(
               message,
               choices: ['a', 'b', 'c'],
               defaultValue: 'b',
@@ -566,7 +572,7 @@ void main() {
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
-            final actual = Logger().pickOne(
+            final actual = Logger().chooseOne(
               message,
               choices: ['a', 'b', 'c'],
             );
@@ -608,7 +614,7 @@ void main() {
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
-            final actual = Logger().pickOne(
+            final actual = Logger().chooseOne(
               message,
               choices: ['a', 'b', 'c'],
               defaultValue: 'c',

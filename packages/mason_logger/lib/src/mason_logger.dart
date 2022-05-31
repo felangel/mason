@@ -153,12 +153,12 @@ class Logger {
     return response;
   }
 
-  /// Prompts user with [message] to pick one value from the provided
+  /// Prompts user with [message] to choose one value from the provided
   /// [choices].
   ///
   /// An optional [defaultValue] can be specified.
   /// The [defaultValue] must be one of the provided [choices].
-  String pickOne(
+  String chooseOne(
     String? message, {
     required List<String> choices,
     String? defaultValue,

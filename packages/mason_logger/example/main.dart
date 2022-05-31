@@ -10,7 +10,7 @@ Future<void> main() async {
     ..detail('detail')
     ..info('');
 
-  final favoriteColor = logger.pickOne(
+  final favoriteColor = logger.chooseOne(
     'What is your favorite color?',
     choices: ['red', 'green', 'blue'],
     defaultValue: 'blue',
