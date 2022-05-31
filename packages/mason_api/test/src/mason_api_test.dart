@@ -701,5 +701,62 @@ void main() {
         });
       });
     });
+    group('search', () {
+      test('successfully decodes empty [bricks] list', () async {
+        const query = 'query';
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response('{"bricks":[],"total":0}', HttpStatus.ok),
+        );
+
+        final results = await masonApi.search(query: query);
+        expect(results, isEmpty);
+      });
+
+      test('successfully decodes populated [bricks] list', () async {
+        const query = 'query';
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '''{"bricks":[{"name":"name","description":"description","publisher":"test@example.com","version":"0.1.0+1","created_at":"2022-04-12T22:21:32.690488Z"}],"total":1}''',
+            HttpStatus.ok,
+          ),
+        );
+
+        final results = await masonApi.search(query: query);
+        expect(results.length, equals(1));
+        expect(results.first.name, 'name');
+        expect(results.first.description, 'description');
+        expect(results.first.version, '0.1.0+1');
+        expect(
+          results.first.createdAt,
+          DateTime.parse('2022-04-12T22:21:32.690488Z'),
+        );
+      });
+
+      test('throws MasonApiSearchFailure when GET throws', () async {
+        final exception = Exception('oops');
+        const query = 'query';
+
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenThrow(exception);
+
+        try {
+          await masonApi.search(query: 'query');
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals('$exception'));
+        }
+      });
+    });
   });
 }

@@ -101,6 +101,20 @@ class MasonApi {
   /// The current user.
   User? get currentUser => _currentUser;
 
+  /// The host for
+  Future<Iterable<Brick>> search({required String query}) async {
+    try {
+      final response = await _httpClient.get(
+        Uri.parse('$_hostedUri/api/v1/search?q=${query.trim()}'),
+      );
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      final bricksBody = (body['bricks'] as List).cast<Map<String, dynamic>>();
+      return bricksBody.map<Brick>(Brick.fromJson);
+    } catch (error) {
+      throw MasonApiSearchFailure(message: '$error');
+    }
+  }
+
   /// Log in with the provided [email] and [password].
   Future<User> login({required String email, required String password}) async {
     final http.Response response;
