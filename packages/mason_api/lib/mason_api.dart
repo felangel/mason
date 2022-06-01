@@ -6,4 +6,4 @@ export 'src/mason_api.dart'
         MasonApiException,
         MasonApiLoginFailure,
         MasonApiPublishFailure;
-export 'src/models/models.dart' show User;
+export 'src/models/models.dart' show User, Brick;
