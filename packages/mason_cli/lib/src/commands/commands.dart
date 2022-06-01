@@ -10,6 +10,7 @@ export 'make.dart';
 export 'new.dart';
 export 'publish.dart';
 export 'remove.dart';
+export 'search.dart';
 export 'unbundle.dart';
 export 'update.dart';
 export 'upgrade.dart';
