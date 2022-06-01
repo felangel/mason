@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
@@ -48,10 +47,7 @@ class BundleCommand extends MasonCommand {
   @override
   Future<int> run() async {
     if (results.rest.isEmpty) {
-      throw UsageException(
-        'path to the brick template must be provided',
-        usage,
-      );
+      usageException('path to the brick template must be provided');
     }
     final brick = Directory(results.rest.first);
     if (!brick.existsSync()) {

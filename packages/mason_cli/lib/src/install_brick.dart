@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 
@@ -9,9 +8,7 @@ mixin InstallBrickMixin on MasonCommand {
   /// Installs a specific brick and returns the [CachedBrick] reference.
   Future<CachedBrick> addBrick(Brick brick, {bool global = false}) async {
     final bricksJson = global ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) {
-      throw UsageException('bricks.json not found', usage);
-    }
+    if (bricksJson == null) usageException('bricks.json not found');
 
     final lockFile = global ? globalMasonLockJsonFile : masonLockJsonFile;
     final lockJson = global ? globalMasonLockJson : masonLockJson;

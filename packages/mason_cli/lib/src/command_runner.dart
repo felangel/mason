@@ -62,7 +62,7 @@ class MasonCommandRunner extends CommandRunner<int> {
       _logger
         ..err(e.message)
         ..info('')
-        ..info(usage);
+        ..info(e.usage);
       return ExitCode.usage.code;
     } on MasonException catch (e) {
       _logger.err(e.message);
