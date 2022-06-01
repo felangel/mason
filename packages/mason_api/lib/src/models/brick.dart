@@ -5,7 +5,7 @@ part 'brick.g.dart';
 /// {@template brick}
 /// Details of a brick from `brickhub.dev` registry
 /// {@endtemplate}
-@JsonSerializable()
+@JsonSerializable(createToJson: false)
 class Brick {
   /// {@macro brick}
   const Brick({
@@ -30,7 +30,4 @@ class Brick {
   /// Date of the brick's creation
   @JsonKey(name: 'created_at')
   final DateTime createdAt;
-
-  /// Converts this [Brick] to `Map<String, dynamic>`.
-  Map<String, dynamic> toJson() => _$BrickToJson(this);
 }

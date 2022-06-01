@@ -23,10 +23,3 @@ Brick _$BrickFromJson(Map<String, dynamic> json) => $checkedCreate(
       },
       fieldKeyMap: const {'createdAt': 'created_at'},
     );
-
-Map<String, dynamic> _$BrickToJson(Brick instance) => <String, dynamic>{
-      'name': instance.name,
-      'description': instance.description,
-      'version': instance.version,
-      'created_at': instance.createdAt.toIso8601String(),
-    };
