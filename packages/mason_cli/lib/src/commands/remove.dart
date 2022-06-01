@@ -1,6 +1,5 @@
 import 'dart:convert';
 
-import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 
@@ -26,7 +25,7 @@ class RemoveCommand extends MasonCommand {
   @override
   Future<int> run() async {
     if (results.rest.isEmpty) {
-      throw UsageException('name of the brick is required.', usage);
+      usageException('name of the brick is required.');
     }
 
     final brickName = results.rest.first;
@@ -35,7 +34,7 @@ class RemoveCommand extends MasonCommand {
     final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
     final brickLocation = targetMasonYaml.bricks[brickName];
     if (bricksJson == null || brickLocation == null) {
-      throw UsageException('no brick named $brickName was found', usage);
+      usageException('no brick named $brickName was found');
     }
 
     final lockFile = isGlobal ? globalMasonLockJsonFile : masonLockJsonFile;

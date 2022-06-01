@@ -1,4 +1,3 @@
-import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/commands/bundle.dart';
@@ -37,10 +36,7 @@ class UnbundleCommand extends MasonCommand {
   @override
   Future<int> run() async {
     if (results.rest.isEmpty) {
-      throw UsageException(
-        'path to the bundle must be provided',
-        usage,
-      );
+      usageException('path to the bundle must be provided');
     }
     final file = File(results.rest.first);
     if (!file.existsSync()) {

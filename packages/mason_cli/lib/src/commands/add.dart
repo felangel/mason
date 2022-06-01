@@ -1,4 +1,3 @@
-import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -32,9 +31,7 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
 
   @override
   Future<int> run() async {
-    if (results.rest.isEmpty) {
-      throw UsageException('brick name is required.', usage);
-    }
+    if (results.rest.isEmpty) usageException('brick name is required.');
 
     final name = results.rest.first;
     final gitUrl = results['git-url'] as String?;
