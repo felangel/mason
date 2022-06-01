@@ -101,7 +101,7 @@ class MasonApi {
   /// The current user.
   User? get currentUser => _currentUser;
 
-  /// The host for
+  /// Search the with the provided [query].
   Future<Iterable<Brick>> search({required String query}) async {
     try {
       final response = await _httpClient.get(

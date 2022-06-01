@@ -27,6 +27,7 @@ void main() {
       brick = Brick(
         name: 'name',
         description: 'description',
+        publisher: 'publisher',
         version: 'version',
         createdAt: DateTime(0, 0, 0),
       );
@@ -84,8 +85,11 @@ void main() {
       verify(() => logger.progress('Searching "query" on brickhub.dev.'))
           .called(1);
       expect(progressDoneCalls, equals(['Found 1 brick.']));
-      verify(() => logger.success('${brick.name} (v${brick.version})'))
-          .called(1);
+      verify(
+        () => logger.success(
+          '${brick.name} (v${brick.version} ${brick.publisher})',
+        ),
+      ).called(1);
       verify(() => logger.info('  ${brick.description}\n')).called(1);
     });
 
@@ -108,8 +112,11 @@ void main() {
       expect(progressDoneCalls, equals(['Found 2 bricks.']));
       verify(() => logger.progress('Searching "query" on brickhub.dev.'))
           .called(1);
-      verify(() => logger.success('${brick.name} (v${brick.version})'))
-          .called(2);
+      verify(
+        () => logger.success(
+          '${brick.name} (v${brick.version} ${brick.publisher})',
+        ),
+      ).called(2);
       verify(() => logger.info('  ${brick.description}\n')).called(2);
     });
 

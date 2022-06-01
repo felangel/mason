@@ -15,6 +15,7 @@ Brick _$BrickFromJson(Map<String, dynamic> json) => $checkedCreate(
         final val = Brick(
           name: $checkedConvert('name', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String),
+          publisher: $checkedConvert('publisher', (v) => v as String),
           version: $checkedConvert('version', (v) => v as String),
           createdAt:
               $checkedConvert('created_at', (v) => DateTime.parse(v as String)),

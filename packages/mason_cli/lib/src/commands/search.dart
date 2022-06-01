@@ -35,7 +35,7 @@ class SearchCommand extends MasonCommand {
 
         for (final brick in results) {
           logger
-            ..success('${brick.name} (v${brick.version})')
+            ..success('${brick.name} (v${brick.version} ${brick.publisher})')
             ..info('  ${brick.description}\n');
         }
       }

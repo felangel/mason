@@ -11,6 +11,7 @@ class Brick {
   const Brick({
     required this.name,
     required this.description,
+    required this.publisher,
     required this.version,
     required this.createdAt,
   });
@@ -23,6 +24,9 @@ class Brick {
 
   /// Description of the brick
   final String description;
+
+  /// Description of the brick
+  final String publisher;
 
   /// Latest registered version of the brick
   final String version;
