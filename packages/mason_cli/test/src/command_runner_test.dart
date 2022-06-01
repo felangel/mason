@@ -35,6 +35,7 @@ const expectedUsage = [
       '  new        Creates a new brick template.\n'
       '  publish    Publish the current brick to brickhub.dev.\n'
       '  remove     Removes a brick.\n'
+      '  search     Search registered bricks on brickhub.dev.\n'
       '  unbundle   Generates a brick template from a bundle.\n'
       '  update     Update mason.\n'
       '  upgrade    Upgrade bricks to their latest versions.\n'
