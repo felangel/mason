@@ -415,5 +415,238 @@ void main() {
         );
       });
     });
+
+    group('.chooseOne', () {
+      test(
+          'enter selects the initial value '
+          'when defaultValue is not specified.', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'a';
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('enter selects the default value when specified.', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'b';
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValue: 'b',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('down arrow selects next index', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'b';
+            final bytes = [27, 91, 66, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('up arrow selects previous index', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'a';
+            final bytes = [27, 91, 65, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValue: 'b',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('up arrow wraps to end', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'c';
+            final bytes = [27, 91, 65, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('c')}'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('down arrow wraps to beginning', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = 'a';
+            final bytes = [27, 91, 66, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseOne(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValue: 'c',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('c')}'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯ c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+    });
   });
 }

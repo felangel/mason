@@ -1,3 +1,15 @@
+# 0.1.0-dev.10
+
+- feat: `chooseOne` API
+
+  ```dart
+  final favoriteColor = logger.chooseOne(
+    'What is your favorite color?',
+    choices: ['red', 'green', 'blue'],
+    defaultValue: 'blue',
+  );
+  ```
+
 # 0.1.0-dev.9
 
 - feat: `progress` API enhancements

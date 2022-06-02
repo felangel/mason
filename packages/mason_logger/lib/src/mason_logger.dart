@@ -153,6 +153,94 @@ class Logger {
     return response;
   }
 
+  /// Prompts user with [message] to choose one value from the provided
+  /// [choices].
+  ///
+  /// An optional [defaultValue] can be specified.
+  /// The [defaultValue] must be one of the provided [choices].
+  String chooseOne(
+    String? message, {
+    required List<String> choices,
+    String? defaultValue,
+  }) {
+    const upKey = [27, 91, 65];
+    const downKey = [27, 91, 66];
+    const enterKey = [10];
+
+    final hasDefault = defaultValue != null && defaultValue.isNotEmpty;
+    var index = hasDefault ? choices.indexOf(defaultValue) : 0;
+
+    void writeChoices() {
+      _stdout
+        // save cursor
+        ..write('\x1b7')
+        // hide cursor
+        ..write('\x1b[?25l')
+        ..writeln('$message');
+
+      for (final choice in choices) {
+        final isCurrent = choices.indexOf(choice) == index;
+        final checkBox = isCurrent ? lightCyan.wrap('◉') : '◯';
+        if (isCurrent) {
+          _stdout
+            ..write(green.wrap('❯'))
+            ..write(' $checkBox ${lightCyan.wrap(choice)}');
+        } else {
+          _stdout
+            ..write(' ')
+            ..write(' $checkBox $choice');
+        }
+        if (choices.last != choice) {
+          _stdout.write('\n');
+        }
+      }
+    }
+
+    _stdin
+      ..lineMode = false
+      ..echoMode = false;
+
+    writeChoices();
+
+    final event = <int>[];
+    var result = '';
+    while (result.isEmpty) {
+      final byte = _stdin.readByteSync();
+      if (event.length == 3) event.clear();
+      event.add(byte);
+      if (upKey.every(event.contains)) {
+        event.clear();
+        index = (index - 1) % (choices.length);
+      } else if (downKey.every(event.contains)) {
+        event.clear();
+        index = (index + 1) % (choices.length);
+      } else if (enterKey.every(event.contains)) {
+        _stdin
+          ..lineMode = true
+          ..echoMode = true;
+
+        _stdout
+          // restore cursor
+          ..write('\x1b8')
+          // clear to end of screen
+          ..write('\x1b[J')
+          // show cursor
+          ..write('\x1b[?25h')
+          ..write('$message ')
+          ..writeln(styleDim.wrap(lightCyan.wrap(choices[index])));
+
+        result = choices[index];
+        break;
+      }
+
+      // restore cursor
+      _stdout.write('\x1b8');
+      writeChoices();
+    }
+
+    return result;
+  }
+
   String _readLineHiddenSync() {
     const lineFeed = 10;
     const carriageReturn = 13;
