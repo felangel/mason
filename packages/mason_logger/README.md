@@ -27,6 +27,13 @@ Future<void> main() async {
     defaultValue: '🐈',
   );
 
+  /// Ask user to choose an option.
+  final favoriteColor = logger.chooseOne(
+    'What is your favorite color?',
+    choices: ['red', 'green', 'blue'],
+    defaultValue: 'blue',
+  );
+
   // Ask for user confirmation.
   final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
 
