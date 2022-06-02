@@ -2,13 +2,13 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'brick.g.dart';
 
-/// {@template brick}
+/// {@template brick_search_result}
 /// Details of a brick from `brickhub.dev` registry
 /// {@endtemplate}
 @JsonSerializable(createToJson: false)
-class Brick {
-  /// {@macro brick}
-  const Brick({
+class BrickSearchResult {
+  /// {@macro brick_search_result}
+  const BrickSearchResult({
     required this.name,
     required this.description,
     required this.publisher,
@@ -16,8 +16,9 @@ class Brick {
     required this.createdAt,
   });
 
-  /// Converts a [Map] to [Brick].
-  factory Brick.fromJson(Map<String, dynamic> json) => _$BrickFromJson(json);
+  /// Converts a [Map] to [BrickSearchResult].
+  factory BrickSearchResult.fromJson(Map<String, dynamic> json) =>
+      _$BrickFromJson(json);
 
   /// Name of the brick
   final String name;

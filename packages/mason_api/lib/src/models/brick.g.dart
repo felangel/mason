@@ -8,11 +8,11 @@ part of 'brick.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-Brick _$BrickFromJson(Map<String, dynamic> json) => $checkedCreate(
+BrickSearchResult _$BrickFromJson(Map<String, dynamic> json) => $checkedCreate(
       'Brick',
       json,
       ($checkedConvert) {
-        final val = Brick(
+        final val = BrickSearchResult(
           name: $checkedConvert('name', (v) => v as String),
           description: $checkedConvert('description', (v) => v as String),
           publisher: $checkedConvert('publisher', (v) => v as String),

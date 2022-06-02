@@ -21,10 +21,10 @@ void main() {
     late MasonApi masonApi;
     late SearchCommand searchCommand;
     late ArgResults argResults;
-    late Brick brick;
+    late BrickSearchResult brick;
 
     setUp(() {
-      brick = Brick(
+      brick = BrickSearchResult(
         name: 'name',
         description: 'description',
         publisher: 'publisher',
