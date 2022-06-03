@@ -2,14 +2,15 @@
 
 // ignore_for_file: implicit_dynamic_parameter, require_trailing_commas, cast_nullable_to_non_nullable, lines_longer_than_80_chars
 
-part of 'brick.dart';
+part of 'brick_search_result.dart';
 
 // **************************************************************************
 // JsonSerializableGenerator
 // **************************************************************************
 
-BrickSearchResult _$BrickFromJson(Map<String, dynamic> json) => $checkedCreate(
-      'Brick',
+BrickSearchResult _$BrickSearchResultFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      'BrickSearchResult',
       json,
       ($checkedConvert) {
         final val = BrickSearchResult(

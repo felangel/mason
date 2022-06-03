@@ -1,6 +1,6 @@
 import 'package:json_annotation/json_annotation.dart';
 
-part 'brick.g.dart';
+part 'brick_search_result.g.dart';
 
 /// {@template brick_search_result}
 /// Details of a brick from `brickhub.dev` registry
@@ -18,7 +18,7 @@ class BrickSearchResult {
 
   /// Converts a [Map] to [BrickSearchResult].
   factory BrickSearchResult.fromJson(Map<String, dynamic> json) =>
-      _$BrickFromJson(json);
+      _$BrickSearchResultFromJson(json);
 
   /// Name of the brick
   final String name;
