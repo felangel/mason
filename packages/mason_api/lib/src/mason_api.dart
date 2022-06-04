@@ -101,12 +101,32 @@ class MasonApi {
   /// The current user.
   User? get currentUser => _currentUser;
 
-  /// Search the with the provided [query].
+  /// Search for bricks the with the provided [query].
   Future<Iterable<BrickSearchResult>> search({required String query}) async {
+    final http.Response response;
     try {
-      final response = await _httpClient.get(
-        Uri.parse('$_hostedUri/api/v1/search?q=${query.trim()}'),
+      response = await _httpClient.get(
+        Uri.parse('$_hostedUri/api/v1/search?q=$query'),
       );
+    } catch (error) {
+      throw MasonApiSearchFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.ok) {
+      final ErrorResponse error;
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiSearchFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiSearchFailure(
+        message: error.message,
+        details: error.details,
+      );
+    }
+
+    try {
       final body = json.decode(response.body) as Map<String, dynamic>;
       final bricksBody = (body['bricks'] as List).cast<Map<String, dynamic>>();
       return bricksBody.map<BrickSearchResult>(BrickSearchResult.fromJson);

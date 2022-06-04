@@ -701,9 +701,20 @@ void main() {
         });
       });
     });
+
     group('search', () {
+      const query = 'query';
+
+      test('makes correct request', () async {
+        masonApi.search(query: query).ignore();
+        verify(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).called(1);
+      });
+
       test('successfully decodes empty [bricks] list', () async {
-        const query = 'query';
         when(
           () => httpClient.get(
             Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
@@ -717,7 +728,6 @@ void main() {
       });
 
       test('successfully decodes populated [bricks] list', () async {
-        const query = 'query';
         when(
           () => httpClient.get(
             Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
@@ -742,7 +752,6 @@ void main() {
 
       test('throws MasonApiSearchFailure when GET throws', () async {
         final exception = Exception('oops');
-        const query = 'query';
 
         when(
           () => httpClient.get(
@@ -755,6 +764,72 @@ void main() {
           fail('should throw');
         } on MasonApiSearchFailure catch (error) {
           expect(error.message, equals('$exception'));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code != 200 (unknown)', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals('An unknown error occurred.'));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code != 200 (w/message & details)', () async {
+        const code = '__code__';
+        const message = '__message__';
+        const details = '__details__';
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '{"code": "$code", "message": "$message", "details": "$details"}',
+            HttpStatus.badRequest,
+          ),
+        );
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals(message));
+          expect(error.details, equals(details));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code == 200 but body is malformed', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(
+            error.message,
+            equals(
+              "type 'Null' is not a subtype of type "
+              "'List<dynamic>' in type cast",
+            ),
+          );
         }
       });
     });
