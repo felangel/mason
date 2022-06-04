@@ -14,6 +14,7 @@ class BrickSearchResult {
     required this.publisher,
     required this.version,
     required this.createdAt,
+    required this.downloads,
   });
 
   /// Converts a [Map] to [BrickSearchResult].
@@ -34,4 +35,7 @@ class BrickSearchResult {
 
   /// The date when the brick was created.
   final DateTime createdAt;
+
+  /// The number of times the brick has been downloaded.
+  final int downloads;
 }

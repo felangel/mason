@@ -734,20 +734,21 @@ void main() {
           ),
         ).thenAnswer(
           (_) async => http.Response(
-            '''{"bricks":[{"name":"name","description":"description","publisher":"test@example.com","version":"0.1.0+1","created_at":"2022-04-12T22:21:32.690488Z"}],"total":1}''',
+            '''{"bricks":[{"name":"name","description":"description","publisher":"test@example.com","version":"0.1.0+1","created_at":"2022-04-12T22:21:32.690488Z", "downloads": 42}],"total":1}''',
             HttpStatus.ok,
           ),
         );
 
         final results = await masonApi.search(query: query);
         expect(results.length, equals(1));
-        expect(results.first.name, 'name');
-        expect(results.first.description, 'description');
-        expect(results.first.version, '0.1.0+1');
+        expect(results.first.name, equals('name'));
+        expect(results.first.description, equals('description'));
+        expect(results.first.version, equals('0.1.0+1'));
         expect(
           results.first.createdAt,
-          DateTime.parse('2022-04-12T22:21:32.690488Z'),
+          equals(DateTime.parse('2022-04-12T22:21:32.690488Z')),
         );
+        expect(results.first.downloads, equals(42));
       });
 
       test('throws MasonApiSearchFailure when GET throws', () async {
