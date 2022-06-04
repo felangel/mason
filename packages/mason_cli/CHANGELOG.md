@@ -1,3 +1,8 @@
+# 0.1.0-dev.27
+
+- feat: add `mason search` command
+- feat: improve usage exceptions
+
 # 0.1.0-dev.26
 
 - feat: upgrade to `mason: ^0.1.0-dev.23`

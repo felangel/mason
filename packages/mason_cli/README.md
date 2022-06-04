@@ -51,6 +51,8 @@ mason make hello
     - [Detecting Changes After Generation](#detecting-changes-after-generation)
     - [Custom Script Execution (Hooks)](#custom-script-execution-hooks)
       - [Hooks Usage](#hooks-usage)
+- [Searching for Bricks](#searching-for-bricks)
+  - [Search Usage](#search-usage)
 - [Adding Bricks](#adding-bricks)
   - [Add Usage](#add-usage)
 - [Removing Bricks](#removing-bricks)
@@ -507,6 +509,17 @@ Hook execution can be disabled using the `--no-hooks` flag:
 mason make example --name Dash --no-hooks
 ```
 
+## Searching for Bricks
+
+The `search` command allows developers to search published bricks on https://brickhub.dev.
+
+### Search usage
+
+```sh
+# search for bricks related to "bloc"
+mason search bloc
+```
+
 ## Adding Bricks
 
 The `add` command allows developers to add brick templates locally or globally on their machines from either a local path or git url. By default `mason add` will add the template locally but bricks can be added globally by providing the `--global` (`-g`) flag.
@@ -709,6 +722,7 @@ Available commands:
   new        Creates a new brick template.
   publish    Publish the current brick to brickhub.dev.
   remove     Removes a brick.
+  search     Search published bricks on brickhub.dev.
   unbundle   Generates a brick template from a bundle.
   update     Update mason.
   upgrade    Upgrade bricks to their latest versions.
