@@ -62,8 +62,9 @@ void main() {
       });
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
-      when(() => masonApi.search(query: 'query'))
-          .thenAnswer((_) async => const []);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => const []);
       final result = await searchCommand.run();
 
       expect(result, ExitCode.success.code);
@@ -83,15 +84,17 @@ void main() {
       });
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
-      when(() => masonApi.search(query: 'query'))
-          .thenAnswer((_) async => [brick]);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => [brick]);
 
       final result = await searchCommand.run();
 
       expect(result, ExitCode.success.code);
 
-      verify(() => logger.progress('Searching "query" on brickhub.dev'))
-          .called(1);
+      verify(
+        () => logger.progress('Searching "query" on brickhub.dev'),
+      ).called(1);
       expect(progressDoneCalls, equals(['Found 1 brick.']));
       verify(() => logger.alert('${brick.name} v${brick.version}')).called(1);
       verify(() => logger.info(brick.description)).called(1);
@@ -107,8 +110,9 @@ void main() {
       });
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
-      when(() => masonApi.search(query: 'query'))
-          .thenAnswer((_) async => [brick, brick]);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => [brick, brick]);
 
       final result = await searchCommand.run();
 
