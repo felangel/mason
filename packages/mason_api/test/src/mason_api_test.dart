@@ -701,5 +701,138 @@ void main() {
         });
       });
     });
+
+    group('search', () {
+      const query = 'query';
+
+      test('makes correct request', () async {
+        masonApi.search(query: query).ignore();
+        verify(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).called(1);
+      });
+
+      test('successfully decodes empty [bricks] list', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response('{"bricks":[],"total":0}', HttpStatus.ok),
+        );
+
+        final results = await masonApi.search(query: query);
+        expect(results, isEmpty);
+      });
+
+      test('successfully decodes populated [bricks] list', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '''{"bricks":[{"name":"name","description":"description","publisher":"test@example.com","version":"0.1.0+1","created_at":"2022-04-12T22:21:32.690488Z", "downloads": 42}],"total":1}''',
+            HttpStatus.ok,
+          ),
+        );
+
+        final results = await masonApi.search(query: query);
+        expect(results.length, equals(1));
+        expect(results.first.name, equals('name'));
+        expect(results.first.description, equals('description'));
+        expect(results.first.version, equals('0.1.0+1'));
+        expect(
+          results.first.createdAt,
+          equals(DateTime.parse('2022-04-12T22:21:32.690488Z')),
+        );
+        expect(results.first.downloads, equals(42));
+      });
+
+      test('throws MasonApiSearchFailure when GET throws', () async {
+        final exception = Exception('oops');
+
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenThrow(exception);
+
+        try {
+          await masonApi.search(query: 'query');
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals('$exception'));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code != 200 (unknown)', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals('An unknown error occurred.'));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code != 200 (w/message & details)', () async {
+        const code = '__code__';
+        const message = '__message__';
+        const details = '__details__';
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer(
+          (_) async => http.Response(
+            '{"code": "$code", "message": "$message", "details": "$details"}',
+            HttpStatus.badRequest,
+          ),
+        );
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(error.message, equals(message));
+          expect(error.details, equals(details));
+        }
+      });
+
+      test(
+          'throws MasonApiSearchFailure '
+          'when status code == 200 but body is malformed', () async {
+        when(
+          () => httpClient.get(
+            Uri.https(authority, 'api/v1/search', <String, String>{'q': query}),
+          ),
+        ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
+
+        try {
+          await masonApi.search(query: query);
+          fail('should throw');
+        } on MasonApiSearchFailure catch (error) {
+          expect(
+            error.message,
+            equals(
+              "type 'Null' is not a subtype of type "
+              "'List<dynamic>' in type cast",
+            ),
+          );
+        }
+      });
+    });
   });
 }

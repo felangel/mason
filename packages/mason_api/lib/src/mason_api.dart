@@ -51,6 +51,15 @@ class MasonApiPublishFailure extends MasonApiException {
       : super(message: message, details: details);
 }
 
+/// {@template mason_api_search_failure}
+/// An exception thrown when an error occurs during `search`.
+/// {@endtemplate}
+class MasonApiSearchFailure extends MasonApiException {
+  /// {@macro mason_api_search_failure}
+  const MasonApiSearchFailure({required String message, String? details})
+      : super(message: message, details: details);
+}
+
 /// {@template mason_api}
 /// API client for the [package:mason_cli](https://github.com/felangel/mason).
 /// {@endtemplate}
@@ -91,6 +100,40 @@ class MasonApi {
 
   /// The current user.
   User? get currentUser => _currentUser;
+
+  /// Search for bricks the with the provided [query].
+  Future<Iterable<BrickSearchResult>> search({required String query}) async {
+    final http.Response response;
+    try {
+      response = await _httpClient.get(
+        Uri.parse('$_hostedUri/api/v1/search?q=$query'),
+      );
+    } catch (error) {
+      throw MasonApiSearchFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.ok) {
+      final ErrorResponse error;
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiSearchFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiSearchFailure(
+        message: error.message,
+        details: error.details,
+      );
+    }
+
+    try {
+      final body = json.decode(response.body) as Map<String, dynamic>;
+      final bricksBody = (body['bricks'] as List).cast<Map<String, dynamic>>();
+      return bricksBody.map<BrickSearchResult>(BrickSearchResult.fromJson);
+    } catch (error) {
+      throw MasonApiSearchFailure(message: '$error');
+    }
+  }
 
   /// Log in with the provided [email] and [password].
   Future<User> login({required String email, required String password}) async {
