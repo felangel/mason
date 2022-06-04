@@ -1,3 +1,7 @@
+# 0.1.0-dev.5
+
+- feat: add `search` to `MasonApi`
+
 # 0.1.0-dev.4
 
 - feat: add `details` to `MasonApiException`
