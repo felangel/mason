@@ -3,7 +3,7 @@ import 'package:json_annotation/json_annotation.dart';
 part 'brick_search_result.g.dart';
 
 /// {@template brick_search_result}
-/// Details of a brick from `brickhub.dev` registry
+/// Brick search result details from brickhub.dev.
 /// {@endtemplate}
 @JsonSerializable(createToJson: false)
 class BrickSearchResult {
@@ -20,18 +20,18 @@ class BrickSearchResult {
   factory BrickSearchResult.fromJson(Map<String, dynamic> json) =>
       _$BrickSearchResultFromJson(json);
 
-  /// Name of the brick
+  /// The name of the brick.
   final String name;
 
-  /// Description of the brick
+  /// The brick description.
   final String description;
 
-  /// Description of the brick
+  /// The email of the brick publisher.
   final String publisher;
 
-  /// Latest registered version of the brick
+  /// The latest published version of the brick.
   final String version;
 
-  /// Date of the brick's creation
+  /// The date when the brick was created.
   final DateTime createdAt;
 }
