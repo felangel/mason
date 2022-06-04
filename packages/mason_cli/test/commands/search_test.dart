@@ -1,4 +1,5 @@
 import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide Brick;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
@@ -30,6 +31,7 @@ void main() {
         publisher: 'publisher',
         version: 'version',
         createdAt: DateTime(0, 0, 0),
+        downloads: 42,
       );
       logger = MockLogger();
       masonApi = MockMasonApi();
@@ -44,6 +46,12 @@ void main() {
       expect(SearchCommand.new, returnsNormally);
     });
 
+    test('throws UsageException when search term is missing', () async {
+      when(() => argResults.rest).thenReturn([]);
+      CommandRunner<int>('example', 'description').addCommand(searchCommand);
+      expect(() => searchCommand.run(), throwsA(isA<UsageException>()));
+    });
+
     test('exits with code 0 when no results are shown', () async {
       final progress = MockProgress();
       final progressDoneCalls = <String?>[];
@@ -56,12 +64,12 @@ void main() {
       when(() => argResults.rest).thenReturn(['query']);
       when(() => masonApi.search(query: 'query'))
           .thenAnswer((_) async => const []);
-
       final result = await searchCommand.run();
 
       expect(result, ExitCode.success.code);
-      verify(() => logger.progress('Searching "query" on brickhub.dev.'))
-          .called(1);
+      verify(
+        () => logger.progress('Searching "query" on brickhub.dev'),
+      ).called(1);
       expect(progressDoneCalls, equals(['No bricks found.']));
     });
 
@@ -82,15 +90,11 @@ void main() {
 
       expect(result, ExitCode.success.code);
 
-      verify(() => logger.progress('Searching "query" on brickhub.dev.'))
+      verify(() => logger.progress('Searching "query" on brickhub.dev'))
           .called(1);
       expect(progressDoneCalls, equals(['Found 1 brick.']));
-      verify(
-        () => logger.success(
-          '${brick.name} (v${brick.version} ${brick.publisher})',
-        ),
-      ).called(1);
-      verify(() => logger.info('  ${brick.description}\n')).called(1);
+      verify(() => logger.alert('${brick.name} v${brick.version}')).called(1);
+      verify(() => logger.info(brick.description)).called(1);
     });
 
     test('exits with code 0 when more than one result is shown', () async {
@@ -110,14 +114,11 @@ void main() {
 
       expect(result, ExitCode.success.code);
       expect(progressDoneCalls, equals(['Found 2 bricks.']));
-      verify(() => logger.progress('Searching "query" on brickhub.dev.'))
-          .called(1);
       verify(
-        () => logger.success(
-          '${brick.name} (v${brick.version} ${brick.publisher})',
-        ),
-      ).called(2);
-      verify(() => logger.info('  ${brick.description}\n')).called(2);
+        () => logger.progress('Searching "query" on brickhub.dev'),
+      ).called(1);
+      verify(() => logger.alert('${brick.name} v${brick.version}')).called(2);
+      verify(() => logger.info(brick.description)).called(2);
     });
 
     test('exits with code 70 when exception occurs', () async {
@@ -136,8 +137,9 @@ void main() {
       final result = await searchCommand.run();
 
       expect(result, equals(ExitCode.software.code));
-      verify(() => logger.progress('Searching "query" on brickhub.dev.'))
-          .called(1);
+      verify(
+        () => logger.progress('Searching "query" on brickhub.dev'),
+      ).called(1);
       verify(() => logger.err('$exception')).called(1);
     });
   });

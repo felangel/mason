@@ -1,7 +1,3 @@
-# 0.1.0-dev.27
-
-- feat: add `mason search` command to search bricks on brickhub.dev
-
 # 0.1.0-dev.26
 
 - feat: upgrade to `mason: ^0.1.0-dev.23`
