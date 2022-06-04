@@ -33,6 +33,5 @@ class BrickSearchResult {
   final String version;
 
   /// Date of the brick's creation
-  @JsonKey(name: 'created_at')
   final DateTime createdAt;
 }
