@@ -1,3 +1,7 @@
+# 0.1.0-dev.28
+
+- feat: support enum vars in `brick.yaml`
+
 # 0.1.0-dev.27
 
 - feat: add `mason search` command
