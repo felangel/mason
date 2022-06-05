@@ -1,3 +1,21 @@
+# 0.1.0-dev.25
+
+- fix: do not prompt when overwrite rule is `alwaysOverwrite`
+- feat: `brick.yaml` vars enum support
+
+  ```yaml
+  vars:
+    color:
+      type: enum
+      description: Your favorite color
+      default: green
+      prompt: What is your favorite color?
+      values:
+        - red
+        - green
+        - blue
+  ```
+
 # 0.1.0-dev.24
 
 - fix: rendering shorthand lambdas within loops
