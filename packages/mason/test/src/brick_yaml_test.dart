@@ -9,12 +9,14 @@ Matcher equalsBrickVariableProperties({
   String? description,
   dynamic defaultValue,
   String? prompt,
+  List<String>? values,
 }) {
   return isA<BrickVariableProperties>()
       .having((v) => v.type, 'type', type)
       .having((v) => v.description, 'description', description)
       .having((v) => v.defaultValue, 'default', defaultValue)
-      .having((v) => v.prompt, 'prompt', prompt);
+      .having((v) => v.prompt, 'prompt', prompt)
+      .having((v) => v.values, 'values', values);
 }
 
 void main() {
@@ -61,6 +63,12 @@ void main() {
               description: 'whether you are a developer',
               defaultValue: true,
               prompt: 'Are you a developer?',
+            ),
+            'favoriteColor': BrickVariableProperties.enumeration(
+              description: 'whether you are a developer',
+              defaultValue: 'blue',
+              prompt: 'Are you a developer?',
+              values: const ['red', 'blue', 'green'],
             ),
           },
         );
@@ -117,7 +125,15 @@ vars:
     description: whether you are a developer
     default: true
     prompt: Are you a developer?
-          ''';
+  favoriteColor:
+    type: enum
+    description: your favorite color
+    default: green
+    prompt: What is your favorite color?
+    values:
+      - red
+      - green
+      - blue''';
 
         final brickYaml = checkedYamlDecode(
           content,
@@ -126,7 +142,10 @@ vars:
         expect(brickYaml.name, equals('A'));
         expect(brickYaml.description, equals('descriptionA'));
         expect(brickYaml.version, equals('1.0.0'));
-        expect(brickYaml.vars.keys, equals(['name', 'age', 'isDeveloper']));
+        expect(
+          brickYaml.vars.keys,
+          equals(['name', 'age', 'isDeveloper', 'favoriteColor']),
+        );
         expect(
           brickYaml.vars.values,
           equals([
@@ -147,6 +166,13 @@ vars:
               description: 'whether you are a developer',
               defaultValue: true,
               prompt: 'Are you a developer?',
+            ),
+            equalsBrickVariableProperties(
+              type: BrickVariableType.enumeration,
+              description: 'your favorite color',
+              defaultValue: 'green',
+              prompt: 'What is your favorite color?',
+              values: ['red', 'green', 'blue'],
             ),
           ]),
         );

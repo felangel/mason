@@ -70,7 +70,13 @@ BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
       ($checkedConvert) {
         $checkKeys(
           json,
-          allowedKeys: const ['type', 'description', 'default', 'prompt'],
+          allowedKeys: const [
+            'type',
+            'description',
+            'default',
+            'prompt',
+            'values'
+          ],
         );
         final val = BrickVariableProperties(
           type: $checkedConvert(
@@ -78,6 +84,8 @@ BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
           description: $checkedConvert('description', (v) => v as String?),
           defaultValue: $checkedConvert('default', (v) => v),
           prompt: $checkedConvert('prompt', (v) => v as String?),
+          values: $checkedConvert('values',
+              (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()),
         );
         return val;
       },
@@ -99,6 +107,7 @@ Map<String, dynamic> _$BrickVariablePropertiesToJson(
   writeNotNull('description', instance.description);
   writeNotNull('default', instance.defaultValue);
   writeNotNull('prompt', instance.prompt);
+  writeNotNull('values', instance.values);
   return val;
 }
 
@@ -106,6 +115,7 @@ const _$BrickVariableTypeEnumMap = {
   BrickVariableType.number: 'number',
   BrickVariableType.string: 'string',
   BrickVariableType.boolean: 'boolean',
+  BrickVariableType.enumeration: 'enum',
 };
 
 BrickEnvironment _$BrickEnvironmentFromJson(Map json) => $checkedCreate(
