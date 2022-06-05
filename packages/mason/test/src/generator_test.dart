@@ -374,6 +374,49 @@ void main() {
 
       test(
           'constructs an instance multiple '
+          'times w/prompt - Y (documentation)', () async {
+        final brick = Brick.path(
+          path.join('..', '..', 'bricks', 'documentation'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final logger = MockLogger();
+        final files1 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'name1',
+            'description': 'description1',
+            'author': 'author1',
+          },
+          logger: logger,
+        );
+
+        expect(files1.length, equals(4));
+        expect(
+          files1.every((f) => f.status == GeneratedFileStatus.created),
+          isTrue,
+        );
+        verifyNever(() => logger.prompt(any()));
+
+        when(() => logger.prompt(any())).thenReturn('Y');
+
+        final files2 = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'name2',
+            'description': 'description2',
+            'author': 'author2',
+          },
+          logger: logger,
+        );
+
+        expect(files2.length, equals(4));
+        verify(() => logger.prompt(any())).called(1);
+      });
+
+      test(
+          'constructs an instance multiple '
           'times w/prompt - Y (hello_world)', () async {
         const name = 'Dash';
         const otherName = 'Other Dash';
@@ -431,6 +474,7 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
+        verify(() => logger.prompt(any())).called(1);
       });
 
       test(
