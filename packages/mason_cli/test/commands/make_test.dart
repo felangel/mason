@@ -632,7 +632,7 @@ bricks:
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });
 
-    test('errors when enum choices is empty', () async {
+    test('throws FormatException when enum values is empty', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'enum_no_choices'),
       )..createSync(recursive: true);
@@ -662,7 +662,7 @@ bricks:
 
       verify(
         () => logger.err(
-          'Invalid color.\n"Enums be have at least one value.',
+          'Invalid color.\n"Enums must have at least one value.',
         ),
       ).called(1);
     });

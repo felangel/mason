@@ -136,7 +136,7 @@ class _MakeCommand extends MasonCommand {
             final choices = properties.values;
             if (choices == null || choices.isEmpty) {
               throw FormatException(
-                'Invalid $variable.\n"Enums be have at least one value.',
+                'Invalid $variable.\n"Enums must have at least one value.',
               );
             }
             response = logger.chooseOne(
