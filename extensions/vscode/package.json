@@ -52,6 +52,10 @@
         "title": "Mason: Add Global Brick"
       },
       {
+        "command": "mason.make-brick",
+        "title": "Mason: Make Brick"
+      },
+      {
         "command": "mason.remove-local-brick",
         "title": "Mason: Remove Local Brick"
       },
@@ -59,7 +63,16 @@
         "command": "mason.remove-global-brick",
         "title": "Mason: Remove Global Brick"
       }
-    ]
+    ],
+    "menus": {
+      "explorer/context": [
+        {
+          "command": "mason.make-brick",
+          "group": "masonGroup@1",
+          "when": "explorerResourceIsFolder"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
