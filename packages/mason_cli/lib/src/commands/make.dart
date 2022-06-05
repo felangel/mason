@@ -131,6 +131,19 @@ class _MakeCommand extends MasonCommand {
               prompt,
               defaultValue: properties.defaultValue as bool? ?? false,
             );
+            break;
+          case BrickVariableType.enumeration:
+            final choices = properties.values;
+            if (choices == null || choices.isEmpty) {
+              throw FormatException(
+                'Invalid $variable.\n"Enums must have at least one value.',
+              );
+            }
+            response = logger.chooseOne(
+              prompt,
+              choices: choices,
+              defaultValue: properties.defaultValue?.toString(),
+            );
         }
         vars.addAll(<String, dynamic>{variable: response});
       }
@@ -215,6 +228,8 @@ extension on BrickVariableType {
         return 'string';
       case BrickVariableType.boolean:
         return 'boolean';
+      case BrickVariableType.enumeration:
+        return 'enum';
     }
   }
 }

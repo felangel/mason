@@ -55,6 +55,8 @@ bricks:
     path: ../../../../../bricks/bio
   documentation:
     path: ../../../../../bricks/documentation
+  favorite_color:
+    path: ../../../../../bricks/favorite_color
   greeting:
     path: ../../../../../bricks/greeting
   legacy:
@@ -84,6 +86,9 @@ bricks:
       );
       final docPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'documentation'),
+      );
+      final favoriteColorPath = canonicalize(
+        path.join(Directory.current.path, bricksPath, 'favorite_color'),
       );
       final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
@@ -119,6 +124,7 @@ bricks:
             'app_icon': appIconPath,
             'bio': bioPath,
             'documentation': docPath,
+            'favorite_color': favoriteColorPath,
             'hello_world': helloWorldPath,
             'hooks': hooksPath,
             'greeting': greetingPath,
@@ -173,18 +179,19 @@ bricks:
               '          [skip]                Always skip conflicting files.\n'
               '\n'
               'Available subcommands:\n'
-              '  app_icon        Create an app icon file from a URL\n'
-              '  bio             A Bio Template\n'
-              '  documentation   Create Documentation Markdown Files\n'
-              '  greeting        A Simple Greeting Template\n'
-              '  hello_world     A Simple Hello World Template\n'
-              '  hooks           A Hooks Example Template\n'
-              '  legacy          A Legacy Greeting Template\n'
-              '  plugin          An example plugin template\n'
-              '  random_color    A Random Color Generator\n'
-              '  simple          A Simple Static Template\n'
-              '  todos           A Todos Template\n'
-              '  widget          Create a Simple Flutter Widget\n'
+              '  app_icon         Create an app icon file from a URL\n'
+              '  bio              A Bio Template\n'
+              '  documentation    Create Documentation Markdown Files\n'
+              '  favorite_color   A new brick created with the Mason CLI.\n'
+              '  greeting         A Simple Greeting Template\n'
+              '  hello_world      A Simple Hello World Template\n'
+              '  hooks            A Hooks Example Template\n'
+              '  legacy           A Legacy Greeting Template\n'
+              '  plugin           An example plugin template\n'
+              '  random_color     A Random Color Generator\n'
+              '  simple           A Simple Static Template\n'
+              '  todos            A Todos Template\n'
+              '  widget           Create a Simple Flutter Widget\n'
               '\n'
               'Run "mason help" to see global options.'
         ];
@@ -599,6 +606,65 @@ bricks:
         path.join(testFixturesPath(cwd, suffix: 'make'), 'documentation'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates favorite_color', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'favorite_color'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      when(
+        () => logger.chooseOne(
+          any(),
+          choices: any(named: 'choices'),
+          defaultValue: any(named: 'defaultValue'),
+        ),
+      ).thenReturn('blue');
+      final result = await commandRunner.run(['make', 'favorite_color']);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'favorite_color'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'favorite_color'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('throws FormatException when enum values is empty', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'enum_no_choices'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+
+      await commandRunner.run([
+        'add',
+        'enum_no_choices',
+        '--path',
+        canonicalize(
+          path.join(
+            Directory.current.path,
+            '..',
+            '..',
+            '..',
+            'bricks',
+            'enum_no_choices',
+          ),
+        )
+      ]);
+
+      final result = await MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      ).run(['make', 'enum_no_choices']);
+      expect(result, equals(ExitCode.usage.code));
+
+      verify(
+        () => logger.err(
+          'Invalid color.\n"Enums must have at least one value.',
+        ),
+      ).called(1);
     });
 
     test('generates greeting', () async {
