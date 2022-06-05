@@ -64,7 +64,7 @@ void main() {
               defaultValue: true,
               prompt: 'Are you a developer?',
             ),
-            'favorite_color': BrickVariableProperties.enumeration(
+            'favoriteColor': BrickVariableProperties.enumeration(
               description: 'whether you are a developer',
               defaultValue: 'blue',
               prompt: 'Are you a developer?',
