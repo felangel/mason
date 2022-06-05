@@ -1,0 +1,14 @@
+name: enum_no_choices
+description: A new brick created with the Mason CLI.
+
+version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev <0.1.0"
+
+vars:
+  color:
+    type: enum
+    description: Your favorite color
+    prompt: What is your favorite color?
+    values:

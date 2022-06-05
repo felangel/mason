@@ -5,6 +5,8 @@ bricks:
     path: ../../../../../bricks/bio
   documentation:
     path: ../../../../../bricks/documentation
+  favorite_color:
+    path: ../../../../../bricks/favorite_color
   hello_world:
     path: ../../../../../bricks/hello_world
   hooks:
