@@ -98,6 +98,10 @@ enum BrickVariableType {
 
   /// A boolean (e.g. true/false)
   boolean,
+
+  /// An enumeration (e.g. ["red", "green", "blue"])
+  @JsonValue('enum')
+  enumeration,
 }
 
 /// {@template brick_variable_properties}
@@ -113,6 +117,7 @@ class BrickVariableProperties {
     this.description,
     this.defaultValue,
     this.prompt,
+    this.values,
   });
 
   /// {@macro brick_variable_properties}
@@ -160,6 +165,23 @@ class BrickVariableProperties {
           prompt: prompt,
         );
 
+  /// {@macro brick_variable_properties}
+  ///
+  /// Creates an instance of a [BrickVariableProperties]
+  /// of type [BrickVariableType.enumeration].
+  const BrickVariableProperties.enumeration({
+    String? description,
+    String? defaultValue,
+    String? prompt,
+    required List<String> values,
+  }) : this(
+          type: BrickVariableType.enumeration,
+          description: description,
+          defaultValue: defaultValue,
+          prompt: prompt,
+          values: values,
+        );
+
   /// Converts [Map] to [BrickYaml]
   factory BrickVariableProperties.fromJson(Map<dynamic, dynamic> json) =>
       _$BrickVariablePropertiesFromJson(json);
@@ -179,6 +201,10 @@ class BrickVariableProperties {
 
   /// An optional prompt used when requesting the variable.
   final String? prompt;
+
+  /// An optional list of values used
+  /// when [type] is [BrickVariableType.enumeration].
+  final List<String>? values;
 }
 
 /// {@template vars_converter}
