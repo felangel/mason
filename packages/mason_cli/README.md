@@ -243,10 +243,11 @@ environment:
 # Variables specify dynamic values that your brick depends on.
 # Zero or more variables can be specified for a given brick.
 # Each variable has:
-#  * a type (string, number, or boolean)
+#  * a type (string, number, boolean, or enum)
 #  * an optional short description
 #  * an optional default value
-#  * an optional prompt phrase used when asking for the variable.
+#  * an optional prompt phrase used when asking for the variable
+#  * a list of values (enums only)
 vars:
   name:
     type: string
