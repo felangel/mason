@@ -319,6 +319,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   /// The target [Directory].
   final Directory dir;
 
+  OverwriteRule? _overwriteRule;
+
   @override
   Future<GeneratedFile> createFile(
     String path,
@@ -326,7 +328,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     Logger? logger,
     OverwriteRule? overwriteRule,
   }) async {
-    var _overwriteRule = overwriteRule;
+    _overwriteRule ??= overwriteRule;
     final file = File(p.join(dir.path, path));
     final fileExists = file.existsSync();
 
