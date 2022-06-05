@@ -654,8 +654,7 @@ bricks:
         )
       ]);
 
-      final result =
-          await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+      final result = await MasonCommandRunner(pubUpdater: pubUpdater).run(
         ['make', 'enum_no_choices'],
       );
       expect(result, equals(ExitCode.usage.code));
