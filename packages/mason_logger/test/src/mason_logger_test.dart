@@ -31,14 +31,14 @@ void main() {
         );
       });
 
-      test('writes to stderr', () {
+      test('writes to stdout', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().write(message);
-            verify(() => stderr.write(message)).called(1);
+            verify(() => stdout.write(message)).called(1);
           },
-          stdout: () => stderr,
+          stdout: () => stdout,
         );
       });
     });
@@ -92,14 +92,14 @@ void main() {
     });
 
     group('.err', () {
-      test('writes line to stdout', () {
+      test('writes line to stderr', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().err(message);
-            verify(() => stdout.writeln(lightRed.wrap(message))).called(1);
+            verify(() => stderr.writeln(lightRed.wrap(message))).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
