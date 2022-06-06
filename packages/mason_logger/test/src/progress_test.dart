@@ -11,10 +11,12 @@ void main() {
   group('Progress', () {
     late Stdout stdout;
     late Stdin stdin;
+    late Stdout stderr;
 
     setUp(() {
       stdout = MockStdout();
       stdin = MockStdin();
+      stderr = MockStdout();
     });
 
     group('.complete', () {
@@ -22,7 +24,7 @@ void main() {
         await StdioOverrides.runZoned(
           () async {
             const message = 'test message';
-            final progress = Progress(message, stdout);
+            final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.complete();
             verify(
@@ -42,16 +44,17 @@ void main() {
           },
           stdout: () => stdout,
           stdin: () => stdin,
+          stderr: () => stderr,
         );
       });
     });
 
     group('.fail', () {
-      test('writes lines to stdout', () async {
+      test('writes lines to stderr', () async {
         await StdioOverrides.runZoned(
           () async {
             const message = 'test message';
-            final progress = Progress(message, stdout);
+            final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.fail();
             verify(
@@ -63,7 +66,7 @@ void main() {
             ).called(1);
             verify(
               () {
-                stdout.write(
+                stderr.write(
                   '''\b${'\b' * (message.length + 4)}\u001b[2K${red.wrap('✗')} $message ${darkGray.wrap('(0.1s)')}\n''',
                 );
               },
@@ -71,6 +74,7 @@ void main() {
           },
           stdout: () => stdout,
           stdin: () => stdin,
+          stderr: () => stderr,
         );
       });
     });
@@ -80,7 +84,7 @@ void main() {
         await StdioOverrides.runZoned(
           () async {
             const message = 'test message';
-            final progress = Progress(message, stdout);
+            final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.cancel();
             verify(
@@ -96,6 +100,7 @@ void main() {
           },
           stdout: () => stdout,
           stdin: () => stdin,
+          stderr: () => stderr,
         );
       });
     });
@@ -105,7 +110,7 @@ void main() {
         await StdioOverrides.runZoned(
           () async {
             const message = 'test message';
-            final progress = Progress(message, stdout);
+            final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             // ignore: deprecated_member_use_from_same_package
             progress();
@@ -126,6 +131,7 @@ void main() {
           },
           stdout: () => stdout,
           stdin: () => stdin,
+          stderr: () => stderr,
         );
       });
     });

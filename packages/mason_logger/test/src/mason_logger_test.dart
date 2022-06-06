@@ -11,10 +11,12 @@ void main() {
   group('Logger', () {
     late Stdout stdout;
     late Stdin stdin;
+    late Stdout stderr;
 
     setUp(() {
       stdout = MockStdout();
       stdin = MockStdin();
+      stderr = MockStdout();
     });
 
     group('.write', () {
@@ -26,6 +28,17 @@ void main() {
             verify(() => stdout.write(message)).called(1);
           },
           stdout: () => stdout,
+        );
+      });
+
+      test('writes to stderr', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().write(message);
+            verify(() => stderr.write(message)).called(1);
+          },
+          stdout: () => stderr,
         );
       });
     });

@@ -34,8 +34,9 @@ abstract class StdioOverrides {
     R Function() body, {
     io.Stdout Function()? stdout,
     io.Stdin Function()? stdin,
+    io.Stdout Function()? stderr,
   }) {
-    final overrides = _StdioOverridesScope(stdout, stdin);
+    final overrides = _StdioOverridesScope(stdout, stdin, stderr);
     return _asyncRunZoned(body, zoneValues: {_token: overrides});
   }
 
@@ -44,14 +45,19 @@ abstract class StdioOverrides {
 
   /// The [io.Stdin] that will be used within the current [Zone].
   io.Stdin get stdin => io.stdin;
+
+  /// The [io.Stdout] that will be used for errors and
+  /// within the current [Zone].
+  io.Stdout get stderr => io.stderr;
 }
 
 class _StdioOverridesScope extends StdioOverrides {
-  _StdioOverridesScope(this._stdout, this._stdin);
+  _StdioOverridesScope(this._stdout, this._stdin, this._stderr);
 
   final StdioOverrides? _previous = StdioOverrides.current;
   final io.Stdout Function()? _stdout;
   final io.Stdin Function()? _stdin;
+  final io.Stdout Function()? _stderr;
 
   @override
   io.Stdout get stdout {
@@ -62,6 +68,11 @@ class _StdioOverridesScope extends StdioOverrides {
   io.Stdin get stdin {
     return _stdin?.call() ?? _previous?.stdin ?? super.stdin;
   }
+
+  @override
+  io.Stdout get stderr {
+    return _stderr?.call() ?? _previous?.stderr ?? super.stderr;
+  }
 }
 
 /// A basic Logger which wraps `stdio` and applies various styles.
@@ -69,6 +80,7 @@ class Logger {
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
+  io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
 
@@ -92,11 +104,11 @@ class Logger {
 
   /// Writes progress message to stdout.
   Progress progress(String message) {
-    return Progress(message, _stdout);
+    return Progress(message, _stdout, _stderr);
   }
 
   /// Writes error message to stdout.
-  void err(String? message) => _stdout.writeln(lightRed.wrap(message));
+  void err(String? message) => _stderr.writeln(lightRed.wrap(message));
 
   /// Writes alert message to stdout.
   void alert(String? message) {
