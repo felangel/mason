@@ -120,7 +120,7 @@ class Logger {
 
   /// Writes warning message to stdout.
   void warn(String? message, {String tag = 'WARN'}) {
-    _stdout.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
+    _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
