@@ -195,11 +195,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox ${lightCyan.wrap(choice)}');
+            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox $choice');
+            ..write(' $checkBox  $choice');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -250,6 +250,106 @@ class Logger {
     }
 
     return result;
+  }
+
+  /// Prompts user with [message] to choose zero or more values
+  /// from the provided [choices].
+  ///
+  /// An optional list of [defaultValues] can be specified.
+  /// The [defaultValues] must be one of the provided [choices].
+  List<String> chooseAny(
+    String? message, {
+    required List<String> choices,
+    List<String>? defaultValues,
+  }) {
+    const upKey = [27, 91, 65];
+    const downKey = [27, 91, 66];
+    const enterKey = [10];
+    const spaceKey = [32];
+
+    final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
+    final selections = hasDefaults
+        ? defaultValues.map((value) => choices.indexOf(value)).toSet()
+        : <int>{};
+    var index = 0;
+
+    void writeChoices() {
+      _stdout
+        // save cursor
+        ..write('\x1b7')
+        // hide cursor
+        ..write('\x1b[?25l')
+        ..writeln('$message');
+
+      for (final choice in choices) {
+        final choiceIndex = choices.indexOf(choice);
+        final isCurrent = choiceIndex == index;
+        final isSelected = selections.contains(choiceIndex);
+        final checkBox = isSelected ? lightCyan.wrap('◉') : '◯';
+        if (isCurrent) {
+          _stdout
+            ..write(green.wrap('❯'))
+            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
+        } else {
+          _stdout
+            ..write(' ')
+            ..write(' $checkBox  $choice');
+        }
+        if (choices.last != choice) {
+          _stdout.write('\n');
+        }
+      }
+    }
+
+    _stdin
+      ..lineMode = false
+      ..echoMode = false;
+
+    writeChoices();
+
+    final event = <int>[];
+    List<String>? results;
+    while (results == null) {
+      final byte = _stdin.readByteSync();
+      if (event.length == 3) event.clear();
+      event.add(byte);
+      if (upKey.every(event.contains)) {
+        event.clear();
+        index = (index - 1) % (choices.length);
+      } else if (downKey.every(event.contains)) {
+        event.clear();
+        index = (index + 1) % (choices.length);
+      } else if (spaceKey.every(event.contains)) {
+        event.clear();
+        selections.contains(index)
+            ? selections.remove(index)
+            : selections.add(index);
+      } else if (enterKey.every(event.contains)) {
+        _stdin
+          ..lineMode = true
+          ..echoMode = true;
+
+        results = selections.map((index) => choices[index]).toList();
+
+        _stdout
+          // restore cursor
+          ..write('\x1b8')
+          // clear to end of screen
+          ..write('\x1b[J')
+          // show cursor
+          ..write('\x1b[?25h')
+          ..write('$message ')
+          ..writeln(styleDim.wrap(lightCyan.wrap('$results')));
+
+        break;
+      }
+
+      // restore cursor
+      _stdout.write('\x1b8');
+      writeChoices();
+    }
+
+    return results;
   }
 
   String _readLineHiddenSync() {

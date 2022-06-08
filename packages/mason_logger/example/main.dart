@@ -18,6 +18,13 @@ Future<void> main() async {
 
   logger.info('Got it, $favoriteColor it is!');
 
+  final flavors = logger.chooseAny(
+    'What build flavors do you want?',
+    choices: ['dev', 'int', 'prod'],
+  );
+
+  logger.info('Awesome, $flavors it is!');
+
   final favoriteAnimal = logger.prompt(
     'What is your favorite animal?',
     defaultValue: '🐈',
