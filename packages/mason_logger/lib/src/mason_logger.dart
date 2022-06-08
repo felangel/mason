@@ -46,8 +46,7 @@ abstract class StdioOverrides {
   /// The [io.Stdin] that will be used within the current [Zone].
   io.Stdin get stdin => io.stdin;
 
-  /// The [io.Stdout] that will be used for errors and
-  /// within the current [Zone].
+  /// The [io.Stdout] that will be used for errors within the current [Zone].
   io.Stdout get stderr => io.stderr;
 }
 
@@ -107,7 +106,7 @@ class Logger {
     return Progress(message, _stdout, _stderr);
   }
 
-  /// Writes error message to stdout.
+  /// Writes error message to stderr.
   void err(String? message) => _stderr.writeln(lightRed.wrap(message));
 
   /// Writes alert message to stdout.
@@ -118,7 +117,7 @@ class Logger {
   /// Writes detail message to stdout.
   void detail(String? message) => _stdout.writeln(darkGray.wrap(message));
 
-  /// Writes warning message to stdout.
+  /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
