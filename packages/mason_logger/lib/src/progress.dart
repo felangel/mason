@@ -8,7 +8,11 @@ import 'package:universal_io/io.dart';
 /// {@endtemplate}
 class Progress {
   /// {@macro progress}
-  Progress(this._message, this._stdout) : _stopwatch = Stopwatch() {
+  Progress(
+    this._message,
+    this._stdout,
+    this._stderr,
+  ) : _stopwatch = Stopwatch() {
     _stopwatch
       ..reset()
       ..start();
@@ -27,6 +31,8 @@ class Progress {
     '⠇',
     '⠏'
   ];
+
+  final Stdout _stderr;
 
   final Stdout _stdout;
 
@@ -60,7 +66,7 @@ class Progress {
     _timer.cancel();
     final time =
         (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
-    _stdout.write(
+    _stderr.write(
       '''\b${'\b' * (_message.length + 4)}\u001b[2K${red.wrap('✗')} ${update ?? _message} ${darkGray.wrap('(${time}s)')}\n''',
     );
     _stopwatch.stop();

@@ -11,10 +11,12 @@ void main() {
   group('Logger', () {
     late Stdout stdout;
     late Stdin stdin;
+    late Stdout stderr;
 
     setUp(() {
       stdout = MockStdout();
       stdin = MockStdin();
+      stderr = MockStdout();
     });
 
     group('.write', () {
@@ -79,14 +81,14 @@ void main() {
     });
 
     group('.err', () {
-      test('writes line to stdout', () {
+      test('writes line to stderr', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().err(message);
-            verify(() => stdout.writeln(lightRed.wrap(message))).called(1);
+            verify(() => stderr.writeln(lightRed.wrap(message))).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
@@ -120,33 +122,33 @@ void main() {
     });
 
     group('.warn', () {
-      test('writes line to stdout', () {
+      test('writes line to stderr', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().warn(message);
             verify(
               () {
-                stdout.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+                stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
               },
             ).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
 
-      test('writes line to stdout with custom tag', () {
+      test('writes line to stderr with custom tag', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().warn(message, tag: '🚨');
             verify(
               () {
-                stdout.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
+                stderr.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
               },
             ).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
