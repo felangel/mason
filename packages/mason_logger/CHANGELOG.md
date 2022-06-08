@@ -1,3 +1,10 @@
+# 0.1.0-dev.11
+
+- fix: write errors and warnings to `stderr`
+  - `Logger().err(...)`
+  - `Logger().warn(...)`
+  - `Logger().progress(...).fail(...)`
+
 # 0.1.0-dev.10
 
 - feat: `chooseOne` API
