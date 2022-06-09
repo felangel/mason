@@ -81,9 +81,10 @@ class Logger {
 
   final _jKey = [106];
   final _kKey = [107];
-  final _upKey = io.Platform.isWindows ? [-0] : [27, 91, 65];
-  final _downKey = io.Platform.isWindows ? [-0] : [27, 91, 66];
-  final _enterKey = io.Platform.isWindows ? [13] : [10];
+  final _upKey = [27, 91, 65];
+  final _downKey = [27, 91, 66];
+  final _enterKey = [13];
+  final _returnKey = [10];
   final _spaceKey = [32];
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
@@ -230,6 +231,7 @@ class Logger {
         event.clear();
         index = (index + 1) % (choices.length);
       } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains)) ||
           _spaceKey.every(event.contains)) {
         _stdin
           ..lineMode = true
@@ -325,7 +327,8 @@ class Logger {
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (_enterKey.every(event.contains)) {
+      } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains))) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
