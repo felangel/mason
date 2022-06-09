@@ -418,6 +418,298 @@ void main() {
       });
     });
 
+    group('.chooseAny', () {
+      test(
+          'enter selects the nothing '
+          'when defaultValues is not specified.', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, isEmpty);
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('enter selects the default values when specified.', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = ['b', 'c'];
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValues: ['b', 'c'],
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('space selected/deselects the values.', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = ['b', 'c'];
+            final bytes = [32, 32, 27, 91, 66, 32, 27, 91, 66, 32, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('down arrow selects next index', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final bytes = [27, 91, 66, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, equals(isEmpty));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout
+                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('up arrow wraps to end', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final bytes = [27, 91, 65, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, isEmpty);
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('down arrow wraps to beginning', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final bytes = [27, 91, 66, 27, 91, 66, 27, 91, 66, 10];
+            when(() => stdin.readByteSync()).thenAnswer((_) {
+              return bytes.removeAt(0);
+            });
+            final actual = Logger().chooseAny(
+              message,
+              choices: ['a', 'b', 'c'],
+            );
+            expect(actual, isEmpty);
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  a'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  b'),
+              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' ◯  c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+    });
+
     group('.chooseOne', () {
       test(
           'enter selects the initial value '
@@ -438,11 +730,11 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
             ]);
           },
           stdout: () => stdout,
@@ -467,12 +759,12 @@ void main() {
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ a'),
+              () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
             ]);
           },
           stdout: () => stdout,
@@ -500,21 +792,21 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ a'),
+              () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
             ]);
           },
           stdout: () => stdout,
@@ -542,22 +834,22 @@ void main() {
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ a'),
+              () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('b')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
             ]);
           },
           stdout: () => stdout,
@@ -585,21 +877,21 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ a'),
+              () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('c')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
             ]);
           },
           stdout: () => stdout,
@@ -627,22 +919,22 @@ void main() {
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ a'),
+              () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('c')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout
-                  .write(' ${lightCyan.wrap('◉')} ${lightCyan.wrap('a')}'),
+                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ b'),
+              () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap(' ')),
-              () => stdout.write(' ◯ c'),
+              () => stdout.write(' ◯  c'),
             ]);
           },
           stdout: () => stdout,

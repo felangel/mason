@@ -11,19 +11,19 @@ Future<void> main() async {
     ..info('');
 
   final favoriteColor = logger.chooseOne(
-    'What is your favorite color?',
+    'Pick a color.',
     choices: ['red', 'green', 'blue'],
     defaultValue: 'blue',
   );
 
   logger.info('Got it, $favoriteColor it is!');
 
-  final flavors = logger.chooseAny(
-    'What build flavors do you want?',
-    choices: ['dev', 'int', 'prod'],
+  final desserts = logger.chooseAny(
+    'Which desserts do you like?',
+    choices: ['🍦', '🍪', '🍩'],
   );
 
-  logger.info('Awesome, $flavors it is!');
+  logger.info('Awesome, $desserts it is!');
 
   final favoriteAnimal = logger.prompt(
     'What is your favorite animal?',

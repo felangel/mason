@@ -34,6 +34,12 @@ Future<void> main() async {
     defaultValue: 'blue',
   );
 
+  /// Ask user to choose zero or more options.
+  final desserts = logger.chooseAny(
+    'Which desserts do you like?',
+    choices: ['🍦', '🍪', '🍩'],
+  );
+
   // Ask for user confirmation.
   final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
 
