@@ -1,6 +1,5 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 
 import 'package:mason_logger/src/io.dart';
 import 'package:mason_logger/src/progress.dart';
@@ -80,11 +79,11 @@ class Logger {
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
-  final _jKey = Platform.isWindows ? [106] : [-0];
-  final _kKey = Platform.isWindows ? [107] : [-0];
-  final _upKey = Platform.isWindows ? [106] : [27, 91, 65];
-  final _downKey = Platform.isWindows ? [107] : [27, 91, 66];
-  final _enterKey = Platform.isWindows ? [13] : [10];
+  final _jKey = [106];
+  final _kKey = [107];
+  final _upKey = io.Platform.isWindows ? [-0] : [27, 91, 65];
+  final _downKey = io.Platform.isWindows ? [-0] : [27, 91, 66];
+  final _enterKey = io.Platform.isWindows ? [13] : [10];
   final _spaceKey = [32];
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
