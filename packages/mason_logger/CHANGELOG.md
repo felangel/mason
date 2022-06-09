@@ -1,3 +1,15 @@
+# 0.1.0-dev.12
+
+- fix: `chooseOne` API windows compatibility
+- feat: `chooseAny`
+  ```dart
+  /// Ask user to choose zero or more options.
+  final desserts = logger.chooseAny(
+    'Which desserts do you like?',
+    choices: ['🍦', '🍪', '🍩'],
+  );
+  ```
+
 # 0.1.0-dev.11
 
 - fix: write errors and warnings to `stderr`
