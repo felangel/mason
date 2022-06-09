@@ -79,6 +79,14 @@ class Logger {
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
+  final _jKey = [106];
+  final _kKey = [107];
+  final _upKey = [27, 91, 65];
+  final _downKey = [27, 91, 66];
+  final _enterKey = [13];
+  final _returnKey = [10];
+  final _spaceKey = [32];
+
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
@@ -174,10 +182,6 @@ class Logger {
     required List<String> choices,
     String? defaultValue,
   }) {
-    const upKey = [27, 91, 65];
-    const downKey = [27, 91, 66];
-    const enterKey = [10];
-
     final hasDefault = defaultValue != null && defaultValue.isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
@@ -208,8 +212,8 @@ class Logger {
     }
 
     _stdin
-      ..lineMode = false
-      ..echoMode = false;
+      ..echoMode = false
+      ..lineMode = false;
 
     writeChoices();
 
@@ -219,13 +223,16 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (upKey.every(event.contains)) {
+      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (downKey.every(event.contains)) {
+      } else if (_downKey.every(event.contains) ||
+          _kKey.every(event.contains)) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (enterKey.every(event.contains)) {
+      } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains)) ||
+          _spaceKey.every(event.contains)) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -262,11 +269,6 @@ class Logger {
     required List<String> choices,
     List<String>? defaultValues,
   }) {
-    const upKey = [27, 91, 65];
-    const downKey = [27, 91, 66];
-    const enterKey = [10];
-    const spaceKey = [32];
-
     final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
     final selections = hasDefaults
         ? defaultValues.map((value) => choices.indexOf(value)).toSet()
@@ -302,8 +304,8 @@ class Logger {
     }
 
     _stdin
-      ..lineMode = false
-      ..echoMode = false;
+      ..echoMode = false
+      ..lineMode = false;
 
     writeChoices();
 
@@ -313,18 +315,20 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (upKey.every(event.contains)) {
+      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (downKey.every(event.contains)) {
+      } else if (_downKey.every(event.contains) ||
+          _kKey.every(event.contains)) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (spaceKey.every(event.contains)) {
+      } else if (_spaceKey.every(event.contains)) {
         event.clear();
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (enterKey.every(event.contains)) {
+      } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains))) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
