@@ -1,3 +1,22 @@
+# 0.1.0-dev.26
+
+- fix: file path looping array resolution
+- feat: `brick.yaml` vars array support
+
+  ```yaml
+  vars:
+    color:
+      type: array
+      description: Your desired build flavors
+      defaults:
+        - production
+      prompt: What build flavors would you like?
+      values:
+        - development
+        - staging
+        - production
+  ```
+
 # 0.1.0-dev.25
 
 - fix: do not prompt when overwrite rule is `alwaysOverwrite`
