@@ -475,9 +475,6 @@ class TemplateFile {
           param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
         }
         final newPath = filePath.render(param);
-        print('filePath: $filePath');
-        print('newPath: $newPath');
-        print('params: ${parameters..addAll(param)}');
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
