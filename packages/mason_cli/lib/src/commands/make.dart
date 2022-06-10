@@ -144,6 +144,21 @@ class _MakeCommand extends MasonCommand {
               choices: choices,
               defaultValue: properties.defaultValue?.toString(),
             );
+            break;
+          case BrickVariableType.array:
+            final choices = properties.values;
+            if (choices == null || choices.isEmpty) {
+              throw FormatException(
+                'Invalid $variable.\n"Arrays must have at least one value.',
+              );
+            }
+            response = logger.chooseAny(
+              prompt,
+              choices: choices,
+              defaultValues:
+                  (properties.defaultValues as List?)?.cast<String>(),
+            );
+            break;
         }
         vars.addAll(<String, dynamic>{variable: response});
       }
@@ -222,6 +237,8 @@ extension on GeneratedFile {
 extension on BrickVariableType {
   String get name {
     switch (this) {
+      case BrickVariableType.array:
+        return 'array';
       case BrickVariableType.number:
         return 'number';
       case BrickVariableType.string:
