@@ -10,7 +10,7 @@ environment:
 dependencies:
   args: ^2.1.0
   checked_yaml: ^2.0.1
-  mason: ^0.1.0-dev.25
+  mason: ^0.1.0-dev.26
   mason_api: ^0.1.0-dev.5
   meta: ^1.7.0
   path: ^1.8.0
