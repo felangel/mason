@@ -98,6 +98,42 @@ void main() {
         );
       });
 
+      test('constructs an instance (loops)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'loop'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'values': ['development', 'staging', 'production']
+          },
+        );
+
+        expect(files.length, equals(3));
+        expect(
+          files.every(
+            (element) => element.status == GeneratedFileStatus.created,
+          ),
+          isTrue,
+        );
+
+        final development =
+            File(path.join(tempDir.path, 'main_development.txt'));
+        final staging = File(path.join(tempDir.path, 'main_staging.txt'));
+        final production = File(path.join(tempDir.path, 'main_production.txt'));
+
+        expect(development.existsSync(), isTrue);
+        expect(staging.existsSync(), isTrue);
+        expect(production.existsSync(), isTrue);
+
+        expect(development.readAsStringSync(), equals('DEVELOPMENT'));
+        expect(staging.readAsStringSync(), equals('STAGING'));
+        expect(production.readAsStringSync(), equals('PRODUCTION'));
+      });
+
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
         final brick = Brick.path(
