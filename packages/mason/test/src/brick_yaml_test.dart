@@ -72,6 +72,12 @@ void main() {
               prompt: 'Are you a developer?',
               values: const ['red', 'blue', 'green'],
             ),
+            'flavors': BrickVariableProperties.enumeration(
+              description: 'supported flavors',
+              defaultValue: 'dev',
+              prompt: 'What flavors do you want?',
+              values: const ['dev', 'prod'],
+            ),
           },
         );
         expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
