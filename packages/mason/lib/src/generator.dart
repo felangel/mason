@@ -447,12 +447,16 @@ class TemplateFile {
         final key = match.group(1);
         if (key == null || _lambdas.hasMatch(key)) continue;
         final value = _loopValueRegExp(key).firstMatch(filePath)![1];
-        final inner = _loopInnerRegExp(key).firstMatch(filePath)![1];
-        final target = inner!.replaceFirst(
-          _loopValueReplaceRegExp,
-          '{{$key.$value}}',
-        );
-        filePath = filePath.replaceFirst(_loopRegExp(key), target);
+        if (value == '.') {
+          filePath = filePath.replaceFirst(_loopRegExp(key), '{{$key}}');
+        } else {
+          final inner = _loopInnerRegExp(key).firstMatch(filePath)![1];
+          final target = inner!.replaceFirst(
+            _loopValueReplaceRegExp,
+            '{{$key.$value}}',
+          );
+          filePath = filePath.replaceFirst(_loopRegExp(key), target);
+        }
       }
 
       final fileContents = <FileContents>{};
@@ -471,6 +475,9 @@ class TemplateFile {
           param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
         }
         final newPath = filePath.render(param);
+        print('filePath: $filePath');
+        print('newPath: $newPath');
+        print('params: ${parameters..addAll(param)}');
         final newContents = TemplateFile(
           newPath,
           utf8.decode(content),
