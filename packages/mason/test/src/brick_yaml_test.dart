@@ -72,9 +72,9 @@ void main() {
               prompt: 'Are you a developer?',
               values: const ['red', 'blue', 'green'],
             ),
-            'flavors': BrickVariableProperties.enumeration(
+            'flavors': BrickVariableProperties.array(
               description: 'supported flavors',
-              defaultValue: 'dev',
+              defaultValues: const ['dev'],
               prompt: 'What flavors do you want?',
               values: const ['dev', 'prod'],
             ),
