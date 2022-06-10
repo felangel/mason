@@ -144,14 +144,15 @@ version: 0.1.0+1
 # The following defines the environment for the current brick.
 # It includes the version of mason that the brick requires.
 environment:
-  mason: ">=0.1.0-dev <0.1.0"
+  mason: ">=0.1.0-dev.26 <0.1.0"
 
 # Variables specify dynamic values that your brick depends on.
 # Zero or more variables can be specified for a given brick.
 # Each variable has:
-#  * a type (string, number, boolean, or enum)
+#  * a type (string, number, boolean, enum, or array)
 #  * an optional short description
 #  * an optional default value
+#  * an optional list of default values (array only)
 #  * an optional prompt phrase used when asking for the variable
 #  * a list of values (enums only)
 vars:
