@@ -221,7 +221,7 @@ class BrickVariableProperties {
   final Object? defaultValue;
 
   /// Optional default values for the variable used
-  /// when [type] is [BrickVariableType.array]ss.
+  /// when [type] is [BrickVariableType.array].
   @JsonKey(name: 'defaults')
   final Object? defaultValues;
 
