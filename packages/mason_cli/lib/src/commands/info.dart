@@ -53,8 +53,8 @@ class InfoCommand extends MasonCommand {
 void _printConsole(Logger logger, BrickYaml brick) {
   logger
     ..info('Name: ${brick.name}')
-    ..info('Version: ${brick.version}')
-    ..info('Description: ${brick.description}');
+    ..info('Description: ${brick.description}')
+    ..info('Version: ${brick.version}');
 }
 
 void _printJson(Logger logger, BrickYaml brick) {
