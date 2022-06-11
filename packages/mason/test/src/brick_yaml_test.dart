@@ -7,7 +7,8 @@ import 'package:test/test.dart';
 Matcher equalsBrickVariableProperties({
   required BrickVariableType type,
   String? description,
-  dynamic defaultValue,
+  Object? defaultValue,
+  List<String>? defaultValues,
   String? prompt,
   List<String>? values,
 }) {
@@ -15,6 +16,7 @@ Matcher equalsBrickVariableProperties({
       .having((v) => v.type, 'type', type)
       .having((v) => v.description, 'description', description)
       .having((v) => v.defaultValue, 'default', defaultValue)
+      .having((v) => v.defaultValues, 'defaults', defaultValues)
       .having((v) => v.prompt, 'prompt', prompt)
       .having((v) => v.values, 'values', values);
 }
@@ -69,6 +71,12 @@ void main() {
               defaultValue: 'blue',
               prompt: 'Are you a developer?',
               values: const ['red', 'blue', 'green'],
+            ),
+            'flavors': BrickVariableProperties.array(
+              description: 'supported flavors',
+              defaultValues: const ['dev'],
+              prompt: 'What flavors do you want?',
+              values: const ['dev', 'prod'],
             ),
           },
         );
@@ -133,7 +141,16 @@ vars:
     values:
       - red
       - green
-      - blue''';
+      - blue
+  flavors:
+    type: array
+    description: supported flavors
+    defaults:
+      - dev
+    prompt: What flavors do you want?
+    values:
+      - dev
+      - prod''';
 
         final brickYaml = checkedYamlDecode(
           content,
@@ -144,7 +161,7 @@ vars:
         expect(brickYaml.version, equals('1.0.0'));
         expect(
           brickYaml.vars.keys,
-          equals(['name', 'age', 'isDeveloper', 'favoriteColor']),
+          equals(['name', 'age', 'isDeveloper', 'favoriteColor', 'flavors']),
         );
         expect(
           brickYaml.vars.values,
@@ -173,6 +190,13 @@ vars:
               defaultValue: 'green',
               prompt: 'What is your favorite color?',
               values: ['red', 'green', 'blue'],
+            ),
+            equalsBrickVariableProperties(
+              type: BrickVariableType.array,
+              description: 'supported flavors',
+              defaultValues: ['dev'],
+              prompt: 'What flavors do you want?',
+              values: ['dev', 'prod'],
             ),
           ]),
         );

@@ -1,3 +1,8 @@
+# 0.1.0-dev.29
+
+- feat: support array vars in `brick.yaml`
+- feat: bump minimum mason version in new bricks
+
 # 0.1.0-dev.28
 
 - feat: support enum vars in `brick.yaml`

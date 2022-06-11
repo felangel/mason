@@ -90,6 +90,9 @@ class BrickYaml {
 
 /// The type of brick variable.
 enum BrickVariableType {
+  /// An array (e.g. ["one", "two", "three"])
+  array,
+
   /// A number (e.g. 42)
   number,
 
@@ -116,6 +119,7 @@ class BrickVariableProperties {
     required this.type,
     this.description,
     this.defaultValue,
+    this.defaultValues,
     this.prompt,
     this.values,
   });
@@ -182,6 +186,23 @@ class BrickVariableProperties {
           values: values,
         );
 
+  /// {@macro brick_variable_properties}
+  ///
+  /// Creates an instance of a [BrickVariableProperties]
+  /// of type [BrickVariableType.array].
+  const BrickVariableProperties.array({
+    String? description,
+    List<String>? defaultValues,
+    String? prompt,
+    required List<String> values,
+  }) : this(
+          type: BrickVariableType.array,
+          description: description,
+          defaultValues: defaultValues,
+          prompt: prompt,
+          values: values,
+        );
+
   /// Converts [Map] to [BrickYaml]
   factory BrickVariableProperties.fromJson(Map<dynamic, dynamic> json) =>
       _$BrickVariablePropertiesFromJson(json);
@@ -199,11 +220,17 @@ class BrickVariableProperties {
   @JsonKey(name: 'default')
   final Object? defaultValue;
 
+  /// Optional default values for the variable used
+  /// when [type] is [BrickVariableType.array].
+  @JsonKey(name: 'defaults')
+  final Object? defaultValues;
+
   /// An optional prompt used when requesting the variable.
   final String? prompt;
 
-  /// An optional list of values used
-  /// when [type] is [BrickVariableType.enumeration].
+  /// An optional list of values used when [type] is:
+  /// * [BrickVariableType.array]
+  /// * [BrickVariableType.enumeration]
   final List<String>? values;
 }
 

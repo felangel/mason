@@ -34,8 +34,9 @@ abstract class StdioOverrides {
     R Function() body, {
     io.Stdout Function()? stdout,
     io.Stdin Function()? stdin,
+    io.Stdout Function()? stderr,
   }) {
-    final overrides = _StdioOverridesScope(stdout, stdin);
+    final overrides = _StdioOverridesScope(stdout, stdin, stderr);
     return _asyncRunZoned(body, zoneValues: {_token: overrides});
   }
 
@@ -44,14 +45,18 @@ abstract class StdioOverrides {
 
   /// The [io.Stdin] that will be used within the current [Zone].
   io.Stdin get stdin => io.stdin;
+
+  /// The [io.Stdout] that will be used for errors within the current [Zone].
+  io.Stdout get stderr => io.stderr;
 }
 
 class _StdioOverridesScope extends StdioOverrides {
-  _StdioOverridesScope(this._stdout, this._stdin);
+  _StdioOverridesScope(this._stdout, this._stdin, this._stderr);
 
   final StdioOverrides? _previous = StdioOverrides.current;
   final io.Stdout Function()? _stdout;
   final io.Stdin Function()? _stdin;
+  final io.Stdout Function()? _stderr;
 
   @override
   io.Stdout get stdout {
@@ -62,6 +67,11 @@ class _StdioOverridesScope extends StdioOverrides {
   io.Stdin get stdin {
     return _stdin?.call() ?? _previous?.stdin ?? super.stdin;
   }
+
+  @override
+  io.Stdout get stderr {
+    return _stderr?.call() ?? _previous?.stderr ?? super.stderr;
+  }
 }
 
 /// A basic Logger which wraps `stdio` and applies various styles.
@@ -69,8 +79,17 @@ class Logger {
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
+  final _jKey = [106];
+  final _kKey = [107];
+  final _upKey = [27, 91, 65];
+  final _downKey = [27, 91, 66];
+  final _enterKey = [13];
+  final _returnKey = [10];
+  final _spaceKey = [32];
+
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
+  io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
 
   /// Flushes internal message queue.
   void flush([Function(String?)? print]) {
@@ -92,11 +111,11 @@ class Logger {
 
   /// Writes progress message to stdout.
   Progress progress(String message) {
-    return Progress(message, _stdout);
+    return Progress(message, _stdout, _stderr);
   }
 
-  /// Writes error message to stdout.
-  void err(String? message) => _stdout.writeln(lightRed.wrap(message));
+  /// Writes error message to stderr.
+  void err(String? message) => _stderr.writeln(lightRed.wrap(message));
 
   /// Writes alert message to stdout.
   void alert(String? message) {
@@ -106,9 +125,9 @@ class Logger {
   /// Writes detail message to stdout.
   void detail(String? message) => _stdout.writeln(darkGray.wrap(message));
 
-  /// Writes warning message to stdout.
+  /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
-    _stdout.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
+    _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
@@ -163,10 +182,6 @@ class Logger {
     required List<String> choices,
     String? defaultValue,
   }) {
-    const upKey = [27, 91, 65];
-    const downKey = [27, 91, 66];
-    const enterKey = [10];
-
     final hasDefault = defaultValue != null && defaultValue.isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
@@ -184,11 +199,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox ${lightCyan.wrap(choice)}');
+            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox $choice');
+            ..write(' $checkBox  $choice');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -197,8 +212,8 @@ class Logger {
     }
 
     _stdin
-      ..lineMode = false
-      ..echoMode = false;
+      ..echoMode = false
+      ..lineMode = false;
 
     writeChoices();
 
@@ -208,13 +223,16 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (upKey.every(event.contains)) {
+      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (downKey.every(event.contains)) {
+      } else if (_downKey.every(event.contains) ||
+          _kKey.every(event.contains)) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (enterKey.every(event.contains)) {
+      } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains)) ||
+          _spaceKey.every(event.contains)) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -239,6 +257,103 @@ class Logger {
     }
 
     return result;
+  }
+
+  /// Prompts user with [message] to choose zero or more values
+  /// from the provided [choices].
+  ///
+  /// An optional list of [defaultValues] can be specified.
+  /// The [defaultValues] must be one of the provided [choices].
+  List<String> chooseAny(
+    String? message, {
+    required List<String> choices,
+    List<String>? defaultValues,
+  }) {
+    final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
+    final selections = hasDefaults
+        ? defaultValues.map((value) => choices.indexOf(value)).toSet()
+        : <int>{};
+    var index = 0;
+
+    void writeChoices() {
+      _stdout
+        // save cursor
+        ..write('\x1b7')
+        // hide cursor
+        ..write('\x1b[?25l')
+        ..writeln('$message');
+
+      for (final choice in choices) {
+        final choiceIndex = choices.indexOf(choice);
+        final isCurrent = choiceIndex == index;
+        final isSelected = selections.contains(choiceIndex);
+        final checkBox = isSelected ? lightCyan.wrap('◉') : '◯';
+        if (isCurrent) {
+          _stdout
+            ..write(green.wrap('❯'))
+            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
+        } else {
+          _stdout
+            ..write(' ')
+            ..write(' $checkBox  $choice');
+        }
+        if (choices.last != choice) {
+          _stdout.write('\n');
+        }
+      }
+    }
+
+    _stdin
+      ..echoMode = false
+      ..lineMode = false;
+
+    writeChoices();
+
+    final event = <int>[];
+    List<String>? results;
+    while (results == null) {
+      final byte = _stdin.readByteSync();
+      if (event.length == 3) event.clear();
+      event.add(byte);
+      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
+        event.clear();
+        index = (index - 1) % (choices.length);
+      } else if (_downKey.every(event.contains) ||
+          _kKey.every(event.contains)) {
+        event.clear();
+        index = (index + 1) % (choices.length);
+      } else if (_spaceKey.every(event.contains)) {
+        event.clear();
+        selections.contains(index)
+            ? selections.remove(index)
+            : selections.add(index);
+      } else if (_enterKey.every(event.contains) ||
+          (_returnKey.every(event.contains))) {
+        _stdin
+          ..lineMode = true
+          ..echoMode = true;
+
+        results = selections.map((index) => choices[index]).toList();
+
+        _stdout
+          // restore cursor
+          ..write('\x1b8')
+          // clear to end of screen
+          ..write('\x1b[J')
+          // show cursor
+          ..write('\x1b[?25h')
+          ..write('$message ')
+          ..writeln(styleDim.wrap(lightCyan.wrap('$results')));
+
+        break;
+      }
+
+      // restore cursor
+      _stdout.write('\x1b8');
+      writeChoices();
+    }
+
+    return results;
   }
 
   String _readLineHiddenSync() {

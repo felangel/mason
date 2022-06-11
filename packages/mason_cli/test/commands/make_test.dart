@@ -57,6 +57,8 @@ bricks:
     path: ../../../../../bricks/documentation
   favorite_color:
     path: ../../../../../bricks/favorite_color
+  flavors:
+    path: ../../../../../bricks/flavors
   greeting:
     path: ../../../../../bricks/greeting
   legacy:
@@ -89,6 +91,9 @@ bricks:
       );
       final favoriteColorPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'favorite_color'),
+      );
+      final flavorsPath = canonicalize(
+        path.join(Directory.current.path, bricksPath, 'flavors'),
       );
       final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
@@ -125,6 +130,7 @@ bricks:
             'bio': bioPath,
             'documentation': docPath,
             'favorite_color': favoriteColorPath,
+            'flavors': flavorsPath,
             'hello_world': helloWorldPath,
             'hooks': hooksPath,
             'greeting': greetingPath,
@@ -183,6 +189,7 @@ bricks:
               '  bio              A Bio Template\n'
               '  documentation    Create Documentation Markdown Files\n'
               '  favorite_color   A new brick created with the Mason CLI.\n'
+              '  flavors          A new brick created with the Mason CLI.\n'
               '  greeting         A Simple Greeting Template\n'
               '  hello_world      A Simple Hello World Template\n'
               '  hooks            A Hooks Example Template\n'
@@ -353,7 +360,7 @@ bricks:
       final brickYaml = File(path.join('example', 'brick.yaml'));
       brickYaml.writeAsStringSync(
         brickYaml.readAsStringSync().replaceFirst(
-              'mason: ">=0.1.0-dev <0.1.0"',
+              'mason: ">=0.1.0-dev.26 <0.1.0"',
               'mason: ">=99.99.99 <100.0.0"',
             ),
       );
@@ -663,6 +670,65 @@ bricks:
       verify(
         () => logger.err(
           'Invalid color.\n"Enums must have at least one value.',
+        ),
+      ).called(1);
+    });
+
+    test('generates flavors', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'flavors'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      when(
+        () => logger.chooseAny(
+          any(),
+          choices: any(named: 'choices'),
+          defaultValues: any(named: 'defaultValues'),
+        ),
+      ).thenReturn(['development', 'production']);
+      final result = await commandRunner.run(['make', 'flavors']);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'flavors'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'flavors'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('throws FormatException when array values is empty', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'array_no_choices'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+
+      await commandRunner.run([
+        'add',
+        'array_no_choices',
+        '--path',
+        canonicalize(
+          path.join(
+            Directory.current.path,
+            '..',
+            '..',
+            '..',
+            'bricks',
+            'array_no_choices',
+          ),
+        )
+      ]);
+
+      final result = await MasonCommandRunner(
+        logger: logger,
+        pubUpdater: pubUpdater,
+      ).run(['make', 'array_no_choices']);
+      expect(result, equals(ExitCode.usage.code));
+
+      verify(
+        () => logger.err(
+          'Invalid colors.\n"Arrays must have at least one value.',
         ),
       ).called(1);
     });

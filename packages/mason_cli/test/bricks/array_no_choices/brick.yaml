@@ -1,0 +1,14 @@
+name: array_no_choices
+description: A new brick created with the Mason CLI.
+
+version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev <0.1.0"
+
+vars:
+  colors:
+    type: array
+    description: Your favorite colors
+    prompt: What are your favorite colors?
+    values:
