@@ -1,33 +1,34 @@
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
-export const masonMake = async ({
+export const masonInfo = async ({
   cwd,
-  targetDirectory,
-  name,
-  args,
+  brickName,
 }: {
   cwd: string;
-  targetDirectory: string;
-  name: string;
-  args: string;
-}): Promise<void> => {
+  brickName: string;
+}): Promise<string> => {
   return vscode.window.withProgress(
     {
       location: vscode.ProgressLocation.Window,
-      title: `mason make ${name}`,
+      title: `mason info`,
     },
     async (_) => {
       try {
-        await masonExec(`make ${name} ${args} --output-dir=${targetDirectory} --on-conflict=skip`, {
+        const brick = await masonExec(`info ${brickName} --format=json`, {
           cwd: cwd,
         });
         vscode.window.setStatusBarMessage(
-          `✓ mason make ${name}`,
+          `✓ mason info`,
           statusBarTimeout
         );
+        if (brick) {
+          return brick;
+        } 
+        return '';
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
+        return '';
       }
     }
   );
