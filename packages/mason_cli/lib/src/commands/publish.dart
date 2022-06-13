@@ -53,7 +53,7 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    final bundle = createBundle(Directory(directoryPath));
+    final bundle = createBundle(directoryPath);
     final bundleProgress = logger.progress('Bundling ${bundle.name}');
     final universalBundle = await bundle.toUniversalBundle();
     bundleProgress.complete('Bundled ${bundle.name}');

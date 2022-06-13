@@ -10,7 +10,7 @@ void main() {
         final message =
             '''Could not find brick at ${path.join(Directory.current.path, BrickYaml.file)}''';
         expect(
-          () => createBundle(Directory.current),
+          () => createBundle(Directory.current.path),
           throwsA(
             isA<BrickNotFoundException>().having(
               (e) => e.message,
@@ -23,7 +23,7 @@ void main() {
 
       test('returns a MasonBundle when brick exists (simple)', () {
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'simple')),
+          path.join('..', '..', 'bricks', 'simple'),
         );
         expect(bundle.name, equals('simple'));
         expect(bundle.description, equals('A Simple Static Template'));
@@ -38,7 +38,7 @@ void main() {
 
       test('returns a MasonBundle when brick exists (hello)', () {
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'hello')),
+          path.join('..', '..', 'bricks', 'hello'),
         );
         Matcher isBundledFile(String path) {
           return isA<MasonBundledFile>()
@@ -63,7 +63,7 @@ void main() {
 
       test('returns a MasonBundle when brick exists (hooks)', () {
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'hooks')),
+          path.join('..', '..', 'bricks', 'hooks'),
         );
         expect(bundle.name, equals('hooks'));
         expect(bundle.description, equals('A Hooks Example Template'));
@@ -94,7 +94,7 @@ void main() {
           '{{#ios}}Podfile{{/ios}}',
         ];
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'plugin')),
+          path.join('..', '..', 'bricks', 'plugin'),
         );
         expect(bundle.name, equals('plugin'));
         expect(bundle.description, equals('An example plugin template'));
@@ -115,7 +115,7 @@ void main() {
       test('unpacks a MasonBundle (simple)', () {
         final tempDir = Directory.systemTemp.createTempSync();
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'simple')),
+          path.join('..', '..', 'bricks', 'simple'),
         );
         unpackBundle(bundle, tempDir);
         final yaml = File(path.join(tempDir.path, 'brick.yaml'));
@@ -139,7 +139,7 @@ void main() {
       test('unpacks a MasonBundle (hello)', () {
         final tempDir = Directory.systemTemp.createTempSync();
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'hello')),
+          path.join('..', '..', 'bricks', 'hello'),
         );
         unpackBundle(bundle, tempDir);
         final yaml = File(path.join(tempDir.path, 'brick.yaml'));
@@ -215,7 +215,7 @@ void main() {
       test('unpacks a MasonBundle (hooks)', () {
         final tempDir = Directory.systemTemp.createTempSync();
         final bundle = createBundle(
-          Directory(path.join('..', '..', 'bricks', 'hooks')),
+          path.join('..', '..', 'bricks', 'hooks'),
         );
         unpackBundle(bundle, tempDir);
         final yaml = File(path.join(tempDir.path, 'brick.yaml'));

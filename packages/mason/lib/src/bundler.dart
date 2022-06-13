@@ -42,9 +42,12 @@ void unpackBundle(MasonBundle bundle, Directory target) {
   if (license != null) _unbundleFile(license, target.path);
 }
 
-/// Generates a [MasonBundle] from the provided [brick] directory.
-MasonBundle createBundle(Directory brick) {
-  final brickYamlFile = File(path.join(brick.path, BrickYaml.file));
+/// Generates a [MasonBundle] from the provided [brickPath] directory.
+MasonBundle createBundle(String brickPath) {
+  if (!Directory(brickPath).existsSync()) {
+    throw BrickNotFoundException(brickPath);
+  }
+  final brickYamlFile = File(path.join(brickPath, BrickYaml.file));
   if (!brickYamlFile.existsSync()) {
     throw BrickNotFoundException(brickYamlFile.path);
   }
@@ -52,12 +55,12 @@ MasonBundle createBundle(Directory brick) {
     brickYamlFile.readAsStringSync(),
     (m) => BrickYaml.fromJson(m!),
   );
-  final files = Directory(path.join(brick.path, BrickYaml.dir))
+  final files = Directory(path.join(brickPath, BrickYaml.dir))
       .listSync(recursive: true)
       .whereType<File>()
       .map(_bundleBrickFile)
       .toList();
-  final hooksDirectory = Directory(path.join(brick.path, BrickYaml.hooks));
+  final hooksDirectory = Directory(path.join(brickPath, BrickYaml.hooks));
   final hooks = hooksDirectory.existsSync()
       ? hooksDirectory
           .listSync(recursive: true)
@@ -75,9 +78,9 @@ MasonBundle createBundle(Directory brick) {
     repository: brickYaml.repository,
     files: files..sort(_comparePaths),
     hooks: hooks..sort(_comparePaths),
-    readme: _bundleTopLevelFile(brick, 'README.md'),
-    changelog: _bundleTopLevelFile(brick, 'CHANGELOG.md'),
-    license: _bundleTopLevelFile(brick, 'LICENSE'),
+    readme: _bundleTopLevelFile(brickPath, 'README.md'),
+    changelog: _bundleTopLevelFile(brickPath, 'CHANGELOG.md'),
+    license: _bundleTopLevelFile(brickPath, 'LICENSE'),
   );
 }
 
@@ -85,8 +88,8 @@ int _comparePaths(MasonBundledFile a, MasonBundledFile b) {
   return a.path.toLowerCase().compareTo(b.path.toLowerCase());
 }
 
-MasonBundledFile? _bundleTopLevelFile(Directory brick, String fileName) {
-  final file = File(path.join(brick.path, fileName));
+MasonBundledFile? _bundleTopLevelFile(String brickPath, String fileName) {
+  final file = File(path.join(brickPath, fileName));
   if (!file.existsSync()) return null;
   final data = base64.encode(file.readAsBytesSync());
   return MasonBundledFile(path.basename(file.path), data, 'text');

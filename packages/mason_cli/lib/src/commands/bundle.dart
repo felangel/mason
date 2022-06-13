@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/install_brick.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
 import 'package:universal_io/io.dart';
@@ -19,7 +20,7 @@ enum BundleType {
 /// `mason bundle` command exposes the ability to generate bundles
 /// from brick templates.
 /// {@endtemplate}
-class BundleCommand extends MasonCommand {
+class BundleCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro bundle_command}
   BundleCommand({Logger? logger}) : super(logger: logger) {
     argParser
@@ -35,6 +36,23 @@ class BundleCommand extends MasonCommand {
         help: 'Type of bundle to generate.',
         allowed: ['universal', 'dart'],
         defaultsTo: 'universal',
+      )
+      ..addOption(
+        'source',
+        abbr: 's',
+        help: 'The source used to find the brick to be bundled.',
+        allowed: ['git', 'path', 'hosted'],
+        defaultsTo: 'path',
+      )
+      ..addOption(
+        'git-ref',
+        help: 'Git branch or commit to be used.'
+            ' Only valid if source is set to "git".',
+      )
+      ..addOption(
+        'git-path',
+        help: 'Path of the brick in the git repository'
+            ' Only valid if source is set to "git".',
       );
   }
 
@@ -49,12 +67,37 @@ class BundleCommand extends MasonCommand {
     if (results.rest.isEmpty) {
       usageException('path to the brick template must be provided');
     }
-    final brick = Directory(results.rest.first);
-    if (!brick.existsSync()) {
-      throw BrickNotFoundException(brick.path);
+
+    final source = results['source'] as String;
+
+    final rest = results.rest.first;
+
+    final Brick brick;
+    if (source == 'git') {
+      brick = Brick(
+        location: BrickLocation(
+          git: GitPath(
+            rest,
+            path: results['git-path'] as String?,
+            ref: results['git-ref'] as String?,
+          ),
+        ),
+      );
+    } else if (source == 'hosted') {
+      brick = Brick(name: rest, location: const BrickLocation(version: 'any'));
+    } else {
+      brick = Brick(location: BrickLocation(path: rest));
     }
 
-    final bundle = createBundle(brick);
+    final String brickPath;
+    if (brick.location.isLocal) {
+      brickPath = brick.location.path!;
+    } else {
+      final cachedBrick = await globalBricksJson.add(brick);
+      brickPath = cachedBrick.path;
+    }
+
+    final bundle = createBundle(brickPath);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
     final bundleProgress = logger.progress('Bundling ${bundle.name}');
