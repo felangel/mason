@@ -223,16 +223,13 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _kKey.every(event.contains)) {
+      if (_eventIsOneOf(event, [_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_downKey.every(event.contains) ||
-          _jKey.every(event.contains)) {
+      } else if (_eventIsOneOf(event, [_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_enterKey.every(event.contains) ||
-          (_returnKey.every(event.contains)) ||
-          _spaceKey.every(event.contains)) {
+      } else if (_eventIsOneOf(event, [_enterKey, _returnKey, _spaceKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -258,6 +255,9 @@ class Logger {
 
     return result;
   }
+
+  bool _eventIsOneOf(Iterable<int> event, Iterable<List<int>> keys) =>
+      keys.any((key) => key.every(event.contains));
 
   /// Prompts user with [message] to choose zero or more values
   /// from the provided [choices].
@@ -315,20 +315,18 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _kKey.every(event.contains)) {
+      if (_eventIsOneOf(event, [_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_downKey.every(event.contains) ||
-          _jKey.every(event.contains)) {
+      } else if (_eventIsOneOf(event, [_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_spaceKey.every(event.contains)) {
+      } else if (_eventIsOneOf(event, [_spaceKey])) {
         event.clear();
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (_enterKey.every(event.contains) ||
-          (_returnKey.every(event.contains))) {
+      } else if (_eventIsOneOf(event, [_enterKey, _returnKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
