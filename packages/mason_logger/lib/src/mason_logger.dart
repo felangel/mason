@@ -223,11 +223,11 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
+      if (_upKey.every(event.contains) || _kKey.every(event.contains)) {
         event.clear();
         index = (index - 1) % (choices.length);
       } else if (_downKey.every(event.contains) ||
-          _kKey.every(event.contains)) {
+          _jKey.every(event.contains)) {
         event.clear();
         index = (index + 1) % (choices.length);
       } else if (_enterKey.every(event.contains) ||
@@ -315,11 +315,11 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
+      if (_upKey.every(event.contains) || _kKey.every(event.contains)) {
         event.clear();
         index = (index - 1) % (choices.length);
       } else if (_downKey.every(event.contains) ||
-          _kKey.every(event.contains)) {
+          _jKey.every(event.contains)) {
         event.clear();
         index = (index + 1) % (choices.length);
       } else if (_spaceKey.every(event.contains)) {
