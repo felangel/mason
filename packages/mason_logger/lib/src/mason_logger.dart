@@ -223,13 +223,13 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_eventIsOneOf(event, [_upKey, _kKey])) {
+      if (event.isOneOf([_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_eventIsOneOf(event, [_downKey, _jKey])) {
+      } else if (event.isOneOf([_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_eventIsOneOf(event, [_enterKey, _returnKey, _spaceKey])) {
+      } else if (event.isOneOf([_enterKey, _returnKey, _spaceKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -255,9 +255,6 @@ class Logger {
 
     return result;
   }
-
-  bool _eventIsOneOf(Iterable<int> event, Iterable<List<int>> keys) =>
-      keys.any((key) => key.every(event.contains));
 
   /// Prompts user with [message] to choose zero or more values
   /// from the provided [choices].
@@ -315,18 +312,18 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_eventIsOneOf(event, [_upKey, _kKey])) {
+      if (event.isOneOf([_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_eventIsOneOf(event, [_downKey, _jKey])) {
+      } else if (event.isOneOf([_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_eventIsOneOf(event, [_spaceKey])) {
+      } else if (event.isOneOf([_spaceKey])) {
         event.clear();
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (_eventIsOneOf(event, [_enterKey, _returnKey])) {
+      } else if (event.isOneOf([_enterKey, _returnKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -406,4 +403,9 @@ extension on String {
         return null;
     }
   }
+}
+
+extension on Iterable<int> {
+  bool isOneOf(Iterable<Iterable<int>> keys) =>
+      keys.any((key) => key.every(contains));
 }
