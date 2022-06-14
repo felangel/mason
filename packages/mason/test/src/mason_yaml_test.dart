@@ -76,6 +76,15 @@ void main() {
             .having((g) => g.path, 'path', instance.git!.path),
       );
     });
+
+    test('isLocal', () {
+      // ignore: avoid_redundant_argument_values
+      final remoteInstance = BrickLocation(version: 'any');
+      expect(remoteInstance.isLocal, isFalse);
+
+      final localInstance = BrickLocation(path: '.');
+      expect(localInstance.isLocal, isTrue);
+    });
   });
 
   group('GitPath', () {

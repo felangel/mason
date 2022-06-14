@@ -64,16 +64,15 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
 
   @override
   Future<int> run() async {
-    if (results.rest.isEmpty) {
-      usageException('path to the brick template must be provided');
-    }
-
     final source = results['source'] as String;
 
-    final rest = results.rest.first;
+    late final rest = results.rest.first;
 
     final Brick brick;
     if (source == 'git') {
+      if (results.rest.isEmpty) {
+        usageException('A repository url must be provided');
+      }
       brick = Brick(
         location: BrickLocation(
           git: GitPath(
@@ -84,8 +83,14 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
         ),
       );
     } else if (source == 'hosted') {
+      if (results.rest.isEmpty) {
+        usageException('A brick name must be provided');
+      }
       brick = Brick(name: rest, location: const BrickLocation(version: 'any'));
     } else {
+      if (results.rest.isEmpty) {
+        usageException('A path to the brick template must be provided');
+      }
       brick = Brick(location: BrickLocation(path: rest));
     }
 
