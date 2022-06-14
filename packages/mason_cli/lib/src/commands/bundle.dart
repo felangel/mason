@@ -41,7 +41,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
         'source',
         abbr: 's',
         help: 'The source used to find the brick to be bundled.',
-        allowed: ['git', 'path', 'hosted'],
+        allowed: ['git', 'path', 'registry'],
         defaultsTo: 'path',
       )
       ..addOption(
@@ -82,7 +82,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
           ),
         ),
       );
-    } else if (source == 'hosted') {
+    } else if (source == 'registry') {
       if (results.rest.isEmpty) {
         usageException('A brick name must be provided');
       }

@@ -410,8 +410,8 @@ void main() {
       });
     });
 
-    group('hosted', () {
-      test('creates a new universal bundle from hosted', () async {
+    group('registry', () {
+      test('creates a new universal bundle from registry', () async {
         final testDir = Directory(
           path.join(Directory.current.path, 'registry'),
         )..createSync(recursive: true);
@@ -420,7 +420,7 @@ void main() {
           'bundle',
           'greeting',
           '--source',
-          'hosted',
+          'registry',
         ]);
 
         expect(result, equals(ExitCode.success.code));
@@ -457,7 +457,7 @@ void main() {
         final result = await commandRunner.run([
           'bundle',
           '--source',
-          'hosted',
+          'registry',
         ]);
 
         expect(result, equals(ExitCode.usage.code));
@@ -471,7 +471,7 @@ void main() {
           'bundle',
           'nonexistent-brick',
           '--source',
-          'hosted',
+          'registry',
         ]);
 
         expect(result, equals(ExitCode.usage.code));
