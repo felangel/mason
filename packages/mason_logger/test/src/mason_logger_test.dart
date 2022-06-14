@@ -613,11 +613,11 @@ void main() {
         );
       });
 
-      test('k selects next index', () {
+      test('j selects next index', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            final bytes = [107, 10];
+            final bytes = [106, 10];
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
@@ -697,7 +697,7 @@ void main() {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            final bytes = [106, 10];
+            final bytes = [107, 10];
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
@@ -1057,7 +1057,7 @@ void main() {
           () {
             const message = 'test message';
             const expected = 'b';
-            final bytes = [107, 10];
+            final bytes = [106, 10];
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
@@ -1099,7 +1099,7 @@ void main() {
           () {
             const message = 'test message';
             const expected = 'a';
-            final bytes = [106, 10];
+            final bytes = [107, 10];
             when(() => stdin.readByteSync()).thenAnswer((_) {
               return bytes.removeAt(0);
             });
