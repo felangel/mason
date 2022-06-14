@@ -693,7 +693,7 @@ void main() {
         );
       });
 
-      test('j wraps to end', () {
+      test('k wraps to end', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
