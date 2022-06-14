@@ -1,3 +1,7 @@
+# 0.1.0-dev.13
+
+- fix: correct J and K key mappings
+
 # 0.1.0-dev.12
 
 - fix: `chooseOne` API windows compatibility
