@@ -41,7 +41,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
         'source',
         abbr: 's',
         help: 'The source used to find the brick to be bundled.',
-        allowed: ['git', 'path', 'registry'],
+        allowed: ['git', 'path', 'hosted'],
         defaultsTo: 'path',
       )
       ..addOption(
@@ -82,7 +82,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
           ),
         ),
       );
-    } else if (source == 'registry') {
+    } else if (source == 'hosted') {
       if (results.rest.isEmpty) {
         usageException('A brick name must be provided');
       }
@@ -94,15 +94,19 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
       brick = Brick(location: BrickLocation(path: rest));
     }
 
-    final String brickPath;
+    final Directory brickDirectory;
     if (brick.location.isLocal) {
-      brickPath = brick.location.path!;
+      final brickPath = brick.location.path!;
+      brickDirectory = Directory(brickPath);
     } else {
       final cachedBrick = await globalBricksJson.add(brick);
-      brickPath = cachedBrick.path;
+      brickDirectory = Directory(cachedBrick.path);
+    }
+    if (!brickDirectory.existsSync()) {
+      throw BrickNotFoundException(brickDirectory.path);
     }
 
-    final bundle = createBundle(brickPath);
+    final bundle = createBundle(brickDirectory);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
     final bundleProgress = logger.progress('Bundling ${bundle.name}');

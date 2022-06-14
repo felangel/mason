@@ -410,17 +410,17 @@ void main() {
       });
     });
 
-    group('registry', () {
-      test('creates a new universal bundle from registry', () async {
+    group('hosted', () {
+      test('creates a new universal bundle from hosted', () async {
         final testDir = Directory(
-          path.join(Directory.current.path, 'registry'),
+          path.join(Directory.current.path, 'hosted'),
         )..createSync(recursive: true);
         Directory.current = testDir.path;
         final result = await commandRunner.run([
           'bundle',
           'greeting',
           '--source',
-          'registry',
+          'hosted',
         ]);
 
         expect(result, equals(ExitCode.success.code));
@@ -428,7 +428,7 @@ void main() {
         final file = File(
           path.join(
             testFixturesPath(cwd, suffix: '.bundle'),
-            'registry',
+            'hosted',
             'greeting.bundle',
           ),
         );
@@ -457,7 +457,7 @@ void main() {
         final result = await commandRunner.run([
           'bundle',
           '--source',
-          'registry',
+          'hosted',
         ]);
 
         expect(result, equals(ExitCode.usage.code));
@@ -471,7 +471,7 @@ void main() {
           'bundle',
           'nonexistent-brick',
           '--source',
-          'registry',
+          'hosted',
         ]);
 
         expect(result, equals(ExitCode.usage.code));
