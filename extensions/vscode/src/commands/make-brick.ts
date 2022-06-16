@@ -96,9 +96,7 @@ const promptForValue = async (args: any): Promise<string | undefined> => {
   if (args.type === "array") {
     return promptForArray(args.prompt, args.defaults, args.values);
   }
-  window.showInformationMessage(
-    `${args.type} type is not supported, settings the default value.`
-  );
+  window.showInformationMessage(`${args.type} type is not supported.`);
   if (args.default) {
     return args.default.toString();
   }
