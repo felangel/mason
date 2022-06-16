@@ -1,3 +1,4 @@
+import * as _ from "lodash";
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
@@ -15,9 +16,9 @@ export const masonRemove = async ({
       location: vscode.ProgressLocation.Window,
       title: `mason remove${global ? " -g " : " "}${brick}`,
     },
-    async (_) => {
+    async (__) => {
       const document = vscode.window.activeTextEditor?.document;
-      if (!document) {
+      if (_.isNil(document)) {
         return;
       }
 

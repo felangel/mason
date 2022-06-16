@@ -1,10 +1,11 @@
+import * as _ from "lodash";
 import * as vscode from "vscode";
 import * as path from "path";
 import { masonAdd } from "../mason";
 
 export const addLocalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) {
+  if (_.isNil(cwd)) {
     return;
   }
 
@@ -19,7 +20,7 @@ export const addLocalBrick = async () => {
   }
 
   const brick = await promptForBrickName();
-  if (!brick) {
+  if (_.isNil(brick)) {
     return;
   }
 
@@ -28,12 +29,12 @@ export const addLocalBrick = async () => {
 
 export const addGlobalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) {
+  if (_.isNil(cwd)) {
     return;
   }
 
   const brick = await promptForBrickName();
-  if (!brick) {
+  if (_.isNil(brick)) {
     return;
   }
 
