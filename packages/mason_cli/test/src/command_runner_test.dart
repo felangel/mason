@@ -27,7 +27,6 @@ const expectedUsage = [
       '  bundle     Generates a bundle from a brick template.\n'
       '  cache      Interact with mason cache.\n'
       '  get        Gets all bricks in the nearest mason.yaml.\n'
-      '  info       Shows detailed info of a brick.\n'
       '  init       Initialize mason in the current directory.\n'
       '  list       Lists installed bricks.\n'
       '  login      Log into brickhub.dev.\n'
