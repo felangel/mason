@@ -223,16 +223,13 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
+      if (event.isOneOf([_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_downKey.every(event.contains) ||
-          _kKey.every(event.contains)) {
+      } else if (event.isOneOf([_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_enterKey.every(event.contains) ||
-          (_returnKey.every(event.contains)) ||
-          _spaceKey.every(event.contains)) {
+      } else if (event.isOneOf([_enterKey, _returnKey, _spaceKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -315,20 +312,18 @@ class Logger {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
-      if (_upKey.every(event.contains) || _jKey.every(event.contains)) {
+      if (event.isOneOf([_upKey, _kKey])) {
         event.clear();
         index = (index - 1) % (choices.length);
-      } else if (_downKey.every(event.contains) ||
-          _kKey.every(event.contains)) {
+      } else if (event.isOneOf([_downKey, _jKey])) {
         event.clear();
         index = (index + 1) % (choices.length);
-      } else if (_spaceKey.every(event.contains)) {
+      } else if (event.isOneOf([_spaceKey])) {
         event.clear();
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (_enterKey.every(event.contains) ||
-          (_returnKey.every(event.contains))) {
+      } else if (event.isOneOf([_enterKey, _returnKey])) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -408,4 +403,9 @@ extension on String {
         return null;
     }
   }
+}
+
+extension on Iterable<int> {
+  bool isOneOf(Iterable<Iterable<int>> keys) =>
+      keys.any((key) => key.every(contains));
 }
