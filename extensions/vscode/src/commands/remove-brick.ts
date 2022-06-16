@@ -1,10 +1,11 @@
+import * as _ from "lodash";
 import * as vscode from "vscode";
 import * as path from "path";
 import { masonRemove } from "../mason";
 
 export const removeLocalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) {
+  if (_.isNil(cwd)) {
     return;
   }
 
@@ -19,7 +20,7 @@ export const removeLocalBrick = async () => {
   }
 
   const brick = await promptForBrickName();
-  if (!brick) {
+  if (_.isNil(brick)) {
     return;
   }
 
@@ -28,12 +29,12 @@ export const removeLocalBrick = async () => {
 
 export const removeGlobalBrick = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (!cwd) {
+  if (_.isNil(cwd)) {
     return;
   }
 
   const brick = await promptForBrickName();
-  if (!brick) {
+  if (_.isNil(brick)) {
     return;
   }
 
