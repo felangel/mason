@@ -13,6 +13,8 @@ export const getBrickYaml = async ({
   brickPath: string;
 }): Promise<BrickYaml | undefined> => {
   const brickYamlPath = path.join(brickPath, "brick.yaml");
-  if (!existsSync(brickYamlPath)) return undefined;
+  if (!existsSync(brickYamlPath)) {
+    return undefined;
+  }
   return YAML.parse(readFileSync(brickYamlPath, { encoding: "utf-8" }));
 };

@@ -76,7 +76,9 @@ const getBricksJson = async ({
   cwd: string;
 }): Promise<Record<string, any> | undefined> => {
   const bricksJsonPath = path.join(cwd, ".mason", "bricks.json");
-  if (!existsSync(bricksJsonPath)) return undefined;
+  if (!existsSync(bricksJsonPath)) {
+    return undefined;
+  }
   const bricksJson = JSON.parse(
     readFileSync(bricksJsonPath, { encoding: "utf-8" })
   );
