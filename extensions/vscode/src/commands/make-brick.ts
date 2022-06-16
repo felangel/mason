@@ -157,12 +157,12 @@ const promptForArray = async (
     label: item,
     picked: _default.includes(item),
   }));
-  return vscode.window
-    .showQuickPick(options, {
-      canPickMany: true,
-      placeHolder: title,
-    })
-    .then((l) => l?.map((i) => i.label).join(","));
+  const results = await vscode.window.showQuickPick(options, {
+    canPickMany: true,
+    placeHolder: title,
+  });
+  const selections = results?.map((r) => r.label);
+  return JSON.stringify(JSON.stringify(selections));
 };
 
 async function promptForTargetDirectory(): Promise<string | undefined> {
