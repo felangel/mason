@@ -94,12 +94,14 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
       brick = Brick(location: BrickLocation(path: rest));
     }
 
+    final tempBricksJson = BricksJson.temp();
+
     final Directory brickDirectory;
     if (brick.location.isLocal) {
       final brickPath = brick.location.path!;
       brickDirectory = Directory(brickPath);
     } else {
-      final cachedBrick = await globalBricksJson.add(brick);
+      final cachedBrick = await tempBricksJson.add(brick);
       brickDirectory = Directory(cachedBrick.path);
     }
     if (!brickDirectory.existsSync()) {
@@ -133,6 +135,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
       rethrow;
     }
 
+    tempBricksJson.clear();
     return ExitCode.success.code;
   }
 }
