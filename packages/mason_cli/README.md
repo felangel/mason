@@ -625,11 +625,23 @@ There are currently two types of bundles:
 To generate a bundle:
 
 ```sh
-# Universal Bundle
+# Create a universal bundle from a local brick.
 mason bundle ./path/to/brick -o ./path/to/destination
 
-# Dart Bundle
+# Create a dart bundle from a local brick.
 mason bundle ./path/to/brick -t dart -o ./path/to/destination
+
+# Create a universal bundle from a git brick.
+mason bundle --source git https://github.com/<organization>/<repository> -o ./path/to/destination
+
+# Create a dart bundle from a git brick.
+mason bundle --source git https://github.com/<organization>/<repository> -t dart -o ./path/to/destination
+
+# Create a universal bundle from a hosted brick.
+mason bundle --source hosted hello -o ./path/to/destination
+
+# Create a dart bundle from a hosted brick.
+mason bundle --source hosted hello -t dart -o ./path/to/destination
 ```
 
 A bundle can then be used to generate code from a brick programmatically:
