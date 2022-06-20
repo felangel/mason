@@ -378,6 +378,7 @@ void main() {
           () => logger.detail('  ${canonicalize(file.path)}'),
         ).called(1);
       });
+
       test('exits with code 64 when no git url is provided', () async {
         final result = await commandRunner.run([
           'bundle',
@@ -392,7 +393,8 @@ void main() {
         ).called(1);
         verifyNever(() => logger.progress(any()));
       });
-      test('exits with code 64 when there is no brick on git', () async {
+
+      test('exits with code 64 when no brick exists at git url', () async {
         const url = 'https://github.com/felangel/mason';
         final result = await commandRunner.run([
           'bundle',
@@ -453,6 +455,7 @@ void main() {
           () => logger.detail('  ${canonicalize(file.path)}'),
         ).called(1);
       });
+
       test('exits with code 64 when no brick name is provided', () async {
         final result = await commandRunner.run([
           'bundle',
@@ -466,6 +469,7 @@ void main() {
         ).called(1);
         verifyNever(() => logger.progress(any()));
       });
+
       test('exits with code 64 when bundling nonexistent brick', () async {
         final result = await commandRunner.run([
           'bundle',

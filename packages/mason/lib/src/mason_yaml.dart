@@ -76,9 +76,6 @@ class BrickLocation {
 
   /// Brick version constraint.
   final String? version;
-
-  /// Whether this location is in a remote source or not.
-  bool get isLocal => path != null;
 }
 
 /// {@template git_path}

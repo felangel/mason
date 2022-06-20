@@ -1,12 +1,9 @@
 // ignore_for_file: prefer_const_constructors
 
 import 'package:mason/mason.dart';
-import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 import 'package:universal_io/io.dart';
-
-class MockGitPath extends Mock implements GitPath {}
 
 void main() {
   group('MasonYaml', () {
@@ -78,19 +75,6 @@ void main() {
             .having((g) => g.ref, 'ref', instance.git!.ref)
             .having((g) => g.path, 'path', instance.git!.path),
       );
-    });
-
-    test('isLocal', () {
-      // ignore: avoid_redundant_argument_values
-      final hostedInstance = BrickLocation(version: 'any');
-      expect(hostedInstance.isLocal, isFalse);
-
-      // ignore: avoid_redundant_argument_values
-      final gitInstance = BrickLocation(git: MockGitPath());
-      expect(gitInstance.isLocal, isFalse);
-
-      final localInstance = BrickLocation(path: '.');
-      expect(localInstance.isLocal, isTrue);
     });
   });
 

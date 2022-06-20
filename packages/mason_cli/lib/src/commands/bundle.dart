@@ -2,7 +2,6 @@ import 'dart:convert';
 
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
-import 'package:mason_cli/src/install_brick.dart';
 import 'package:path/path.dart' as path;
 import 'package:recase/recase.dart';
 import 'package:universal_io/io.dart';
@@ -20,7 +19,7 @@ enum BundleType {
 /// `mason bundle` command exposes the ability to generate bundles
 /// from brick templates.
 /// {@endtemplate}
-class BundleCommand extends MasonCommand with InstallBrickMixin {
+class BundleCommand extends MasonCommand {
   /// {@macro bundle_command}
   BundleCommand({Logger? logger}) : super(logger: logger) {
     argParser
@@ -66,8 +65,6 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
   Future<int> run() async {
     final source = results['source'] as String;
 
-    late final rest = results.rest.first;
-
     final Brick brick;
     if (source == 'git') {
       if (results.rest.isEmpty) {
@@ -76,7 +73,7 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
       brick = Brick(
         location: BrickLocation(
           git: GitPath(
-            rest,
+            results.rest.first,
             path: results['git-path'] as String?,
             ref: results['git-ref'] as String?,
           ),
@@ -86,24 +83,28 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
       if (results.rest.isEmpty) {
         usageException('A brick name must be provided');
       }
-      brick = Brick(name: rest, location: const BrickLocation(version: 'any'));
+      brick = Brick(
+        name: results.rest.first,
+        location: const BrickLocation(version: 'any'),
+      );
     } else {
       if (results.rest.isEmpty) {
         usageException('A path to the brick template must be provided');
       }
-      brick = Brick(location: BrickLocation(path: rest));
+      brick = Brick(location: BrickLocation(path: results.rest.first));
     }
 
-    final tempBricksJson = BricksJson.temp();
+    BricksJson? tempBricksJson;
 
     final Directory brickDirectory;
-    if (brick.location.isLocal) {
-      final brickPath = brick.location.path!;
-      brickDirectory = Directory(brickPath);
+    if (brick.location.path != null) {
+      brickDirectory = Directory(brick.location.path!);
     } else {
+      tempBricksJson = BricksJson.temp();
       final cachedBrick = await tempBricksJson.add(brick);
       brickDirectory = Directory(cachedBrick.path);
     }
+
     if (!brickDirectory.existsSync()) {
       throw BrickNotFoundException(brickDirectory.path);
     }
@@ -133,9 +134,10 @@ class BundleCommand extends MasonCommand with InstallBrickMixin {
     } catch (_) {
       bundleProgress.fail();
       rethrow;
+    } finally {
+      tempBricksJson?.clear();
     }
 
-    tempBricksJson.clear();
     return ExitCode.success.code;
   }
 }
