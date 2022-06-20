@@ -4,10 +4,10 @@
 
   ```sh
   # Create a bundle from a git brick.
-  mason bundle --source git https://github.com/<organization>/<repository>
+  mason bundle --source git https://github.com/:org/:repo
 
   # Create a bundle from a hosted brick.
-  mason bundle --source hosted hello
+  mason bundle --source hosted <BRICK_NAME>
   ```
 
 # 0.1.0-dev.29
