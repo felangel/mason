@@ -35,6 +35,23 @@ class BundleCommand extends MasonCommand {
         help: 'Type of bundle to generate.',
         allowed: ['universal', 'dart'],
         defaultsTo: 'universal',
+      )
+      ..addOption(
+        'source',
+        abbr: 's',
+        help: 'The source used to find the brick to be bundled.',
+        allowed: ['git', 'path', 'hosted'],
+        defaultsTo: 'path',
+      )
+      ..addOption(
+        'git-ref',
+        help: 'Git branch or commit to be used.'
+            ' Only valid if source is set to "git".',
+      )
+      ..addOption(
+        'git-path',
+        help: 'Path of the brick in the git repository'
+            ' Only valid if source is set to "git".',
       );
   }
 
@@ -46,15 +63,53 @@ class BundleCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    if (results.rest.isEmpty) {
-      usageException('path to the brick template must be provided');
-    }
-    final brick = Directory(results.rest.first);
-    if (!brick.existsSync()) {
-      throw BrickNotFoundException(brick.path);
+    final source = results['source'] as String;
+
+    final Brick brick;
+    if (source == 'git') {
+      if (results.rest.isEmpty) {
+        usageException('A repository url must be provided');
+      }
+      brick = Brick(
+        location: BrickLocation(
+          git: GitPath(
+            results.rest.first,
+            path: results['git-path'] as String?,
+            ref: results['git-ref'] as String?,
+          ),
+        ),
+      );
+    } else if (source == 'hosted') {
+      if (results.rest.isEmpty) {
+        usageException('A brick name must be provided');
+      }
+      brick = Brick(
+        name: results.rest.first,
+        location: const BrickLocation(version: 'any'),
+      );
+    } else {
+      if (results.rest.isEmpty) {
+        usageException('A path to the brick template must be provided');
+      }
+      brick = Brick(location: BrickLocation(path: results.rest.first));
     }
 
-    final bundle = createBundle(brick);
+    BricksJson? tempBricksJson;
+
+    final Directory brickDirectory;
+    if (brick.location.path != null) {
+      brickDirectory = Directory(brick.location.path!);
+    } else {
+      tempBricksJson = BricksJson.temp();
+      final cachedBrick = await tempBricksJson.add(brick);
+      brickDirectory = Directory(cachedBrick.path);
+    }
+
+    if (!brickDirectory.existsSync()) {
+      throw BrickNotFoundException(brickDirectory.path);
+    }
+
+    final bundle = createBundle(brickDirectory);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
     final bundleProgress = logger.progress('Bundling ${bundle.name}');
@@ -79,6 +134,8 @@ class BundleCommand extends MasonCommand {
     } catch (_) {
       bundleProgress.fail();
       rethrow;
+    } finally {
+      tempBricksJson?.clear();
     }
 
     return ExitCode.success.code;
