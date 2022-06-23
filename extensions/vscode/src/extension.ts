@@ -3,7 +3,8 @@ import {
   addLocalBrick,
   addGlobalBrick,
   init,
-  makeBrick,
+  makeLocalBrick,
+  makeGlobalBrick,
   removeLocalBrick,
   removeGlobalBrick,
 } from "./commands";
@@ -15,7 +16,8 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("mason.init", init),
     vscode.commands.registerCommand("mason.add-local-brick", addLocalBrick),
     vscode.commands.registerCommand("mason.add-global-brick", addGlobalBrick),
-    vscode.commands.registerCommand("mason.make-brick", makeBrick),
+    vscode.commands.registerCommand("mason.make-local-brick", makeLocalBrick),
+    vscode.commands.registerCommand("mason.make-global-brick", makeGlobalBrick),
     vscode.commands.registerCommand(
       "mason.remove-local-brick",
       removeLocalBrick
