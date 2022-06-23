@@ -60,7 +60,7 @@ export const makeLocalBrick = async (uri: Uri) => {
   }
   const args = vars.join(" ");
 
-  await masonMake({ cwd, targetDirectory, name, args });
+  await masonMake({ targetDirectory, name, args });
 };
 
 export const makeGlobalBrick = async (uri: Uri) => {
@@ -119,7 +119,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
   }
   const args = vars.join(" ");
 
-  await masonMake({ cwd, targetDirectory, name, args });
+  await masonMake({ targetDirectory, name, args });
 };
 
 const promptForBrickName = ({ bricks }: { bricks: string[] }) => {
