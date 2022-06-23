@@ -9,5 +9,7 @@
 - Add bricks globally
 - Remove bricks from the local workspace
 - Remove bricks globally
+- Mason make w/local bricks
+- Mason make w/global bricks
 
 [mason_link]: https://github.com/felangel/mason
