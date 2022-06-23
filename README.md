@@ -41,10 +41,10 @@ mason make hello
 
 View the full documentation [here](https://github.com/felangel/mason/tree/master/packages/mason_cli).
 
-## Video Tutorial
+## Video Tutorials
 
-[![Mason Video Tutorial](https://img.youtube.com/vi/G4PTjA6tpTU/0.jpg)](https://www.youtube.com/watch?v=G4PTjA6tpTU)
-
-**Very Good Livestream: Felix Angelov Demos Mason** by [_Very Good Ventures_](https://www.youtube.com/channel/UCMEL3IZanJyEmU9ycwnAGNA)
+|                        **Package of the Week** by [_Flutter_](https://www.youtube.com/c/flutterdev)                         |  **Felix Angelov Demos Mason** by [_Very Good Ventures_](https://www.youtube.com/channel/UCMEL3IZanJyEmU9ycwnAGNA)   |
+| :-------------------------------------------------------------------------------------------------------------------------: | :------------------------------------------------------------------------------------------------------------------: |
+| [![mason (Package of the Week)](https://img.youtube.com/vi/qjA0JFiPMnQ/0.jpg)](https://www.youtube.com/watch?v=qjA0JFiPMnQ) | [![Mason Video Tutorial](https://img.youtube.com/vi/G4PTjA6tpTU/0.jpg)](https://www.youtube.com/watch?v=G4PTjA6tpTU) |
 
 [mason_demo]: https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif
