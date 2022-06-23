@@ -1,13 +1,11 @@
 import * as vscode from "vscode";
-import { masonExec, statusBarTimeout } from ".";
+import { masonSpawn, statusBarTimeout } from ".";
 
 export const masonMake = async ({
-  cwd,
   targetDirectory,
   name,
   args,
 }: {
-  cwd: string;
   targetDirectory: string;
   name: string;
   args: string;
@@ -19,11 +17,8 @@ export const masonMake = async ({
     },
     async (_) => {
       try {
-        await masonExec(
-          `make ${name} ${args} --output-dir=${targetDirectory} --on-conflict=skip`,
-          {
-            cwd: cwd,
-          }
+        await masonSpawn(
+          `make ${name} ${args} --output-dir=${targetDirectory} --on-conflict=skip`
         );
         vscode.window.setStatusBarMessage(
           `✓ mason make ${name}`,
