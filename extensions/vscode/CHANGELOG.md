@@ -1,3 +1,9 @@
+# 0.1.2
+
+- feat: add commands
+  - Mason: Make Local Brick
+  - Mason: Make Global Brick
+
 # 0.1.1
 
 - feat: add commands
