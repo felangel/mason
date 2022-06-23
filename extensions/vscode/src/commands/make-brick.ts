@@ -242,8 +242,10 @@ async function promptForTargetDirectory(): Promise<string | undefined> {
 
 function _rootDir(): string {
   const masonCache = env["MASON_CACHE"];
-  if (!_.isNil(masonCache)) return masonCache;
-  const isWindows = platform == "win32";
+  if (!_.isNil(masonCache)) {
+    return masonCache;
+  }
+  const isWindows = platform === "win32";
   if (isWindows) {
     const appData = env["APPDATA"]!;
     const appDataCacheDir = path.join(appData, "Mason", "Cache");
