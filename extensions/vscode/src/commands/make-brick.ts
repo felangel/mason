@@ -4,8 +4,9 @@ import * as path from "path";
 import * as vscode from "vscode";
 import { Uri, window } from "vscode";
 import { getBrickYaml, masonMake } from "../mason";
+import { env, platform } from "node:process";
 
-export const makeBrick = async (uri: Uri) => {
+export const makeLocalBrick = async (uri: Uri) => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
   if (_.isNil(cwd)) {
@@ -28,6 +29,65 @@ export const makeBrick = async (uri: Uri) => {
 
   if (_.isNil(bricksJson)) {
     window.showErrorMessage("No bricks found in the workspace");
+    return;
+  }
+
+  const bricks = Object.keys(bricksJson);
+  const brickName = await promptForBrickName({ bricks });
+
+  if (_.isNil(brickName)) {
+    window.showErrorMessage("No brick selected");
+    return;
+  }
+
+  const brickPath = bricksJson[brickName];
+  const brickYaml = await getBrickYaml({ brickPath });
+
+  if (_.isNil(brickYaml)) {
+    window.showErrorMessage("Could not read brick.yaml");
+    return;
+  }
+
+  const name: string = brickYaml.name;
+
+  let vars: string[] = [];
+  for (let key in brickYaml.vars) {
+    const value = await promptForValue(brickYaml.vars[key]);
+    if (_.isNil(value)) {
+      return;
+    }
+    vars.push(`--${key}=${value.toString()}`);
+  }
+  const args = vars.join(" ");
+
+  await masonMake({ cwd, targetDirectory, name, args });
+};
+
+export const makeGlobalBrick = async (uri: Uri) => {
+  const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
+
+  if (_.isNil(cwd)) {
+    return;
+  }
+
+  let targetDirectory;
+
+  if (_.isNil(_.get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
+    targetDirectory = await promptForTargetDirectory();
+    if (_.isNil(targetDirectory)) {
+      window.showErrorMessage("Please select a valid directory");
+      return;
+    }
+  } else {
+    targetDirectory = uri.fsPath;
+  }
+
+  const rootDir = _rootDir();
+  const globalDir = path.join(rootDir, "global");
+  const bricksJson = await getBricksJson({ cwd: globalDir });
+
+  if (_.isNil(bricksJson)) {
+    window.showErrorMessage("No global bricks found");
     return;
   }
 
@@ -178,4 +238,21 @@ async function promptForTargetDirectory(): Promise<string | undefined> {
     }
     return uri[0].fsPath;
   });
+}
+
+function _rootDir(): string {
+  const masonCache = env["MASON_CACHE"];
+  if (!_.isNil(masonCache)) return masonCache;
+  const isWindows = platform == "win32";
+  if (isWindows) {
+    const appData = env["APPDATA"]!;
+    const appDataCacheDir = path.join(appData, "Mason", "Cache");
+    if (existsSync(appDataCacheDir)) {
+      return appDataCacheDir;
+    }
+    const localAppData = env["LOCALAPPDATA"]!;
+    return path.join(localAppData, "Mason", "Cache");
+  } else {
+    return path.join(env["HOME"]!, ".mason-cache");
+  }
 }

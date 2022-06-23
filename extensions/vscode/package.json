@@ -52,8 +52,12 @@
         "title": "Mason: Add Global Brick"
       },
       {
-        "command": "mason.make-brick",
-        "title": "Mason: Make Brick"
+        "command": "mason.make-local-brick",
+        "title": "Mason: Make Local Brick"
+      },
+      {
+        "command": "mason.make-global-brick",
+        "title": "Mason: Make Global Brick"
       },
       {
         "command": "mason.remove-local-brick",
@@ -67,7 +71,12 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "mason.make-brick",
+          "command": "mason.make-local-brick",
+          "group": "masonGroup@1",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "mason.make-global-brick",
           "group": "masonGroup@1",
           "when": "explorerResourceIsFolder"
         }
