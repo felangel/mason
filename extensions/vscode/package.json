@@ -33,6 +33,8 @@
     "onCommand:mason.init",
     "onCommand:mason.add-local-brick",
     "onCommand:mason.add-global-brick",
+    "onCommand:mason.make-local-brick",
+    "onCommand:mason.make-global-brick",
     "onCommand:mason.remove-local-brick",
     "onCommand:mason.remove-global-brick"
   ],
