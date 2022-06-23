@@ -1,3 +1,7 @@
+# 0.1.3
+
+- fix: activate make commands when extension is initialized
+
 # 0.1.2
 
 - feat: add commands
