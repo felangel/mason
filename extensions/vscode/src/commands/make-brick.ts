@@ -56,7 +56,7 @@ export const makeLocalBrick = async (uri: Uri) => {
     if (_.isNil(value)) {
       return;
     }
-    vars.push(`--${key}=${value.toString()}`);
+    vars.push(`--${key} ${value.toString()}`);
   }
   const args = vars.join(" ");
 
@@ -115,7 +115,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
     if (_.isNil(value)) {
       return;
     }
-    vars.push(`--${key}=${value.toString()}`);
+    vars.push(`--${key} ${value.toString()}`);
   }
   const args = vars.join(" ");
 
@@ -179,6 +179,9 @@ const promptForPrimitive = async (
   });
   if (result === "") {
     return _default;
+  }
+  if (result?.includes(" ")) {
+    return `"${result}"`;
   }
   return result;
 };
