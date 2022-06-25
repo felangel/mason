@@ -1,3 +1,7 @@
+# 0.1.4
+
+- fix: make command supports spaces in string variables
+
 # 0.1.3
 
 - fix: activate make commands when extension is initialized
