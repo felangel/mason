@@ -62,7 +62,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (update.length + time.length + 4)}⠹')} $update ${darkGray.wrap(time)}...''',
+                  '''${lightGreen.wrap('\b${'\b' * (update.length + time.length + 5)}⠹')} $update ${darkGray.wrap(time)}...''',
                 );
               },
             ).called(1);
