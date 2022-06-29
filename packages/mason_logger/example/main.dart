@@ -31,7 +31,9 @@ Future<void> main() async {
   );
   final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
   final calculating = logger.progress('Calculating');
-  await Future<void>.delayed(const Duration(seconds: 1));
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+  calculating.update('Halfway!');
+  await Future<void>.delayed(const Duration(milliseconds: 500));
   calculating.complete('Done!');
   logger
     ..info('Your favorite animal is a $favoriteAnimal!')
