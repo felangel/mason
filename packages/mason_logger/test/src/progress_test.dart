@@ -49,6 +49,31 @@ void main() {
       });
     });
 
+    group('.update', () {
+      test('writes lines to stdout', () async {
+        await StdioOverrides.runZoned(
+          () async {
+            const update = 'update';
+            const time = '(0.1s)';
+            final progress = Progress('message', stdout, stderr);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            progress.update(update);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            verify(
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (update.length + time.length + 4)}⠹')} $update ${darkGray.wrap(time)}...''',
+                );
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+          stderr: () => stderr,
+        );
+      });
+    });
+
     group('.fail', () {
       test('writes lines to stderr', () async {
         await StdioOverrides.runZoned(
