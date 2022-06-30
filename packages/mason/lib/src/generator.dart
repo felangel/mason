@@ -7,6 +7,7 @@ import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
+import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
@@ -15,7 +16,7 @@ part 'hooks.dart';
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
-final _delimeterRegExp = RegExp('{{(.*?)}}');
+final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
 final _whiteSpace = RegExp(r'\s+');
@@ -221,7 +222,8 @@ abstract class Generator implements Comparable<Generator> {
         );
         generatedFiles.add(generatedFile);
       } else {
-        final resultFiles = file.runSubstitution(
+        final resultFiles = await _runSubstitutionAsync(
+          file,
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
@@ -583,6 +585,22 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
   }
 
   return results;
+}
+
+Future<Set<FileContents>> _runSubstitutionAsync(
+  TemplateFile file,
+  Map<String, dynamic> vars,
+  Map<String, List<int>> partials,
+) async {
+  return compute(
+    (List inputs) {
+      final file = inputs[0] as TemplateFile;
+      final vars = inputs[1] as Map<String, dynamic>;
+      final partials = inputs[2] as Map<String, List<int>>;
+      return file.runSubstitution(vars, partials);
+    },
+    [file, vars, partials],
+  );
 }
 
 extension on FileConflictResolution {
