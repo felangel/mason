@@ -16,7 +16,7 @@ part 'hooks.dart';
 
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
-final _delimeterRegExp = RegExp('{{([^;=&%*,]*)}}');
+final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
 final _whiteSpace = RegExp(r'\s+');
