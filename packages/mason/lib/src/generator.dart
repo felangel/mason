@@ -222,7 +222,8 @@ abstract class Generator implements Comparable<Generator> {
         );
         generatedFiles.add(generatedFile);
       } else {
-        final resultFiles = await file.runSubstitutionAsync(
+        final resultFiles = await _runSubstitutionAsync(
+          file,
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
         );
@@ -586,19 +587,20 @@ List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
   return results;
 }
 
-extension on TemplateFile {
-  Future<Set<FileContents>> runSubstitutionAsync(
-    Map<String, dynamic> vars,
-    Map<String, List<int>> partials,
-  ) async {
-    return compute(
-      (List inputs) => runSubstitution(
-        inputs[0] as Map<String, dynamic>,
-        inputs[1] as Map<String, List<int>>,
-      ),
-      [vars, partials],
-    );
-  }
+Future<Set<FileContents>> _runSubstitutionAsync(
+  TemplateFile file,
+  Map<String, dynamic> vars,
+  Map<String, List<int>> partials,
+) async {
+  return compute(
+    (List inputs) {
+      final file = inputs[0] as TemplateFile;
+      final vars = inputs[1] as Map<String, dynamic>;
+      final partials = inputs[2] as Map<String, List<int>>;
+      return file.runSubstitution(vars, partials);
+    },
+    [file, vars, partials],
+  );
 }
 
 extension on FileConflictResolution {
