@@ -41,7 +41,6 @@ class Progress {
   late final Timer _timer;
 
   String _message;
-  String _messageTime = '';
 
   int _index = 0;
 
@@ -68,9 +67,10 @@ class Progress {
   }
 
   /// Update the progress message.
-  void update([String? update]) {
-    if (update != null) _message = update;
-    _messageTime = ' $_time';
+  void update(String update) {
+    _stdout.write(_clearLn);
+    _message = update;
+    _onTimer(_timer);
   }
 
   /// Cancel the progress and remove the written line.
@@ -84,19 +84,19 @@ class Progress {
     _index++;
     final char = _progressAnimation[_index % _progressAnimation.length];
     _stdout.write(
-      '''${lightGreen.wrap('$_clearMessageLength$char')} $_message$_messageTime...''',
+      '''${lightGreen.wrap('$_clearMessageLength$char')} $_message... $_time''',
     );
   }
 
   String get _clearMessageLength {
-    final length = _message.length + _messageTime.length + 4;
+    final length = _message.length + 4 + _time.length;
     return '\b${'\b' * length}';
   }
 
   String get _clearLn => '$_clearMessageLength\u001b[2K';
 
   String get _time {
-    final _elapsed = _stopwatch.elapsed.inMilliseconds / 1000.0;
-    return '''${darkGray.wrap('(${_elapsed.toStringAsFixed(1)}s)')}''';
+    final elapsed = _stopwatch.elapsed.inMilliseconds / 1000.0;
+    return '''${darkGray.wrap('(${elapsed.toStringAsFixed(1)}s)')}''';
   }
 }

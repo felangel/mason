@@ -23,6 +23,7 @@ void main() {
       test('writes lines to stdout', () async {
         await StdioOverrides.runZoned(
           () async {
+            const time = '(0.1s)';
             const message = 'test message';
             final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -30,14 +31,14 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap(time)}''',
                 );
               },
             ).called(1);
             verify(
               () {
                 stdout.write(
-                  '''\b${'\b' * (message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.1s)')}\n''',
+                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap(time)}\n''',
                 );
               },
             ).called(1);
@@ -62,7 +63,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (update.length + time.length + 5)}⠹')} $update ${darkGray.wrap(time)}...''',
+                  '''${lightGreen.wrap('\b${'\b' * (update.length + time.length + 4)}⠹')} $update... ${darkGray.wrap(time)}''',
                 );
               },
             ).called(1);
@@ -78,6 +79,7 @@ void main() {
       test('writes lines to stderr', () async {
         await StdioOverrides.runZoned(
           () async {
+            const time = '(0.1s)';
             const message = 'test message';
             final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -85,14 +87,14 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap(time)}''',
                 );
               },
             ).called(1);
             verify(
               () {
                 stderr.write(
-                  '''\b${'\b' * (message.length + 4)}\u001b[2K${red.wrap('✗')} $message ${darkGray.wrap('(0.1s)')}\n''',
+                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${red.wrap('✗')} $message ${darkGray.wrap(time)}\n''',
                 );
               },
             ).called(1);
@@ -108,6 +110,7 @@ void main() {
       test('writes lines to stdout', () async {
         await StdioOverrides.runZoned(
           () async {
+            const time = '(0.1s)';
             const message = 'test message';
             final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -115,12 +118,14 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap(time)}''',
                 );
               },
             ).called(1);
             verify(
-              () => stdout.write('\b${'\b' * (message.length + 4)}\u001b[2K'),
+              () => stdout.write(
+                '\b${'\b' * (message.length + 4 + time.length)}\u001b[2K',
+              ),
             ).called(1);
           },
           stdout: () => stdout,
@@ -134,6 +139,7 @@ void main() {
       test('writes lines to stdout', () async {
         await StdioOverrides.runZoned(
           () async {
+            const time = '(0.1s)';
             const message = 'test message';
             final progress = Progress(message, stdout, stderr);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -142,14 +148,14 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap(time)}''',
                 );
               },
             ).called(1);
             verify(
               () {
                 stdout.write(
-                  '''\b${'\b' * (message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.1s)')}\n''',
+                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap(time)}\n''',
                 );
               },
             ).called(1);
