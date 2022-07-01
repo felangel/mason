@@ -47,6 +47,10 @@ Future<void> main() async {
   final progress = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
 
+  // Provide an update.
+  progress.update('Almost done');
+  await Future<void>.delayed(const Duration(seconds: 1));
+
   // Show a completion message when the asynchronous operation has completed.
   progress.complete('Done!');
 
