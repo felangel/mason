@@ -1,3 +1,14 @@
+# 0.1.0-dev.14
+
+- feat: `Progress.update`
+  ```dart
+  final progress = logger.progress('Calculating');
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+  progress.update('Halfway!');
+  await Future<void>.delayed(const Duration(milliseconds: 500));
+  progress.complete('Done!');
+  ```
+
 # 0.1.0-dev.13
 
 - fix: correct J and K key mappings
