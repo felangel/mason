@@ -1,3 +1,8 @@
+# 0.1.0-dev.27
+
+- perf: run substitutions in isolate and improve render specificity
+- chore: use `mason_logger ^0.1.0-dev.14`
+
 # 0.1.0-dev.26
 
 - fix: file path looping array resolution
