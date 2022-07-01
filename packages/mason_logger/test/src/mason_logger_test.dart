@@ -393,24 +393,28 @@ void main() {
       test('writes lines to stdout', () async {
         await StdioOverrides.runZoned(
           () async {
+            const time = '(0.Xs)';
             const message = 'test message';
             final done = Logger().progress(message);
-            await Future<void>.delayed(const Duration(milliseconds: 100));
+            await Future<void>.delayed(const Duration(milliseconds: 300));
             done.complete();
-            verify(
+            verifyInOrder([
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4)}⠙')} $message...''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap('(0.1s)')}''',
                 );
               },
-            ).called(1);
-            verify(
               () {
                 stdout.write(
-                  '''\b${'\b' * (message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.1s)')}\n''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠹')} $message... ${darkGray.wrap('(0.2s)')}''',
                 );
               },
-            ).called(1);
+              () {
+                stdout.write(
+                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.3s)')}\n''',
+                );
+              },
+            ]);
           },
           stdout: () => stdout,
           stdin: () => stdin,

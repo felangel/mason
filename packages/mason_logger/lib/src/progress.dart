@@ -40,7 +40,7 @@ class Progress {
 
   late final Timer _timer;
 
-  final String _message;
+  String _message;
 
   int _index = 0;
 
@@ -53,10 +53,8 @@ class Progress {
   /// End the progress and mark it as completed.
   void complete([String? update]) {
     _stopwatch.stop();
-    final time =
-        (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
     _stdout.write(
-      '''\b${'\b' * (_message.length + 4)}\u001b[2K${lightGreen.wrap('✓')} ${update ?? _message} ${darkGray.wrap('(${time}s)')}\n''',
+      '''$_clearLn${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer.cancel();
   }
@@ -64,18 +62,21 @@ class Progress {
   /// End the progress and mark it as failed.
   void fail([String? update]) {
     _timer.cancel();
-    final time =
-        (_stopwatch.elapsed.inMilliseconds / 1000.0).toStringAsFixed(1);
-    _stderr.write(
-      '''\b${'\b' * (_message.length + 4)}\u001b[2K${red.wrap('✗')} ${update ?? _message} ${darkGray.wrap('(${time}s)')}\n''',
-    );
+    _stderr.write('$_clearLn${red.wrap('✗')} ${update ?? _message} $_time\n');
     _stopwatch.stop();
+  }
+
+  /// Update the progress message.
+  void update(String update) {
+    _stdout.write(_clearLn);
+    _message = update;
+    _onTimer(_timer);
   }
 
   /// Cancel the progress and remove the written line.
   void cancel() {
     _timer.cancel();
-    _stdout.write('\b${'\b' * (_message.length + 4)}\u001b[2K');
+    _stdout.write(_clearLn);
     _stopwatch.stop();
   }
 
@@ -83,7 +84,19 @@ class Progress {
     _index++;
     final char = _progressAnimation[_index % _progressAnimation.length];
     _stdout.write(
-      '''${lightGreen.wrap('\b${'\b' * (_message.length + 4)}$char')} $_message...''',
+      '''${lightGreen.wrap('$_clearMessageLength$char')} $_message... $_time''',
     );
+  }
+
+  String get _clearMessageLength {
+    final length = _message.length + 4 + _time.length;
+    return '\b${'\b' * length}';
+  }
+
+  String get _clearLn => '$_clearMessageLength\u001b[2K';
+
+  String get _time {
+    final elapsed = _stopwatch.elapsed.inMilliseconds / 1000.0;
+    return '''${darkGray.wrap('(${elapsed.toStringAsFixed(1)}s)')}''';
   }
 }
