@@ -2,11 +2,11 @@
 
 - feat: `Progress.update`
   ```dart
-  final calculating = logger.progress('Calculating');
+  final progress = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(milliseconds: 500));
-  calculating.update('Halfway!');
+  progress.update('Halfway!');
   await Future<void>.delayed(const Duration(milliseconds: 500));
-  calculating.complete('Done!');
+  progress.complete('Done!');
   ```
 
 # 0.1.0-dev.13
