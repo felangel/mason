@@ -12,6 +12,12 @@ void main() {
         final exception = MasonException(message);
         expect(exception.message, equals(message));
       });
+
+      test('overrides toString()', () {
+        const message = 'test message';
+        final exception = MasonException(message);
+        expect(exception.toString(), equals(message));
+      });
     });
 
     group('BrickResolveVersionException', () {
