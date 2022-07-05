@@ -1,0 +1,3 @@
+dependency_overrides:
+  mason_logger:
+    path: ../mason_logger

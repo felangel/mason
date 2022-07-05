@@ -27,13 +27,5 @@ dev_dependencies:
   test: ^1.17.0
   very_good_analysis: ^2.4.0
 
-dependency_overrides:
-  mason:
-    path: ../mason
-  mason_api:
-    path: ../mason_api
-  mason_logger:
-    path: ../mason_logger
-
 executables:
   mason:
