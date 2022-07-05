@@ -7,6 +7,9 @@ class MasonException implements Exception {
 
   /// The error message which will be displayed to the user via stderr.
   final String message;
+
+  @override
+  String toString() => message;
 }
 
 /// {@template brick_not_found_exception}
