@@ -1,0 +1,7 @@
+dependency_overrides:
+  mason:
+    path: ../mason
+  mason_api:
+    path: ../mason_api
+  mason_logger:
+    path: ../mason_logger
