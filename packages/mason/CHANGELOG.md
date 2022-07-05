@@ -1,3 +1,7 @@
+# 0.1.0-dev.28
+
+- fix: override `toString` on `MasonException`
+
 # 0.1.0-dev.27
 
 - perf: run substitutions in isolate and improve render specificity
