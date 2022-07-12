@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/progress.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:universal_io/io.dart' as io;
 
@@ -74,8 +73,18 @@ class _StdioOverridesScope extends StdioOverrides {
   }
 }
 
+/// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
+/// {@endtemplate}
 class Logger {
+  /// {@macro logger}
+  Logger({
+    this.level = LogLevel.all,
+  });
+
+  /// The current log level for this logger.
+  final LogLevel level;
+
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
@@ -104,7 +113,12 @@ class Logger {
   void write(String? message) => _stdout.write(message);
 
   /// Writes info message to stdout.
-  void info(String? message) => _stdout.writeln(message);
+  void info(String? message) {
+    if (level.level > LogLevel.info.level) {
+      return;
+    }
+    _stdout.writeln(message);
+  }
 
   /// Writes delayed message to stdout.
   void delayed(String? message) => _queue.add(message);
@@ -115,23 +129,44 @@ class Logger {
   }
 
   /// Writes error message to stderr.
-  void err(String? message) => _stderr.writeln(lightRed.wrap(message));
+  void err(String? message) {
+    if (level.level > LogLevel.error.level) {
+      return;
+    }
+    _stderr.writeln(lightRed.wrap(message));
+  }
 
   /// Writes alert message to stdout.
   void alert(String? message) {
+    if (level.level > LogLevel.alert.level) {
+      return;
+    }
     _stdout.writeln(lightCyan.wrap(styleBold.wrap(message)));
   }
 
   /// Writes detail message to stdout.
-  void detail(String? message) => _stdout.writeln(darkGray.wrap(message));
+  void detail(String? message) {
+    if (level.level > LogLevel.detail.level) {
+      return;
+    }
+    _stdout.writeln(darkGray.wrap(message));
+  }
 
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
+    if (level.level > LogLevel.warn.level) {
+      return;
+    }
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
-  void success(String? message) => _stdout.writeln(lightGreen.wrap(message));
+  void success(String? message) {
+    if (level.level > LogLevel.success.level) {
+      return;
+    }
+    _stdout.writeln(lightGreen.wrap(message));
+  }
 
   /// Prompts user and returns response.
   /// Provide a default value via [defaultValue].
@@ -408,4 +443,26 @@ extension on String {
 extension on Iterable<int> {
   bool isOneOf(Iterable<Iterable<int>> keys) =>
       keys.any((key) => key.every(contains));
+}
+
+extension on LogLevel {
+  int get level {
+    switch (this) {
+      case LogLevel.all:
+        return 0;
+      case LogLevel.detail:
+        return 100;
+      case LogLevel.success:
+      case LogLevel.info:
+        return 200;
+      case LogLevel.warn:
+        return 400;
+      case LogLevel.error:
+        return 500;
+      case LogLevel.alert:
+        return 600;
+      case LogLevel.none:
+        return 1000;
+    }
+  }
 }

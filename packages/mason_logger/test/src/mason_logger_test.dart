@@ -43,6 +43,17 @@ void main() {
           stdout: () => stdout,
         );
       });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.alert).info(message);
+            verifyNever(() => stdout.writeln(contains(message)));
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('.delayed', () {
@@ -91,6 +102,17 @@ void main() {
           stderr: () => stderr,
         );
       });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.alert).err(message);
+            verifyNever(() => stderr.writeln(lightRed.wrap(message)));
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('.alert', () {
@@ -106,6 +128,19 @@ void main() {
           stdout: () => stdout,
         );
       });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.none).alert(message);
+            verifyNever(
+              () => stdout.writeln(lightCyan.wrap(styleBold.wrap(message))),
+            );
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('.detail', () {
@@ -115,6 +150,17 @@ void main() {
             const message = 'test message';
             Logger().detail(message);
             verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.alert).detail(message);
+            verifyNever(() => stdout.writeln(darkGray.wrap(message)));
           },
           stdout: () => stdout,
         );
@@ -151,6 +197,19 @@ void main() {
           stderr: () => stderr,
         );
       });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.alert).warn(message);
+            verifyNever(() {
+              stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+            });
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('.success', () {
@@ -160,6 +219,17 @@ void main() {
             const message = 'test message';
             Logger().success(message);
             verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('does not write with higher log level', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: LogLevel.alert).success(message);
+            verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
           },
           stdout: () => stdout,
         );
