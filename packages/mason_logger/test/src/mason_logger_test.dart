@@ -44,11 +44,11 @@ void main() {
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stdout when LogLevel > info', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.alert).info(message);
+            Logger(level: LogLevel.critical).info(message);
             verifyNever(() => stdout.writeln(contains(message)));
           },
           stdout: () => stdout,
@@ -103,11 +103,11 @@ void main() {
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stderr when LogLevel > error', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.alert).err(message);
+            Logger(level: LogLevel.critical).err(message);
             verifyNever(() => stderr.writeln(lightRed.wrap(message)));
           },
           stdout: () => stdout,
@@ -129,11 +129,11 @@ void main() {
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stdout when LogLevel > critical', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.none).alert(message);
+            Logger(level: LogLevel.quiet).alert(message);
             verifyNever(
               () => stdout.writeln(lightCyan.wrap(styleBold.wrap(message))),
             );
@@ -148,18 +148,18 @@ void main() {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger().detail(message);
+            Logger(level: LogLevel.debug).detail(message);
             verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
           },
           stdout: () => stdout,
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stdout when LogLevel > debug', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.alert).detail(message);
+            Logger().detail(message);
             verifyNever(() => stdout.writeln(darkGray.wrap(message)));
           },
           stdout: () => stdout,
@@ -198,11 +198,11 @@ void main() {
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stderr when LogLevel > warning', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.alert).warn(message);
+            Logger(level: LogLevel.error).warn(message);
             verifyNever(() {
               stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
             });
@@ -224,11 +224,11 @@ void main() {
         );
       });
 
-      test('does not write with higher log level', () {
+      test('does not write to stdout when LogLevel > info', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger(level: LogLevel.alert).success(message);
+            Logger(level: LogLevel.warning).success(message);
             verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
           },
           stdout: () => stdout,

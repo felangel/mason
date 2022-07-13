@@ -78,9 +78,7 @@ class _StdioOverridesScope extends StdioOverrides {
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
-  Logger({
-    this.level = LogLevel.all,
-  });
+  Logger({this.level = LogLevel.info});
 
   /// The current log level for this logger.
   final LogLevel level;
@@ -114,7 +112,7 @@ class Logger {
 
   /// Writes info message to stdout.
   void info(String? message) {
-    if (level.level > LogLevel.info.level) {
+    if (level.index > LogLevel.info.index) {
       return;
     }
     _stdout.writeln(message);
@@ -124,13 +122,11 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) {
-    return Progress(message, _stdout, _stderr);
-  }
+  Progress progress(String message) => Progress(message, _stdout, level);
 
   /// Writes error message to stderr.
   void err(String? message) {
-    if (level.level > LogLevel.error.level) {
+    if (level.index > LogLevel.error.index) {
       return;
     }
     _stderr.writeln(lightRed.wrap(message));
@@ -138,15 +134,15 @@ class Logger {
 
   /// Writes alert message to stdout.
   void alert(String? message) {
-    if (level.level > LogLevel.alert.level) {
+    if (level.index > LogLevel.critical.index) {
       return;
     }
-    _stdout.writeln(lightCyan.wrap(styleBold.wrap(message)));
+    _stdout.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
   }
 
   /// Writes detail message to stdout.
   void detail(String? message) {
-    if (level.level > LogLevel.detail.level) {
+    if (level.index > LogLevel.debug.index) {
       return;
     }
     _stdout.writeln(darkGray.wrap(message));
@@ -154,7 +150,7 @@ class Logger {
 
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
-    if (level.level > LogLevel.warn.level) {
+    if (level.index > LogLevel.warning.index) {
       return;
     }
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
@@ -162,7 +158,7 @@ class Logger {
 
   /// Writes success message to stdout.
   void success(String? message) {
-    if (level.level > LogLevel.success.level) {
+    if (level.index > LogLevel.info.index) {
       return;
     }
     _stdout.writeln(lightGreen.wrap(message));
@@ -443,26 +439,4 @@ extension on String {
 extension on Iterable<int> {
   bool isOneOf(Iterable<Iterable<int>> keys) =>
       keys.any((key) => key.every(contains));
-}
-
-extension on LogLevel {
-  int get level {
-    switch (this) {
-      case LogLevel.all:
-        return 0;
-      case LogLevel.detail:
-        return 100;
-      case LogLevel.success:
-      case LogLevel.info:
-        return 200;
-      case LogLevel.warn:
-        return 400;
-      case LogLevel.error:
-        return 500;
-      case LogLevel.alert:
-        return 600;
-      case LogLevel.none:
-        return 1000;
-    }
-  }
 }

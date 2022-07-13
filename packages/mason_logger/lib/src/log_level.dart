@@ -1,28 +1,23 @@
 /// Indicates the desired logging level.
 enum LogLevel {
-  /// Logs everything, no matter what levels will be added in the future.
-  ///
-  /// This is the default level.
-  all,
+  /// The most verbose log level -- everything is logged.
+  verbose,
 
-  /// Log detail, success, info, warning, error, and alert messages.
-  detail,
+  /// Used for debug info.
+  debug,
 
-  /// Log success, info, warning, error, and alert messages.
+  /// Default log level used for standard logs.
   info,
 
-  /// Log success, info, warning, error, and alert messages.
-  success,
+  /// Used to indicate a potential problem.
+  warning,
 
-  /// Log warning, error and alert messages.
-  warn,
-
-  /// Log error and alert messages.
+  /// Used to indicate a problem.
   error,
 
-  /// Only log alert messages
-  alert,
+  /// Used to indicate an urgent/severe problem.
+  critical,
 
-  /// Logs nothing.
-  none,
+  /// The least verbose level -- nothing is logged.
+  quiet,
 }

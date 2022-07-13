@@ -1,7 +1,7 @@
 import 'package:mason_logger/mason_logger.dart';
 
 Future<void> main() async {
-  final logger = Logger()
+  final logger = Logger(level: LogLevel.verbose)
     ..info('info')
     ..alert('alert')
     ..err('error')

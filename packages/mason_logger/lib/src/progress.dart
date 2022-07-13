@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:mason_logger/mason_logger.dart';
+import 'package:meta/meta.dart';
 import 'package:universal_io/io.dart';
 
 /// {@template progress}
@@ -8,10 +9,11 @@ import 'package:universal_io/io.dart';
 /// {@endtemplate}
 class Progress {
   /// {@macro progress}
+  @internal
   Progress(
     this._message,
     this._stdout,
-    this._stderr,
+    this._level,
   ) : _stopwatch = Stopwatch() {
     _stopwatch
       ..reset()
@@ -32,9 +34,9 @@ class Progress {
     '⠏'
   ];
 
-  final Stdout _stderr;
-
   final Stdout _stdout;
+
+  final LogLevel _level;
 
   final Stopwatch _stopwatch;
 
@@ -53,7 +55,7 @@ class Progress {
   /// End the progress and mark it as completed.
   void complete([String? update]) {
     _stopwatch.stop();
-    _stdout.write(
+    _write(
       '''$_clearLn${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer.cancel();
@@ -62,13 +64,13 @@ class Progress {
   /// End the progress and mark it as failed.
   void fail([String? update]) {
     _timer.cancel();
-    _stderr.write('$_clearLn${red.wrap('✗')} ${update ?? _message} $_time\n');
+    _write('$_clearLn${red.wrap('✗')} ${update ?? _message} $_time\n');
     _stopwatch.stop();
   }
 
   /// Update the progress message.
   void update(String update) {
-    _stdout.write(_clearLn);
+    _write(_clearLn);
     _message = update;
     _onTimer(_timer);
   }
@@ -76,16 +78,21 @@ class Progress {
   /// Cancel the progress and remove the written line.
   void cancel() {
     _timer.cancel();
-    _stdout.write(_clearLn);
+    _write(_clearLn);
     _stopwatch.stop();
   }
 
   void _onTimer(Timer _) {
     _index++;
     final char = _progressAnimation[_index % _progressAnimation.length];
-    _stdout.write(
+    _write(
       '''${lightGreen.wrap('$_clearMessageLength$char')} $_message... $_time''',
     );
+  }
+
+  void _write(Object? object) {
+    if (_level.index > LogLevel.info.index) return;
+    _stdout.write(object);
   }
 
   String get _clearMessageLength {
