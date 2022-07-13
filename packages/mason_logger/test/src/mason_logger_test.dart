@@ -207,7 +207,7 @@ void main() {
               stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
             });
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
