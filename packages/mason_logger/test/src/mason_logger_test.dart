@@ -122,7 +122,9 @@ void main() {
             const message = 'test message';
             Logger().alert(message);
             verify(
-              () => stdout.writeln(lightCyan.wrap(styleBold.wrap(message))),
+              () => stdout.writeln(
+                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+              ),
             ).called(1);
           },
           stdout: () => stdout,
@@ -135,7 +137,9 @@ void main() {
             const message = 'test message';
             Logger(level: LogLevel.quiet).alert(message);
             verifyNever(
-              () => stdout.writeln(lightCyan.wrap(styleBold.wrap(message))),
+              () => stdout.writeln(
+                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+              ),
             );
           },
           stdout: () => stdout,
