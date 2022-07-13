@@ -110,7 +110,7 @@ void main() {
             Logger(level: LogLevel.critical).err(message);
             verifyNever(() => stderr.writeln(lightRed.wrap(message)));
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
