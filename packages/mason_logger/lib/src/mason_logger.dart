@@ -137,7 +137,7 @@ class Logger {
     if (level.index > LogLevel.critical.index) {
       return;
     }
-    _stdout.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
+    _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
   }
 
   /// Writes detail message to stdout.

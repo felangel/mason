@@ -116,33 +116,33 @@ void main() {
     });
 
     group('.alert', () {
-      test('writes line to stdout', () {
+      test('writes line to stderr', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().alert(message);
             verify(
-              () => stdout.writeln(
+              () => stderr.writeln(
                 backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
               ),
             ).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
 
-      test('does not write to stdout when LogLevel > critical', () {
+      test('does not write to stderr when LogLevel > critical', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: LogLevel.quiet).alert(message);
             verifyNever(
-              () => stdout.writeln(
+              () => stderr.writeln(
                 backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
               ),
             );
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
         );
       });
     });
