@@ -1,5 +1,10 @@
-/// Indicates what level of logging is desired.
+/// Indicates the desired logging level.
 enum LogLevel {
+  /// Logs everything, no matter what levels will be added in the future.
+  ///
+  /// This is the default level.
+  all,
+
   /// Log detail, success, info, warning, error, and alert messages.
   detail,
 
@@ -18,11 +23,6 @@ enum LogLevel {
   /// Only log alert messages
   alert,
 
-  /// Logs everything, no matter what levels will be added in the future.
-  ///
-  /// This is the default level.
-  all,
-
-  /// No logging.
+  /// Logs nothing.
   none,
 }
