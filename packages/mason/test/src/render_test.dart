@@ -447,6 +447,19 @@ void main() {
           equals(expected),
         );
       });
+
+      test('handles nested variables', () {
+        const input = '{{greeting.name.upperCase()}}';
+        const expected = 'HELLO WORLD';
+        expect(
+          input.render(<String, dynamic>{
+            'greeting': {
+              'name': 'hello world',
+            },
+          }),
+          equals(expected),
+        );
+      });
     });
   });
 }
