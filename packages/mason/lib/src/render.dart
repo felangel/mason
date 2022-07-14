@@ -107,7 +107,7 @@ extension on String {
     final builtInLambdaNamesEscaped =
         _builtInLambdas.keys.map(RegExp.escape).join('|');
     final lambdaPattern =
-        RegExp('{?{{([^}]*)\\.($builtInLambdaNamesEscaped)\\(\\)}}}?');
+        RegExp('{?{{ *([^}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
 
     var currentIteration = this;
 
