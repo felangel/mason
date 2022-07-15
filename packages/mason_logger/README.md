@@ -15,7 +15,7 @@ Future<void> main() async {
   // Use the various APIs to log to stdout.
   final logger = Logger(
     // Specify a log level (defaults to LogLevel.info).
-    level: LogLevel.verbose,
+    level: Level.verbose,
   )
     ..info('info')
     ..alert('alert')

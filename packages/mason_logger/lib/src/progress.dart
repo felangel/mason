@@ -36,7 +36,7 @@ class Progress {
 
   final Stdout _stdout;
 
-  final LogLevel _level;
+  final Level _level;
 
   final Stopwatch _stopwatch;
 
@@ -91,7 +91,7 @@ class Progress {
   }
 
   void _write(Object? object) {
-    if (_level.index > LogLevel.info.index) return;
+    if (_level.index > Level.info.index) return;
     _stdout.write(object);
   }
 

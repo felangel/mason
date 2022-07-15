@@ -11,12 +11,12 @@ void main() {
   group('Progress', () {
     late Stdout stdout;
     late Stdin stdin;
-    late LogLevel level;
+    late Level level;
 
     setUp(() {
       stdout = MockStdout();
       stdin = MockStdin();
-      level = LogLevel.info;
+      level = Level.info;
     });
 
     group('.complete', () {
@@ -48,12 +48,12 @@ void main() {
         );
       });
 
-      test('does not write lines to stdout when LogLevel > info', () async {
+      test('does not write lines to stdout when Level > info', () async {
         await StdioOverrides.runZoned(
           () async {
             const time = '(0.1s)';
             const message = 'test message';
-            final progress = Progress(message, stdout, LogLevel.warning);
+            final progress = Progress(message, stdout, Level.warning);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.complete();
             verifyNever(
@@ -100,12 +100,12 @@ void main() {
         );
       });
 
-      test('does not writes to stdout when LogLevel > info', () async {
+      test('does not writes to stdout when Level > info', () async {
         await StdioOverrides.runZoned(
           () async {
             const update = 'update';
             const time = '(0.1s)';
-            final progress = Progress('message', stdout, LogLevel.warning);
+            final progress = Progress('message', stdout, Level.warning);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.update(update);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -152,12 +152,12 @@ void main() {
         );
       });
 
-      test('does not write to stdout when LogLevel > info', () async {
+      test('does not write to stdout when Level > info', () async {
         await StdioOverrides.runZoned(
           () async {
             const time = '(0.1s)';
             const message = 'test message';
-            final progress = Progress(message, stdout, LogLevel.warning);
+            final progress = Progress(message, stdout, Level.warning);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.fail();
             verifyNever(
@@ -208,12 +208,12 @@ void main() {
         );
       });
 
-      test('does not write to stdout when LogLevel > info', () async {
+      test('does not write to stdout when Level > info', () async {
         await StdioOverrides.runZoned(
           () async {
             const time = '(0.1s)';
             const message = 'test message';
-            final progress = Progress(message, stdout, LogLevel.warning);
+            final progress = Progress(message, stdout, Level.warning);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.cancel();
             verifyNever(

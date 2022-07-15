@@ -1,5 +1,5 @@
 /// Indicates the desired logging level.
-enum LogLevel {
+enum Level {
   /// The most verbose log level -- everything is logged.
   verbose,
 

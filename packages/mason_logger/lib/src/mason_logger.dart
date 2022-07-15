@@ -78,10 +78,10 @@ class _StdioOverridesScope extends StdioOverrides {
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
-  Logger({this.level = LogLevel.info});
+  Logger({this.level = Level.info});
 
   /// The current log level for this logger.
-  final LogLevel level;
+  Level level;
 
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
@@ -112,7 +112,7 @@ class Logger {
 
   /// Writes info message to stdout.
   void info(String? message) {
-    if (level.index > LogLevel.info.index) {
+    if (level.index > Level.info.index) {
       return;
     }
     _stdout.writeln(message);
@@ -126,7 +126,7 @@ class Logger {
 
   /// Writes error message to stderr.
   void err(String? message) {
-    if (level.index > LogLevel.error.index) {
+    if (level.index > Level.error.index) {
       return;
     }
     _stderr.writeln(lightRed.wrap(message));
@@ -134,7 +134,7 @@ class Logger {
 
   /// Writes alert message to stdout.
   void alert(String? message) {
-    if (level.index > LogLevel.critical.index) {
+    if (level.index > Level.critical.index) {
       return;
     }
     _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
@@ -142,7 +142,7 @@ class Logger {
 
   /// Writes detail message to stdout.
   void detail(String? message) {
-    if (level.index > LogLevel.debug.index) {
+    if (level.index > Level.debug.index) {
       return;
     }
     _stdout.writeln(darkGray.wrap(message));
@@ -150,7 +150,7 @@ class Logger {
 
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
-    if (level.index > LogLevel.warning.index) {
+    if (level.index > Level.warning.index) {
       return;
     }
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
@@ -158,7 +158,7 @@ class Logger {
 
   /// Writes success message to stdout.
   void success(String? message) {
-    if (level.index > LogLevel.info.index) {
+    if (level.index > Level.info.index) {
       return;
     }
     _stdout.writeln(lightGreen.wrap(message));
