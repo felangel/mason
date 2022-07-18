@@ -1,3 +1,8 @@
+# 0.1.0-dev.31
+
+- feat: upgrade to `mason: ^0.1.0-dev.29`
+  - includes `mason_logger: ^0.1.0`
+
 # 0.1.0-dev.30
 
 - feat: support bundling git and hosted bricks
