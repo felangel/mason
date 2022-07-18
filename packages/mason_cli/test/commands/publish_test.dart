@@ -115,7 +115,13 @@ void main() {
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Bundling greeting')).called(1);
       verify(() {
-        logger.alert('\nPublishing is forever; bricks cannot be unpublished.');
+        logger.info(
+          lightCyan.wrap(
+            styleBold.wrap(
+              '\nPublishing is forever; bricks cannot be unpublished.',
+            ),
+          ),
+        );
       }).called(1);
       verify(() {
         logger.info('See policy details at https://brickhub.dev/policy\n');

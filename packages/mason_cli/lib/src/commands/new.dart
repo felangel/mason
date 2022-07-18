@@ -73,7 +73,7 @@ class NewCommand extends MasonCommand {
         ..info(
           '''${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):''',
         )
-        ..flush(logger.detail);
+        ..flush((message) => logger.info(darkGray.wrap(message)));
       return ExitCode.success.code;
     } catch (_) {
       newProgress.fail();

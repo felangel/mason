@@ -130,7 +130,7 @@ class BundleCommand extends MasonCommand {
           '${lightGreen.wrap('✓')} '
           'Generated 1 file:',
         )
-        ..detail('  $bundlePath');
+        ..info(darkGray.wrap('  $bundlePath'));
     } catch (_) {
       bundleProgress.fail();
       rethrow;

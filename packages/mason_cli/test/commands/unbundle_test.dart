@@ -75,9 +75,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail(
-          '  ${canonicalize(actual.path)}',
-        ),
+        () => logger.info(darkGray.wrap('  ${canonicalize(actual.path)}')),
       ).called(1);
     });
 
@@ -115,9 +113,7 @@ void main() {
         ),
       ).called(1);
       verify(
-        () => logger.detail(
-          '  ${canonicalize(actual.path)}',
-        ),
+        () => logger.info(darkGray.wrap('  ${canonicalize(actual.path)}')),
       ).called(1);
     });
 

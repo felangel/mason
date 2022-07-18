@@ -96,7 +96,11 @@ void main() {
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
       expect(progressDoneCalls, equals(['Found 1 brick.']));
-      verify(() => logger.alert('${brick.name} v${brick.version}')).called(1);
+      verify(
+        () => logger.info(
+          lightCyan.wrap(styleBold.wrap('${brick.name} v${brick.version}')),
+        ),
+      ).called(1);
       verify(() => logger.info(brick.description)).called(1);
     });
 
@@ -121,7 +125,11 @@ void main() {
       verify(
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
-      verify(() => logger.alert('${brick.name} v${brick.version}')).called(2);
+      verify(
+        () => logger.info(
+          lightCyan.wrap(styleBold.wrap('${brick.name} v${brick.version}')),
+        ),
+      ).called(2);
       verify(() => logger.info(brick.description)).called(2);
     });
 

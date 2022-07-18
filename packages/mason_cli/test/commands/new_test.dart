@@ -81,7 +81,7 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new'), 'simple'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
-      verify(() => logger.flush(logger.detail)).called(1);
+      verify(() => logger.flush(any())).called(1);
     });
 
     test('creates a new brick w/custom output-dir', () async {
@@ -101,7 +101,7 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new'), 'custom'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
-      verify(() => logger.flush(logger.detail)).called(1);
+      verify(() => logger.flush(any())).called(1);
     });
 
     test('creates a new brick w/hooks', () async {
@@ -118,7 +118,7 @@ void main() {
         path.join(testFixturesPath(cwd, suffix: 'new'), 'hooks'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
-      verify(() => logger.flush(logger.detail)).called(1);
+      verify(() => logger.flush(any())).called(1);
     });
 
     test('exits with code 64 when brick already exists', () async {

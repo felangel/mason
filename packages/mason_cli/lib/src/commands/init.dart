@@ -37,7 +37,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       ..info(
         '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
       )
-      ..flush(logger.detail)
+      ..flush((message) => logger.info(darkGray.wrap(message)))
       ..info('')
       ..info('Run "mason make hello" to use your first brick.');
     return ExitCode.success.code;
