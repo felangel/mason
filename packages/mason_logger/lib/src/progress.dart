@@ -47,12 +47,6 @@ class Progress {
   int _index = 0;
 
   /// End the progress and mark it as completed.
-  @Deprecated('Please use [Progress.complete] instead.')
-  void call([String? update]) {
-    return complete(update);
-  }
-
-  /// End the progress and mark it as completed.
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
