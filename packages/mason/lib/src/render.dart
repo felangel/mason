@@ -104,44 +104,30 @@ extension RenderTemplate on String {
 
 extension on String {
   String transpiled(Map<String, dynamic> vars) {
-    final delimeterRegExp = RegExp(r'''({?{{[^{{]*?\(\)}}}?)''');
-    final lambdasRegExp = RegExp(
-      r'''((.*).(camelCase|constantCase|dotCase|headerCase|lowerCase|mustacheCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)\(\))''',
-    );
+    final builtInLambdaNamesEscaped =
+        _builtInLambdas.keys.map(RegExp.escape).join('|');
+    final lambdaPattern =
+        RegExp('{?{{ *([^}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
 
-    final containsLambdas = lambdasRegExp.hasMatch(this);
-    if (!containsLambdas) return this;
+    var currentIteration = this;
 
-    return replaceAllMapped(delimeterRegExp, (match) {
-      final group = match.group(1);
-      if (group == null) return this;
+    // Continue substituting until no match is found to account for chained
+    // lambdas
+    while (lambdaPattern.hasMatch(currentIteration)) {
+      currentIteration =
+          currentIteration.replaceAllMapped(lambdaPattern, (match) {
+        final variable = match.group(1)!;
+        final lambda = match.group(2)!;
 
-      final isTriple = group.startsWith('{{{') && group.endsWith('}}}');
-      final groupContents = isTriple
-          ? group.substring(3, group.length - 3)
-          : group.substring(2, group.length - 2);
+        final isTriple = match.group(0)!.startsWith('{{{');
 
-      return groupContents.replaceAllMapped(lambdasRegExp, (lambdaMatch) {
-        final lambdaGroup = lambdaMatch.group(1);
-        if (lambdaGroup == null) return groupContents;
+        final output = isTriple ? '{{{$variable}}}' : '{{$variable}}';
 
-        var segments = lambdaGroup.split('.');
-        if (segments.length == 1) return groupContents;
-        if (segments.length == 3 &&
-            segments[0].isEmpty &&
-            segments[1].isEmpty) {
-          segments = ['.', segments[2]];
-        }
-
-        final variable = segments.first;
-        var output = isTriple ? '{{{$variable}}}' : '{{$variable}}';
-        for (var i = 1; i < segments.length; i++) {
-          final lambda = segments[i].replaceFirst('()', '');
-          output = '{{#$lambda}}$output{{/$lambda}}';
-        }
-        return output;
+        return '{{#$lambda}}$output{{/$lambda}}';
       });
-    });
+    }
+
+    return currentIteration;
   }
 }
 
