@@ -13,7 +13,10 @@ import 'package:mason_logger/mason_logger.dart';
 
 Future<void> main() async {
   // Use the various APIs to log to stdout.
-  final logger = Logger()
+  final logger = Logger(
+    // Specify a log level (defaults to LogLevel.info).
+    level: Level.verbose,
+  )
     ..info('info')
     ..alert('alert')
     ..err('error')

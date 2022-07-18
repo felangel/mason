@@ -24,6 +24,13 @@ void main() {
         });
       });
 
+      test('uses default Stderr when not specified', () {
+        StdioOverrides.runZoned(() {
+          final overrides = StdioOverrides.current;
+          expect(overrides!.stderr, isA<Stdout>());
+        });
+      });
+
       test('uses custom Stdout when specified', () {
         final stdout = FakeStdout();
         StdioOverrides.runZoned(
@@ -43,6 +50,17 @@ void main() {
             expect(overrides!.stdin, equals(stdin));
           },
           stdin: () => stdin,
+        );
+      });
+
+      test('uses custom Stderr when specified', () {
+        final stderr = FakeStdout();
+        StdioOverrides.runZoned(
+          () {
+            final overrides = StdioOverrides.current;
+            expect(overrides!.stderr, equals(stderr));
+          },
+          stderr: () => stderr,
         );
       });
 
@@ -73,6 +91,21 @@ void main() {
             });
           },
           stdin: () => stdin,
+        );
+      });
+
+      test(
+          'uses current Stderr when not specified '
+          'and zone already contains a Stderr', () {
+        final stderr = FakeStdout();
+        StdioOverrides.runZoned(
+          () {
+            StdioOverrides.runZoned(() {
+              final overrides = StdioOverrides.current;
+              expect(overrides!.stderr, equals(stderr));
+            });
+          },
+          stderr: () => stderr,
         );
       });
 
@@ -115,6 +148,27 @@ void main() {
             );
           },
           stdin: () => rootStdin,
+        );
+      });
+
+      test(
+          'uses nested Stderr when specified '
+          'and zone already contains a Stderr', () {
+        final rootStderr = FakeStdout();
+        StdioOverrides.runZoned(
+          () {
+            final nestedStderr = FakeStdout();
+            final overrides = StdioOverrides.current;
+            expect(overrides!.stderr, equals(rootStderr));
+            StdioOverrides.runZoned(
+              () {
+                final overrides = StdioOverrides.current;
+                expect(overrides!.stderr, equals(nestedStderr));
+              },
+              stderr: () => nestedStderr,
+            );
+          },
+          stderr: () => rootStderr,
         );
       });
     });

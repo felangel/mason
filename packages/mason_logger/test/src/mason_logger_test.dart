@@ -19,6 +19,15 @@ void main() {
       stderr = MockStdout();
     });
 
+    group('level', () {
+      test('is mutable', () {
+        final logger = Logger();
+        expect(logger.level, equals(Level.info));
+        logger.level = Level.verbose;
+        expect(logger.level, equals(Level.verbose));
+      });
+    });
+
     group('.write', () {
       test('writes to stdout', () {
         StdioOverrides.runZoned(
@@ -39,6 +48,17 @@ void main() {
             const message = 'test message';
             Logger().info(message);
             verify(() => stdout.writeln(message)).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('does not write to stdout when Level > info', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: Level.critical).info(message);
+            verifyNever(() => stdout.writeln(contains(message)));
           },
           stdout: () => stdout,
         );
@@ -91,19 +111,47 @@ void main() {
           stderr: () => stderr,
         );
       });
+
+      test('does not write to stderr when Level > error', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: Level.critical).err(message);
+            verifyNever(() => stderr.writeln(lightRed.wrap(message)));
+          },
+          stderr: () => stderr,
+        );
+      });
     });
 
     group('.alert', () {
-      test('writes line to stdout', () {
+      test('writes line to stderr', () {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().alert(message);
             verify(
-              () => stdout.writeln(lightCyan.wrap(styleBold.wrap(message))),
+              () => stderr.writeln(
+                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+              ),
             ).called(1);
           },
-          stdout: () => stdout,
+          stderr: () => stderr,
+        );
+      });
+
+      test('does not write to stderr when Level > critical', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: Level.quiet).alert(message);
+            verifyNever(
+              () => stderr.writeln(
+                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+              ),
+            );
+          },
+          stderr: () => stderr,
         );
       });
     });
@@ -113,8 +161,19 @@ void main() {
         StdioOverrides.runZoned(
           () {
             const message = 'test message';
-            Logger().detail(message);
+            Logger(level: Level.debug).detail(message);
             verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('does not write to stdout when Level > debug', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().detail(message);
+            verifyNever(() => stdout.writeln(darkGray.wrap(message)));
           },
           stdout: () => stdout,
         );
@@ -151,6 +210,19 @@ void main() {
           stderr: () => stderr,
         );
       });
+
+      test('does not write to stderr when Level > warning', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: Level.error).warn(message);
+            verifyNever(() {
+              stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+            });
+          },
+          stderr: () => stderr,
+        );
+      });
     });
 
     group('.success', () {
@@ -160,6 +232,17 @@ void main() {
             const message = 'test message';
             Logger().success(message);
             verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('does not write to stdout when Level > info', () {
+        StdioOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(level: Level.warning).success(message);
+            verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
           },
           stdout: () => stdout,
         );
