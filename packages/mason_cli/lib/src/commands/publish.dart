@@ -69,7 +69,13 @@ class PublishCommand extends MasonCommand {
     }
 
     logger
-      ..alert('\nPublishing is forever; bricks cannot be unpublished.')
+      ..info(
+        lightCyan.wrap(
+          styleBold.wrap(
+            '\nPublishing is forever; bricks cannot be unpublished.',
+          ),
+        ),
+      )
       ..info('See policy details at https://brickhub.dev/policy\n');
 
     final confirmed = logger.confirm(

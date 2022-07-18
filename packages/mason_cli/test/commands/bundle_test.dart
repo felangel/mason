@@ -90,7 +90,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 
@@ -152,7 +152,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 
@@ -205,7 +205,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 
@@ -279,7 +279,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 
@@ -375,7 +375,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 
@@ -452,7 +452,7 @@ void main() {
           ),
         ).called(1);
         verify(
-          () => logger.detail('  ${canonicalize(file.path)}'),
+          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
       });
 

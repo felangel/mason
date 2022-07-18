@@ -40,10 +40,12 @@ class SearchCommand extends MasonCommand {
 
       for (final brick in results) {
         logger
-          ..alert('${brick.name} v${brick.version}')
+          ..info(
+            lightCyan.wrap(styleBold.wrap('${brick.name} v${brick.version}')),
+          )
           ..info(brick.description)
           ..info('https://brickhub.dev/bricks/${brick.name}/${brick.version}')
-          ..detail('-' * 80);
+          ..info(darkGray.wrap('-' * 80));
       }
       return ExitCode.success.code;
     } catch (error) {

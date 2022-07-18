@@ -330,14 +330,14 @@ extension on Logger {
           '${lightGreen.wrap('✓')} '
           'Generated $fileCount file:',
         )
-        ..flush(detail);
+        ..flush((message) => info(darkGray.wrap(message)));
     } else {
       this
         ..info(
           '${lightGreen.wrap('✓')} '
           'Generated $fileCount file(s):',
         )
-        ..flush(detail);
+        ..flush((message) => info(darkGray.wrap(message)));
     }
   }
 }
