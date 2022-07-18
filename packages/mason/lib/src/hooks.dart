@@ -289,8 +289,7 @@ class GeneratorHooks {
         }
       }
 
-      final packageConfigBytes = await packageConfigFile.readAsBytes();
-      packageConfigUri = Uri.dataFromBytes(packageConfigBytes);
+      packageConfigUri = packageConfigFile.uri;
     }
 
     Uri? uri;
