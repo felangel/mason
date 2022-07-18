@@ -1,3 +1,9 @@
+# 0.1.0-dev.29
+
+- fix: improve lambda shorthand syntax flexibility
+- perf: speed up hooks execution
+- refactor: use `mason_logger ^0.1.0`
+
 # 0.1.0-dev.28
 
 - fix: override `toString` on `MasonException`
