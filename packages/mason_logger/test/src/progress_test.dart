@@ -234,36 +234,5 @@ void main() {
         );
       });
     });
-
-    group('.call', () {
-      test('writes lines to stdout', () async {
-        await StdioOverrides.runZoned(
-          () async {
-            const time = '(0.1s)';
-            const message = 'test message';
-            final progress = Progress(message, stdout, level);
-            await Future<void>.delayed(const Duration(milliseconds: 100));
-            // ignore: deprecated_member_use_from_same_package
-            progress();
-            verify(
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap(time)}''',
-                );
-              },
-            ).called(1);
-            verify(
-              () {
-                stdout.write(
-                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap(time)}\n''',
-                );
-              },
-            ).called(1);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
-        );
-      });
-    });
   });
 }
