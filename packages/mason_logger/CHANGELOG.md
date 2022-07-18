@@ -1,3 +1,11 @@
+# 0.1.0
+
+- **BREAKING**: support log levels (default `Level` is `Level.info`)
+- **BREAKING**: mark `Progress()` as `@internal`
+- **BREAKING**: `alert` writes to `stderr` instead of `stdout`
+- **BREAKING**: `Progress.fail(...)` writes to `stdout` instead of `stderr`
+- **BREAKING**: remove deprecated `Progress.call(...)` (use `Progress.complete` instead).
+
 # 0.1.0-dev.14
 
 - feat: `Progress.update`

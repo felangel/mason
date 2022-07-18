@@ -1,8 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 
-import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/progress.dart';
+import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
 import 'package:universal_io/io.dart' as io;
 
@@ -74,8 +73,16 @@ class _StdioOverridesScope extends StdioOverrides {
   }
 }
 
+/// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
+/// {@endtemplate}
 class Logger {
+  /// {@macro logger}
+  Logger({this.level = Level.info});
+
+  /// The current log level for this logger.
+  Level level;
+
   final _queue = <String?>[];
   final StdioOverrides? _overrides = StdioOverrides.current;
 
@@ -104,34 +111,58 @@ class Logger {
   void write(String? message) => _stdout.write(message);
 
   /// Writes info message to stdout.
-  void info(String? message) => _stdout.writeln(message);
+  void info(String? message) {
+    if (level.index > Level.info.index) {
+      return;
+    }
+    _stdout.writeln(message);
+  }
 
   /// Writes delayed message to stdout.
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) {
-    return Progress(message, _stdout, _stderr);
-  }
+  Progress progress(String message) => Progress(message, _stdout, level);
 
   /// Writes error message to stderr.
-  void err(String? message) => _stderr.writeln(lightRed.wrap(message));
+  void err(String? message) {
+    if (level.index > Level.error.index) {
+      return;
+    }
+    _stderr.writeln(lightRed.wrap(message));
+  }
 
   /// Writes alert message to stdout.
   void alert(String? message) {
-    _stdout.writeln(lightCyan.wrap(styleBold.wrap(message)));
+    if (level.index > Level.critical.index) {
+      return;
+    }
+    _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
   }
 
   /// Writes detail message to stdout.
-  void detail(String? message) => _stdout.writeln(darkGray.wrap(message));
+  void detail(String? message) {
+    if (level.index > Level.debug.index) {
+      return;
+    }
+    _stdout.writeln(darkGray.wrap(message));
+  }
 
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
+    if (level.index > Level.warning.index) {
+      return;
+    }
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
-  void success(String? message) => _stdout.writeln(lightGreen.wrap(message));
+  void success(String? message) {
+    if (level.index > Level.info.index) {
+      return;
+    }
+    _stdout.writeln(lightGreen.wrap(message));
+  }
 
   /// Prompts user and returns response.
   /// Provide a default value via [defaultValue].
