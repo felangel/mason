@@ -15,9 +15,9 @@ const colors = [
 ];
 
 Future<void> run(HookContext context) async {
-  final done = context.logger.progress('Generating a random color');
+  final progress = context.logger.progress('Generating a random color');
   await Future<void>.delayed(Duration(seconds: 1));
-  done('Generated');
+  progress.complete('Generated');
   final randomSeed = Random().nextInt(colors.length);
   context.vars['favorite_color'] = colors[randomSeed];
 }
