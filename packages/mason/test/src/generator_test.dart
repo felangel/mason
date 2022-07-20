@@ -1,11 +1,11 @@
 // ignore_for_file: missing_whitespace_between_adjacent_strings
+import 'dart:io';
 
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 import '../bundles/bundles.dart';
 

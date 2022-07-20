@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:http/http.dart' as http;
@@ -6,7 +7,6 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 /// {@template brick_resolve_version_exception}
 /// Thrown when an error occurs while resolving a brick version.

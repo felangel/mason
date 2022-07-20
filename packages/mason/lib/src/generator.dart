@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'dart:io' show Directory, File, FileMode, Process;
 import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
@@ -10,7 +11,6 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart' show Directory, File, FileMode, Process;
 
 part 'hooks.dart';
 

@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:mason/src/git.dart';
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 void main() {
   group('Git', () {
