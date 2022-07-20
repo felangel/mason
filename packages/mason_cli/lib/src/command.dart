@@ -1,10 +1,11 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 /// {@template mason_yaml_not_found_exception}
 /// Thrown when a `mason.yaml` cannot be found locally.

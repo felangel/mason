@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
@@ -5,7 +7,6 @@ import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:pub_updater/pub_updater.dart';
-import 'package:universal_io/io.dart';
 
 /// The package name.
 const packageName = 'mason_cli';

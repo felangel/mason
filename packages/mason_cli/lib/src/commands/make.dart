@@ -1,10 +1,10 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.

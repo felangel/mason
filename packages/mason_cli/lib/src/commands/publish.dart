@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'dart:math' as math;
 import 'dart:typed_data';
 
@@ -6,7 +7,6 @@ import 'package:mason/mason.dart';
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
-import 'package:universal_io/io.dart';
 
 const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
 
