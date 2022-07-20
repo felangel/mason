@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:http/http.dart' as http;
 import 'package:mason_api/mason_api.dart';
@@ -7,7 +8,6 @@ import 'package:mason_api/src/models/models.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 class MockHttpClient extends Mock implements http.Client {}
 
