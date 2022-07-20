@@ -1,8 +1,8 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:meta/meta.dart';
-import 'package:universal_io/io.dart';
 
 /// {@template progress}
 /// A class that can be used to display progress information to the user.
