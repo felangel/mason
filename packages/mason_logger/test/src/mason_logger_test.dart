@@ -18,6 +18,8 @@ void main() {
       stdout = MockStdout();
       stdin = MockStdin();
       stderr = MockStdout();
+
+      when(() => stdout.supportsAnsiEscapes).thenReturn(true);
     });
 
     group('level', () {
@@ -31,7 +33,7 @@ void main() {
 
     group('.write', () {
       test('writes to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().write(message);
@@ -44,7 +46,7 @@ void main() {
 
     group('.info', () {
       test('writes line to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().info(message);
@@ -55,7 +57,7 @@ void main() {
       });
 
       test('does not write to stdout when Level > info', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.critical).info(message);
@@ -68,7 +70,7 @@ void main() {
 
     group('.delayed', () {
       test('does not write to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().delayed(message);
@@ -81,7 +83,7 @@ void main() {
 
     group('.flush', () {
       test('writes to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const messages = ['test', 'message', '!'];
             final logger = Logger();
@@ -103,7 +105,7 @@ void main() {
 
     group('.err', () {
       test('writes line to stderr', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().err(message);
@@ -114,7 +116,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > error', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.critical).err(message);
@@ -127,7 +129,7 @@ void main() {
 
     group('.alert', () {
       test('writes line to stderr', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().alert(message);
@@ -142,7 +144,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > critical', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.quiet).alert(message);
@@ -159,7 +161,7 @@ void main() {
 
     group('.detail', () {
       test('writes line to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.debug).detail(message);
@@ -170,7 +172,7 @@ void main() {
       });
 
       test('does not write to stdout when Level > debug', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().detail(message);
@@ -183,7 +185,7 @@ void main() {
 
     group('.warn', () {
       test('writes line to stderr', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().warn(message);
@@ -198,7 +200,7 @@ void main() {
       });
 
       test('writes line to stderr with custom tag', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().warn(message, tag: '🚨');
@@ -213,7 +215,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > warning', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.error).warn(message);
@@ -228,7 +230,7 @@ void main() {
 
     group('.success', () {
       test('writes line to stdout', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger().success(message);
@@ -239,7 +241,7 @@ void main() {
       });
 
       test('does not write to stdout when Level > info', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             Logger(level: Level.warning).success(message);
@@ -252,7 +254,7 @@ void main() {
 
     group('.prompt', () {
       test('writes line to stdout and reads line from stdin', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const response = 'test response';
@@ -271,7 +273,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin with default', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const defaultValue = 'Dash';
             const message = 'test message';
@@ -291,7 +293,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin hidden', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const defaultValue = 'Dash';
             const message = 'test message';
@@ -337,7 +339,7 @@ void main() {
       });
 
       test('writes multi line to stdout and resets after response', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message\nwith more\nlines';
             final lines = message.split('\n').length - 1;
@@ -359,7 +361,7 @@ void main() {
 
     group('.confirm', () {
       test('writes line to stdout and reads line from stdin (default no)', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -377,7 +379,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin (default yes)', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
@@ -395,7 +397,7 @@ void main() {
       });
 
       test('handles all versions of yes correctly', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -416,7 +418,7 @@ void main() {
       });
 
       test('handles all versions of no correctly', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -437,7 +439,7 @@ void main() {
       });
 
       test('returns default when response is neither yes/no (default no)', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -455,7 +457,7 @@ void main() {
       });
 
       test('returns default when response is neither yes/no (default yes)', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
@@ -475,7 +477,7 @@ void main() {
 
     group('.progress', () {
       test('writes lines to stdout', () async {
-        await StdioOverrides.runZoned(
+        await IOOverrides.runZoned(
           () async {
             const time = '(0.Xs)';
             const message = 'test message';
@@ -510,7 +512,7 @@ void main() {
       test(
           'enter selects the nothing '
           'when defaultValues is not specified.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             when(() => stdin.readByteSync()).thenReturn(10);
@@ -525,9 +527,9 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -537,7 +539,7 @@ void main() {
       });
 
       test('enter selects the default values when specified.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = ['b', 'c'];
@@ -554,10 +556,10 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
             ]);
@@ -568,7 +570,7 @@ void main() {
       });
 
       test('space selected/deselects the values.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = ['b', 'c'];
@@ -588,9 +590,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
@@ -598,9 +600,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
@@ -608,36 +610,36 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
               () => stdout.write(green.wrap('❯')),
@@ -645,9 +647,9 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
               () => stdout.write(green.wrap('❯')),
@@ -661,7 +663,7 @@ void main() {
       });
 
       test('down arrow selects next index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final bytes = [27, 91, 66, 10];
@@ -680,19 +682,19 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -702,7 +704,7 @@ void main() {
       });
 
       test('j selects next index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final bytes = [106, 10];
@@ -721,19 +723,19 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -743,7 +745,7 @@ void main() {
       });
 
       test('up arrow wraps to end', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final bytes = [27, 91, 65, 10];
@@ -761,16 +763,16 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
@@ -782,7 +784,7 @@ void main() {
       });
 
       test('k wraps to end', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final bytes = [107, 10];
@@ -800,16 +802,16 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
@@ -821,7 +823,7 @@ void main() {
       });
 
       test('down arrow wraps to beginning', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             final bytes = [27, 91, 66, 27, 91, 66, 27, 91, 66, 10];
@@ -839,25 +841,25 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
@@ -866,9 +868,9 @@ void main() {
               () => stdout.writeln(message),
               () => stdout.write(green.wrap('❯')),
               () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -882,7 +884,7 @@ void main() {
       test(
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'a';
@@ -899,9 +901,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -911,7 +913,7 @@ void main() {
       });
 
       test('enter selects the default value when specified.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'b';
@@ -926,12 +928,12 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -941,7 +943,7 @@ void main() {
       });
 
       test('space selects the default value when specified.', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'b';
@@ -956,12 +958,12 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -971,7 +973,7 @@ void main() {
       });
 
       test('down arrow selects next index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'b';
@@ -991,19 +993,19 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -1013,7 +1015,7 @@ void main() {
       });
 
       test('up arrow selects previous index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'a';
@@ -1031,12 +1033,12 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
@@ -1044,9 +1046,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -1056,7 +1058,7 @@ void main() {
       });
 
       test('up arrow wraps to end', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'c';
@@ -1076,16 +1078,16 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
@@ -1098,7 +1100,7 @@ void main() {
       });
 
       test('down arrow wraps to beginning', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'a';
@@ -1116,9 +1118,9 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
@@ -1129,9 +1131,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -1141,7 +1143,7 @@ void main() {
       });
 
       test('j selects next index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'b';
@@ -1161,19 +1163,19 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
@@ -1183,7 +1185,7 @@ void main() {
       });
 
       test('k selects previous index', () {
-        StdioOverrides.runZoned(
+        IOOverrides.runZoned(
           () {
             const message = 'test message';
             const expected = 'a';
@@ -1201,12 +1203,12 @@ void main() {
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
               () => stdout.writeln(message),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  a'),
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
               () => stdout.write('\x1b7'),
               () => stdout.write('\x1b[?25l'),
@@ -1214,9 +1216,9 @@ void main() {
               () => stdout.write(green.wrap('❯')),
               () => stdout
                   .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap(' ')),
+              () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
             ]);
           },
