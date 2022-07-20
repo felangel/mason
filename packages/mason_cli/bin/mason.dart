@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:mason_cli/src/command_runner.dart';
-import 'package:universal_io/io.dart';
 
 Future<void> main(List<String> args) async {
   await flushThenExit(await MasonCommandRunner().run(args));

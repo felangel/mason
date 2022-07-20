@@ -1,8 +1,9 @@
+import 'dart:io';
+
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
 import 'package:recase/recase.dart';
-import 'package:universal_io/io.dart';
 
 /// {@template new_command}
 /// `mason new` command which creates a new brick.

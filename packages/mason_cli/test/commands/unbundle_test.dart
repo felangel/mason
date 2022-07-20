@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
@@ -5,7 +7,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 import '../helpers/helpers.dart';
 

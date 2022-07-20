@@ -1,4 +1,5 @@
 // ignore_for_file: prefer_const_constructors
+import 'dart:io';
 
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
@@ -6,7 +7,6 @@ import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 class MockLogger extends Mock implements Logger {}
 

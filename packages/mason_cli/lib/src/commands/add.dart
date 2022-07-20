@@ -1,9 +1,10 @@
+import 'dart:io';
+
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/install_brick.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 /// {@template add_command}
 /// `mason add` command which adds a brick.

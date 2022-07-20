@@ -1,5 +1,6 @@
+import 'dart:io';
+
 import 'package:path/path.dart' as path;
-import 'package:universal_io/io.dart';
 
 String testFixturesPath(Directory cwd, {String suffix = ''}) {
   return path.join(cwd.path, 'test', 'fixtures', suffix);

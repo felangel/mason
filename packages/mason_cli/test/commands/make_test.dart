@@ -1,5 +1,6 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason/mason.dart' as mason show packageVersion;
@@ -9,7 +10,6 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 import '../helpers/helpers.dart';
 
