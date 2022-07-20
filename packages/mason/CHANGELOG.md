@@ -1,3 +1,8 @@
+# 0.1.0-dev.30
+
+- refactor(deps): remove `pkg:universal_io`
+- refactor: use `mason_logger ^0.1.1`
+
 # 0.1.0-dev.29
 
 - fix: improve lambda shorthand syntax flexibility
