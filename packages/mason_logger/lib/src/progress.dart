@@ -18,7 +18,7 @@ class Progress {
     _stopwatch
       ..reset()
       ..start();
-    _timer = Timer.periodic(const Duration(milliseconds: 80), _onTimer);
+    _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
   }
 
   static const List<String> _progressAnimation = [
@@ -66,7 +66,7 @@ class Progress {
   void update(String update) {
     _write(_clearLn);
     _message = update;
-    _onTimer(_timer);
+    _onTick(_timer);
   }
 
   /// Cancel the progress and remove the written line.
@@ -76,7 +76,7 @@ class Progress {
     _stopwatch.stop();
   }
 
-  void _onTimer(Timer _) {
+  void _onTick(Timer _) {
     _index++;
     final char = _progressAnimation[_index % _progressAnimation.length];
     _write(

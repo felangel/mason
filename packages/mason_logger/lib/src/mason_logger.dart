@@ -112,9 +112,7 @@ class Logger {
 
   /// Writes info message to stdout.
   void info(String? message) {
-    if (level.index > Level.info.index) {
-      return;
-    }
+    if (level.index > Level.info.index) return;
     _stdout.writeln(message);
   }
 
@@ -126,41 +124,31 @@ class Logger {
 
   /// Writes error message to stderr.
   void err(String? message) {
-    if (level.index > Level.error.index) {
-      return;
-    }
+    if (level.index > Level.error.index) return;
     _stderr.writeln(lightRed.wrap(message));
   }
 
   /// Writes alert message to stdout.
   void alert(String? message) {
-    if (level.index > Level.critical.index) {
-      return;
-    }
+    if (level.index > Level.critical.index) return;
     _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
   }
 
   /// Writes detail message to stdout.
   void detail(String? message) {
-    if (level.index > Level.debug.index) {
-      return;
-    }
+    if (level.index > Level.debug.index) return;
     _stdout.writeln(darkGray.wrap(message));
   }
 
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
-    if (level.index > Level.warning.index) {
-      return;
-    }
+    if (level.index > Level.warning.index) return;
     _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
   }
 
   /// Writes success message to stdout.
   void success(String? message) {
-    if (level.index > Level.info.index) {
-      return;
-    }
+    if (level.index > Level.info.index) return;
     _stdout.writeln(lightGreen.wrap(message));
   }
 
