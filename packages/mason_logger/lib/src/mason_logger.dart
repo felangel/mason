@@ -1,77 +1,7 @@
-import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:meta/meta.dart';
-
-const _asyncRunZoned = runZoned;
-
-// TODO(felangel): remove when IOOverrides stdout/stdin is available in stable, https://github.com/dart-lang/sdk/commit/0d6c343196ea216cfb1eecc9e4f5c4cdedcdd52f
-/// This class facilitates overriding [io.stdout] and [io.stdin].
-/// It should be extended by another class in client code with overrides
-/// that construct a custom implementation.
-@visibleForTesting
-abstract class StdioOverrides {
-  static final _token = Object();
-
-  /// Returns the current [StdioOverrides] instance.
-  ///
-  /// This will return `null` if the current [Zone] does not contain
-  /// any [StdioOverrides].
-  ///
-  /// See also:
-  /// * [StdioOverrides.runZoned] to provide [StdioOverrides]
-  /// in a fresh [Zone].
-  ///
-  static StdioOverrides? get current {
-    return Zone.current[_token] as StdioOverrides?;
-  }
-
-  /// Runs [body] in a fresh [Zone] using the provided overrides.
-  static R runZoned<R>(
-    R Function() body, {
-    io.Stdout Function()? stdout,
-    io.Stdin Function()? stdin,
-    io.Stdout Function()? stderr,
-  }) {
-    final overrides = _StdioOverridesScope(stdout, stdin, stderr);
-    return _asyncRunZoned(body, zoneValues: {_token: overrides});
-  }
-
-  /// The [io.Stdout] that will be used within the current [Zone].
-  io.Stdout get stdout => io.stdout;
-
-  /// The [io.Stdin] that will be used within the current [Zone].
-  io.Stdin get stdin => io.stdin;
-
-  /// The [io.Stdout] that will be used for errors within the current [Zone].
-  io.Stdout get stderr => io.stderr;
-}
-
-class _StdioOverridesScope extends StdioOverrides {
-  _StdioOverridesScope(this._stdout, this._stdin, this._stderr);
-
-  final StdioOverrides? _previous = StdioOverrides.current;
-  final io.Stdout Function()? _stdout;
-  final io.Stdin Function()? _stdin;
-  final io.Stdout Function()? _stderr;
-
-  @override
-  io.Stdout get stdout {
-    return _stdout?.call() ?? _previous?.stdout ?? super.stdout;
-  }
-
-  @override
-  io.Stdin get stdin {
-    return _stdin?.call() ?? _previous?.stdin ?? super.stdin;
-  }
-
-  @override
-  io.Stdout get stderr {
-    return _stderr?.call() ?? _previous?.stderr ?? super.stderr;
-  }
-}
 
 /// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
@@ -84,7 +14,7 @@ class Logger {
   Level level;
 
   final _queue = <String?>[];
-  final StdioOverrides? _overrides = StdioOverrides.current;
+  final io.IOOverrides? _overrides = io.IOOverrides.current;
 
   final _jKey = [106];
   final _kKey = [107];
