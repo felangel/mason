@@ -1,7 +1,10 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
+
+part 'progress.dart';
 
 /// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
@@ -50,7 +53,7 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) => Progress(message, _stdout, level);
+  Progress progress(String message) => Progress._(message, _stdout, level);
 
   /// Writes error message to stderr.
   void err(String? message) {

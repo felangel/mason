@@ -1,16 +1,11 @@
-import 'dart:async';
-import 'dart:io';
-
-import 'package:mason_logger/mason_logger.dart';
-import 'package:meta/meta.dart';
+part of 'mason_logger.dart';
 
 /// {@template progress}
 /// A class that can be used to display progress information to the user.
 /// {@endtemplate}
 class Progress {
   /// {@macro progress}
-  @internal
-  Progress(
+  Progress._(
     this._message,
     this._stdout,
     this._level,
@@ -34,7 +29,7 @@ class Progress {
     '⠏'
   ];
 
-  final Stdout _stdout;
+  final io.Stdout _stdout;
 
   final Level _level;
 

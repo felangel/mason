@@ -12,11 +12,9 @@ class MockStdin extends Mock implements Stdin {}
 void main() {
   group('Progress', () {
     late Stdout stdout;
-    late Level level;
 
     setUp(() {
       stdout = MockStdout();
-      level = Level.info;
     });
 
     group('.complete', () {
@@ -27,7 +25,7 @@ void main() {
               () async {
                 const time = '(0.1s)';
                 const message = 'test message';
-                final progress = Progress(message, stdout, level);
+                final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.complete();
                 verify(
@@ -58,7 +56,7 @@ void main() {
             await IOOverrides.runZoned(
               () async {
                 const message = 'test message';
-                final progress = Progress(message, stdout, Level.warning);
+                final progress = Logger(level: Level.warning).progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.complete();
                 verifyNever(() => stdout.write(any()));
@@ -80,7 +78,7 @@ void main() {
                 const message = 'message';
                 const update = 'update';
                 const time = '(0.1s)';
-                final progress = Progress(message, stdout, level);
+                final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.update(update);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -111,8 +109,9 @@ void main() {
           () async {
             await IOOverrides.runZoned(
               () async {
+                const message = 'message';
                 const update = 'update';
-                final progress = Progress('message', stdout, Level.warning);
+                final progress = Logger(level: Level.warning).progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.update(update);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -134,7 +133,7 @@ void main() {
               () async {
                 const time = '(0.1s)';
                 const message = 'test message';
-                final progress = Progress(message, stdout, level);
+                final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.fail();
                 verify(
@@ -165,7 +164,7 @@ void main() {
             await IOOverrides.runZoned(
               () async {
                 const message = 'test message';
-                final progress = Progress(message, stdout, Level.warning);
+                final progress = Logger(level: Level.warning).progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.fail();
                 verifyNever(() => stdout.write(any()));
@@ -186,7 +185,7 @@ void main() {
               () async {
                 const time = '(0.1s)';
                 const message = 'test message';
-                final progress = Progress(message, stdout, level);
+                final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.cancel();
                 verify(
@@ -217,7 +216,7 @@ void main() {
             await IOOverrides.runZoned(
               () async {
                 const message = 'test message';
-                final progress = Progress(message, stdout, Level.warning);
+                final progress = Logger(level: Level.warning).progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.cancel();
                 verifyNever(() => stdout.write(any()));
