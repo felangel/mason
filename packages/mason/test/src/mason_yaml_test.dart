@@ -1,9 +1,9 @@
 // ignore_for_file: prefer_const_constructors
+import 'dart:io';
 
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 void main() {
   group('MasonYaml', () {

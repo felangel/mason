@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
-import 'package:universal_io/io.dart';
 
 final _binaryFileTypes = RegExp(
   r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf)$',

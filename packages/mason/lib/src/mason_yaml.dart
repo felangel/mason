@@ -1,6 +1,7 @@
+import 'dart:io';
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 part 'mason_yaml.g.dart';
 
