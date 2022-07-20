@@ -1,7 +1,8 @@
+import 'dart:io';
+
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
-import 'package:universal_io/io.dart';
 
 class FakeStdout extends Fake implements Stdout {}
 
