@@ -1,11 +1,11 @@
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:cli_util/cli_util.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason_api/src/jwt_decode.dart';
 import 'package:mason_api/src/models/models.dart';
 import 'package:path/path.dart' as p;
-import 'package:universal_io/io.dart';
 
 /// {@template mason_api_exception}
 /// Base for all exceptions thrown by [MasonApi].
