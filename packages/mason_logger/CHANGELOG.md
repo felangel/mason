@@ -1,3 +1,8 @@
+# 0.1.1
+
+- refactor(deps): remove `pkg:universal_io`
+- docs: fix typo in `README` snippet
+
 # 0.1.0
 
 - **BREAKING**: support log levels (default `Level` is `Level.info`)
