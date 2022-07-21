@@ -53,10 +53,7 @@ void main() {
         const content = 'Hello {{#upperCase}}{{name}}{{/upperCase}}!';
         final source = utf8.encode(content);
         expect(
-          {'{{~ $name }}': source}.resolve(
-            name,
-            vars: <String, dynamic>{'name': 'dash'},
-          ),
+          {'{{~ $name }}': source}.resolve(name),
           isA<Template>()
               .having((template) => template.name, 'name', name)
               .having((template) => template.source, 'source', content),
@@ -69,10 +66,7 @@ void main() {
         final source = utf8.encode(content);
         const expected = 'Hello {{#upperCase}}{{name}}{{/upperCase}}!';
         expect(
-          {'{{~ $name }}': source}.resolve(
-            name,
-            vars: <String, dynamic>{'name': 'dash'},
-          ),
+          {'{{~ $name }}': source}.resolve(name),
           isA<Template>()
               .having((template) => template.name, 'name', name)
               .having((template) => template.source, 'source', expected),
@@ -475,6 +469,28 @@ void main() {
       test('nested lambdas with whitespace', () {
         const input = '{{ greeting.dotCase().upperCase() }}';
         const expected = 'HELLO.WORLD';
+        expect(
+          input.render(<String, dynamic>{
+            'greeting': 'hello world',
+          }),
+          equals(expected),
+        );
+      });
+
+      test('asymmetrical mustache brackets (prefix)', () {
+        const input = '{{{greeting.dotCase()}}';
+        const expected = '{hello.world';
+        expect(
+          input.render(<String, dynamic>{
+            'greeting': 'hello world',
+          }),
+          equals(expected),
+        );
+      });
+
+      test('asymmetrical mustache brackets (suffix)', () {
+        const input = '{{greeting.dotCase()}}}';
+        const expected = 'hello.world}';
         expect(
           input.render(<String, dynamic>{
             'greeting': 'hello world',
