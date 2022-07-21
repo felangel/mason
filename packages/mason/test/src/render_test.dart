@@ -477,7 +477,7 @@ void main() {
         );
       });
 
-      test('asymmetrical mustache brackets (prefix)', () {
+      test('asymmetrical curly brackets (prefix)', () {
         const input = '{{{greeting.dotCase()}}';
         const expected = '{hello.world';
         expect(
@@ -488,7 +488,7 @@ void main() {
         );
       });
 
-      test('asymmetrical mustache brackets (suffix)', () {
+      test('asymmetrical curly brackets (suffix)', () {
         const input = '{{greeting.dotCase()}}}';
         const expected = 'hello.world}';
         expect(
