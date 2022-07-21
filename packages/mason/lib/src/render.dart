@@ -64,7 +64,8 @@ final _builtInLambdas = <String, LambdaFunction>{
   'upperCase': (ctx) => ctx.renderString().toUpperCase(),
 };
 
-const _internalVars = <String, dynamic>{
+/// [Map] of all the built-in variables.
+const _builtInVars = <String, dynamic>{
   '__LEFT_CURLY_BRACKET__': '{',
   '__RIGHT_CURLY_BRACKET__': '}',
 };
@@ -105,7 +106,7 @@ extension RenderTemplate on String {
       template.renderString(<String, dynamic>{
         ...vars,
         ..._builtInLambdas,
-        ..._internalVars,
+        ..._builtInVars,
       }),
     );
   }
