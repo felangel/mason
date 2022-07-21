@@ -1,6 +1,6 @@
 # 0.1.0-dev.31
 
-- fix:render asymmetrical shorthand lambda expressions correctly
+- fix: render asymmetrical shorthand lambda expressions correctly
 
 # 0.1.0-dev.30
 
