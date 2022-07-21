@@ -64,6 +64,12 @@ final _builtInLambdas = <String, LambdaFunction>{
   'upperCase': (ctx) => ctx.renderString().toUpperCase(),
 };
 
+/// [Map] of all the built-in variables.
+const _builtInVars = <String, dynamic>{
+  '__LEFT_CURLY_BRACKET__': '{',
+  '__RIGHT_CURLY_BRACKET__': '}',
+};
+
 /// {@template render_template}
 /// Given a `String` with mustache templates, and a [Map] of String key /
 /// value pairs, substitute all instances of `{{key}}` for `value`.
@@ -91,23 +97,27 @@ extension RenderTemplate on String {
     Map<String, List<int>>? partials = const {},
   ]) {
     final template = Template(
-      _sanitizeInput(transpiled(vars)),
+      _sanitizeInput(transpiled()),
       lenient: true,
-      partialResolver: (name) => partials?.resolve(name, vars: vars),
+      partialResolver: (name) => partials?.resolve(name),
     );
 
     return _sanitizeOutput(
-      template.renderString(<String, dynamic>{..._builtInLambdas, ...vars}),
+      template.renderString(<String, dynamic>{
+        ...vars,
+        ..._builtInLambdas,
+        ..._builtInVars,
+      }),
     );
   }
 }
 
 extension on String {
-  String transpiled(Map<String, dynamic> vars) {
+  String transpiled() {
     final builtInLambdaNamesEscaped =
         _builtInLambdas.keys.map(RegExp.escape).join('|');
     final lambdaPattern =
-        RegExp('{?{{ *([^}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
+        RegExp('{?{{ *([^{}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
 
     var currentIteration = this;
 
@@ -116,12 +126,23 @@ extension on String {
     while (lambdaPattern.hasMatch(currentIteration)) {
       currentIteration =
           currentIteration.replaceAllMapped(lambdaPattern, (match) {
+        final expression = match.group(0)!;
         final variable = match.group(1)!;
         final lambda = match.group(2)!;
 
-        final isTriple = match.group(0)!.startsWith('{{{');
+        final startsWithTriple = expression.startsWith('{{{');
+        final endsWithTriple = expression.endsWith('}}}');
+        final isTriple = startsWithTriple && endsWithTriple;
 
         final output = isTriple ? '{{{$variable}}}' : '{{$variable}}';
+
+        if (startsWithTriple && !isTriple) {
+          return '{{__LEFT_CURLY_BRACKET__}}{{#$lambda}}$output{{/$lambda}}';
+        }
+
+        if (endsWithTriple && !isTriple) {
+          return '{{#$lambda}}$output{{/$lambda}}{{__RIGHT_CURLY_BRACKET__}}';
+        }
 
         return '{{#$lambda}}$output{{/$lambda}}';
       });
@@ -137,14 +158,11 @@ extension on String {
 /// {@endtemplate}
 extension ResolvePartial on Map<String, List<int>> {
   /// {@macro resolve_partial}
-  Template? resolve(
-    final String name, {
-    Map<String, dynamic> vars = const <String, dynamic>{},
-  }) {
+  Template? resolve(final String name) {
     final content = this['{{~ $name }}'];
     if (content == null) return null;
     final decoded = utf8.decode(content);
-    final sanitized = _sanitizeInput(decoded.transpiled(vars));
+    final sanitized = _sanitizeInput(decoded.transpiled());
     return Template(sanitized, name: name, lenient: true);
   }
 }
