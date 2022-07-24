@@ -8,9 +8,9 @@ class Progress {
   Progress._(
     this._message,
     this._stdout,
-    this._level, {
+    this._level,
     List<String>? progressAnimation,
-  })  : _stopwatch = Stopwatch(),
+  )   : _stopwatch = Stopwatch(),
         _progressAnimation = progressAnimation ?? _defaultProgressAnimation {
     _stopwatch
       ..reset()

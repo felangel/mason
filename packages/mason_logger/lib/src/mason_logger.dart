@@ -62,7 +62,7 @@ class Logger {
         message,
         _stdout,
         level,
-        progressAnimation: progressAnimation,
+        progressAnimation,
       );
 
   /// Writes error message to stderr.
