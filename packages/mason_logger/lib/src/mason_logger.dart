@@ -53,7 +53,17 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) => Progress._(message, _stdout, level);
+  /// Provide a animation list via [progressAnimation].
+  Progress progress(
+    String message, {
+    List<String>? progressAnimation,
+  }) =>
+      Progress._(
+        message,
+        _stdout,
+        level,
+        progressAnimation: progressAnimation,
+      );
 
   /// Writes error message to stderr.
   void err(String? message) {

@@ -8,15 +8,17 @@ class Progress {
   Progress._(
     this._message,
     this._stdout,
-    this._level,
-  ) : _stopwatch = Stopwatch() {
+    this._level, {
+    List<String>? progressAnimation,
+  })  : _stopwatch = Stopwatch(),
+        _progressAnimation = progressAnimation ?? _defaultProgressAnimation {
     _stopwatch
       ..reset()
       ..start();
     _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
   }
 
-  static const List<String> _progressAnimation = [
+  static const List<String> _defaultProgressAnimation = [
     '⠋',
     '⠙',
     '⠹',
@@ -28,6 +30,8 @@ class Progress {
     '⠇',
     '⠏'
   ];
+
+  final List<String> _progressAnimation;
 
   final io.Stdout _stdout;
 
