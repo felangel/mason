@@ -87,6 +87,13 @@ void main() {
       });
     });
 
+    group('close', () {
+      test('closes the underlying httpClient', () {
+        MasonApi(httpClient: httpClient).close();
+        verify(() => httpClient.close()).called(1);
+      });
+    });
+
     group('logout', () {
       test('clears credentials and user', () {
         final credentials = Credentials(
