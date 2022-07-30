@@ -22,14 +22,16 @@ void main() {
 
   group('mason bundle', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
+      progress = MockProgress();
       pubUpdater = MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -82,11 +84,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
           ),
         );
-        verify(() => logger.progress('Bundling greeting')).called(1);
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
@@ -144,11 +147,12 @@ void main() {
             '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
           ),
         );
-        verify(() => logger.progress('Bundling hooks')).called(1);
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => progress.update('Bundling hooks')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
@@ -197,11 +201,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
           ),
         );
-        verify(() => logger.progress('Bundling greeting')).called(1);
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
@@ -271,15 +276,62 @@ void main() {
             '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
           ),
         );
-        verify(() => logger.progress('Bundling hooks')).called(1);
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => progress.update('Bundling hooks')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+        ).called(1);
+      });
+
+      test('creates a new dart bundle with multiple files', () async {
+        final testDir = Directory(
+          path.join(Directory.current.path, 'dart'),
+        )..createSync(recursive: true);
+        final brick1Path =
+            path.join('..', '..', '..', '..', '..', '..', 'bricks', 'greeting');
+        final brick2Path =
+            path.join('..', '..', '..', '..', '..', '..', 'bricks', 'hello');
+        Directory.current = testDir.path;
+        final result = await commandRunner.run(
+          ['bundle', brick1Path, brick2Path, '-t', 'dart'],
+        );
+        expect(result, equals(ExitCode.success.code));
+        final file1 = File(
+          path.join(
+            testFixturesPath(cwd, suffix: '.bundle'),
+            'dart',
+            'greeting_bundle.dart',
+          ),
+        );
+        final file2 = File(
+          path.join(
+            testFixturesPath(cwd, suffix: '.bundle'),
+            'dart',
+            'hello_bundle.dart',
+          ),
+        );
+        verify(() => logger.progress('Bundling 2 bricks')).called(1);
+        verify(() => progress.update('Bundling greeting')).called(1);
+        verify(() => progress.update('Bundled greeting')).called(1);
+        verify(() => progress.update('Bundling hello')).called(1);
+        verify(() => progress.update('Bundled hello')).called(1);
+        verify(
+          () => logger.info(
+            '${lightGreen.wrap('✓')} '
+            'Generated 2 files:',
+          ),
+        ).called(1);
+        verify(
+          () => logger.info(darkGray.wrap('  ${canonicalize(file1.path)}')),
+        ).called(1);
+        verify(
+          () => logger.info(darkGray.wrap('  ${canonicalize(file2.path)}')),
         ).called(1);
       });
 
@@ -299,7 +351,7 @@ void main() {
         verify(
           () => logger.err('Could not find brick at $brickPath'),
         ).called(1);
-        verifyNever(() => logger.progress(any()));
+        verifyNever(() => progress.update(any()));
       });
 
       test('exists with code 64 when exception occurs on bundling', () async {
@@ -367,11 +419,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
           ),
         );
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => logger.progress('Bundling greeting')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
@@ -444,11 +497,12 @@ void main() {
         expect(actual, contains('"changelog":{"path":"CHANGELOG.md","data":"'));
         expect(actual, contains('"license":{"path":"LICENSE","data":"'));
 
-        verify(() => logger.progress('Bundling greeting')).called(1);
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
+            'Generated 1 files:',
           ),
         ).called(1);
         verify(
@@ -482,7 +536,7 @@ void main() {
         verify(
           () => logger.err('Brick "nonexistent-brick" does not exist.'),
         ).called(1);
-        verifyNever(() => logger.progress(any()));
+        verifyNever(() => progress.update(any()));
       });
     });
   });
