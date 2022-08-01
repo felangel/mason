@@ -178,7 +178,7 @@ void main() {
         expect(
           actual,
           contains(
-            '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal, implicit_dynamic_map_literal',
+            '// ignore_for_file: type=lint, implicit_dynamic_list_literal, implicit_dynamic_map_literal, inference_failure_on_collection_literal',
           ),
         );
         expect(actual, contains("import 'package:mason/mason.dart'"));
@@ -231,7 +231,7 @@ void main() {
         expect(
           actual,
           contains(
-            '// ignore_for_file: prefer_single_quotes, public_member_api_docs, lines_longer_than_80_chars, implicit_dynamic_list_literal, implicit_dynamic_map_literal',
+            '// ignore_for_file: type=lint, implicit_dynamic_list_literal, implicit_dynamic_map_literal, inference_failure_on_collection_literal',
           ),
         );
         expect(actual, contains("import 'package:mason/mason.dart'"));
