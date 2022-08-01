@@ -10,7 +10,7 @@ final greetingBundle = MasonBundle.fromJson(<String, dynamic>{
   "name": "greeting",
   "description": "A Simple Greeting Template",
   "version": "0.1.0+1",
-  "environment": {},
+  "environment": {"mason": "any"},
   "vars": {
     "name": {
       "type": "string",
