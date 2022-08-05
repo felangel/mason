@@ -1,3 +1,7 @@
+# 0.1.0-dev.34
+
+- fix: call `close` on `MasonApi` client
+
 # 0.1.0-dev.33
 
 - feat: disable lints in Dart bundles
