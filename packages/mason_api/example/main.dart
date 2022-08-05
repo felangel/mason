@@ -11,4 +11,6 @@ Future<void> main() async {
 
   masonApi.logout();
   print('Logged out!');
+
+  masonApi.close();
 }
