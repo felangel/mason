@@ -203,7 +203,7 @@ const promptForEnum = async (
   items: string[]
 ): Promise<string | undefined> => {
   if (_.isNil(_default) && !_.isEmpty(items)) {
-    _default = items[0]
+    _default = items[0];
   }
 
   return vscode.window.showQuickPick(
