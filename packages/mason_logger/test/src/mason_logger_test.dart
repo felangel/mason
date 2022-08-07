@@ -31,6 +31,15 @@ void main() {
       });
     });
 
+    group('progressAnimation', () {
+      test('is mutable', () {
+        final logger = Logger();
+        expect(logger.progressAnimation, equals(null));
+        logger.progressAnimation = ['a', 'b', 'c'];
+        expect(logger.progressAnimation, equals(['a', 'b', 'c']));
+      });
+    });
+
     group('.write', () {
       test('writes to stdout', () {
         IOOverrides.runZoned(
@@ -520,6 +529,48 @@ void main() {
                 'c',
               ],
             );
+            await Future<void>.delayed(const Duration(milliseconds: 400));
+            done.complete();
+            verifyInOrder([
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}a')} $message... ${darkGray.wrap('(0.1s)')}''',
+                );
+              },
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}b')} $message... ${darkGray.wrap('(0.2s)')}''',
+                );
+              },
+              () {
+                stdout.write(
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}c')} $message... ${darkGray.wrap('(0.3s)')}''',
+                );
+              },
+              () {
+                stdout.write(
+                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                );
+              },
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('writes loggers progress animation to stdout', () async {
+        await IOOverrides.runZoned(
+          () async {
+            const time = '(0.Xs)';
+            const message = 'test message';
+            final done = Logger(
+              progressAnimation: [
+                'a',
+                'b',
+                'c',
+              ],
+            ).progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 400));
             done.complete();
             verifyInOrder([

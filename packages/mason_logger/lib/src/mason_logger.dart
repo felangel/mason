@@ -11,10 +11,16 @@ part 'progress.dart';
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
-  Logger({this.level = Level.info});
+  Logger({
+    this.level = Level.info,
+    this.progressAnimation,
+  });
 
   /// The current log level for this logger.
   Level level;
+
+  /// The current progress animation for this logger.
+  List<String>? progressAnimation;
 
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
@@ -62,7 +68,7 @@ class Logger {
         message,
         _stdout,
         level,
-        progressAnimation,
+        progressAnimation ?? this.progressAnimation,
       );
 
   /// Writes error message to stderr.
