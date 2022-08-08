@@ -1,3 +1,7 @@
+# 0.1.5
+
+- fix: enum defaults to first value when no default specified
+
 # 0.1.4
 
 - fix: make command supports spaces in string variables
