@@ -1,3 +1,12 @@
+# 0.1.0-dev.34
+
+- fix: call `close` on `MasonApi` client
+
+# 0.1.0-dev.33
+
+- feat: disable lints in Dart bundles
+- docs: add additional metadata to `pubspec.yaml`
+
 # 0.1.0-dev.32
 
 - refactor(deps): remove `pkg:universal_io`

@@ -235,6 +235,11 @@ class MasonApi {
     }
   }
 
+  /// Closes the client and cleans up any resources associated with it.
+  /// It's important to close each client when it's done being used;
+  /// failing to do so can cause the Dart process to hang.
+  void close() => _httpClient.close();
+
   /// Attempt to refresh the current credentials and return
   /// refreshed credentials.
   Future<Credentials> _refresh() async {

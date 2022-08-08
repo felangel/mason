@@ -9,7 +9,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
 import 'package:test/test.dart';
 
-class MockHttpClient extends Mock implements http.Client {}
+class _MockHttpClient extends Mock implements http.Client {}
 
 const token =
     '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZW1haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlfQ.SaCs1BJ2Oib4TkUeR6p1uh_XnWjJnJpm-dZkL8Whsc_g-NrDKeHhkuVa8fNIbfLtdVeXjVSSi_ZjQDAJho039HSrrdhQAgrRY04cJ6IZCF1HKvJeWDcIihPdl2Zl_V5u9xBxU3ImfGpJ-0O0vCpKHIuDwZsmfN3h_CkDv3SK7lA''';
@@ -33,7 +33,7 @@ void main() {
 
     setUp(() {
       testEnvironment = environment;
-      httpClient = MockHttpClient();
+      httpClient = _MockHttpClient();
       masonApi = MasonApi(httpClient: httpClient);
     });
 
@@ -84,6 +84,13 @@ void main() {
               .having((u) => u.email, 'email', email)
               .having((u) => u.emailVerified, 'emailVerified', false),
         );
+      });
+    });
+
+    group('close', () {
+      test('closes the underlying httpClient', () {
+        MasonApi(httpClient: httpClient).close();
+        verify(() => httpClient.close()).called(1);
       });
     });
 
