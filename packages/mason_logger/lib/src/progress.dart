@@ -94,12 +94,12 @@ class Progress {
   String get _time {
     final time = _stopwatch.elapsed.inMilliseconds;
     final displayInMilliseconds = time < 100;
-    final elapsed = displayInMilliseconds ? time : time/1000;
+    final elapsed = displayInMilliseconds ? time : time / 1000;
     final unit = displayInMilliseconds ? 'ms' : 's';
     final formattedTime = displayInMilliseconds
-      ? '${elapsed.toString()}$unit' 
-      : '${elapsed.toStringAsFixed(1)}$unit';
-    
+        ? '${elapsed.toString()}$unit'
+        : '${elapsed.toStringAsFixed(1)}$unit';
+
     return '''${darkGray.wrap('($formattedTime)')}''';
   }
 }
