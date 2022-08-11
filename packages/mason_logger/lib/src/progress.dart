@@ -92,14 +92,12 @@ class Progress {
   String get _clearLn => '$_clearMessageLength\u001b[2K';
 
   String get _time {
-    final time = _stopwatch.elapsed.inMilliseconds;
-    final displayInMilliseconds = time < 100;
-    final elapsed = displayInMilliseconds ? time : time / 1000;
-    final unit = displayInMilliseconds ? 'ms' : 's';
+    final elapsedTime = _stopwatch.elapsed.inMilliseconds;
+    final displayInMilliseconds = elapsedTime < 100;
+    final time = displayInMilliseconds ? elapsedTime : elapsedTime / 1000;
     final formattedTime = displayInMilliseconds
-        ? '${elapsed.toString()}$unit'
-        : '${elapsed.toStringAsFixed(1)}$unit';
-
-    return '''${darkGray.wrap('($formattedTime)')}''';
+        ? '${time.toString()}ms'
+        : '${time.toStringAsFixed(1)}s';
+    return '${darkGray.wrap('($formattedTime)')}';
   }
 }
