@@ -1,4 +1,4 @@
-name: unicode_hook_hooks
+name: relative_imports_hook_hooks
 
 environment:
   sdk: ">=2.12.0 <3.0.0"

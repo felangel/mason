@@ -1,0 +1,9 @@
+name: relative_imports_hook
+description: A Test Hook
+version: 0.1.0+1
+vars:
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?

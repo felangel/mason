@@ -13,20 +13,6 @@ Error: $error''',
         );
 }
 
-/// {@template hook_invalid_characters_exception}
-/// Thrown when a hook contains non-ascii characters.
-/// {@endtemplate}
-class HookInvalidCharactersException extends MasonException {
-  /// {@macro hook_invalid_characters_exception}
-  HookInvalidCharactersException(String path)
-      : super(
-          '''
-Unable to execute hook: $path.
-Error: Hook contains invalid characters.
-Ensure the hook does not contain non-ascii characters.''',
-        );
-}
-
 /// {@template hook_missing_run_exception}
 /// Thrown when a hook does not contain a 'run' method.
 /// {@endtemplate}
@@ -292,14 +278,7 @@ class GeneratorHooks {
       packageConfigUri = packageConfigFile.uri;
     }
 
-    Uri? uri;
-    try {
-      uri = _getHookUri(hook.runSubstitution(vars).content);
-      // ignore: avoid_catching_errors
-    } on ArgumentError {
-      throw HookInvalidCharactersException(hook.path);
-    }
-
+    final uri = _getHookUri(hook, vars);
     if (uri == null) throw HookMissingRunException(hook.path);
 
     final cwd = Directory.current;
@@ -412,13 +391,15 @@ final _runRegExp = RegExp(
   multiLine: true,
 );
 
-Uri? _getHookUri(List<int> content) {
+Uri? _getHookUri(HookFile hook, Map<String, dynamic> vars) {
+  final content = hook.runSubstitution(vars).content;
   final decoded = utf8.decode(content);
-  if (_runRegExp.hasMatch(decoded)) {
-    final code = _generatedHookCode(decoded);
-    return Uri.dataFromString(code, mimeType: 'application/dart');
-  }
-  return null;
+  if (!_runRegExp.hasMatch(decoded)) return null;
+  final tempDir = Directory.systemTemp.createTempSync();
+  copyPathSync(File(hook.path).parent.path, tempDir.path);
+  final file = File(p.join(tempDir.path, '.${p.basename(hook.path)}'))
+    ..writeAsStringSync(_generatedHookCode(decoded));
+  return Uri.file(file.path);
 }
 
 String _generatedHookCode(String content) => '''

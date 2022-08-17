@@ -10,7 +10,7 @@ final _binaryFileTypes = RegExp(
   caseSensitive: false,
 );
 
-final _hookFiles = RegExp('(pre_gen.dart|post_gen.dart|pubspec.yaml)');
+final _hookFiles = RegExp('(.*.dart|pubspec.yaml)');
 
 /// Unpack the [bundle] in the [target] directory.
 void unpackBundle(MasonBundle bundle, Directory target) {
