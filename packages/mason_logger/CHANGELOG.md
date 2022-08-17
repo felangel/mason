@@ -1,3 +1,9 @@
+# 0.1.2
+
+- feat: render milliseconds on progress duration
+- refactor(deps): remove `package:meta`
+- refactor: use `IOOverrides`
+
 # 0.1.1
 
 - refactor(deps): remove `pkg:universal_io`
