@@ -211,7 +211,6 @@ dependencies:
   static const _hooksGitignoreContent = '''
 .dart_tool
 .packages
-pubspec.lock
 ''';
 
   static const _hooksPreGenContent = '''
