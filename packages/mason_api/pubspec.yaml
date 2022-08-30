@@ -10,16 +10,16 @@ environment:
   sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
-  cli_util: ^0.3.5
-  http: ^0.13.4
-  json_annotation: ^4.4.0
-  meta: ^1.7.0
-  path: ^1.8.1
-  platform: ^3.1.0
+  cli_util: any
+  http: any
+  json_annotation: any
+  meta: any
+  path: any
+  platform: any
 
 dev_dependencies:
-  build_runner: ^2.0.0
-  json_serializable: ^6.1.4
-  mocktail: ^0.3.0
-  test: ^1.19.0
-  very_good_analysis: ^2.4.0
+  build_runner: any
+  json_serializable: any
+  mocktail: any
+  test: any
+  very_good_analysis: any

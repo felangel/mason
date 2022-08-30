@@ -11,25 +11,25 @@ environment:
   sdk: ">=2.16.0 <3.0.0"
 
 dependencies:
-  archive: ^3.1.11
-  checked_yaml: ^2.0.1
-  collection: ^1.15.0
-  crypto: ^3.0.1
-  http: ^0.13.3
-  json_annotation: ^4.4.0
-  mason_logger: ^0.1.1
-  meta: ^1.7.0
-  mustache_template: ^2.0.0
-  path: ^1.8.0
-  pub_semver: ^2.1.0
-  recase: ^4.0.0
-  yaml: ^3.1.0
+  archive: any
+  checked_yaml: any
+  collection: any
+  crypto: any
+  http: any
+  json_annotation: any
+  mason_logger: any
+  meta: any
+  mustache_template: any
+  path: any
+  pub_semver: any
+  recase: any
+  yaml: any
 
 dev_dependencies:
-  build_runner: ^2.0.0
-  build_verify: ^2.0.0
-  build_version: ^2.0.0
-  json_serializable: ^6.0.0
-  mocktail: ^0.3.0
-  test: ^1.17.0
-  very_good_analysis: ^2.4.0
+  build_runner: any
+  build_verify: any
+  build_version: any
+  json_serializable: any
+  mocktail: any
+  test: any
+  very_good_analysis: any

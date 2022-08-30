@@ -7,7 +7,7 @@ environment:
   sdk: ">=2.16.0 <3.0.0"
 
 dev_dependencies:
-  meta: ^1.7.0
-  mocktail: ^0.3.0
-  test: ^1.19.0
-  very_good_analysis: ^2.4.0
+  meta: any
+  mocktail: any
+  test: any
+  very_good_analysis: any
