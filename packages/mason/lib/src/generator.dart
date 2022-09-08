@@ -11,6 +11,7 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
+import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
@@ -77,6 +78,7 @@ class MasonGenerator extends Generator {
   }
 
   static Future<MasonGenerator> _fromBrick(String path) async {
+    final descriptorPool = Pool(200);
     final file = File(p.join(path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
@@ -88,6 +90,7 @@ class MasonGenerator extends Generator {
         .whereType<File>()
         .map((file) {
       return () async {
+        final resource = await descriptorPool.request();
         try {
           final content = await File(file.path).readAsBytes();
           final relativePath = file.path.substring(
@@ -96,6 +99,8 @@ class MasonGenerator extends Generator {
           return TemplateFile.fromBytes(relativePath, content);
         } on Exception {
           return null;
+        } finally {
+          resource.release();
         }
       }();
     });
