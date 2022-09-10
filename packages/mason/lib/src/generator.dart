@@ -15,6 +15,7 @@ import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
+final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
@@ -78,7 +79,6 @@ class MasonGenerator extends Generator {
   }
 
   static Future<MasonGenerator> _fromBrick(String path) async {
-    final descriptorPool = Pool(200);
     final file = File(p.join(path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
@@ -90,7 +90,7 @@ class MasonGenerator extends Generator {
         .whereType<File>()
         .map((file) {
       return () async {
-        final resource = await descriptorPool.request();
+        final resource = await _descriptorPool.request();
         try {
           final content = await File(file.path).readAsBytes();
           final relativePath = file.path.substring(
