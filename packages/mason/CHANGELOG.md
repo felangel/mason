@@ -1,3 +1,8 @@
+# 0.1.0-dev.32
+
+- fix: use file descriptor pooling
+- chore: add additional `pubspec.yaml` metadata
+
 # 0.1.0-dev.31
 
 - fix: render asymmetrical shorthand lambda expressions correctly
