@@ -6,6 +6,9 @@ on:
       - master
     paths:
       - .github/workflows/mason_cli.yaml
+      - packages/mason_logger/**
+      - packages/mason_api/**
+      - packages/mason/**
       - packages/mason_cli/**
 
   pull_request:
@@ -13,6 +16,9 @@ on:
       - master
     paths:
       - .github/workflows/mason_cli.yaml
+      - packages/mason_logger/**
+      - packages/mason_api/**
+      - packages/mason/**
       - packages/mason_cli/**
 
 jobs:
