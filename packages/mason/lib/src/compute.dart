@@ -9,7 +9,6 @@ Future<R> compute<R, M>(FutureOr<R> Function(M) computation, M input) async {
   await Isolate.spawn<_IsolateConfig<M, FutureOr<R>>>(
     _spawn,
     _IsolateConfig<M, FutureOr<R>>(computation, input, resultPort.sendPort),
-    errorsAreFatal: true,
     onError: errorPort.sendPort,
   );
 

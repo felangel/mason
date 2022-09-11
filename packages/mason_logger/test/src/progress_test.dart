@@ -17,6 +17,26 @@ void main() {
       stdout = MockStdout();
     });
 
+    test('writes ms when elapsed time is less than 0.1s', () async {
+      await runZoned(
+        () async {
+          await IOOverrides.runZoned(
+            () async {
+              const message = 'test message';
+              final progress = Logger().progress(message);
+              await Future<void>.delayed(const Duration(milliseconds: 10));
+              progress.complete();
+              verify(
+                () => stdout.write(any(that: matches(RegExp(r'\(\d\dms\)')))),
+              ).called(1);
+            },
+            stdout: () => stdout,
+          );
+        },
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     group('.complete', () {
       test('writes lines to stdout', () async {
         await runZoned(
@@ -31,7 +51,11 @@ void main() {
                 verify(
                   () {
                     stdout.write(
-                      '''[92m⠙[0m $message... [90m$time[0m''',
+                      any(
+                        that: contains(
+                          '''[92m⠙[0m $message... [90m''',
+                        ),
+                      ),
                     );
                   },
                 ).called(1);
@@ -85,7 +109,11 @@ void main() {
                 verify(
                   () {
                     stdout.write(
-                      '''[92m⠙[0m $message... [90m$time[0m''',
+                      any(
+                        that: contains(
+                          '''[92m⠙[0m $message... [90m''',
+                        ),
+                      ),
                     );
                   },
                 ).called(1);
@@ -139,7 +167,11 @@ void main() {
                 verify(
                   () {
                     stdout.write(
-                      '''[92m⠙[0m $message... [90m$time[0m''',
+                      any(
+                        that: contains(
+                          '''[92m⠙[0m $message... [90m''',
+                        ),
+                      ),
                     );
                   },
                 ).called(1);
@@ -183,7 +215,6 @@ void main() {
           () async {
             await IOOverrides.runZoned(
               () async {
-                const time = '(0.1s)';
                 const message = 'test message';
                 final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -191,7 +222,11 @@ void main() {
                 verify(
                   () {
                     stdout.write(
-                      '''[92m⠙[0m $message... [90m$time[0m''',
+                      any(
+                        that: contains(
+                          '''[92m⠙[0m $message... [90m''',
+                        ),
+                      ),
                     );
                   },
                 ).called(1);

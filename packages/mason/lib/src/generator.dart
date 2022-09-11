@@ -11,9 +11,11 @@ import 'package:mason/mason.dart';
 import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
+import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
+final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
@@ -88,6 +90,7 @@ class MasonGenerator extends Generator {
         .whereType<File>()
         .map((file) {
       return () async {
+        final resource = await _descriptorPool.request();
         try {
           final content = await File(file.path).readAsBytes();
           final relativePath = file.path.substring(
@@ -96,6 +99,8 @@ class MasonGenerator extends Generator {
           return TemplateFile.fromBytes(relativePath, content);
         } on Exception {
           return null;
+        } finally {
+          resource.release();
         }
       }();
     });
