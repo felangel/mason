@@ -11,7 +11,7 @@ void main() {
       () {
         const message = 'message';
 
-        final output = linkWrap(message, uri);
+        final output = link(message: message, uri: uri);
         final matcher = stringContainsInOrder(
           [lead, '$uri', trail, message, lead, trail],
         );
@@ -21,7 +21,7 @@ void main() {
     );
 
     test('builds String with Uri when message is null: ', () {
-      final output = linkWrap(null, uri);
+      final output = link(uri: uri);
       final matcher = stringContainsInOrder(
         [lead, '$uri', trail, '$uri', lead, trail],
       );

@@ -1,5 +1,8 @@
-/// Helper function for "wrapping" an optional message with link.
-String linkWrap(String? message, Uri uri) {
+/// Helper function for "encoding" an optional message with link.
+String link({
+  required Uri uri,
+  String? message,
+}) {
   const lead = '\x1B]8;;';
   const trail = '\x1B\\';
 
