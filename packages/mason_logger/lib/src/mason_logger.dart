@@ -6,9 +6,6 @@ import 'package:mason_logger/mason_logger.dart';
 
 part 'progress.dart';
 
-/// Callback for writing to `stdout` or `stderr`.
-typedef StdoutWriter = void Function(String?);
-
 /// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
 /// {@endtemplate}
