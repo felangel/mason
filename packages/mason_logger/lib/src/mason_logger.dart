@@ -52,21 +52,6 @@ class Logger {
     _stdout.writeln(message);
   }
 
-  /// Writes a message with a clickable link.
-  /// By default writes to `stdout` with [info], but any [StdoutWriter] works.
-  ///
-  /// **NOTE**: Only works on supported terminal emulators. Please see this
-  /// [link on what is supported](https://gist.github.com/egmontkob/eb114294efbcd5adb1944c9f3cb5feda#supporting-apps).
-  void link(
-    String? message,
-    Uri uri, [
-    StdoutWriter? writer,
-  ]) {
-    final _writer = writer ?? info;
-    final _message = linkWrap(message, uri);
-    _writer(_message);
-  }
-
   /// Writes delayed message to stdout.
   void delayed(String? message) => _queue.add(message);
 
