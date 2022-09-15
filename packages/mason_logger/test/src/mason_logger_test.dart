@@ -22,6 +22,47 @@ void main() {
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
     });
 
+    group('.link', () {
+      final uri = Uri.parse('https://github.com/felangel/mason/issues/');
+
+      test(
+        'writes to stdout',
+        () {
+          IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const lead = '\x1B]8;;';
+              const trail = '\x1B\\';
+
+              Logger().link(message, uri);
+              verify(
+                () => stdout.writeln('$lead$uri$trail$message$lead$trail'),
+              ).called(1);
+            },
+            stdout: () => stdout,
+          );
+        },
+      );
+
+      test(
+        'writes with the provided writer',
+        () {
+          IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const lead = '\x1B]8;;';
+              const trail = '\x1B\\';
+              Logger().link(message, uri, stdout.write);
+              verify(
+                () => stdout.write('$lead$uri$trail$message$lead$trail'),
+              ).called(1);
+            },
+            stdout: () => stdout,
+          );
+        },
+      );
+    });
+
     group('level', () {
       test('is mutable', () {
         final logger = Logger();
