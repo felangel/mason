@@ -1,3 +1,16 @@
+# 0.1.3
+
+- feat: add `link` API
+
+  ```dart
+  final logger = Logger();
+  final repoLink = link(
+    message: 'GitHub Repository',
+    uri: Uri.parse('https://github.com/felangel/mason'),
+  );
+  logger.info('To learn more, visit the $repoLink.');
+  ```
+
 # 0.1.2
 
 - feat: render milliseconds on progress duration
