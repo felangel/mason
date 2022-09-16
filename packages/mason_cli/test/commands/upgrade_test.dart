@@ -110,10 +110,10 @@ bricks:
 
       final nested = Directory(path.join(Directory.current.path, 'nested'))
         ..createSync();
-      final testDir = Directory.current;
+      final workspace = Directory.current;
       Directory.current = nested.path;
       final upgradeResult = await commandRunner.run(['upgrade']);
-      Directory.current = testDir;
+      Directory.current = workspace;
       expect(upgradeResult, equals(ExitCode.success.code));
       expect(
         File(
