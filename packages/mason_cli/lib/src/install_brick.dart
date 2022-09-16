@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:path/path.dart' as p;
 
 /// Mixin on [MasonCommand] which adds support for installing bricks.
 mixin InstallBrickMixin on MasonCommand {
@@ -59,8 +60,15 @@ mixin InstallBrickMixin on MasonCommand {
               location: entry.value,
               lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
             );
+            final normalizedLocation = location.path != null
+                ? BrickLocation(
+                    path: canonicalize(
+                      p.join(masonYamlFile.parent.path, location.path),
+                    ),
+                  )
+                : location;
             final cachedBrick = await bricksJson.add(
-              Brick(name: entry.key, location: location),
+              Brick(name: entry.key, location: normalizedLocation),
             );
             resolvedBricks.addAll(
               <String, BrickLocation>{entry.key: cachedBrick.brick.location},
