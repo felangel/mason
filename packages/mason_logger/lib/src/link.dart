@@ -3,10 +3,10 @@
 /// If no [message] is provided, the text content will be the full [uri].
 ///
 /// ```dart
-/// final plainLink = link(Uri.parse('https://dart.dev'));
+/// final plainLink = link(uri: Uri.parse('https://dart.dev'));
 /// print(plainLink); // Equivalent to `[https://dart.dev](https://dart.dev)` in markdown
 ///
-/// final richLink = link(Uri.parse('https://dart.dev'), message: 'The Dart Website');
+/// final richLink = link(uri: Uri.parse('https://dart.dev'), message: 'The Dart Website');
 /// print(richLink); // Equivalent to `[The Dart Website](https://dart.dev)` in markdown
 /// ```
 String link({required Uri uri, String? message}) {
