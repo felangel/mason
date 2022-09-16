@@ -75,5 +75,54 @@ bricks:
         equals('{"bricks":{"greeting":"0.1.0+2"}}'),
       );
     });
+
+    test('updates lockfile from nested directtory', () async {
+      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+      final simplePath = canonicalize(
+        path.join(Directory.current.path, bricksPath, 'simple'),
+      );
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  greeting: 0.1.0+1
+  simple:
+    path: ${path.join(bricksPath, 'simple')}
+''',
+      );
+      final getResult = await commandRunner.run(['get']);
+      expect(getResult, equals(ExitCode.success.code));
+      expect(
+        File(
+          path.join(Directory.current.path, MasonLockJson.file),
+        ).readAsStringSync(),
+        equals(
+          '{"bricks":{"greeting":"0.1.0+1","simple":{"path":"$simplePath"}}}',
+        ),
+      );
+      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+        '''
+bricks:
+  greeting: ^0.1.0
+  simple:
+    path: ${path.join(bricksPath, 'simple')}
+''',
+      );
+
+      final nested = Directory(path.join(Directory.current.path, 'nested'))
+        ..createSync();
+      final workspace = Directory.current;
+      Directory.current = nested.path;
+      final upgradeResult = await commandRunner.run(['upgrade']);
+      Directory.current = workspace;
+      expect(upgradeResult, equals(ExitCode.success.code));
+      expect(
+        File(
+          path.join(Directory.current.path, MasonLockJson.file),
+        ).readAsStringSync(),
+        equals(
+          '{"bricks":{"greeting":"0.1.0+2","simple":{"path":"$simplePath"}}}',
+        ),
+      );
+    });
   });
 }
