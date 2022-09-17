@@ -107,7 +107,9 @@ void main() {
     });
 
     test('exits with code 70 when publish is aborted', () async {
-      final policyLink = link(uri: Uri.parse('https://brickhub.dev/policy'));
+      final policyLink = styleUnderlined.wrap(
+        link(uri: Uri.parse('https://brickhub.dev/policy')),
+      );
       final user = MockUser();
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);

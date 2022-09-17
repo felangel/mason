@@ -67,7 +67,9 @@ class PublishCommand extends MasonCommand {
       );
       return ExitCode.software.code;
     }
-    final policyLink = link(uri: Uri.parse('https://brickhub.dev/policy'));
+    final policyLink = styleUnderlined.wrap(
+      link(uri: Uri.parse('https://brickhub.dev/policy')),
+    );
     logger
       ..info(
         lightCyan.wrap(

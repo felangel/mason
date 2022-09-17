@@ -98,9 +98,13 @@ class MasonCommandRunner extends CommandRunner<int> {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
       final isUpToDate = packageVersion == latestVersion;
       if (!isUpToDate) {
-        final changelogLink = link(
-          uri: Uri.parse(
-            'https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion',
+        final changelogLink = lightCyan.wrap(
+          styleUnderlined.wrap(
+            link(
+              uri: Uri.parse(
+                'https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion',
+              ),
+            ),
           ),
         );
         _logger
@@ -108,7 +112,7 @@ class MasonCommandRunner extends CommandRunner<int> {
           ..info(
             '''
 ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
-${lightYellow.wrap('Changelog:')} ${lightCyan.wrap(changelogLink)}
+${lightYellow.wrap('Changelog:')} $changelogLink
 Run ${cyan.wrap('mason update')} to update''',
           );
       }
