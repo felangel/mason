@@ -47,10 +47,14 @@ const expectedUsage = [
 ];
 
 const latestVersion = '0.0.0';
-
+final changelogLink = link(
+  uri: Uri.parse(
+    'https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion',
+  ),
+);
 final updateMessage = '''
 ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
-${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+${lightYellow.wrap('Changelog:')} ${lightCyan.wrap(changelogLink)}
 Run ${cyan.wrap('mason update')} to update''';
 
 void main() {
