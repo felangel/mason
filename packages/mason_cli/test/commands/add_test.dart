@@ -140,6 +140,49 @@ void main() {
           );
           expect(directoriesDeepEqual(actual, expected), isTrue);
         });
+
+        test(
+            'adds brick successfully when brick exists '
+            'from nested directory', () async {
+          final nested = Directory(path.join(Directory.current.path, 'nested'))
+            ..createSync();
+          final workspace = Directory.current;
+          Directory.current = nested;
+          final brickPath = path.join(
+            '..',
+            '..',
+            '..',
+            '..',
+            '..',
+            '..',
+            'bricks',
+            'greeting',
+          );
+          final result = await commandRunner.run(
+            ['add', 'greeting', '--path', brickPath],
+          );
+          expect(result, equals(ExitCode.success.code));
+          Directory.current = workspace;
+          final testDir = Directory(
+            path.join(Directory.current.path, 'greeting'),
+          )..createSync(recursive: true);
+          Directory.current = testDir.path;
+          final makeResult = await MasonCommandRunner(
+            logger: logger,
+            pubUpdater: pubUpdater,
+          ).run(['make', 'greeting', '--name', 'Dash']);
+          expect(makeResult, equals(ExitCode.success.code));
+
+          verify(() => logger.progress('Installing greeting')).called(1);
+
+          final actual = Directory(
+            path.join(testFixturesPath(cwd, suffix: '.add'), 'greeting'),
+          );
+          final expected = Directory(
+            path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
+          );
+          expect(directoriesDeepEqual(actual, expected), isTrue);
+        });
       });
 
       group('git', () {

@@ -107,6 +107,9 @@ void main() {
     });
 
     test('exits with code 70 when publish is aborted', () async {
+      final policyLink = styleUnderlined.wrap(
+        link(uri: Uri.parse('https://brickhub.dev/policy')),
+      );
       final user = MockUser();
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
@@ -125,7 +128,7 @@ void main() {
         );
       }).called(1);
       verify(() {
-        logger.info('See policy details at https://brickhub.dev/policy\n');
+        logger.info('See policy details at $policyLink\n');
       }).called(1);
       verify(
         () => logger.confirm('Do you want to publish greeting 0.1.0+1?'),

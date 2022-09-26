@@ -69,7 +69,14 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
     final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
     final location = brick.location.version != null
         ? BrickLocation(version: '^${brickYaml.version}')
-        : brick.location;
+        : brick.location.path != null
+            ? BrickLocation(
+                path: p.relative(
+                  canonicalize(Directory(brick.location.path!).absolute.path),
+                  from: targetMasonYamlFile.parent.path,
+                ),
+              )
+            : brick.location;
     final bricks = Map.of(targetMasonYaml.bricks)..addAll({name: location});
     final addProgress = logger.progress('Adding ${brickYaml.name}');
     try {

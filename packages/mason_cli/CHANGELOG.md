@@ -1,3 +1,9 @@
+# 0.1.0-dev.35
+
+- fix: `upgrade` from subdirectory w/relative paths
+- fix: `add` from subdirectory w/relative path
+- feat: use logger `link` api
+
 # 0.1.0-dev.34
 
 - fix: call `close` on `MasonApi` client

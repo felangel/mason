@@ -46,5 +46,10 @@ Future<void> main() async {
   final canceling = logger.progress('Trying to cancel now!');
   await Future<void>.delayed(const Duration(seconds: 1));
   canceling.cancel();
-  logger.info('Done!');
+
+  final repoLink = link(
+    message: 'GitHub Repository',
+    uri: Uri.parse('https://github.com/felangel/mason'),
+  );
+  logger.info('To learn more, visit the $repoLink.');
 }

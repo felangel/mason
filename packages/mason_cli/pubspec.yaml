@@ -1,7 +1,7 @@
 name: mason_cli
 description: >
   Mason CLI allows developers to create and consume reusable templates called bricks.
-version: 0.1.0-dev.34
+version: 0.1.0-dev.35
 homepage: https://github.com/felangel/mason
 repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
@@ -13,7 +13,7 @@ environment:
 dependencies:
   args: ^2.1.0
   checked_yaml: ^2.0.1
-  mason: ^0.1.0-dev.30
+  mason: ^0.1.0-dev.33
   mason_api: ^0.1.0-dev.7
   meta: ^1.7.0
   path: ^1.8.0

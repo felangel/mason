@@ -39,12 +39,19 @@ class SearchCommand extends MasonCommand {
       logger.info('');
 
       for (final brick in results) {
+        final brickLink = styleUnderlined.wrap(
+          link(
+            uri: Uri.parse(
+              'https://brickhub.dev/bricks/${brick.name}/${brick.version}',
+            ),
+          ),
+        );
         logger
           ..info(
             lightCyan.wrap(styleBold.wrap('${brick.name} v${brick.version}')),
           )
           ..info(brick.description)
-          ..info('https://brickhub.dev/bricks/${brick.name}/${brick.version}')
+          ..info(brickLink)
           ..info(darkGray.wrap('-' * 80));
       }
       return ExitCode.success.code;
