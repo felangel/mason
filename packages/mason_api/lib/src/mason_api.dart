@@ -175,6 +175,8 @@ class MasonApi {
       throw MasonApiLoginFailure(message: '$error');
     }
 
+    _credentials = credentials;
+
     try {
       return _currentUser = credentials.toUser();
     } catch (error) {
@@ -187,14 +189,15 @@ class MasonApi {
 
   /// Publish universal [bundle] to remote registry.
   Future<void> publish({required List<int> bundle}) async {
-    if (_credentials == null) {
+    var credentials = _credentials;
+
+    if (credentials == null) {
       throw const MasonApiPublishFailure(
         message:
             '''User not found. Please make sure you are logged in and try again.''',
       );
     }
 
-    var credentials = _credentials!;
     if (credentials.areExpired) {
       try {
         credentials = await _refresh();
