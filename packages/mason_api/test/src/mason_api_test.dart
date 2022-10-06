@@ -32,9 +32,20 @@ void main() {
     late MasonApi masonApi;
 
     setUp(() {
+      try {
+        File(
+          p.join(tempDir.path, credentialsFileName),
+        ).deleteSync(recursive: true);
+      } catch (_) {}
+
       testEnvironment = environment;
       httpClient = _MockHttpClient();
       masonApi = MasonApi(httpClient: httpClient);
+    });
+
+    test('MasonApiUnauthorized can be instantiated', () {
+      // ignore: prefer_const_constructors
+      expect(() => MasonApiUnauthorized(message: 'oops'), returnsNormally);
     });
 
     test('MasonApiException overrides toString', () {
@@ -333,19 +344,783 @@ void main() {
       });
     });
 
+    group('addPublisher', () {
+      const brick = 'example';
+      const publisher = 'test@brickhub.dev';
+
+      test('throws when user not found', () async {
+        final masonApi = MasonApi(httpClient: httpClient);
+
+        try {
+          await masonApi.addPublisher(brick: brick, publisher: publisher);
+          fail('should throw');
+        } on MasonApiUnauthorized catch (error) {
+          expect(
+            error.message,
+            equals(
+              '''User not found. Please make sure you are logged in and try again.''',
+            ),
+          );
+        }
+      });
+
+      group('with expired credentials', () {
+        final credentials = Credentials(
+          accessToken: token,
+          refreshToken: '__refresh_token__',
+          expiresAt: DateTime(2021),
+          tokenType: 'Bearer',
+        );
+
+        setUp(() {
+          File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
+            json.encode(credentials.toJson()),
+          );
+          masonApi = MasonApi(httpClient: httpClient);
+        });
+
+        test('makes correct refresh request', () async {
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+          verify(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: json.encode({
+                'grant_type': 'refresh_token',
+                'refresh_token': credentials.refreshToken,
+              }),
+            ),
+          ).called(1);
+        });
+
+        test('throws MasonAuthRefreshFailure when POST throws', () async {
+          final exception = Exception('oops');
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenThrow(exception);
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(error.message, equals('Refresh failure: $exception'));
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code != 200 (unknown)', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: An unknown error occurred.'),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code != 200 (w/message)', () async {
+          const code = '__code__';
+          const message = '__message__';
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              '{"code": "$code", "message": "$message"}',
+              HttpStatus.badRequest,
+            ),
+          );
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(error.message, equals('Refresh failure: $message'));
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but body is malformed', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals(
+                """Refresh failure: type 'Null' is not a subtype of type 'String' in type cast""",
+              ),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but jwt is invalid', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token': 'malformed',
+                'refresh_token': 'malformed',
+                'expires_in': '3600',
+                'token_type': 'Bearer'
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: Exception: Invalid JWT'),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but claims are malformed', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token':
+                    '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
+                'refresh_token': '__refresh_token__',
+                'expires_in': '3600',
+                'token_type': 'Bearer'
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: Exception: Malformed Claims'),
+            );
+          }
+        });
+
+        test(
+            'refresh succeeds when '
+            'status code == 200 and claims are valid', () async {
+          const refreshToken = '__refresh_token__';
+          const tokenType = 'Bearer';
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token': token,
+                'refresh_token': refreshToken,
+                'expires_in': '42',
+                'token_type': tokenType
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          final user = masonApi.currentUser!;
+          expect(user.email, equals(email));
+          expect(user.emailVerified, isFalse);
+
+          final credentialsFile =
+              File(p.join(tempDir.path, credentialsFileName));
+          expect(credentialsFile.existsSync(), isTrue);
+          final credentialsFileContents = credentialsFile.readAsStringSync();
+          final credentials = Credentials.fromJson(
+            json.decode(credentialsFileContents) as Map<String, dynamic>,
+          );
+          expect(credentials.accessToken, equals(token));
+          expect(credentials.refreshToken, equals(refreshToken));
+          expect(credentials.tokenType, equals(tokenType));
+          expect(
+            credentials.expiresAt.difference(DateTime.now()).inSeconds,
+            closeTo(42, 1),
+          );
+        });
+      });
+
+      group('with valid credentials', () {
+        final credentials = Credentials(
+          accessToken: token,
+          refreshToken: '__refresh_token__',
+          expiresAt: DateTime.now().add(const Duration(hours: 1)),
+          tokenType: 'Bearer',
+        );
+
+        setUp(() {
+          File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
+            json.encode(credentials.toJson()),
+          );
+          masonApi = MasonApi(httpClient: httpClient);
+        });
+
+        test('does not attempt to refresh', () async {
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          verifyNever(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: json.encode({
+                'grant_type': 'refresh_token',
+                'refresh_token': credentials.refreshToken,
+              }),
+            ),
+          );
+        });
+
+        test('makes correct request', () async {
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          verify(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/bricks/$brick/publishers'),
+              headers: {
+                'Authorization':
+                    '${credentials.tokenType} ${credentials.accessToken}',
+              },
+              body: json.encode({'email': publisher}),
+            ),
+          ).called(1);
+        });
+
+        test('throws MasonApiAddPublisherFailure when POST throws', () async {
+          final exception = Exception('oops');
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/bricks/$brick/publishers'),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenThrow(exception);
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiAddPublisherFailure catch (error) {
+            expect(error.message, equals('$exception'));
+          }
+        });
+
+        test(
+            'throws MasonApiAddPublisherFailure '
+            'when status code != 201 (unknown)', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/bricks/$brick/publishers'),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiAddPublisherFailure catch (error) {
+            expect(error.message, equals('An unknown error occurred.'));
+          }
+        });
+
+        test(
+            'throws MasonApiAddPublisherFailure '
+            'when status code != 201 (w/message & details)', () async {
+          const code = '__code__';
+          const message = '__message__';
+          const details = '__details__';
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/bricks/$brick/publishers'),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              '{"code": "$code", "message": "$message", "details": "$details"}',
+              HttpStatus.badRequest,
+            ),
+          );
+
+          try {
+            await masonApi.addPublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiAddPublisherFailure catch (error) {
+            expect(error.message, equals(message));
+            expect(error.details, equals(details));
+          }
+        });
+
+        test('succeeds when status code is 201', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/bricks/$brick/publishers'),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer((_) async => http.Response('{}', HttpStatus.created));
+
+          expect(
+            masonApi.addPublisher(brick: brick, publisher: publisher),
+            completes,
+          );
+        });
+      });
+    });
+
+    group('removePublisher', () {
+      const brick = 'example';
+      const publisher = 'test@brickhub.dev';
+
+      test('throws when user not found', () async {
+        final masonApi = MasonApi(httpClient: httpClient);
+
+        try {
+          await masonApi.removePublisher(brick: brick, publisher: publisher);
+          fail('should throw');
+        } on MasonApiUnauthorized catch (error) {
+          expect(
+            error.message,
+            equals(
+              '''User not found. Please make sure you are logged in and try again.''',
+            ),
+          );
+        }
+      });
+
+      group('with expired credentials', () {
+        final credentials = Credentials(
+          accessToken: token,
+          refreshToken: '__refresh_token__',
+          expiresAt: DateTime(2021),
+          tokenType: 'Bearer',
+        );
+
+        setUp(() {
+          File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
+            json.encode(credentials.toJson()),
+          );
+          masonApi = MasonApi(httpClient: httpClient);
+        });
+
+        test('makes correct refresh request', () async {
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+          verify(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: json.encode({
+                'grant_type': 'refresh_token',
+                'refresh_token': credentials.refreshToken,
+              }),
+            ),
+          ).called(1);
+        });
+
+        test('throws MasonAuthRefreshFailure when POST throws', () async {
+          final exception = Exception('oops');
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenThrow(exception);
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(error.message, equals('Refresh failure: $exception'));
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code != 200 (unknown)', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: An unknown error occurred.'),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code != 200 (w/message)', () async {
+          const code = '__code__';
+          const message = '__message__';
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              '{"code": "$code", "message": "$message"}',
+              HttpStatus.badRequest,
+            ),
+          );
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(error.message, equals('Refresh failure: $message'));
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but body is malformed', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer((_) async => http.Response('{}', HttpStatus.ok));
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals(
+                """Refresh failure: type 'Null' is not a subtype of type 'String' in type cast""",
+              ),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but jwt is invalid', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token': 'malformed',
+                'refresh_token': 'malformed',
+                'expires_in': '3600',
+                'token_type': 'Bearer'
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: Exception: Invalid JWT'),
+            );
+          }
+        });
+
+        test(
+            'throws MasonAuthRefreshFailure '
+            'when status code == 200 but claims are malformed', () async {
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token':
+                    '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
+                'refresh_token': '__refresh_token__',
+                'expires_in': '3600',
+                'token_type': 'Bearer'
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRefreshFailure catch (error) {
+            expect(
+              error.message,
+              equals('Refresh failure: Exception: Malformed Claims'),
+            );
+          }
+        });
+
+        test(
+            'refresh succeeds when '
+            'status code == 200 and claims are valid', () async {
+          const refreshToken = '__refresh_token__';
+          const tokenType = 'Bearer';
+          when(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: any(named: 'body'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              json.encode({
+                'access_token': token,
+                'refresh_token': refreshToken,
+                'expires_in': '42',
+                'token_type': tokenType
+              }),
+              HttpStatus.ok,
+            ),
+          );
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          final user = masonApi.currentUser!;
+          expect(user.email, equals(email));
+          expect(user.emailVerified, isFalse);
+
+          final credentialsFile =
+              File(p.join(tempDir.path, credentialsFileName));
+          expect(credentialsFile.existsSync(), isTrue);
+          final credentialsFileContents = credentialsFile.readAsStringSync();
+          final credentials = Credentials.fromJson(
+            json.decode(credentialsFileContents) as Map<String, dynamic>,
+          );
+          expect(credentials.accessToken, equals(token));
+          expect(credentials.refreshToken, equals(refreshToken));
+          expect(credentials.tokenType, equals(tokenType));
+          expect(
+            credentials.expiresAt.difference(DateTime.now()).inSeconds,
+            closeTo(42, 1),
+          );
+        });
+      });
+
+      group('with valid credentials', () {
+        final credentials = Credentials(
+          accessToken: token,
+          refreshToken: '__refresh_token__',
+          expiresAt: DateTime.now().add(const Duration(hours: 1)),
+          tokenType: 'Bearer',
+        );
+
+        setUp(() {
+          File(p.join(tempDir.path, credentialsFileName)).writeAsStringSync(
+            json.encode(credentials.toJson()),
+          );
+          masonApi = MasonApi(httpClient: httpClient);
+        });
+
+        test('does not attempt to refresh', () async {
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          verifyNever(
+            () => httpClient.post(
+              Uri.https(authority, 'api/v1/oauth/token'),
+              body: json.encode({
+                'grant_type': 'refresh_token',
+                'refresh_token': credentials.refreshToken,
+              }),
+            ),
+          );
+        });
+
+        test('makes correct request', () async {
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+          } catch (_) {}
+
+          verify(
+            () => httpClient.delete(
+              Uri.https(
+                authority,
+                'api/v1/bricks/$brick/publishers/$publisher',
+              ),
+              headers: {
+                'Authorization':
+                    '${credentials.tokenType} ${credentials.accessToken}',
+              },
+            ),
+          ).called(1);
+        });
+
+        test('throws MasonApiRemovePublisherFailure when DELETE throws',
+            () async {
+          final exception = Exception('oops');
+          when(
+            () => httpClient.delete(
+              Uri.https(
+                authority,
+                'api/v1/bricks/$brick/publishers/$publisher',
+              ),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenThrow(exception);
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRemovePublisherFailure catch (error) {
+            expect(error.message, equals('$exception'));
+          }
+        });
+
+        test(
+            'throws MasonApiRemovePublisherFailure '
+            'when status code != 204 (unknown)', () async {
+          when(
+            () => httpClient.delete(
+              Uri.https(
+                authority,
+                'api/v1/bricks/$brick/publishers/$publisher',
+              ),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer((_) async => http.Response('', HttpStatus.badRequest));
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRemovePublisherFailure catch (error) {
+            expect(error.message, equals('An unknown error occurred.'));
+          }
+        });
+
+        test(
+            'throws MasonApiRemovePublisherFailure '
+            'when status code != 204 (w/message & details)', () async {
+          const code = '__code__';
+          const message = '__message__';
+          const details = '__details__';
+          when(
+            () => httpClient.delete(
+              Uri.https(
+                authority,
+                'api/v1/bricks/$brick/publishers/$publisher',
+              ),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer(
+            (_) async => http.Response(
+              '{"code": "$code", "message": "$message", "details": "$details"}',
+              HttpStatus.badRequest,
+            ),
+          );
+
+          try {
+            await masonApi.removePublisher(brick: brick, publisher: publisher);
+            fail('should throw');
+          } on MasonApiRemovePublisherFailure catch (error) {
+            expect(error.message, equals(message));
+            expect(error.details, equals(details));
+          }
+        });
+
+        test('succeeds when status code is 204', () async {
+          when(
+            () => httpClient.delete(
+              Uri.https(
+                authority,
+                'api/v1/bricks/$brick/publishers/$publisher',
+              ),
+              body: any(named: 'body'),
+              headers: any(named: 'headers'),
+            ),
+          ).thenAnswer((_) async => http.Response('{}', HttpStatus.noContent));
+
+          expect(
+            masonApi.removePublisher(brick: brick, publisher: publisher),
+            completes,
+          );
+        });
+      });
+    });
+
     group('publish', () {
       final bytes = <int>[42];
 
       test('throws when user not found', () async {
-        File(
-          p.join(tempDir.path, credentialsFileName),
-        ).deleteSync(recursive: true);
         final masonApi = MasonApi(httpClient: httpClient);
 
         try {
           await masonApi.publish(bundle: bytes);
           fail('should throw');
-        } on MasonApiPublishFailure catch (error) {
+        } on MasonApiUnauthorized catch (error) {
           expect(
             error.message,
             equals(
@@ -397,7 +1172,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(error.message, equals('Refresh failure: $exception'));
           }
         });
@@ -415,7 +1190,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: An unknown error occurred.'),
@@ -443,7 +1218,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(error.message, equals('Refresh failure: $message'));
           }
         });
@@ -461,7 +1236,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(
               error.message,
               equals(
@@ -494,7 +1269,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: Exception: Invalid JWT'),
@@ -526,7 +1301,7 @@ void main() {
           try {
             await masonApi.publish(bundle: bytes);
             fail('should throw');
-          } on MasonApiPublishFailure catch (error) {
+          } on MasonApiRefreshFailure catch (error) {
             expect(
               error.message,
               equals('Refresh failure: Exception: Malformed Claims'),

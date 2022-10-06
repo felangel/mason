@@ -24,6 +24,15 @@ abstract class MasonApiException implements Exception {
   String toString() => '$message${details != null ? '\n$details' : ''}';
 }
 
+/// {@template mason_api_unauthorized}
+/// An exception thrown when the client is unauthorized.
+/// {@endtemplate}
+class MasonApiUnauthorized extends MasonApiException {
+  /// {@macro mason_api_unauthorized}
+  const MasonApiUnauthorized({required String message})
+      : super(message: message);
+}
+
 /// {@template mason_api_login_failure}
 /// An exception thrown when an error occurs during `login`.
 /// {@endtemplate}
@@ -58,6 +67,26 @@ class MasonApiSearchFailure extends MasonApiException {
   /// {@macro mason_api_search_failure}
   const MasonApiSearchFailure({required String message, String? details})
       : super(message: message, details: details);
+}
+
+/// {@template mason_api_add_publisher_failure}
+/// An exception thrown when an error occurs during `addPublisher`.
+/// {@endtemplate}
+class MasonApiAddPublisherFailure extends MasonApiException {
+  /// {@macro mason_api_add_publisher_failure}
+  const MasonApiAddPublisherFailure({required String message, String? details})
+      : super(message: message, details: details);
+}
+
+/// {@template mason_api_remove_publisher_failure}
+/// An exception thrown when an error occurs during `removePublisher`.
+/// {@endtemplate}
+class MasonApiRemovePublisherFailure extends MasonApiException {
+  /// {@macro mason_api_remove_publisher_failure}
+  const MasonApiRemovePublisherFailure({
+    required String message,
+    String? details,
+  }) : super(message: message, details: details);
 }
 
 /// {@template mason_api}
@@ -100,6 +129,13 @@ class MasonApi {
 
   /// The current user.
   User? get currentUser => _currentUser;
+
+  Map<String, String> get _authorizationHeader {
+    final credentials = _credentials!;
+    return <String, String>{
+      'Authorization': '${credentials.tokenType} ${credentials.accessToken}',
+    };
+  }
 
   /// Search for bricks the with the provided [query].
   Future<Iterable<BrickSearchResult>> search({required String query}) async {
@@ -175,6 +211,8 @@ class MasonApi {
       throw MasonApiLoginFailure(message: '$error');
     }
 
+    _credentials = credentials;
+
     try {
       return _currentUser = credentials.toUser();
     } catch (error) {
@@ -187,31 +225,14 @@ class MasonApi {
 
   /// Publish universal [bundle] to remote registry.
   Future<void> publish({required List<int> bundle}) async {
-    if (_credentials == null) {
-      throw const MasonApiPublishFailure(
-        message:
-            '''User not found. Please make sure you are logged in and try again.''',
-      );
-    }
-
-    var credentials = _credentials!;
-    if (credentials.areExpired) {
-      try {
-        credentials = await _refresh();
-      } on MasonApiRefreshFailure catch (error) {
-        throw MasonApiPublishFailure(
-          message: 'Refresh failure: ${error.message}',
-        );
-      }
-    }
+    await _ensureCredentialsAreFresh();
 
     final http.Response response;
     try {
       response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/bricks'),
         headers: {
-          'Authorization':
-              '${credentials.tokenType} ${credentials.accessToken}',
+          ..._authorizationHeader,
           'Content-Type': 'application/octet-stream',
         },
         body: bundle,
@@ -235,10 +256,105 @@ class MasonApi {
     }
   }
 
+  /// Add a new brick publisher.
+  /// The [brick] must be the name of the brick.
+  /// The [publisher] must be the email address of the desired publisher.
+  Future<void> addPublisher({
+    required String brick,
+    required String publisher,
+  }) async {
+    await _ensureCredentialsAreFresh();
+
+    final http.Response response;
+    try {
+      response = await _httpClient.post(
+        Uri.parse('$_hostedUri/api/v1/bricks/$brick/publishers'),
+        headers: _authorizationHeader,
+        body: json.encode({'email': publisher}),
+      );
+    } catch (error) {
+      throw MasonApiAddPublisherFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.created) {
+      final ErrorResponse error;
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiAddPublisherFailure(message: _unknownErrorMessage);
+      }
+      throw MasonApiAddPublisherFailure(
+        message: error.message,
+        details: error.details,
+      );
+    }
+  }
+
+  /// Removes an existing brick publisher.
+  /// The [brick] must be the name of the brick.
+  /// The [publisher] must be the email address of the desired publisher.
+  Future<void> removePublisher({
+    required String brick,
+    required String publisher,
+  }) async {
+    await _ensureCredentialsAreFresh();
+
+    final http.Response response;
+    try {
+      response = await _httpClient.delete(
+        Uri.parse('$_hostedUri/api/v1/bricks/$brick/publishers/$publisher'),
+        headers: _authorizationHeader,
+      );
+    } catch (error) {
+      throw MasonApiRemovePublisherFailure(message: '$error');
+    }
+
+    if (response.statusCode != HttpStatus.noContent) {
+      final ErrorResponse error;
+      try {
+        final body = json.decode(response.body) as Map<String, dynamic>;
+        error = ErrorResponse.fromJson(body);
+      } catch (_) {
+        throw const MasonApiRemovePublisherFailure(
+          message: _unknownErrorMessage,
+        );
+      }
+      throw MasonApiRemovePublisherFailure(
+        message: error.message,
+        details: error.details,
+      );
+    }
+  }
+
   /// Closes the client and cleans up any resources associated with it.
   /// It's important to close each client when it's done being used;
   /// failing to do so can cause the Dart process to hang.
   void close() => _httpClient.close();
+
+  /// Ensures credentials are fresh by refreshing
+  /// the credentials if they are expired.
+  ///
+  /// Throws if the user is not logged in.
+  /// Throws if credentials are expired and refresh fails.
+  Future<void> _ensureCredentialsAreFresh() async {
+    if (_credentials == null) {
+      throw const MasonApiUnauthorized(
+        message:
+            '''User not found. Please make sure you are logged in and try again.''',
+      );
+    }
+
+    if (_credentials!.areExpired) {
+      try {
+        await _refresh();
+      } on MasonApiRefreshFailure catch (error) {
+        throw MasonApiRefreshFailure(
+          message: 'Refresh failure: ${error.message}',
+        );
+      }
+    }
+  }
 
   /// Attempt to refresh the current credentials and return
   /// refreshed credentials.
