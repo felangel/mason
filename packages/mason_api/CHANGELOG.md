@@ -1,3 +1,7 @@
+# 0.1.0-dev.8
+
+- fix: `login` sets in-memory credentials
+
 # 0.1.0-dev.7
 
 - feat: add `close`
