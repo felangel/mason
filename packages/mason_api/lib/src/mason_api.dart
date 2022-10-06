@@ -338,14 +338,15 @@ class MasonApi {
   /// Throws if the user is not logged in.
   /// Throws if credentials are expired and refresh fails.
   Future<void> _ensureCredentialsAreFresh() async {
-    if (_credentials == null) {
+    final credentials = _credentials;
+    if (credentials == null) {
       throw const MasonApiUnauthorized(
         message:
             '''User not found. Please make sure you are logged in and try again.''',
       );
     }
 
-    if (_credentials!.areExpired) {
+    if (credentials.areExpired) {
       try {
         await _refresh();
       } on MasonApiRefreshFailure catch (error) {
