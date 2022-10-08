@@ -330,6 +330,20 @@ void main() {
           credentials.expiresAt.difference(DateTime.now()).inSeconds,
           closeTo(42, 1),
         );
+
+        try {
+          await masonApi.publish(bundle: <int>[]);
+          fail('should throw');
+        } on MasonApiPublishFailure catch (error) {
+          expect(
+            error.message,
+            isNot(
+              equals(
+                '''User not found. Please make sure you are logged in and try again.''',
+              ),
+            ),
+          );
+        }
       });
     });
 
