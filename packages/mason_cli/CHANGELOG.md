@@ -1,3 +1,7 @@
+# 0.1.0-dev.36
+
+- feat: support `mason add <brick> <version>`
+
 # 0.1.0-dev.35
 
 - fix: `upgrade` from subdirectory w/relative paths
