@@ -529,11 +529,17 @@ The `add` command allows developers to add brick templates locally or globally o
 ### Add Usage
 
 ```sh
-# add from registry
+# add latest version from registry
 mason add my_brick
 
-# add from registry (global)
+# add latest version from registry (global)
 mason add --global my_brick
+
+# add version 0.1.0 from registry
+mason add my_brick 0.1.0
+
+# add version 0.1.0 from registry (global)
+mason add --global my_brick 0.1.0
 
 # add from registry shorthand syntax (global)
 mason add -g my_brick
