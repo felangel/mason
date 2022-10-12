@@ -1,10 +1,10 @@
 import 'package:mason_logger/mason_logger.dart';
 
 enum Shape {
-  Square,
-  Circle,
-  Triangle,
-  Diamond,
+  square,
+  circle,
+  triangle,
+  diamond,
 }
 
 Future<void> main() async {
