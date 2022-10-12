@@ -878,6 +878,38 @@ void main() {
           stdin: () => stdin,
         );
       });
+
+      test('converts list to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny<Map<String, String>>(
+              message,
+              choices: [
+                {'key': 'a'},
+                {'key': 'b'},
+                {'key': 'c'},
+              ],
+              display: (data) => 'Key: ${data['key']}',
+            );
+            expect(actual, isEmpty);
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('Key: a')}'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: b'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
     });
 
     group('.chooseOne', () {
@@ -1220,6 +1252,41 @@ void main() {
               () => stdout.write(' ◯  b'),
               () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('converts list to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = {'key': 'a'};
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseOne<Map<String, String>>(
+              message,
+              choices: [
+                {'key': 'a'},
+                {'key': 'b'},
+                {'key': 'c'},
+              ],
+              display: (data) => 'Key: ${data['key']}',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(
+                    ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
+                  ),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: b'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: c'),
             ]);
           },
           stdout: () => stdout,

@@ -1,5 +1,12 @@
 import 'package:mason_logger/mason_logger.dart';
 
+enum Shape {
+  Square,
+  Circle,
+  Triangle,
+  Diamond,
+}
+
 Future<void> main() async {
   final logger = Logger(level: Level.verbose)
     ..info('info')
@@ -52,4 +59,23 @@ Future<void> main() async {
     uri: Uri.parse('https://github.com/felangel/mason'),
   );
   logger.info('To learn more, visit the $repoLink.');
+
+  final shape = logger.chooseOne(
+    'What is your favorite shape?',
+    choices: Shape.values,
+    display: (Shape shape) {
+      return 'Is it a ${shape.toString().split('.').last}?';
+    },
+  );
+  logger.info('You chose $shape!');
+
+  final shapes = logger.chooseAny(
+    'Or did you want to choose multiples?',
+    choices: Shape.values,
+    defaultValues: [shape],
+    display: (Shape shape) {
+      return 'Is it a ${shape.toString().split('.').last}?';
+    },
+  );
+  logger.info('You chose the following shapes: $shapes!');
 }
