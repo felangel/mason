@@ -54,7 +54,13 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
         ),
       );
     } else {
-      brick = Brick(name: name, location: const BrickLocation(version: 'any'));
+      if (results.rest.length > 2) {
+        usageException(
+          'Too many arguments, expected arguments <name> <version>',
+        );
+      }
+      final version = results.rest.length == 2 ? results.rest.last : 'any';
+      brick = Brick(name: name, location: BrickLocation(version: version));
     }
 
     final cachedBrick = await addBrick(brick, global: isGlobal);
