@@ -13,14 +13,14 @@ class Logger {
   /// {@macro logger}
   Logger({
     this.level = Level.info,
-    this.progressAnimation,
+    this.progressOptions = const ProgressOptions(),
   });
 
   /// The current log level for this logger.
   Level level;
 
-  /// The current progress animation for this logger.
-  List<String>? progressAnimation;
+  /// The progress options for the logger instance.
+  ProgressOptions progressOptions;
 
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
@@ -59,17 +59,16 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  /// Provide a animation list via [progressAnimation].
-  Progress progress(
-    String message, {
-    List<String>? progressAnimation,
-  }) =>
-      Progress._(
-        message,
-        _stdout,
-        level,
-        progressAnimation ?? this.progressAnimation,
-      );
+  /// Optionally provide [options] to override the current
+  /// [ProgressOptions] for the generated [Progress].
+  Progress progress(String message, {ProgressOptions? options}) {
+    return Progress._(
+      message,
+      _stdout,
+      level,
+      options: options ?? progressOptions,
+    );
+  }
 
   /// Writes error message to stderr.
   void err(String? message) {

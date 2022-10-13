@@ -31,12 +31,29 @@ void main() {
       });
     });
 
-    group('progressAnimation', () {
-      test('is mutable', () {
+    group('progressOptions', () {
+      test('are set by default', () {
+        expect(Logger().progressOptions, equals(const ProgressOptions()));
+      });
+
+      test('can be injected via constructor', () {
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(
+          Logger(progressOptions: customProgressOptions).progressOptions,
+          equals(customProgressOptions),
+        );
+      });
+
+      test('are mutable', () {
         final logger = Logger();
-        expect(logger.progressAnimation, equals(null));
-        logger.progressAnimation = ['a', 'b', 'c'];
-        expect(logger.progressAnimation, equals(['a', 'b', 'c']));
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(logger.progressOptions, equals(const ProgressOptions()));
+        logger.progressOptions = customProgressOptions;
+        expect(logger.progressOptions, equals(customProgressOptions));
       });
     });
 
@@ -521,72 +538,26 @@ void main() {
           () async {
             const time = '(0.Xs)';
             const message = 'test message';
-            final done = Logger().progress(
-              message,
-              progressAnimation: [
-                'a',
-                'b',
-                'c',
-              ],
+            const progressOptions = ProgressOptions(
+              animation: ProgressAnimation(frames: ['+', 'x', '*']),
             );
+            final done = Logger().progress(message, options: progressOptions);
             await Future<void>.delayed(const Duration(milliseconds: 400));
             done.complete();
             verifyInOrder([
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}a')} $message... ${darkGray.wrap('(0.1s)')}''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message... ${darkGray.wrap('(0.1s)')}''',
                 );
               },
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}b')} $message... ${darkGray.wrap('(0.2s)')}''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}x')} $message... ${darkGray.wrap('(0.2s)')}''',
                 );
               },
               () {
                 stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}c')} $message... ${darkGray.wrap('(0.3s)')}''',
-                );
-              },
-              () {
-                stdout.write(
-                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-                );
-              },
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
-        );
-      });
-
-      test('writes loggers progress animation to stdout', () async {
-        await IOOverrides.runZoned(
-          () async {
-            const time = '(0.Xs)';
-            const message = 'test message';
-            final done = Logger(
-              progressAnimation: [
-                'a',
-                'b',
-                'c',
-              ],
-            ).progress(message);
-            await Future<void>.delayed(const Duration(milliseconds: 400));
-            done.complete();
-            verifyInOrder([
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}a')} $message... ${darkGray.wrap('(0.1s)')}''',
-                );
-              },
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}b')} $message... ${darkGray.wrap('(0.2s)')}''',
-                );
-              },
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}c')} $message... ${darkGray.wrap('(0.3s)')}''',
+                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}*')} $message... ${darkGray.wrap('(0.3s)')}''',
                 );
               },
               () {
