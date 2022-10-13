@@ -21,7 +21,7 @@
       defaultValues: [shape],
       display: (shape) => '${shape.name}',
     );
-    logger.info('You chose the: $shapes');
+    logger.info('You chose: $shapes');
   }
   ```
 
