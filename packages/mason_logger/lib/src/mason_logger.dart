@@ -144,7 +144,7 @@ class Logger {
   ///
   /// An optional [defaultValue] can be specified.
   /// The [defaultValue] must be one of the provided [choices].
-  T chooseOne<T>(
+  T chooseOne<T extends Object?>(
     String? message, {
     required List<T> choices,
     T? defaultValue,
@@ -231,7 +231,7 @@ class Logger {
   ///
   /// An optional list of [defaultValues] can be specified.
   /// The [defaultValues] must be one of the provided [choices].
-  List<T> chooseAny<T>(
+  List<T> chooseAny<T extends Object?>(
     String? message, {
     required List<T> choices,
     List<T>? defaultValues,
