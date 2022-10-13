@@ -255,6 +255,18 @@ void main() {
           ).called(1);
         });
 
+        test('exits with code 64 when too many arguments provided', () async {
+          final result = await commandRunner.run(
+            ['add', 'nonexistent-brick', 'foo', 'bar'],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err(
+              'Too many arguments, expected arguments <name> <version>',
+            ),
+          ).called(1);
+        });
+
         test('adds brick successfully when brick exists', () async {
           final result = await commandRunner.run(['add', 'greeting']);
           expect(result, equals(ExitCode.success.code));
@@ -275,6 +287,21 @@ void main() {
             path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
           );
           expect(directoriesDeepEqual(actual, expected), isTrue);
+        });
+
+        test('adds brick successfully when brick exists w/version', () async {
+          final addResult = await commandRunner.run(
+            ['add', 'greeting', '0.1.0+1'],
+          );
+          expect(addResult, equals(ExitCode.success.code));
+
+          final listResult = await commandRunner.run(['ls']);
+          expect(listResult, equals(ExitCode.success.code));
+          verify(
+            () => logger.info(
+              any(that: contains('greeting 0.1.0+1 -> registry.brickhub.dev')),
+            ),
+          ).called(1);
         });
       });
     });
@@ -414,6 +441,18 @@ void main() {
           ).called(1);
         });
 
+        test('exits with code 64 when too many arguments provided', () async {
+          final result = await commandRunner.run(
+            ['add', '-g', 'nonexistent-brick', 'foo', 'bar'],
+          );
+          expect(result, equals(ExitCode.usage.code));
+          verify(
+            () => logger.err(
+              'Too many arguments, expected arguments <name> <version>',
+            ),
+          ).called(1);
+        });
+
         test('adds brick successfully when brick exists', () async {
           final result = await commandRunner.run(['add', '-g', 'greeting']);
           expect(result, equals(ExitCode.success.code));
@@ -434,6 +473,21 @@ void main() {
             path.join(testFixturesPath(cwd, suffix: 'add'), 'greeting'),
           );
           expect(directoriesDeepEqual(actual, expected), isTrue);
+        });
+
+        test('adds brick successfully when brick exists w/version', () async {
+          final addResult = await commandRunner.run(
+            ['add', '-g', 'greeting', '0.1.0+1'],
+          );
+          expect(addResult, equals(ExitCode.success.code));
+
+          final listResult = await commandRunner.run(['ls', '-g']);
+          expect(listResult, equals(ExitCode.success.code));
+          verify(
+            () => logger.info(
+              any(that: contains('greeting 0.1.0+1 -> registry.brickhub.dev')),
+            ),
+          ).called(1);
         });
       });
     });
