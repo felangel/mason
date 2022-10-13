@@ -101,10 +101,11 @@ class Progress {
   void _onTick(Timer _) {
     _index++;
     final frames = _options.animation.frames;
-    final char = frames[_index % frames.length];
-    _write(
-      '''${lightGreen.wrap('$_clearMessageLength$char')} $_message... $_time''',
-    );
+    final char = frames.isEmpty ? '' : frames[_index % frames.length];
+    final prefix = char.isEmpty
+        ? _clearMessageLength
+        : '${lightGreen.wrap('$_clearMessageLength$char')} ';
+    _write('$prefix$_message... $_time');
   }
 
   void _write(Object? object) {
