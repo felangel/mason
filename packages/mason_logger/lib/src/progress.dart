@@ -32,7 +32,7 @@ class ProgressAnimation {
     '⠏'
   ];
 
-  /// A list of animation frames.
+  /// The list of animation frames.
   final List<String> frames;
 }
 
