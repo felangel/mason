@@ -1,3 +1,28 @@
+# 0.1.4
+
+- feat: add `ProgressOptions` API
+
+  ```dart
+  import 'package:mason_logger/mason_logger.dart';
+
+  Future<void> main() async {
+    // 1. ✨ Create a custom ProgressOptions.
+    const progressOptions = ProgressOptions(
+      animation: ProgressAnimation(
+        frames: ['🌑', '🌒', '🌓', '🌔', '🌕', '🌖', '🌗', '🌘'],
+      ),
+    );
+
+    // 2. 💉 Inject `progressOptions` into your Logger.
+    final logger = Logger(progressOptions: progressOptions);
+
+    // 3. 🤤 Admire your custom progress animation.
+    final progress = logger.progress('Calculating');
+    await Future.delayed(const Duration(seconds: 3));
+    progress.complete('Done!');
+  }
+  ```
+
 # 0.1.3
 
 - feat: add `link` API
