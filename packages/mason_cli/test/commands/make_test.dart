@@ -624,7 +624,7 @@ bricks:
         () => logger.chooseOne<String>(
           any(),
           choices: any(named: 'choices'),
-          defaultValue: any<String>(named: 'defaultValue'),
+          defaultValue: any(named: 'defaultValue'),
         ),
       ).thenReturn('blue');
       final result = await commandRunner.run(['make', 'favorite_color']);
