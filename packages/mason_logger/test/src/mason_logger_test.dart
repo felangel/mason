@@ -31,6 +31,32 @@ void main() {
       });
     });
 
+    group('progressOptions', () {
+      test('are set by default', () {
+        expect(Logger().progressOptions, equals(const ProgressOptions()));
+      });
+
+      test('can be injected via constructor', () {
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(
+          Logger(progressOptions: customProgressOptions).progressOptions,
+          equals(customProgressOptions),
+        );
+      });
+
+      test('are mutable', () {
+        final logger = Logger();
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(logger.progressOptions, equals(const ProgressOptions()));
+        logger.progressOptions = customProgressOptions;
+        expect(logger.progressOptions, equals(customProgressOptions));
+      });
+    });
+
     group('.write', () {
       test('writes to stdout', () {
         IOOverrides.runZoned(

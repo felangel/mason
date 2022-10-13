@@ -1,22 +1,25 @@
 part of 'mason_logger.dart';
 
-/// {@template progress}
-/// A class that can be used to display progress information to the user.
+/// {@template progress_options}
+/// An object containing configuration for a [Progress] instance.
 /// {@endtemplate}
-class Progress {
-  /// {@macro progress}
-  Progress._(
-    this._message,
-    this._stdout,
-    this._level,
-  ) : _stopwatch = Stopwatch() {
-    _stopwatch
-      ..reset()
-      ..start();
-    _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
-  }
+class ProgressOptions {
+  /// {@macro progress_options}
+  const ProgressOptions({this.animation = const ProgressAnimation()});
 
-  static const List<String> _progressAnimation = [
+  /// The progress animation configuration.
+  final ProgressAnimation animation;
+}
+
+/// {@template progress_animation}
+/// An object which contains configuration for the animation
+/// of a [Progress] instance.
+/// {@endtemplate}
+class ProgressAnimation {
+  /// {@macro progress_animation}
+  const ProgressAnimation({this.frames = _defaultFrames});
+
+  static const _defaultFrames = [
     '⠋',
     '⠙',
     '⠹',
@@ -28,6 +31,30 @@ class Progress {
     '⠇',
     '⠏'
   ];
+
+  /// The list of animation frames.
+  final List<String> frames;
+}
+
+/// {@template progress}
+/// A class that can be used to display progress information to the user.
+/// {@endtemplate}
+class Progress {
+  /// {@macro progress}
+  Progress._(
+    this._message,
+    this._stdout,
+    this._level, {
+    ProgressOptions options = const ProgressOptions(),
+  })  : _stopwatch = Stopwatch(),
+        _options = options {
+    _stopwatch
+      ..reset()
+      ..start();
+    _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
+  }
+
+  final ProgressOptions _options;
 
   final io.Stdout _stdout;
 
@@ -73,10 +100,12 @@ class Progress {
 
   void _onTick(Timer _) {
     _index++;
-    final char = _progressAnimation[_index % _progressAnimation.length];
-    _write(
-      '''${lightGreen.wrap('$_clearMessageLength$char')} $_message... $_time''',
-    );
+    final frames = _options.animation.frames;
+    final char = frames.isEmpty ? '' : frames[_index % frames.length];
+    final prefix = char.isEmpty
+        ? _clearMessageLength
+        : '${lightGreen.wrap('$_clearMessageLength$char')} ';
+    _write('$prefix$_message... $_time');
   }
 
   void _write(Object? object) {

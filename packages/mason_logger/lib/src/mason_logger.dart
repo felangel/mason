@@ -11,10 +11,16 @@ part 'progress.dart';
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
-  Logger({this.level = Level.info});
+  Logger({
+    this.level = Level.info,
+    this.progressOptions = const ProgressOptions(),
+  });
 
   /// The current log level for this logger.
   Level level;
+
+  /// The progress options for the logger instance.
+  ProgressOptions progressOptions;
 
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
@@ -53,7 +59,16 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) => Progress._(message, _stdout, level);
+  /// Optionally provide [options] to override the current
+  /// [ProgressOptions] for the generated [Progress].
+  Progress progress(String message, {ProgressOptions? options}) {
+    return Progress._(
+      message,
+      _stdout,
+      level,
+      options: options ?? progressOptions,
+    );
+  }
 
   /// Writes error message to stderr.
   void err(String? message) {

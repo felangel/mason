@@ -15,6 +15,7 @@ void main() {
 
     setUp(() {
       stdout = MockStdout();
+      when(() => stdout.supportsAnsiEscapes).thenReturn(true);
     });
 
     test('writes ms when elapsed time is less than 0.1s', () async {
@@ -34,6 +35,84 @@ void main() {
           );
         },
         zoneValues: {AnsiCode: true},
+      );
+    });
+
+    test('writes custom progress animation to stdout', () async {
+      await IOOverrides.runZoned(
+        () async {
+          const time = '(0.Xs)';
+          const message = 'test message';
+          const progressOptions = ProgressOptions(
+            animation: ProgressAnimation(frames: ['+', 'x', '*']),
+          );
+          final done = Logger().progress(message, options: progressOptions);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          done.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message... ${darkGray.wrap('(0.1s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}x')} $message... ${darkGray.wrap('(0.2s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}*')} $message... ${darkGray.wrap('(0.3s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        stdin: () => stdin,
+      );
+    });
+
+    test('supports empty list of animation frames', () async {
+      await IOOverrides.runZoned(
+        () async {
+          const time = '(0.Xs)';
+          const message = 'test message';
+          const progressOptions = ProgressOptions(
+            animation: ProgressAnimation(frames: []),
+          );
+          final done = Logger().progress(message, options: progressOptions);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          done.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.1s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.2s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.3s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        stdin: () => stdin,
       );
     });
 
