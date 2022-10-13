@@ -148,7 +148,7 @@ class Logger {
     String? message, {
     required List<T> choices,
     T? defaultValue,
-    String Function(T)? display,
+    String Function(T choice)? display,
   }) {
     final _display = display ?? (value) => '$value';
     final hasDefault =
@@ -235,7 +235,7 @@ class Logger {
     String? message, {
     required List<T> choices,
     List<T>? defaultValues,
-    String Function(T)? display,
+    String Function(T choice)? display,
   }) {
     final _display = display ?? (value) => '$value';
     final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;

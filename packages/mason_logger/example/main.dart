@@ -60,22 +60,18 @@ Future<void> main() async {
   );
   logger.info('To learn more, visit the $repoLink.');
 
-  final shape = logger.chooseOne(
+  final shape = logger.chooseOne<Shape>(
     'What is your favorite shape?',
     choices: Shape.values,
-    display: (Shape shape) {
-      return 'Is it a ${shape.name}?';
-    },
+    display: (shape) => 'Is it a ${shape.name}?',
   );
   logger.info('You chose $shape!');
 
-  final shapes = logger.chooseAny(
+  final shapes = logger.chooseAny<Shape>(
     'Or did you want to choose multiples?',
     choices: Shape.values,
     defaultValues: [shape],
-    display: (Shape shape) {
-      return 'Is it a ${shape.name}?';
-    },
+    display: (shape) => 'Is it a ${shape.name}?',
   );
   logger.info('You chose the following shapes: $shapes!');
 }
