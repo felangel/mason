@@ -1,3 +1,7 @@
+# 0.1.0-dev.34
+
+- chore(deps): upgrade to `mason_logger ^0.2.0`
+
 # 0.1.0-dev.33
 
 - refactor: use `mason_logger ^0.1.3`
