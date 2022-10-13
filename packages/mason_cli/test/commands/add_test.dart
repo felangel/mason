@@ -299,7 +299,11 @@ void main() {
           expect(listResult, equals(ExitCode.success.code));
           verify(
             () => logger.info(
-              any(that: contains('greeting 0.1.0+1 -> registry.brickhub.dev')),
+              any(
+                that: contains(
+                  '''${styleBold.wrap('greeting')} 0.1.0+1 -> registry.brickhub.dev''',
+                ),
+              ),
             ),
           ).called(1);
         });
@@ -485,7 +489,11 @@ void main() {
           expect(listResult, equals(ExitCode.success.code));
           verify(
             () => logger.info(
-              any(that: contains('greeting 0.1.0+1 -> registry.brickhub.dev')),
+              any(
+                that: contains(
+                  '''${styleBold.wrap('greeting')} 0.1.0+1 -> registry.brickhub.dev''',
+                ),
+              ),
             ),
           ).called(1);
         });
