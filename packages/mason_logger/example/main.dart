@@ -74,7 +74,7 @@ Future<void> main() async {
     choices: Shape.values,
     defaultValues: [shape],
     display: (Shape shape) {
-      return 'Is it a ${shape.toString().split('.').last}?';
+      return 'Is it a ${shape.name}?';
     },
   );
   logger.info('You chose the following shapes: $shapes!');
