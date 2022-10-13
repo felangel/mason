@@ -1,11 +1,6 @@
 import 'package:mason_logger/mason_logger.dart';
 
-enum Shape {
-  square,
-  circle,
-  triangle,
-  diamond,
-}
+enum Shape { square, circle, triangle }
 
 Future<void> main() async {
   final logger = Logger(level: Level.verbose)
@@ -31,6 +26,21 @@ Future<void> main() async {
   );
 
   logger.info('Awesome, $desserts it is!');
+
+  final shape = logger.chooseOne<Shape>(
+    'What is your favorite shape?',
+    choices: Shape.values,
+    display: (shape) => 'Is it a ${shape.name}?',
+  );
+  logger.info('You chose the following shape: $shape!');
+
+  final shapes = logger.chooseAny<Shape>(
+    'Or did you want to choose multiple?',
+    choices: Shape.values,
+    defaultValues: [shape],
+    display: (shape) => 'Is it a ${shape.name}?',
+  );
+  logger.info('You chose the following shapes: $shapes!');
 
   final favoriteAnimal = logger.prompt(
     'What is your favorite animal?',
@@ -59,19 +69,4 @@ Future<void> main() async {
     uri: Uri.parse('https://github.com/felangel/mason'),
   );
   logger.info('To learn more, visit the $repoLink.');
-
-  final shape = logger.chooseOne<Shape>(
-    'What is your favorite shape?',
-    choices: Shape.values,
-    display: (shape) => 'Is it a ${shape.name}?',
-  );
-  logger.info('You chose $shape!');
-
-  final shapes = logger.chooseAny<Shape>(
-    'Or did you want to choose multiples?',
-    choices: Shape.values,
-    defaultValues: [shape],
-    display: (shape) => 'Is it a ${shape.name}?',
-  );
-  logger.info('You chose the following shapes: $shapes!');
 }
