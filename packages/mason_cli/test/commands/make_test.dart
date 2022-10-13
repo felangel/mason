@@ -621,7 +621,7 @@ bricks:
       )..createSync(recursive: true);
       Directory.current = testDir.path;
       when(
-        () => logger.chooseOne(
+        () => logger.chooseOne<String>(
           any(),
           choices: any(named: 'choices'),
           defaultValue: any(named: 'defaultValue'),
@@ -680,7 +680,7 @@ bricks:
       )..createSync(recursive: true);
       Directory.current = testDir.path;
       when(
-        () => logger.chooseAny(
+        () => logger.chooseAny<String>(
           any(),
           choices: any(named: 'choices'),
           defaultValues: any(named: 'defaultValues'),
