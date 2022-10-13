@@ -1,3 +1,30 @@
+# 0.2.0
+
+- **BREAKING** feat: add generic support to `chooseOne` and `chooseAny`
+
+  ```dart
+  enum Shape { square, circle, triangle}
+
+  void main() {
+    final logger = Logger();
+
+    final shape = logger.chooseOne<Shape>(
+      'What is your favorite shape?',
+      choices: Shape.values,
+      display: (shape) => '${shape.name}',
+    );
+    logger.info('You chose: $shape');
+
+    final shapes = logger.chooseAny<Shape>(
+      'Or did you want to choose multiples?',
+      choices: Shape.values,
+      defaultValues: [shape],
+      display: (shape) => '${shape.name}',
+    );
+    logger.info('You chose the: $shapes');
+  }
+  ```
+
 # 0.1.4
 
 - feat: add `ProgressOptions` API

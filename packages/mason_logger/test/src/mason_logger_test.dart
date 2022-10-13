@@ -905,7 +905,7 @@ void main() {
         );
       });
 
-      test('converts list to a preferred display', () {
+      test('converts choices to a preferred display', () {
         IOOverrides.runZoned(
           () {
             const message = 'test message';
@@ -1285,7 +1285,7 @@ void main() {
         );
       });
 
-      test('converts list to a preferred display', () {
+      test('converts choices to a preferred display', () {
         IOOverrides.runZoned(
           () {
             const message = 'test message';
