@@ -17,9 +17,9 @@ class ProgressOptions {
 /// {@endtemplate}
 class ProgressAnimation {
   /// {@macro progress_animation}
-  const ProgressAnimation({this.frames = _defaultProgressAnimationFrames});
+  const ProgressAnimation({this.frames = _defaultFrames});
 
-  static const List<String> _defaultProgressAnimationFrames = [
+  static const _defaultFrames = [
     '⠋',
     '⠙',
     '⠹',
