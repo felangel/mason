@@ -1,3 +1,10 @@
+# 0.1.0-dev.37
+
+- feat: support `mason upgrade -g`
+- deps: upgrade to `mason: ^0.1.0-dev.34`
+- deps: upgrade to `mason_api: ^0.1.0-dev.8`
+- deps: upgrade to `pub_updater: ^0.2.2`
+
 # 0.1.0-dev.36
 
 - feat: support `mason add <brick> <version>`
