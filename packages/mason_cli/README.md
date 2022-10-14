@@ -613,8 +613,14 @@ Installed bricks can be upgraded to their latest versions via the `upgrade` comm
 ### Upgrade Usage
 
 ```sh
-# upgrade all bricks and generate a new mason-lock.json
+# upgrade all local bricks and generate a new mason-lock.json
 mason upgrade
+
+# upgrade all global bricks
+mason upgrade --global
+
+# upgrade all global bricks shorthand syntax
+mason upgrade -g
 ```
 
 ## Bundling
