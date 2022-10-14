@@ -18,7 +18,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
   @override
   Future<int> run() async {
     if (masonInitialized) {
-      logger.err('Existing ${MasonYaml.file} at ${masonYamlFile.path}');
+      logger.err('Existing ${MasonYaml.file} at ${localMasonYamlFile.path}');
       return ExitCode.usage.code;
     }
     final fetchProgress = logger.progress('Initializing');

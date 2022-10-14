@@ -44,85 +44,112 @@ void main() {
       Directory.current = cwd;
     });
 
-    test('updates lockfile', () async {
-      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
-        '''
+    group('local', () {
+      test('updates lockfile', () async {
+        File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+          '''
 bricks:
   greeting: 0.1.0+1
 ''',
-      );
-      final getResult = await commandRunner.run(['get']);
-      expect(getResult, equals(ExitCode.success.code));
-      expect(
-        File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync(),
-        equals('{"bricks":{"greeting":"0.1.0+1"}}'),
-      );
-      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
-        '''
+        );
+        final getResult = await commandRunner.run(['get']);
+        expect(getResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals('{"bricks":{"greeting":"0.1.0+1"}}'),
+        );
+        File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+          '''
 bricks:
   greeting: ^0.1.0
 ''',
-      );
+        );
 
-      final upgradeResult = await commandRunner.run(['upgrade']);
-      expect(upgradeResult, equals(ExitCode.success.code));
-      expect(
-        File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync(),
-        equals('{"bricks":{"greeting":"0.1.0+2"}}'),
-      );
+        final upgradeResult = await commandRunner.run(['upgrade']);
+        expect(upgradeResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals('{"bricks":{"greeting":"0.1.0+2"}}'),
+        );
+      });
+
+      test('updates lockfile from nested directtory', () async {
+        final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+        final simplePath = canonicalize(
+          path.join(Directory.current.path, bricksPath, 'simple'),
+        );
+        File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+          '''
+bricks:
+  greeting: 0.1.0+1
+  simple:
+    path: ${path.join(bricksPath, 'simple')}
+''',
+        );
+        final getResult = await commandRunner.run(['get']);
+        expect(getResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals(
+            '{"bricks":{"greeting":"0.1.0+1","simple":{"path":"$simplePath"}}}',
+          ),
+        );
+        File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+          '''
+bricks:
+  greeting: ^0.1.0
+  simple:
+    path: ${path.join(bricksPath, 'simple')}
+''',
+        );
+
+        final nested = Directory(path.join(Directory.current.path, 'nested'))
+          ..createSync();
+        final workspace = Directory.current;
+        Directory.current = nested.path;
+        final upgradeResult = await commandRunner.run(['upgrade']);
+        Directory.current = workspace;
+        expect(upgradeResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals(
+            '{"bricks":{"greeting":"0.1.0+2","simple":{"path":"$simplePath"}}}',
+          ),
+        );
+      });
     });
 
-    test('updates lockfile from nested directtory', () async {
-      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final simplePath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'simple'),
-      );
-      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
-        '''
-bricks:
-  greeting: 0.1.0+1
-  simple:
-    path: ${path.join(bricksPath, 'simple')}
-''',
-      );
-      final getResult = await commandRunner.run(['get']);
-      expect(getResult, equals(ExitCode.success.code));
-      expect(
-        File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync(),
-        equals(
-          '{"bricks":{"greeting":"0.1.0+1","simple":{"path":"$simplePath"}}}',
-        ),
-      );
-      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
-        '''
-bricks:
-  greeting: ^0.1.0
-  simple:
-    path: ${path.join(bricksPath, 'simple')}
-''',
-      );
+    group('global', () {
+      test('updates lockfile', () async {
+        await commandRunner.run(['cache', 'clear']);
+        final addResult = await commandRunner.run(
+          ['add', '-g', 'greeting', '0.1.0+1'],
+        );
+        expect(addResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(BricksJson.globalDir.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals('{"bricks":{"greeting":"0.1.0+1"}}'),
+        );
 
-      final nested = Directory(path.join(Directory.current.path, 'nested'))
-        ..createSync();
-      final workspace = Directory.current;
-      Directory.current = nested.path;
-      final upgradeResult = await commandRunner.run(['upgrade']);
-      Directory.current = workspace;
-      expect(upgradeResult, equals(ExitCode.success.code));
-      expect(
-        File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync(),
-        equals(
-          '{"bricks":{"greeting":"0.1.0+2","simple":{"path":"$simplePath"}}}',
-        ),
-      );
+        final upgradeResult = await commandRunner.run(['upgrade', '-g']);
+        expect(upgradeResult, equals(ExitCode.success.code));
+        expect(
+          File(
+            path.join(BricksJson.globalDir.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals('{"bricks":{"greeting":"0.1.0+2"}}'),
+        );
+      });
     });
   });
 }

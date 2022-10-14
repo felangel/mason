@@ -7,7 +7,13 @@ import 'package:mason_cli/src/install_brick.dart';
 /// {@endtemplate}
 class UpgradeCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro upgrade_command}
-  UpgradeCommand({Logger? logger}) : super(logger: logger);
+  UpgradeCommand({Logger? logger}) : super(logger: logger) {
+    argParser.addFlag(
+      'global',
+      abbr: 'g',
+      help: 'Upgrades globally installed bricks.',
+    );
+  }
 
   @override
   final String description = 'Upgrade bricks to their latest versions.';
@@ -17,7 +23,8 @@ class UpgradeCommand extends MasonCommand with InstallBrickMixin {
 
   @override
   Future<int> run() async {
-    await getBricks(upgrade: true);
+    final isGlobal = results['global'] == true;
+    await getBricks(upgrade: true, global: isGlobal);
     return ExitCode.success.code;
   }
 }

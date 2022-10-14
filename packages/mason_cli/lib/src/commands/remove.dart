@@ -31,32 +31,31 @@ class RemoveCommand extends MasonCommand {
     final brickName = results.rest.first;
     final isGlobal = results['global'] == true;
     final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
-    final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
-    final brickLocation = targetMasonYaml.bricks[brickName];
+    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
+    final brickLocation = masonYaml.bricks[brickName];
     if (bricksJson == null || brickLocation == null) {
       usageException('no brick named $brickName was found');
     }
 
-    final lockFile = isGlobal ? globalMasonLockJsonFile : masonLockJsonFile;
-    final lockJson = isGlobal ? globalMasonLockJson : masonLockJson;
+    final masonLockJsonFile =
+        isGlobal ? globalMasonLockJsonFile : localMasonLockJsonFile;
+    final masonLockJson = isGlobal ? globalMasonLockJson : localMasonLockJson;
 
-    final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
+    final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
     final removeProgress = logger.progress('Removing $brickName');
     try {
       bricksJson.remove(Brick(name: brickName, location: brickLocation));
-      final bricks = Map.of(targetMasonYaml.bricks)
+      final bricks = Map.of(masonYaml.bricks)
         ..removeWhere((key, value) => key == brickName);
 
-      targetMasonYamlFile.writeAsStringSync(
-        Yaml.encode(MasonYaml(bricks).toJson()),
-      );
+      masonYamlFile.writeAsStringSync(Yaml.encode(MasonYaml(bricks).toJson()));
 
       await bricksJson.flush();
 
-      if (lockJson.bricks.containsKey(brickName)) {
-        final lockedBricks = {...lockJson.bricks}
+      if (masonLockJson.bricks.containsKey(brickName)) {
+        final lockedBricks = {...masonLockJson.bricks}
           ..removeWhere((key, value) => key == brickName);
-        await lockFile.writeAsString(
+        await masonLockJsonFile.writeAsString(
           json.encode(MasonLockJson(bricks: lockedBricks).toJson()),
         );
       }
