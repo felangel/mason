@@ -13,11 +13,11 @@ environment:
 dependencies:
   args: ^2.1.0
   checked_yaml: ^2.0.1
-  mason: ^0.1.0-dev.33
-  mason_api: ^0.1.0-dev.7
+  mason: ^0.1.0-dev.34
+  mason_api: ^0.1.0-dev.8
   meta: ^1.7.0
   path: ^1.8.0
-  pub_updater: ^0.2.1
+  pub_updater: ^0.2.2
   recase: ^4.0.0
 
 dev_dependencies:
