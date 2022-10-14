@@ -129,6 +129,7 @@ bricks:
 
     group('global', () {
       test('updates lockfile', () async {
+        await commandRunner.run(['cache', 'clear']);
         final addResult = await commandRunner.run(
           ['add', '-g', 'greeting', '0.1.0+1'],
         );
@@ -137,7 +138,7 @@ bricks:
           File(
             path.join(BricksJson.globalDir.path, MasonLockJson.file),
           ).readAsStringSync(),
-          contains('"greeting":"0.1.0+1"'),
+          equals('{"bricks":{"greeting":"0.1.0+1"}}'),
         );
 
         final upgradeResult = await commandRunner.run(['upgrade', '-g']);
@@ -146,7 +147,7 @@ bricks:
           File(
             path.join(BricksJson.globalDir.path, MasonLockJson.file),
           ).readAsStringSync(),
-          contains('"greeting":"0.1.0+2"'),
+          equals('{"bricks":{"greeting":"0.1.0+2"}}'),
         );
       });
     });
