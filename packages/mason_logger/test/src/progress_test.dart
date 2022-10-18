@@ -122,7 +122,6 @@ void main() {
           () async {
             await IOOverrides.runZoned(
               () async {
-                const time = '(0.1s)';
                 const message = 'test message';
                 final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -131,17 +130,20 @@ void main() {
                   () {
                     stdout.write(
                       any(
-                        that: contains(
-                          '''[92m⠙[0m $message... [90m''',
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                          ),
                         ),
                       ),
                     );
                   },
                 ).called(1);
+
                 verify(
                   () {
                     stdout.write(
-                      '''[2K[92m✓[0m $message [90m$time[0m\n''',
+                      '''[2K\r[92m✓[0m test message [90m(0.1s)[0m\n''',
                     );
                   },
                 ).called(1);
@@ -173,33 +175,42 @@ void main() {
     });
 
     group('.update', () {
-      test('writes lines to stdout', () async {
+      test('writes lines to stdouta', () async {
         await runZoned(
           () async {
             await IOOverrides.runZoned(
               () async {
                 const message = 'message';
                 const update = 'update';
-                const time = '(0.1s)';
                 final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.update(update);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
+
                 verify(
                   () {
                     stdout.write(
                       any(
-                        that: contains(
-                          '''[92m⠙[0m $message... [90m''',
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D\[92m⠙\[0m message... \[90m\(8\dms\)\[0m',
+                          ),
                         ),
                       ),
                     );
                   },
                 ).called(1);
+
                 verify(
                   () {
                     stdout.write(
-                      '''[92m⠹[0m $update... [90m$time[0m''',
+                      any(
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D\[92m⠹\[0m update... \[90m\(0\.1s\)\[0m',
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ).called(1);
@@ -243,21 +254,25 @@ void main() {
                 final progress = Logger().progress(message);
                 await Future<void>.delayed(const Duration(milliseconds: 100));
                 progress.fail();
+
                 verify(
                   () {
                     stdout.write(
                       any(
-                        that: contains(
-                          '''[92m⠙[0m $message... [90m''',
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                          ),
                         ),
                       ),
                     );
                   },
                 ).called(1);
+
                 verify(
                   () {
                     stdout.write(
-                      '''[2K[31m✗[0m $message [90m$time[0m\n''',
+                      '''[2K\u000D[31m✗[0m $message [90m$time[0m\n''',
                     );
                   },
                 ).called(1);
@@ -302,17 +317,26 @@ void main() {
                   () {
                     stdout.write(
                       any(
-                        that: contains(
-                          '''[92m⠙[0m $message... [90m''',
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                          ),
                         ),
                       ),
                     );
                   },
                 ).called(1);
+
                 verify(
                   () {
                     stdout.write(
-                      '''[2K''',
+                      any(
+                        that: matches(
+                          RegExp(
+                            r'\[2K\u000D',
+                          ),
+                        ),
+                      ),
                     );
                   },
                 ).called(1);

@@ -72,7 +72,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLn${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
+      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer.cancel();
   }
@@ -80,13 +80,13 @@ class Progress {
   /// End the progress and mark it as failed.
   void fail([String? update]) {
     _timer.cancel();
-    _write('$_clearLn${red.wrap('✗')} ${update ?? _message} $_time\n');
+    _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
     _stopwatch.stop();
   }
 
   /// Update the progress message.
   void update(String update) {
-    _write(_clearLn);
+    _write(_clearLine);
     _message = update;
     _onTick(_timer);
   }
@@ -94,31 +94,28 @@ class Progress {
   /// Cancel the progress and remove the written line.
   void cancel() {
     _timer.cancel();
-    _write(_clearLn);
+    _write(_clearLine);
     _stopwatch.stop();
+  }
+
+  String get _clearLine {
+    return '\u001b[2K' // clear current line
+        '\r'; // bring cursor to the start of the current line
   }
 
   void _onTick(Timer _) {
     _index++;
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
-    final prefix = char.isEmpty
-        ? _clearMessageLength
-        : '${lightGreen.wrap('$_clearMessageLength$char')} ';
-    _write('$prefix$_message... $_time');
+    final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
+
+    _write('$_clearLine$prefix$_message... $_time');
   }
 
-  void _write(Object? object) {
+  void _write(String object) {
     if (_level.index > Level.info.index) return;
     _stdout.write(object);
   }
-
-  String get _clearMessageLength {
-    final length = _message.length + 4 + _time.length;
-    return '\b${'\b' * length}';
-  }
-
-  String get _clearLn => '$_clearMessageLength\u001b[2K';
 
   String get _time {
     final elapsedTime = _stopwatch.elapsed.inMilliseconds;
