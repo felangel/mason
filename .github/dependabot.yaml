@@ -5,14 +5,6 @@ updates:
     schedule:
       interval: "daily"
   - package-ecosystem: "pub"
-    directory: "/bricks/random_color/hooks"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "pub"
-    directory: "/bricks/hooks/hooks"
-    schedule:
-      interval: "daily"
-  - package-ecosystem: "pub"
     directory: "/packages/mason_cli"
     schedule:
       interval: "daily"
