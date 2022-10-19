@@ -175,7 +175,7 @@ void main() {
     });
 
     group('.update', () {
-      test('writes lines to stdouta', () async {
+      test('writes lines to stdout', () async {
         await runZoned(
           () async {
             await IOOverrides.runZoned(
