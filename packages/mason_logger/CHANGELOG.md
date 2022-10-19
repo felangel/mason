@@ -1,3 +1,7 @@
+# 0.2.1
+
+- fix: improve clear line mechanism for Progress API
+
 # 0.2.0
 
 - **BREAKING** feat: add generic support to `chooseOne` and `chooseAny`
