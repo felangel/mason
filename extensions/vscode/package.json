@@ -103,7 +103,7 @@
     "@types/vscode": "^1.72.0",
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^5.40.1",
-    "@typescript-eslint/parser": "^5.40.1",
+    "@typescript-eslint/parser": "^5.41.0",
     "eslint": "^8.25.0",
     "glob": "^8.0.3",
     "prettier": "2.7.1",
