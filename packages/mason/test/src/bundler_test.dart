@@ -247,7 +247,7 @@ void main() {
         expect(
           preGenHookFile.readAsStringSync(),
           equals(
-            '''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.pre_gen.txt');file.writeAsStringSync('pre_gen: {{name}}');}''',
+            r'''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.pre_gen.txt');file.writeAsStringSync('pre_gen: ${context.vars['name']}');}''',
           ),
         );
         final postGenHookFile = File(
@@ -257,7 +257,7 @@ void main() {
         expect(
           postGenHookFile.readAsStringSync(),
           equals(
-            '''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.post_gen.txt');file.writeAsStringSync('post_gen: {{name}}');}''',
+            r'''import 'dart:io';import 'package:mason/mason.dart';void run(HookContext context){final file=File('.post_gen.txt');file.writeAsStringSync('post_gen: ${context.vars['name']}');}''',
           ),
         );
         final hookPubspecFile = File(
