@@ -36,6 +36,9 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos --fatal-warnings .
 
+      - name: Verify CI
+        run: dart example/test.dart
+
       - name: Run Tests
         run: |
           dart pub global activate coverage 1.2.0
