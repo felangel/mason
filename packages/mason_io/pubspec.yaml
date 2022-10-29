@@ -1,0 +1,12 @@
+name: mason_io
+description: Reusable I/O utilities used by the Mason CLI (package:mason_cli).
+version: 0.0.0
+repository: https://github.com/felangel/mason
+
+environment:
+  sdk: ">=2.16.0 <3.0.0"
+
+dev_dependencies:
+  mocktail: ^0.3.0
+  test: ^1.19.2
+  very_good_analysis: ^2.4.0
