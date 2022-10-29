@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:mason/mason.dart';
-import 'package:mason/src/generator.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -954,21 +953,6 @@ void main() {
           final set = template.runSubstitution(<String, dynamic>{}, {});
           expect(set.length, equals(1));
           expect(set.first.content, equals(bytes));
-        });
-      });
-    });
-
-    group('HookFile', () {
-      group('runSubstitution', () {
-        test('handles malformed content', () {
-          final tempDir = Directory.systemTemp.createTempSync();
-          final bytes = [0x80, 0x00];
-          final template = HookFile.fromBytes(
-            path.join(tempDir.path, 'malformed.txt'),
-            bytes,
-          );
-          final file = template.runSubstitution(<String, dynamic>{});
-          expect(file.content, equals(bytes));
         });
       });
     });
