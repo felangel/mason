@@ -54,6 +54,7 @@ void main() {
           ]);
         },
         stdout: () => stdout,
+        stdioType: () => (dynamic _) => StdioType.other,
         zoneValues: {AnsiCode: true},
       );
     });
