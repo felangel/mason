@@ -36,8 +36,17 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos --fatal-warnings .
 
-      - name: Verify CI
-        run: dart example/test.dart
+      - name: Verify CI Behavior
+        run: |
+          dart test/ci.dart >> ci.txt
+          actual="ci.txt"
+          expected="test/fixtures/ci.txt"
+          if cmp -s "$actual" "$expected"; then
+              echo "PASSED"
+          else
+              echo "FAILED"
+              exit 1
+          fi
 
       - name: Run Tests
         run: |
