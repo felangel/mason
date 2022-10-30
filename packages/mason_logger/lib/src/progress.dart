@@ -52,9 +52,11 @@ class Progress {
       ..reset()
       ..start();
 
+    final stdioType = StdioOverrides.current?.stdioType ?? io.stdioType;
+
     // The animation is only shown when it would be meaningful.
     // Do not animate if the stdio type is not a terminal.
-    if (io.stdioType(_stdout) != io.StdioType.terminal) {
+    if (stdioType(_stdout) != io.StdioType.terminal) {
       final frames = _options.animation.frames;
       final char = frames.isEmpty ? '' : frames.first;
       final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
