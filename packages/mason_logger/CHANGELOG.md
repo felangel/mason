@@ -1,3 +1,7 @@
+# 0.2.2
+
+- fix: only animate progress on terminals
+
 # 0.2.1
 
 - fix: improve clear line mechanism for Progress API
