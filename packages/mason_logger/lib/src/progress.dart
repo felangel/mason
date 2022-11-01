@@ -51,6 +51,19 @@ class Progress {
     _stopwatch
       ..reset()
       ..start();
+
+    final stdioType = StdioOverrides.current?.stdioType ?? io.stdioType;
+
+    // The animation is only shown when it would be meaningful.
+    // Do not animate if the stdio type is not a terminal.
+    if (stdioType(_stdout) != io.StdioType.terminal) {
+      final frames = _options.animation.frames;
+      final char = frames.isEmpty ? '' : frames.first;
+      final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
+      _write('$prefix$_message...');
+      return;
+    }
+
     _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
   }
 
@@ -62,7 +75,7 @@ class Progress {
 
   final Stopwatch _stopwatch;
 
-  late final Timer _timer;
+  Timer? _timer;
 
   String _message;
 
@@ -74,26 +87,26 @@ class Progress {
     _write(
       '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
-    _timer.cancel();
+    _timer?.cancel();
   }
 
   /// End the progress and mark it as failed.
   void fail([String? update]) {
-    _timer.cancel();
+    _timer?.cancel();
     _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
     _stopwatch.stop();
   }
 
   /// Update the progress message.
   void update(String update) {
-    _write(_clearLine);
+    if (_timer != null) _write(_clearLine);
     _message = update;
     _onTick(_timer);
   }
 
   /// Cancel the progress and remove the written line.
   void cancel() {
-    _timer.cancel();
+    _timer?.cancel();
     _write(_clearLine);
     _stopwatch.stop();
   }
@@ -103,7 +116,7 @@ class Progress {
         '\r'; // bring cursor to the start of the current line
   }
 
-  void _onTick(Timer _) {
+  void _onTick(Timer? _) {
     _index++;
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
