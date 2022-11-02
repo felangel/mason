@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: favorite_color
 description: A new brick created with the Mason CLI.
 

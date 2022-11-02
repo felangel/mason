@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: documentation
 description: Create Documentation Markdown Files
 version: 0.1.0+1

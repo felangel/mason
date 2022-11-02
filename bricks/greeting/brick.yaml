@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: greeting
 description: A Simple Greeting Template
 repository: https://github.com/felangel/mason/tree/master/bricks/greeting

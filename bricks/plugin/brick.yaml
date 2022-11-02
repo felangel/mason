@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: plugin
 description: An example plugin template
 version: 0.1.0+1

@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: widget
 description: Create a Simple Flutter Widget
 version: 0.1.0+1

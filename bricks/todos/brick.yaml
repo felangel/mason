@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: todos
 description: A Todos Template
 version: 0.1.0+1

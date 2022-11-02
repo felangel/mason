@@ -1,3 +1,4 @@
+# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: simple
 description: A Simple Static Template
 version: 0.1.0+1
