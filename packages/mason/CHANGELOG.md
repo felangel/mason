@@ -1,3 +1,8 @@
+# 0.1.0-dev.35
+
+- **BREAKING** feat!: avoid templating hook contents
+- chore(deps): upgrade to `mason_logger ^0.2.2`
+
 # 0.1.0-dev.34
 
 - chore(deps): upgrade to `mason_logger ^0.2.0`
