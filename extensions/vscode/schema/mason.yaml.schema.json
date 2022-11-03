@@ -24,15 +24,15 @@
   "$defs": {
     "brickVersion": {
       "type": "string",
-      "description": "A version constraint (^1.0.0)"
+      "description": "The version constraint for the associated brick (^1.0.0)."
     },
     "brickPath": {
       "type": "object",
-      "description": "A local path reference (./path/to/brick)",
+      "description": "The path location for the associated brick.",
       "properties": {
         "path": {
           "type": "string",
-          "description": "Local path to the associated brick."
+          "description": "The local path to the associated brick (./path/to/brick)."
         }
       },
       "required": ["path"],
@@ -44,17 +44,17 @@
       "properties": {
         "git": {
           "type": "object",
-          "description": "The git path for the associated brick.",
+          "description": "The git location for the associated brick.",
           "properties": {
             "url": {
               "type": "string",
-              "description": "The git url for the associated brick.",
+              "description": "The git url for the associated brick (https://github.com/felangel/mason).",
               "pattern": "^https?://",
               "format": "uri"
             },
             "path": {
               "type": "string",
-              "description": "Path relative to the root of the repository."
+              "description": "Path relative to the root of the repository (bricks/widget)."
             },
             "ref": {
               "type": "string",
