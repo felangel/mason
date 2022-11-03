@@ -6,6 +6,9 @@ on:
       - master
     paths:
       - .github/workflows/mason_cli.yaml
+      - packages/mason_logger/**
+      - packages/mason_api/**
+      - packages/mason/**
       - packages/mason_cli/**
 
   pull_request:
@@ -13,6 +16,9 @@ on:
       - master
     paths:
       - .github/workflows/mason_cli.yaml
+      - packages/mason_logger/**
+      - packages/mason_api/**
+      - packages/mason/**
       - packages/mason_cli/**
 
 jobs:
@@ -24,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.1.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -54,7 +60,7 @@ jobs:
         os: [macos-latest, windows-2019, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.1.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -63,10 +69,10 @@ jobs:
       - name: Run Tests
         run: |
           dart pub global activate coverage 1.2.0
-          dart test -j 1 -x pull-request-only --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.packages --report-on=lib
+          dart test -j 1 -x pull-request-only --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib
 
       - name: Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v1
+        uses: VeryGoodOpenSource/very_good_coverage@v2
         with:
           path: packages/mason_cli/coverage/lcov.info
 
@@ -78,7 +84,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v3.1.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies

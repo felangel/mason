@@ -1,0 +1,73 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "title": "mason.yaml",
+  "description": "The mason.yaml schema for the mason ecosystem",
+  "type": "object",
+  "properties": {
+    "bricks": {
+      "type": ["object", "null"],
+      "description": "A list of the registered bricks for the current workspace.",
+      "patternProperties": {
+        "^.*$": {
+          "anyOf": [
+            { "$ref": "#/$defs/brickVersion" },
+            { "$ref": "#/$defs/brickPath" },
+            { "$ref": "#/$defs/brickGit" }
+          ]
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["bricks"],
+  "$defs": {
+    "brickVersion": {
+      "type": "string",
+      "description": "The version constraint for the associated brick (^1.0.0)."
+    },
+    "brickPath": {
+      "type": "object",
+      "description": "The path location for the associated brick.",
+      "properties": {
+        "path": {
+          "type": "string",
+          "description": "The local path to the associated brick (./path/to/brick)."
+        }
+      },
+      "required": ["path"],
+      "additionalProperties": false
+    },
+    "brickGit": {
+      "type": "object",
+      "description": "A git reference.",
+      "properties": {
+        "git": {
+          "type": "object",
+          "description": "The git location for the associated brick.",
+          "properties": {
+            "url": {
+              "type": "string",
+              "description": "The git url for the associated brick (https://github.com/felangel/mason).",
+              "pattern": "^https?://",
+              "format": "uri"
+            },
+            "path": {
+              "type": "string",
+              "description": "Path relative to the root of the repository (bricks/widget)."
+            },
+            "ref": {
+              "type": "string",
+              "description": "Anything that git can use to identify a commit. Can be a branch name, tag, or commit hash."
+            }
+          },
+          "additionalProperties": false,
+          "required": ["url"]
+        },
+        "additionalProperties": false,
+        "required": ["git"]
+      },
+      "additionalProperties": false
+    }
+  }
+}

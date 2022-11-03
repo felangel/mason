@@ -175,6 +175,8 @@ class MasonApi {
       throw MasonApiLoginFailure(message: '$error');
     }
 
+    _credentials = credentials;
+
     try {
       return _currentUser = credentials.toUser();
     } catch (error) {
@@ -187,14 +189,15 @@ class MasonApi {
 
   /// Publish universal [bundle] to remote registry.
   Future<void> publish({required List<int> bundle}) async {
-    if (_credentials == null) {
+    var credentials = _credentials;
+
+    if (credentials == null) {
       throw const MasonApiPublishFailure(
         message:
             '''User not found. Please make sure you are logged in and try again.''',
       );
     }
 
-    var credentials = _credentials!;
     if (credentials.areExpired) {
       try {
         credentials = await _refresh();
@@ -234,6 +237,11 @@ class MasonApi {
       );
     }
   }
+
+  /// Closes the client and cleans up any resources associated with it.
+  /// It's important to close each client when it's done being used;
+  /// failing to do so can cause the Dart process to hang.
+  void close() => _httpClient.close();
 
   /// Attempt to refresh the current credentials and return
   /// refreshed credentials.

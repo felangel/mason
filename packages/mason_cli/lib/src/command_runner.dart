@@ -25,8 +25,8 @@ class MasonCommandRunner extends CommandRunner<int> {
     MasonApi? masonApi,
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
+        _masonApi = masonApi ?? MasonApi(hostedUri: BricksJson.hostedUri),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
-    final _masonApi = masonApi ?? MasonApi(hostedUri: BricksJson.hostedUri);
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
     addCommand(CacheCommand(logger: _logger));
@@ -47,6 +47,7 @@ class MasonCommandRunner extends CommandRunner<int> {
   }
 
   final Logger _logger;
+  final MasonApi _masonApi;
   final PubUpdater _pubUpdater;
 
   @override
@@ -74,6 +75,8 @@ class MasonCommandRunner extends CommandRunner<int> {
     } catch (error) {
       _logger.err('$error');
       return ExitCode.software.code;
+    } finally {
+      _masonApi.close();
     }
   }
 
@@ -95,12 +98,21 @@ class MasonCommandRunner extends CommandRunner<int> {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
       final isUpToDate = packageVersion == latestVersion;
       if (!isUpToDate) {
+        final changelogLink = lightCyan.wrap(
+          styleUnderlined.wrap(
+            link(
+              uri: Uri.parse(
+                'https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion',
+              ),
+            ),
+          ),
+        );
         _logger
           ..info('')
           ..info(
             '''
 ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
-${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+${lightYellow.wrap('Changelog:')} $changelogLink
 Run ${cyan.wrap('mason update')} to update''',
           );
       }

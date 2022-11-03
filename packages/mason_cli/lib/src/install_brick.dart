@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:path/path.dart' as p;
 
 /// Mixin on [MasonCommand] which adds support for installing bricks.
 mixin InstallBrickMixin on MasonCommand {
@@ -10,23 +11,24 @@ mixin InstallBrickMixin on MasonCommand {
     final bricksJson = global ? globalBricksJson : localBricksJson;
     if (bricksJson == null) usageException('bricks.json not found');
 
-    final lockFile = global ? globalMasonLockJsonFile : masonLockJsonFile;
-    final lockJson = global ? globalMasonLockJson : masonLockJson;
+    final masonLockJsonFile =
+        global ? globalMasonLockJsonFile : localMasonLockJsonFile;
+    final masonLockJson = global ? globalMasonLockJson : localMasonLockJson;
     final installProgress = logger.progress('Installing ${brick.name}');
     try {
       final location = resolveBrickLocation(
         location: brick.location,
-        lockedLocation: lockJson.bricks[brick.name],
+        lockedLocation: masonLockJson.bricks[brick.name],
       );
       final cachedBrick = await bricksJson.add(
         Brick(name: brick.name, location: location),
       );
       await bricksJson.flush();
-      await lockFile.writeAsString(
+      await masonLockJsonFile.writeAsString(
         json.encode(
           MasonLockJson(
             bricks: {
-              ...lockJson.bricks,
+              ...masonLockJson.bricks,
               brick.name!: cachedBrick.brick.location
             },
           ),
@@ -38,19 +40,20 @@ mixin InstallBrickMixin on MasonCommand {
     }
   }
 
-  /// Installs all bricks registered in nearest `mason.yaml`.
+  /// Installs all bricks either locally or globally depending on [global].
   /// If [upgrade] is true, bricks are upgraded to the latest version
   /// and the lock file is regenerated.
-  Future<void> getBricks({bool upgrade = false}) async {
-    final bricksJson = localBricksJson;
+  Future<void> getBricks({bool upgrade = false, bool global = false}) async {
+    final bricksJson = global ? globalBricksJson : localBricksJson;
     if (bricksJson == null) throw const MasonYamlNotFoundException();
-    final lockJson = masonLockJson;
+    final lockJson = global ? globalMasonLockJson : localMasonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
     final getBricksProgress = logger.progress(
       upgrade ? 'Upgrading bricks' : 'Getting bricks',
     );
     try {
       bricksJson.clear();
+      final masonYaml = global ? globalMasonYaml : localMasonYaml;
       if (masonYaml.bricks.entries.isNotEmpty) {
         await Future.forEach<MapEntry<String, BrickLocation>>(
           masonYaml.bricks.entries,
@@ -59,8 +62,17 @@ mixin InstallBrickMixin on MasonCommand {
               location: entry.value,
               lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
             );
+            final masonYamlFile =
+                global ? globalMasonYamlFile : localMasonYamlFile;
+            final normalizedLocation = location.path != null
+                ? BrickLocation(
+                    path: canonicalize(
+                      p.join(masonYamlFile.parent.path, location.path),
+                    ),
+                  )
+                : location;
             final cachedBrick = await bricksJson.add(
-              Brick(name: entry.key, location: location),
+              Brick(name: entry.key, location: normalizedLocation),
             );
             resolvedBricks.addAll(
               <String, BrickLocation>{entry.key: cachedBrick.brick.location},
@@ -71,6 +83,8 @@ mixin InstallBrickMixin on MasonCommand {
     } finally {
       getBricksProgress.complete();
       await bricksJson.flush();
+      final masonLockJsonFile =
+          global ? globalMasonLockJsonFile : localMasonLockJsonFile;
       await masonLockJsonFile.writeAsString(
         json.encode(MasonLockJson(bricks: resolvedBricks)),
       );

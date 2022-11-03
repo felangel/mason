@@ -294,7 +294,7 @@ class GeneratorHooks {
 
     Uri? uri;
     try {
-      uri = _getHookUri(hook.runSubstitution(vars).content);
+      uri = _getHookUri(hook.content);
       // ignore: avoid_catching_errors
     } on ArgumentError {
       throw HookInvalidCharactersException(hook.path);
@@ -357,22 +357,6 @@ class HookFile {
 
   /// The template file content.
   final List<int> content;
-
-  /// Performs a substitution on the [path] based on the incoming [parameters].
-  FileContents runSubstitution(Map<String, dynamic> parameters) {
-    return FileContents(path, _createContent(parameters));
-  }
-
-  List<int> _createContent(Map<String, dynamic> vars) {
-    try {
-      final decoded = utf8.decode(content);
-      if (!decoded.contains(_delimeterRegExp)) return content;
-      final rendered = decoded.render(vars);
-      return utf8.encode(rendered);
-    } on Exception {
-      return content;
-    }
-  }
 }
 
 /// A reference to core mason APIs to be used within hooks.

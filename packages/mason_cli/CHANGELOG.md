@@ -1,3 +1,29 @@
+# 0.1.0-dev.37
+
+- feat: support `mason upgrade -g`
+- deps: upgrade to `mason: ^0.1.0-dev.34`
+- deps: upgrade to `mason_api: ^0.1.0-dev.8`
+- deps: upgrade to `pub_updater: ^0.2.2`
+
+# 0.1.0-dev.36
+
+- feat: support `mason add <brick> <version>`
+
+# 0.1.0-dev.35
+
+- fix: `upgrade` from subdirectory w/relative paths
+- fix: `add` from subdirectory w/relative path
+- feat: use logger `link` api
+
+# 0.1.0-dev.34
+
+- fix: call `close` on `MasonApi` client
+
+# 0.1.0-dev.33
+
+- feat: disable lints in Dart bundles
+- docs: add additional metadata to `pubspec.yaml`
+
 # 0.1.0-dev.32
 
 - refactor(deps): remove `pkg:universal_io`

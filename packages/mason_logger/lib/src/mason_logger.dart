@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mason_logger/src/stdio_overrides.dart';
 
 part 'progress.dart';
 
@@ -11,10 +12,16 @@ part 'progress.dart';
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
-  Logger({this.level = Level.info});
+  Logger({
+    this.level = Level.info,
+    this.progressOptions = const ProgressOptions(),
+  });
 
   /// The current log level for this logger.
   Level level;
+
+  /// The progress options for the logger instance.
+  ProgressOptions progressOptions;
 
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
@@ -53,7 +60,16 @@ class Logger {
   void delayed(String? message) => _queue.add(message);
 
   /// Writes progress message to stdout.
-  Progress progress(String message) => Progress._(message, _stdout, level);
+  /// Optionally provide [options] to override the current
+  /// [ProgressOptions] for the generated [Progress].
+  Progress progress(String message, {ProgressOptions? options}) {
+    return Progress._(
+      message,
+      _stdout,
+      level,
+      options: options ?? progressOptions,
+    );
+  }
 
   /// Writes error message to stderr.
   void err(String? message) {
@@ -129,12 +145,15 @@ class Logger {
   ///
   /// An optional [defaultValue] can be specified.
   /// The [defaultValue] must be one of the provided [choices].
-  String chooseOne(
+  T chooseOne<T extends Object?>(
     String? message, {
-    required List<String> choices,
-    String? defaultValue,
+    required List<T> choices,
+    T? defaultValue,
+    String Function(T choice)? display,
   }) {
-    final hasDefault = defaultValue != null && defaultValue.isNotEmpty;
+    final _display = display ?? (value) => '$value';
+    final hasDefault =
+        defaultValue != null && _display(defaultValue).isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
     void writeChoices() {
@@ -151,11 +170,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
+            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  $choice');
+            ..write(' $checkBox  ${_display(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -170,8 +189,8 @@ class Logger {
     writeChoices();
 
     final event = <int>[];
-    var result = '';
-    while (result.isEmpty) {
+    T? result;
+    while (result == null) {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();
       event.add(byte);
@@ -194,7 +213,7 @@ class Logger {
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
-          ..writeln(styleDim.wrap(lightCyan.wrap(choices[index])));
+          ..writeln(styleDim.wrap(lightCyan.wrap(_display(choices[index]))));
 
         result = choices[index];
         break;
@@ -205,7 +224,7 @@ class Logger {
       writeChoices();
     }
 
-    return result;
+    return result!;
   }
 
   /// Prompts user with [message] to choose zero or more values
@@ -213,11 +232,13 @@ class Logger {
   ///
   /// An optional list of [defaultValues] can be specified.
   /// The [defaultValues] must be one of the provided [choices].
-  List<String> chooseAny(
+  List<T> chooseAny<T extends Object?>(
     String? message, {
-    required List<String> choices,
-    List<String>? defaultValues,
+    required List<T> choices,
+    List<T>? defaultValues,
+    String Function(T choice)? display,
   }) {
+    final _display = display ?? (value) => '$value';
     final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
     final selections = hasDefaults
         ? defaultValues.map((value) => choices.indexOf(value)).toSet()
@@ -240,11 +261,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(choice)}');
+            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  $choice');
+            ..write(' $checkBox  ${_display(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -259,7 +280,7 @@ class Logger {
     writeChoices();
 
     final event = <int>[];
-    List<String>? results;
+    List<T>? results;
     while (results == null) {
       final byte = _stdin.readByteSync();
       if (event.length == 3) event.clear();

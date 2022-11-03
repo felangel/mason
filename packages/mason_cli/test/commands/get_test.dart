@@ -139,11 +139,11 @@ bricks:
         equals(
           json.encode({
             'bricks': {
-              'app_icon': {'path': '../../../../../bricks/app_icon'},
-              'documentation': {'path': '../../../../../bricks/documentation'},
-              'greeting': {'path': '../../../../../bricks/greeting'},
-              'simple': {'path': '../../../../../bricks/simple'},
-              'todos': {'path': '../../../../../bricks/todos'},
+              'app_icon': {'path': appIconPath},
+              'documentation': {'path': docPath},
+              'greeting': {'path': greetingPath},
+              'simple': {'path': simplePath},
+              'todos': {'path': todosPath},
               'widget': {
                 'git': {
                   'url': 'https://github.com/felangel/mason',
@@ -315,7 +315,7 @@ bricks:
       final brickYaml = File(path.join('example', 'brick.yaml'));
       brickYaml.writeAsStringSync(
         brickYaml.readAsStringSync().replaceFirst(
-              'mason: ">=0.1.0-dev.26 <0.1.0"',
+              'mason: ">=${mason.packageVersion} <0.1.0"',
               'mason: ">=99.99.99 <100.0.0"',
             ),
       );

@@ -31,6 +31,32 @@ void main() {
       });
     });
 
+    group('progressOptions', () {
+      test('are set by default', () {
+        expect(Logger().progressOptions, equals(const ProgressOptions()));
+      });
+
+      test('can be injected via constructor', () {
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(
+          Logger(progressOptions: customProgressOptions).progressOptions,
+          equals(customProgressOptions),
+        );
+      });
+
+      test('are mutable', () {
+        final logger = Logger();
+        const customProgressOptions = ProgressOptions(
+          animation: ProgressAnimation(frames: []),
+        );
+        expect(logger.progressOptions, equals(const ProgressOptions()));
+        logger.progressOptions = customProgressOptions;
+        expect(logger.progressOptions, equals(customProgressOptions));
+      });
+    });
+
     group('.write', () {
       test('writes to stdout', () {
         IOOverrides.runZoned(
@@ -878,6 +904,38 @@ void main() {
           stdin: () => stdin,
         );
       });
+
+      test('converts choices to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny<Map<String, String>>(
+              message,
+              choices: [
+                {'key': 'a'},
+                {'key': 'b'},
+                {'key': 'c'},
+              ],
+              display: (data) => 'Key: ${data['key']}',
+            );
+            expect(actual, isEmpty);
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(' ◯  ${lightCyan.wrap('Key: a')}'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: b'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
     });
 
     group('.chooseOne', () {
@@ -1220,6 +1278,41 @@ void main() {
               () => stdout.write(' ◯  b'),
               () => stdout.write(' '),
               () => stdout.write(' ◯  c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('converts choices to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = {'key': 'a'};
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseOne<Map<String, String>>(
+              message,
+              choices: [
+                {'key': 'a'},
+                {'key': 'b'},
+                {'key': 'c'},
+              ],
+              display: (data) => 'Key: ${data['key']}',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b7'),
+              () => stdout.write('\x1b[?25l'),
+              () => stdout.writeln(message),
+              () => stdout.write(green.wrap('❯')),
+              () => stdout.write(
+                    ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
+                  ),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: b'),
+              () => stdout.write(' '),
+              () => stdout.write(' ◯  Key: c'),
             ]);
           },
           stdout: () => stdout,

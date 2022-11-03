@@ -1,6 +1,7 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -8,6 +9,8 @@ import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
+
+class MockMasonApi extends Mock implements MasonApi {}
 
 class MockLogger extends Mock implements Logger {}
 
@@ -44,21 +47,31 @@ const expectedUsage = [
 ];
 
 const latestVersion = '0.0.0';
-
+final changelogLink = lightCyan.wrap(
+  styleUnderlined.wrap(
+    link(
+      uri: Uri.parse(
+        'https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion',
+      ),
+    ),
+  ),
+);
 final updateMessage = '''
 ${lightYellow.wrap('Update available!')} ${lightCyan.wrap(packageVersion)} \u2192 ${lightCyan.wrap(latestVersion)}
-${lightYellow.wrap('Changelog:')} ${lightCyan.wrap('https://github.com/felangel/mason/releases/tag/mason_cli-v$latestVersion')}
+${lightYellow.wrap('Changelog:')} $changelogLink
 Run ${cyan.wrap('mason update')} to update''';
 
 void main() {
   group('MasonCommandRunner', () {
     late Logger logger;
+    late MasonApi masonApi;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       printLogs = [];
       logger = MockLogger();
+      masonApi = MockMasonApi();
       pubUpdater = MockPubUpdater();
 
       when(
@@ -67,6 +80,7 @@ void main() {
 
       commandRunner = MasonCommandRunner(
         logger: logger,
+        masonApi: masonApi,
         pubUpdater: pubUpdater,
       );
     });
@@ -134,6 +148,11 @@ void main() {
           expect(result, equals(ExitCode.success.code));
         }),
       );
+
+      test('closes MasonApi', () async {
+        await commandRunner.run(['--version']);
+        verify(() => masonApi.close()).called(1);
+      });
 
       group('--help', () {
         test(

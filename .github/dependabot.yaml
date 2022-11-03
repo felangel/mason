@@ -1,0 +1,26 @@
+version: 2
+updates:
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/packages/mason_cli"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/packages/mason_logger"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/packages/mason"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "pub"
+    directory: "/packages/mason_api"
+    schedule:
+      interval: "daily"
+  - package-ecosystem: "npm"
+    directory: "/extensions/vscode"
+    schedule:
+      interval: "daily"

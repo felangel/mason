@@ -54,7 +54,13 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
         ),
       );
     } else {
-      brick = Brick(name: name, location: const BrickLocation(version: 'any'));
+      if (results.rest.length > 2) {
+        usageException(
+          'Too many arguments, expected arguments <name> <version>',
+        );
+      }
+      final version = results.rest.length == 2 ? results.rest.last : 'any';
+      brick = Brick(name: name, location: BrickLocation(version: version));
     }
 
     final cachedBrick = await addBrick(brick, global: isGlobal);
@@ -65,16 +71,23 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
 
-    final targetMasonYaml = isGlobal ? globalMasonYaml : masonYaml;
-    final targetMasonYamlFile = isGlobal ? globalMasonYamlFile : masonYamlFile;
+    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
+    final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
     final location = brick.location.version != null
         ? BrickLocation(version: '^${brickYaml.version}')
-        : brick.location;
-    final bricks = Map.of(targetMasonYaml.bricks)..addAll({name: location});
+        : brick.location.path != null
+            ? BrickLocation(
+                path: p.relative(
+                  canonicalize(Directory(brick.location.path!).absolute.path),
+                  from: masonYamlFile.parent.path,
+                ),
+              )
+            : brick.location;
+    final bricks = Map.of(masonYaml.bricks)..addAll({name: location});
     final addProgress = logger.progress('Adding ${brickYaml.name}');
     try {
-      if (!targetMasonYaml.bricks.containsKey(name)) {
-        await targetMasonYamlFile.writeAsString(
+      if (!masonYaml.bricks.containsKey(name)) {
+        await masonYamlFile.writeAsString(
           Yaml.encode(MasonYaml(bricks).toJson()),
         );
       }

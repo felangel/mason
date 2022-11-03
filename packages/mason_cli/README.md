@@ -529,11 +529,17 @@ The `add` command allows developers to add brick templates locally or globally o
 ### Add Usage
 
 ```sh
-# add from registry
+# add latest version from registry
 mason add my_brick
 
-# add from registry (global)
+# add latest version from registry (global)
 mason add --global my_brick
+
+# add version 0.1.0 from registry
+mason add my_brick 0.1.0
+
+# add version 0.1.0 from registry (global)
+mason add --global my_brick 0.1.0
 
 # add from registry shorthand syntax (global)
 mason add -g my_brick
@@ -607,8 +613,14 @@ Installed bricks can be upgraded to their latest versions via the `upgrade` comm
 ### Upgrade Usage
 
 ```sh
-# upgrade all bricks and generate a new mason-lock.json
+# upgrade all local bricks and generate a new mason-lock.json
 mason upgrade
+
+# upgrade all global bricks
+mason upgrade --global
+
+# upgrade all global bricks shorthand syntax
+mason upgrade -g
 ```
 
 ## Bundling

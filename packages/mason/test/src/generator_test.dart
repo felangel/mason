@@ -2,7 +2,6 @@
 import 'dart:io';
 
 import 'package:mason/mason.dart';
-import 'package:mason/src/generator.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
@@ -132,6 +131,29 @@ void main() {
         expect(development.readAsStringSync(), equals('DEVELOPMENT'));
         expect(staging.readAsStringSync(), equals('STAGING'));
         expect(production.readAsStringSync(), equals('PRODUCTION'));
+      });
+
+      test('constructs an instance (loops stress test)', () async {
+        const fileCount = 1000;
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'loop'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'values': List.generate(fileCount, (index) => '$index'),
+          },
+        );
+
+        expect(files.length, equals(fileCount));
+        expect(
+          files.every(
+            (element) => element.status == GeneratedFileStatus.created,
+          ),
+          isTrue,
+        );
       });
 
       test('constructs an instance with hooks', () async {
@@ -931,21 +953,6 @@ void main() {
           final set = template.runSubstitution(<String, dynamic>{}, {});
           expect(set.length, equals(1));
           expect(set.first.content, equals(bytes));
-        });
-      });
-    });
-
-    group('HookFile', () {
-      group('runSubstitution', () {
-        test('handles malformed content', () {
-          final tempDir = Directory.systemTemp.createTempSync();
-          final bytes = [0x80, 0x00];
-          final template = HookFile.fromBytes(
-            path.join(tempDir.path, 'malformed.txt'),
-            bytes,
-          );
-          final file = template.runSubstitution(<String, dynamic>{});
-          expect(file.content, equals(bytes));
         });
       });
     });

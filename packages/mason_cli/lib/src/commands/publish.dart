@@ -67,7 +67,9 @@ class PublishCommand extends MasonCommand {
       );
       return ExitCode.software.code;
     }
-
+    final policyLink = styleUnderlined.wrap(
+      link(uri: Uri.parse('https://brickhub.dev/policy')),
+    );
     logger
       ..info(
         lightCyan.wrap(
@@ -76,7 +78,7 @@ class PublishCommand extends MasonCommand {
           ),
         ),
       )
-      ..info('See policy details at https://brickhub.dev/policy\n');
+      ..info('See policy details at $policyLink\n');
 
     final confirmed = logger.confirm(
       'Do you want to publish ${bundle.name} ${bundle.version}?',

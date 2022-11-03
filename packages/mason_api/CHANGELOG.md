@@ -1,3 +1,13 @@
+# 0.1.0-dev.8
+
+- fix: `login` sets in-memory credentials
+
+# 0.1.0-dev.7
+
+- feat: add `close`
+- docs: add additional metadata to `pubspec.yaml`
+- chore: upgrade to `mocktail ^0.3.0`
+
 # 0.1.0-dev.6
 
 - refactor(deps): remove `pkg:universal_io`
