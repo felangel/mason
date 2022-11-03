@@ -2,7 +2,7 @@
   "name": "mason",
   "displayName": "mason",
   "description": "Mason support for Visual Studio Code.",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "publisher": "FelixAngelov",
   "repository": {
     "type": "git",
@@ -30,6 +30,7 @@
   "icon": "assets/logo.png",
   "activationEvents": [
     "workspaceContains:**/mason.yaml",
+    "workspaceContains:**/brick.yaml",
     "onCommand:mason.init",
     "onCommand:mason.add-local-brick",
     "onCommand:mason.add-global-brick",
@@ -39,7 +40,20 @@
     "onCommand:mason.remove-global-brick"
   ],
   "main": "./dist/extension.js",
+  "extensionDependencies": [
+    "redhat.vscode-yaml"
+  ],
   "contributes": {
+    "yamlValidation": [
+      {
+        "fileMatch": "brick.yaml",
+        "url": "./schema/brick.yaml.schema.json"
+      },
+      {
+        "fileMatch": "mason.yaml",
+        "url": "./schema/mason.yaml.schema.json"
+      }
+    ],
     "commands": [
       {
         "command": "mason.init",
@@ -100,7 +114,7 @@
     "@types/lodash": "^4.14.187",
     "@types/mocha": "^10.0.0",
     "@types/node": "14.x",
-    "@types/vscode": "^1.72.0",
+    "@types/vscode": "^1.66.0",
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
     "@typescript-eslint/parser": "^5.42.0",

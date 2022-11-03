@@ -1,0 +1,203 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "additionalProperties": false,
+  "title": "brick.yaml",
+  "description": "The brick.yaml schema for the mason ecosystem",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "The name of the brick."
+    },
+    "description": {
+      "type": "string",
+      "description": "A short description of the brick."
+    },
+    "version": {
+      "description": "The current brick version.",
+      "$ref": "#/$defs/semanticVersion"
+    },
+    "environment": {
+      "type": "object",
+      "description": "The environment of the brick.",
+      "properties": {
+        "mason": {
+          "type": "string",
+          "description": "Mason version constraint (semver)"
+        }
+      }
+    },
+    "repository": {
+      "description": "A url pointing to the brick's source code repository.",
+      "$ref": "#/$defs/url"
+    },
+    "vars": {
+      "type": ["object", "array"],
+      "description": "Input variable properties used when templating a brick.",
+      "items": {
+        "type": "string",
+        "uniqueItems": true
+      },
+      "patternProperties": {
+        "^.*$": {
+          "anyOf": [
+            { "$ref": "#/$defs/varString" },
+            { "$ref": "#/$defs/varNumber" },
+            { "$ref": "#/$defs/varBoolean" },
+            { "$ref": "#/$defs/varEnum" },
+            { "$ref": "#/$defs/varArray" }
+          ]
+        },
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["name", "description", "version"],
+  "$defs": {
+    "semanticVersion": {
+      "type": "string",
+      "minLength": 5,
+      "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
+    },
+    "url": { "type": "string", "pattern": "^https?://", "format": "uri" },
+    "varDescription": {
+      "type": ["string", "null"],
+      "description": "An optional description of the variable."
+    },
+    "varPrompt": {
+      "type": ["string", "null"],
+      "description": "An optional prompt used when requesting the variable."
+    },
+    "varString": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A string (e.g. 'Mason')",
+          "anyOf": [{ "pattern": "string" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "An optional default value for the variable."
+        }
+      },
+      "additionalProperties": false
+    },
+    "varNumber": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A number (e.g. 42)",
+          "anyOf": [{ "pattern": "number" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["integer", "null"],
+          "description": "An optional default value for the variable."
+        }
+      },
+      "additionalProperties": false
+    },
+    "varBoolean": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A boolean (e.g. true/false)",
+          "anyOf": [{ "pattern": "boolean" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "default": {
+            "type": ["boolean", "null"],
+            "description": "An optional default value for the variable."
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "varEnum": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "An enumeration (e.g. ['red', 'green', 'blue'])",
+          "anyOf": [{ "pattern": "enum" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "An optional default value for the variable."
+        },
+        "values": {
+          "type": "array",
+          "description": "List of all possible enum values.",
+          "minLength": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["values"]
+    },
+    "varArray": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "An array (e.g. [])",
+          "anyOf": [{ "pattern": "array" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "defaults": {
+          "type": ["array", "null"],
+          "description": "An optional list of default values",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        },
+        "values": {
+          "type": "array",
+          "description": "List of all possible array values.",
+          "minLength": 1,
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false,
+      "required": ["values"]
+    }
+  }
+}
