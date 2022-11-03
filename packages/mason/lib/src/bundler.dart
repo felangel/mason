@@ -6,7 +6,7 @@ import 'package:mason/mason.dart';
 import 'package:path/path.dart' as path;
 
 final _binaryFileTypes = RegExp(
-  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf)$',
+  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf|mp3)$',
   caseSensitive: false,
 );
 
