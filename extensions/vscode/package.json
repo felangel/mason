@@ -48,6 +48,10 @@
       {
         "fileMatch": "brick.yaml",
         "url": "./schema/brick.yaml.schema.json"
+      },
+      {
+        "fileMatch": "mason.yaml",
+        "url": "./schema/mason.yaml.schema.json"
       }
     ],
     "commands": [
