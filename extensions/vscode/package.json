@@ -113,7 +113,7 @@
     "@types/glob": "^8.0.0",
     "@types/lodash": "^4.14.187",
     "@types/mocha": "^10.0.0",
-    "@types/node": "14.x",
+    "@types/node": "18.x",
     "@types/vscode": "^1.66.0",
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^5.42.0",
