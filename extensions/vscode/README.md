@@ -11,5 +11,6 @@
 - Remove bricks globally
 - Mason make w/local bricks
 - Mason make w/global bricks
+- YAML schema validation for `mason.yaml` and `brick.yaml` files
 
 [mason_link]: https://github.com/felangel/mason
