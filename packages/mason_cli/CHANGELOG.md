@@ -1,3 +1,7 @@
+# 0.1.0-dev.38
+
+- deps: upgrade to `mason: ^0.1.0-dev.35`
+
 # 0.1.0-dev.37
 
 - feat: support `mason upgrade -g`
