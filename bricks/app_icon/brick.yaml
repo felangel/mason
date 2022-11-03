@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: app_icon
 description: Create an app icon file from a URL
 version: 0.1.0+1

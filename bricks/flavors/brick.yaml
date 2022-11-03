@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: flavors
 description: A new brick created with the Mason CLI.
 

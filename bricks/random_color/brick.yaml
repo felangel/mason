@@ -1,4 +1,3 @@
-# yaml-language-server: $schema=../../brick.yaml.schema.json
 name: random_color
 description: A Random Color Generator
 version: 0.1.0+1

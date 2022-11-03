@@ -64,10 +64,6 @@
       "type": ["string", "null"],
       "description": "An optional description of the variable."
     },
-    "varDefault": {
-      "type": ["string", "null"],
-      "description": "An optional default value for the variable."
-    },
     "varPrompt": {
       "type": ["string", "null"],
       "description": "An optional prompt used when requesting the variable."
@@ -83,11 +79,12 @@
         "description": {
           "$ref": "#/$defs/varDescription"
         },
-        "default": {
-          "$ref": "#/$defs/varDefault"
-        },
         "prompt": {
           "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "An optional default value for the variable."
         }
       }
     },
@@ -102,11 +99,12 @@
         "description": {
           "$ref": "#/$defs/varDescription"
         },
-        "default": {
-          "$ref": "#/$defs/varDefault"
-        },
         "prompt": {
           "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["integer", "null"],
+          "description": "An optional default value for the variable."
         }
       }
     },
@@ -121,11 +119,14 @@
         "description": {
           "$ref": "#/$defs/varDescription"
         },
-        "default": {
-          "$ref": "#/$defs/varDefault"
-        },
         "prompt": {
           "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "default": {
+            "type": ["boolean", "null"],
+            "description": "An optional default value for the variable."
+          }
         }
       }
     },
@@ -140,11 +141,12 @@
         "description": {
           "$ref": "#/$defs/varDescription"
         },
-        "default": {
-          "$ref": "#/$defs/varDefault"
-        },
         "prompt": {
           "$ref": "#/$defs/varPrompt"
+        },
+        "default": {
+          "type": ["string", "null"],
+          "description": "An optional default value for the variable."
         },
         "values": {
           "type": "array",
