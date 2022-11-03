@@ -1,3 +1,7 @@
+# 0.1.0-dev.36
+
+- fix: support mp3 binary file types
+
 # 0.1.0-dev.35
 
 - **BREAKING** feat!: avoid templating hook contents
