@@ -86,7 +86,8 @@
           "type": ["string", "null"],
           "description": "An optional default value for the variable."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "varNumber": {
       "type": "object",
@@ -106,7 +107,8 @@
           "type": ["integer", "null"],
           "description": "An optional default value for the variable."
         }
-      }
+      },
+      "additionalProperties": false
     },
     "varBoolean": {
       "type": "object",
@@ -128,7 +130,8 @@
             "description": "An optional default value for the variable."
           }
         }
-      }
+      },
+      "additionalProperties": false
     },
     "varEnum": {
       "type": "object",
@@ -157,7 +160,9 @@
             "type": "string"
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": ["values"]
     },
     "varArray": {
       "type": "object",
@@ -190,7 +195,9 @@
             "type": "string"
           }
         }
-      }
+      },
+      "additionalProperties": false,
+      "required": ["values"]
     }
   }
 }
