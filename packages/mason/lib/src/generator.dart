@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File, FileMode, Process;
+import 'dart:io' show Directory, File, FileMode, Process, ProcessResult;
 import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';

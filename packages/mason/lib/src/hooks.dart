@@ -261,28 +261,36 @@ class GeneratorHooks {
       );
     }
 
+    Future<ProcessResult> _dartPubGet({required String workingDirectory}) {
+      return Process.run(
+        'dart',
+        ['pub', 'get'],
+        workingDirectory: workingDirectory,
+        runInShell: true,
+      );
+    }
+
+    var dependenciesInstalled = false;
+    Directory? hookCacheDir;
     Uri? packageConfigUri;
     if (pubspec != null) {
       final directoryHash = sha1.convert(pubspec).toString();
-      final directory = Directory(
+      hookCacheDir = Directory(
         p.join(Directory.systemTemp.path, '.mason', directoryHash),
       );
       final packageConfigFile = File(
-        p.join(directory.path, '.dart_tool', 'package_config.json'),
+        p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
       );
 
       if (!packageConfigFile.existsSync()) {
-        await directory.create(recursive: true);
+        await hookCacheDir.create(recursive: true);
         await File(
-          p.join(directory.path, 'pubspec.yaml'),
+          p.join(hookCacheDir.path, 'pubspec.yaml'),
         ).writeAsBytes(pubspec);
 
-        final result = await Process.run(
-          'dart',
-          ['pub', 'get'],
-          workingDirectory: directory.path,
-          runInShell: true,
-        );
+        final result = await _dartPubGet(workingDirectory: hookCacheDir.path);
+
+        dependenciesInstalled = true;
 
         if (result.exitCode != 0) {
           throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
@@ -302,22 +310,49 @@ class GeneratorHooks {
 
     if (uri == null) throw HookMissingRunException(hook.path);
 
-    final cwd = Directory.current;
-    Isolate? isolate;
-    try {
-      if (workingDirectory != null) Directory.current = workingDirectory;
-      isolate = await Isolate.spawnUri(
+    Future<Isolate> spawnIsolate(Uri uri) {
+      return Isolate.spawnUri(
         uri,
         [json.encode(vars)],
         messagePort.sendPort,
         paused: true,
         packageConfig: packageConfigUri,
       );
+    }
+
+    final cwd = Directory.current;
+    Isolate? isolate;
+    try {
+      if (workingDirectory != null) Directory.current = workingDirectory;
+      isolate = await spawnIsolate(uri);
     } on IsolateSpawnException catch (error) {
-      Directory.current = cwd;
-      final msg = error.message;
-      final content = msg.contains('Error: ') ? msg.split('Error: ').last : msg;
-      throw HookRunException(hook.path, content.trim());
+      Never throwHookRunException(IsolateSpawnException error) {
+        Directory.current = cwd;
+        final msg = error.message;
+        final content =
+            msg.contains('Error: ') ? msg.split('Error: ').last : msg;
+        throw HookRunException(hook.path, content.trim());
+      }
+
+      final shouldRetry = !dependenciesInstalled && hookCacheDir != null;
+
+      if (!shouldRetry) throwHookRunException(error);
+
+      // Failure to spawn the isolate could be due to changes in the pub cache.
+      // We attempt to reinstall hook dependencies.
+      final result = await _dartPubGet(workingDirectory: hookCacheDir.path);
+
+      if (result.exitCode != 0) {
+        throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
+      }
+
+      // Retry spawning the isolate if the hook dependencies
+      // have been successfully reinstalled.
+      try {
+        isolate = await spawnIsolate(uri);
+      } on IsolateSpawnException catch (error) {
+        throwHookRunException(error);
+      }
     }
 
     isolate
