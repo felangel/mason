@@ -24,10 +24,10 @@ void main() {
     });
 
     test(
-        'throws HookDependencyInstallFailure '
-        'when pubspec is malformed', () async {
+        'throws HookRunException '
+        'when unable to resolve a type', () async {
       final brick = Brick.path(
-        path.join('test', 'fixtures', 'malformed_pubspec'),
+        path.join('test', 'fixtures', 'spawn_exception'),
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
@@ -35,7 +35,30 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookDependencyInstallFailure>());
+        expect(error, isA<HookRunException>());
+      }
+    });
+
+    test(
+        'throws HookRunException '
+        'when unable to resolve a type (back-to-back)', () async {
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'spawn_exception'),
+      );
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookRunException>());
+      }
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookRunException>());
       }
     });
 
