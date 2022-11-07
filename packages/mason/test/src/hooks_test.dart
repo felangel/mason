@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
 import 'package:path/path.dart' as path;
@@ -22,10 +24,10 @@ void main() {
     });
 
     test(
-        'throws HookDependencyInstallFailure '
-        'when pubspec is malformed', () async {
+        'throws HookRunException '
+        'when unable to resolve a type', () async {
       final brick = Brick.path(
-        path.join('test', 'fixtures', 'malformed_pubspec'),
+        path.join('test', 'fixtures', 'spawn_exception'),
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
@@ -33,7 +35,30 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookDependencyInstallFailure>());
+        expect(error, isA<HookRunException>());
+      }
+    });
+
+    test(
+        'throws HookRunException '
+        'when unable to resolve a type (back-to-back)', () async {
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'spawn_exception'),
+      );
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookRunException>());
+      }
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookRunException>());
       }
     });
 
@@ -79,6 +104,34 @@ void main() {
       } catch (error) {
         expect(error, isA<HookExecutionException>());
       }
+    });
+
+    test(
+        'throws HookDependencyInstallFailure '
+        'when dependencies cannot be resolved', () async {
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'dependency_install_failure'),
+      );
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookDependencyInstallFailure>());
+      }
+    });
+
+    test('recovers from cleared pub cache', () async {
+      final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      await expectLater(generator.hooks.preGen(), completes);
+
+      final result = await Process.run('dart', ['pub', 'cache', 'clean']);
+      expect(result.exitCode, equals(ExitCode.success.code));
+
+      await expectLater(generator.hooks.preGen(), completes);
     });
   });
 }

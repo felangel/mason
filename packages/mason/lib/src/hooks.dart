@@ -261,13 +261,16 @@ class GeneratorHooks {
       );
     }
 
-    Future<ProcessResult> _dartPubGet({required String workingDirectory}) {
-      return Process.run(
+    Future<void> _dartPubGet({required String workingDirectory}) async {
+      final result = await Process.run(
         'dart',
         ['pub', 'get'],
         workingDirectory: workingDirectory,
         runInShell: true,
       );
+      if (result.exitCode != ExitCode.success.code) {
+        throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
+      }
     }
 
     var dependenciesInstalled = false;
@@ -287,14 +290,8 @@ class GeneratorHooks {
         await File(
           p.join(hookCacheDir.path, 'pubspec.yaml'),
         ).writeAsBytes(pubspec);
-
-        final result = await _dartPubGet(workingDirectory: hookCacheDir.path);
-
+        await _dartPubGet(workingDirectory: hookCacheDir.path);
         dependenciesInstalled = true;
-
-        if (result.exitCode != 0) {
-          throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
-        }
       }
 
       packageConfigUri = packageConfigFile.uri;
@@ -340,11 +337,7 @@ class GeneratorHooks {
 
       // Failure to spawn the isolate could be due to changes in the pub cache.
       // We attempt to reinstall hook dependencies.
-      final result = await _dartPubGet(workingDirectory: hookCacheDir.path);
-
-      if (result.exitCode != 0) {
-        throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
-      }
+      await _dartPubGet(workingDirectory: hookCacheDir.path);
 
       // Retry spawning the isolate if the hook dependencies
       // have been successfully reinstalled.
