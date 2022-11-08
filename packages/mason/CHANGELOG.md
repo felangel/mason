@@ -1,3 +1,7 @@
+# 0.1.0-dev.37
+
+- fix: hook execution after pub cache clean
+
 # 0.1.0-dev.36
 
 - fix: support mp3 binary file types
