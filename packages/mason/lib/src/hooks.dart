@@ -202,6 +202,7 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     String? workingDirectory,
     void Function(Map<String, dynamic> vars)? onVarsChanged,
+    Logger? logger,
   }) async {
     final preGenHook = this.preGenHook;
     if (preGenHook != null && pubspec != null) {
@@ -210,6 +211,7 @@ class GeneratorHooks {
         vars: vars,
         workingDirectory: workingDirectory,
         onVarsChanged: onVarsChanged,
+        logger: logger,
       );
     }
   }
@@ -220,6 +222,7 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     String? workingDirectory,
     void Function(Map<String, dynamic> vars)? onVarsChanged,
+    Logger? logger,
   }) async {
     final postGenHook = this.postGenHook;
     if (postGenHook != null && pubspec != null) {
@@ -228,6 +231,7 @@ class GeneratorHooks {
         vars: vars,
         workingDirectory: workingDirectory,
         onVarsChanged: onVarsChanged,
+        logger: logger,
       );
     }
   }
@@ -239,6 +243,7 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     void Function(Map<String, dynamic> vars)? onVarsChanged,
     String? workingDirectory,
+    Logger? logger,
   }) async {
     final pubspec = this.pubspec;
     final subscriptions = <StreamSubscription>[];
@@ -274,13 +279,15 @@ class GeneratorHooks {
     }
 
     var dependenciesInstalled = false;
-    Directory? hookCacheDir;
+    final hookHash = sha1.convert(hook.content).toString();
+    final directoryHash =
+        pubspec != null ? sha1.convert(pubspec).toString() : hookHash;
+    final hookCacheDir = Directory(
+      p.join(Directory.systemTemp.path, '.mason', directoryHash),
+    );
+
     Uri? packageConfigUri;
     if (pubspec != null) {
-      final directoryHash = sha1.convert(pubspec).toString();
-      hookCacheDir = Directory(
-        p.join(Directory.systemTemp.path, '.mason', directoryHash),
-      );
       final packageConfigFile = File(
         p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
       );
@@ -297,15 +304,50 @@ class GeneratorHooks {
       packageConfigUri = packageConfigFile.uri;
     }
 
-    Uri? uri;
-    try {
-      uri = _getHookUri(hook.content);
-      // ignore: avoid_catching_errors
-    } on ArgumentError {
-      throw HookInvalidCharactersException(hook.path);
-    }
+    final hookBuildDir = Directory(
+      p.join(hookCacheDir.path, 'build', p.basenameWithoutExtension(hook.path)),
+    );
+    final snapshot = File(p.join(hookBuildDir.path, '.$hookHash.jit'));
+    Uri? uri = Uri.file(snapshot.path);
 
-    if (uri == null) throw HookMissingRunException(hook.path);
+    if (!snapshot.existsSync()) {
+      try {
+        await hookBuildDir.delete(recursive: true);
+      } catch (_) {}
+
+      try {
+        uri = _getHookUri(hook.content);
+        // ignore: avoid_catching_errors
+      } on ArgumentError {
+        throw HookInvalidCharactersException(hook.path);
+      }
+
+      if (uri == null) throw HookMissingRunException(hook.path);
+
+      File(p.join(hookBuildDir.path, '.$hookHash.dart'))
+        ..createSync(recursive: true)
+        ..writeAsBytesSync(uri.data!.contentAsBytes());
+
+      final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
+      final result = await Process.run(
+        'dart',
+        [
+          'compile',
+          'jit-snapshot',
+          p.join(hookBuildDir.path, '.$hookHash.dart')
+        ],
+        workingDirectory: hookCacheDir.path,
+        runInShell: true,
+      );
+
+      if (result.exitCode != ExitCode.success.code) {
+        progress?.fail(result.stderr.toString());
+        // TODO(felangel): create `HookCompileException`
+        throw Exception('HookCompileException');
+      }
+
+      progress?.complete('Compiled ${p.basename(hook.path)}');
+    }
 
     Future<Isolate> spawnIsolate(Uri uri) {
       return Isolate.spawnUri(
@@ -331,9 +373,7 @@ class GeneratorHooks {
         throw HookRunException(hook.path, content.trim());
       }
 
-      final shouldRetry = !dependenciesInstalled && hookCacheDir != null;
-
-      if (!shouldRetry) throwHookRunException(error);
+      if (!!dependenciesInstalled) throwHookRunException(error);
 
       // Failure to spawn the isolate could be due to changes in the pub cache.
       // We attempt to reinstall hook dependencies.
@@ -441,15 +481,15 @@ import 'dart:isolate';
 
 $content
 
-void main(List<String> args, SendPort port) {
-  run(_HookContext._(port, vars: json.decode(args.first)));
+void main(List<String> args, [SendPort? port]) {
+  run(_HookContext._(port, vars: args.isEmpty ? {} : json.decode(args.first)));
 }
 
 class _HookContext implements HookContext {
   _HookContext._(this._port, {Map<String, dynamic>? vars})
       : _vars = _Vars(_port, vars: vars);
 
-  final SendPort _port;
+  final SendPort? _port;
   _Vars _vars;
 
   @override
@@ -461,7 +501,7 @@ class _HookContext implements HookContext {
   @override
   set vars(Map<String, dynamic> value) {
     _vars = _Vars(_port, vars: value);
-    _port.send(json.encode(_vars));
+    _port?.send(json.encode(_vars));
   }
 }
 
@@ -471,7 +511,7 @@ class _Vars with MapMixin<String, dynamic> {
     Map<String, dynamic>? vars,
   }) : _vars = vars ?? const <String, dynamic>{};
 
-  final SendPort _port;
+  final SendPort? _port;
   final Map<String, dynamic> _vars;
 
   @override
@@ -499,6 +539,6 @@ class _Vars with MapMixin<String, dynamic> {
     return result;
   }
 
-  void _updateVars() => _port.send(json.encode(_vars));
+  void _updateVars() => _port?.send(json.encode(_vars));
 }
 ''';

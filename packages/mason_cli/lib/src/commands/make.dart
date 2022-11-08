@@ -171,6 +171,7 @@ class _MakeCommand extends MasonCommand {
         vars: vars,
         workingDirectory: outputDir,
         onVarsChanged: (vars) => updatedVars = vars,
+        logger: logger,
       );
     }
 
@@ -189,6 +190,7 @@ class _MakeCommand extends MasonCommand {
         await generator.hooks.postGen(
           vars: updatedVars ?? vars,
           workingDirectory: outputDir,
+          logger: logger,
         );
       }
 
