@@ -24,6 +24,22 @@ void main() {
     });
 
     test(
+        'throws HookDependencyInstallFailure '
+        'when pubspec is malformed', () async {
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'malformed_pubspec'),
+      );
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      try {
+        await generator.hooks.preGen();
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookDependencyInstallFailure>());
+      }
+    });
+
+    test(
         'throws HookRunException '
         'when unable to resolve a type', () async {
       final brick = Brick.path(
