@@ -79,45 +79,6 @@ void main() {
     });
 
     test(
-        'throws HookRunException '
-        'when unable to resolve a type', () async {
-      final brick = Brick.path(
-        path.join('test', 'fixtures', 'spawn_exception'),
-      );
-      final generator = await MasonGenerator.fromBrick(brick);
-
-      try {
-        await generator.hooks.preGen();
-        fail('should throw');
-      } catch (error) {
-        expect(error, isA<HookRunException>());
-      }
-    });
-
-    test(
-        'throws HookRunException '
-        'when unable to resolve a type (back-to-back)', () async {
-      final brick = Brick.path(
-        path.join('test', 'fixtures', 'spawn_exception'),
-      );
-      final generator = await MasonGenerator.fromBrick(brick);
-
-      try {
-        await generator.hooks.preGen();
-        fail('should throw');
-      } catch (error) {
-        expect(error, isA<HookRunException>());
-      }
-
-      try {
-        await generator.hooks.preGen();
-        fail('should throw');
-      } catch (error) {
-        expect(error, isA<HookRunException>());
-      }
-    });
-
-    test(
         'throws HookMissingRunException '
         'when hook does not contain a valid run method', () async {
       final brick = Brick.path(
