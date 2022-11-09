@@ -292,9 +292,15 @@ class GeneratorHooks {
     }
 
     var dependenciesInstalled = false;
-    final hookHash = sha1.convert(hook.content).toString();
     final hookCacheDir = Directory(
-      p.join(Directory.systemTemp.path, '.mason', hookHash),
+      p.join(
+        Directory(p.join(Directory.systemTemp.path, '.mason')).path,
+        sha1
+            .convert(
+              pubspec ?? utf8.encode(File(hook.path).parent.absolute.path),
+            )
+            .toString(),
+      ),
     );
 
     Uri? packageConfigUri;
@@ -318,6 +324,7 @@ class GeneratorHooks {
     final hookBuildDir = Directory(
       p.join(hookCacheDir.path, 'build', p.basenameWithoutExtension(hook.path)),
     );
+    final hookHash = sha1.convert(hook.content).toString();
     final snapshot = File(p.join(hookBuildDir.path, '.$hookHash.jit'));
     Uri? uri = Uri.file(snapshot.path);
 
@@ -345,13 +352,13 @@ class GeneratorHooks {
         [
           'compile',
           'jit-snapshot',
-          p.join(hookBuildDir.path, '.$hookHash.dart')
+          p.join(hookBuildDir.path, '.$hookHash.dart'),
         ],
         workingDirectory: hookCacheDir.path,
         runInShell: true,
       );
 
-      if (result.exitCode != ExitCode.success.code) {
+      if (result.exitCode != ExitCode.success.code && !snapshot.existsSync()) {
         final error = result.stderr.toString();
         progress?.fail(error);
         throw HookCompileException(hook.path, error);
@@ -384,7 +391,9 @@ class GeneratorHooks {
         throw HookRunException(hook.path, content.trim());
       }
 
-      if (!!dependenciesInstalled) throwHookRunException(error);
+      final shouldRetry = !dependenciesInstalled && pubspec != null;
+
+      if (!shouldRetry) throwHookRunException(error);
 
       // Failure to spawn the isolate could be due to changes in the pub cache.
       // We attempt to reinstall hook dependencies.
@@ -492,15 +501,15 @@ import 'dart:isolate';
 
 $content
 
-void main(List<String> args, [SendPort? port]) {
-  run(_HookContext._(port, vars: args.isEmpty ? {} : json.decode(args.first)));
+void main(List<String> args, SendPort port) {
+  run(_HookContext._(port, vars: json.decode(args.first)));
 }
 
 class _HookContext implements HookContext {
   _HookContext._(this._port, {Map<String, dynamic>? vars})
       : _vars = _Vars(_port, vars: vars);
 
-  final SendPort? _port;
+  final SendPort _port;
   _Vars _vars;
 
   @override
@@ -512,7 +521,7 @@ class _HookContext implements HookContext {
   @override
   set vars(Map<String, dynamic> value) {
     _vars = _Vars(_port, vars: value);
-    _port?.send(json.encode(_vars));
+    _port.send(json.encode(_vars));
   }
 }
 
@@ -522,7 +531,7 @@ class _Vars with MapMixin<String, dynamic> {
     Map<String, dynamic>? vars,
   }) : _vars = vars ?? const <String, dynamic>{};
 
-  final SendPort? _port;
+  final SendPort _port;
   final Map<String, dynamic> _vars;
 
   @override
@@ -550,6 +559,6 @@ class _Vars with MapMixin<String, dynamic> {
     return result;
   }
 
-  void _updateVars() => _port?.send(json.encode(_vars));
+  void _updateVars() => _port.send(json.encode(_vars));
 }
 ''';
