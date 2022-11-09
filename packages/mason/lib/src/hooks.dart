@@ -330,7 +330,7 @@ class GeneratorHooks {
 
     Future<void> _compileSnapshot() async {
       try {
-        await snapshot.delete(recursive: true);
+        await hookBuildDir.delete(recursive: true);
       } catch (_) {}
 
       try {
