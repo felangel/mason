@@ -280,10 +280,8 @@ class GeneratorHooks {
 
     var dependenciesInstalled = false;
     final hookHash = sha1.convert(hook.content).toString();
-    final directoryHash =
-        pubspec != null ? sha1.convert(pubspec).toString() : hookHash;
     final hookCacheDir = Directory(
-      p.join(Directory.systemTemp.path, '.mason', directoryHash),
+      p.join(Directory.systemTemp.path, '.mason', hookHash),
     );
 
     Uri? packageConfigUri;
