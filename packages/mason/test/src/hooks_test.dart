@@ -47,7 +47,7 @@ void main() {
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
-      try { 
+      try {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
