@@ -328,9 +328,9 @@ class GeneratorHooks {
     final snapshot = File(p.join(hookBuildDir.path, '.$hookHash.jit'));
     Uri? uri = Uri.file(snapshot.path);
 
-    if (!snapshot.existsSync()) {
+    Future<void> _compileSnapshot() async {
       try {
-        await hookBuildDir.delete(recursive: true);
+        await snapshot.delete(recursive: true);
       } catch (_) {}
 
       try {
@@ -344,7 +344,7 @@ class GeneratorHooks {
 
       File(p.join(hookBuildDir.path, '.$hookHash.dart'))
         ..createSync(recursive: true)
-        ..writeAsBytesSync(uri.data!.contentAsBytes());
+        ..writeAsBytesSync(uri!.data!.contentAsBytes());
 
       final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
       final result = await Process.run(
@@ -367,6 +367,8 @@ class GeneratorHooks {
       progress?.complete('Compiled ${p.basename(hook.path)}');
     }
 
+    if (!snapshot.existsSync()) await _compileSnapshot();
+
     Future<Isolate> spawnIsolate(Uri uri) {
       return Isolate.spawnUri(
         uri,
@@ -381,7 +383,7 @@ class GeneratorHooks {
     Isolate? isolate;
     try {
       if (workingDirectory != null) Directory.current = workingDirectory;
-      isolate = await spawnIsolate(uri);
+      isolate = await spawnIsolate(uri!);
     } on IsolateSpawnException catch (error) {
       Never throwHookRunException(IsolateSpawnException error) {
         Directory.current = cwd;
@@ -391,18 +393,26 @@ class GeneratorHooks {
         throw HookRunException(hook.path, content.trim());
       }
 
-      final shouldRetry = !dependenciesInstalled && pubspec != null;
+      final incompatibleSnapshot = error.message.contains(
+        'Snapshot not compatible with the current VM configuration',
+      );
+      final missingDependencies = !dependenciesInstalled && pubspec != null;
+      final shouldRetry = incompatibleSnapshot || missingDependencies;
 
       if (!shouldRetry) throwHookRunException(error);
 
-      // Failure to spawn the isolate could be due to changes in the pub cache.
-      // We attempt to reinstall hook dependencies.
-      await _dartPubGet(workingDirectory: hookCacheDir.path);
+      incompatibleSnapshot
+          // Failure to spawn the isolate could be due to vm incompatibilities.
+          // We attempt to recompile the hook.
+          ? await _compileSnapshot()
+          // Failure to spawn the isolate could be due
+          // to changes in the pub cache.
+          // We attempt to reinstall hook dependencies.
+          : await _dartPubGet(workingDirectory: hookCacheDir.path);
 
-      // Retry spawning the isolate if the hook dependencies
-      // have been successfully reinstalled.
+      // Retry spawning the isolate.
       try {
-        isolate = await spawnIsolate(uri);
+        isolate = await spawnIsolate(uri!);
       } on IsolateSpawnException catch (error) {
         throwHookRunException(error);
       }
