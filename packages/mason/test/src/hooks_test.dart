@@ -40,23 +40,23 @@ void main() {
     });
 
     test(
-        'throws HookRunException '
+        'throws HookCompileException '
         'when unable to resolve a type', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'spawn_exception'),
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
-      try {
+      try { 
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
     test(
-        'throws HookRunException '
+        'throws HookCompileException '
         'when unable to resolve a type (back-to-back)', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'spawn_exception'),
@@ -67,14 +67,14 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
 
       try {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
@@ -94,7 +94,7 @@ void main() {
       }
     });
 
-    test('throws HookRunException when hook cannot be run', () async {
+    test('throws HookCompileException when hook cannot be run', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'run_exception'),
       );
@@ -104,7 +104,7 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
