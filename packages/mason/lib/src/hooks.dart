@@ -45,8 +45,21 @@ Ensure the hook contains a 'run' method:
         );
 }
 
+/// {@template hook_compile_exception}
+/// Thrown when an error occurs when trying to compile a hook.
+/// {@endtemplate}
+class HookCompileException extends MasonException {
+  /// {@macro hook_compile_exception}
+  HookCompileException(String path, String error)
+      : super(
+          '''
+Unable to compile hook: $path.
+Error: $error''',
+        );
+}
+
 /// {@template hook_run_exception}
-/// Thrown when an error occurs when trying to run hook.
+/// Thrown when an error occurs when trying to run a hook.
 /// {@endtemplate}
 class HookRunException extends MasonException {
   /// {@macro hook_run_exception}
@@ -339,9 +352,9 @@ class GeneratorHooks {
       );
 
       if (result.exitCode != ExitCode.success.code) {
-        progress?.fail(result.stderr.toString());
-        // TODO(felangel): create `HookCompileException`
-        throw Exception('HookCompileException');
+        final error = result.stderr.toString();
+        progress?.fail(error);
+        throw HookCompileException(hook.path, error);
       }
 
       progress?.complete('Compiled ${p.basename(hook.path)}');
