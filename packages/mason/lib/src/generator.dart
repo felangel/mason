@@ -638,3 +638,23 @@ extension on String {
     }
   }
 }
+
+extension on HookFile {
+  String get hash => sha1.convert(content).toString();
+
+  Directory get cacheDirectory {
+    return Directory(
+      p.join(
+        Directory(p.join(Directory.systemTemp.path, '.mason')).path,
+        sha1.convert(utf8.encode(File(path).parent.absolute.path)).toString(),
+      ),
+    );
+  }
+
+  File get snapshot {
+    final hookBuildDir = Directory(
+      p.join(cacheDirectory.path, 'build', p.basenameWithoutExtension(path)),
+    );
+    return File(p.join(hookBuildDir.path, '.$hash.jit'));
+  }
+}
