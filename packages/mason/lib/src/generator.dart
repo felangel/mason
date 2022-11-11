@@ -651,10 +651,13 @@ extension on HookFile {
     );
   }
 
-  File get snapshot {
-    final hookBuildDir = Directory(
+  Directory get buildDirectory {
+    return Directory(
       p.join(cacheDirectory.path, 'build', p.basenameWithoutExtension(path)),
     );
-    return File(p.join(hookBuildDir.path, '.$hash.jit'));
+  }
+
+  File get module {
+    return File(p.join(buildDirectory.path, '.$hash.dill'));
   }
 }
