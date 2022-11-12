@@ -84,26 +84,28 @@ class MasonGenerator extends Generator {
       file.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
-    final brickDirectory = p.join(path, BrickYaml.dir);
-    final brickFiles = Directory(brickDirectory)
-        .listSync(recursive: true)
-        .whereType<File>()
-        .map((file) {
-      return () async {
-        final resource = await _descriptorPool.request();
-        try {
-          final content = await File(file.path).readAsBytes();
-          final relativePath = file.path.substring(
-            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-          );
-          return TemplateFile.fromBytes(relativePath, content);
-        } on Exception {
-          return null;
-        } finally {
-          resource.release();
-        }
-      }();
-    });
+    final brickDirectory = Directory(p.join(path, BrickYaml.dir));
+    final brickFiles = brickDirectory.existsSync()
+        ? brickDirectory
+            .listSync(recursive: true)
+            .whereType<File>()
+            .map((file) {
+            return () async {
+              final resource = await _descriptorPool.request();
+              try {
+                final content = await File(file.path).readAsBytes();
+                final relativePath = file.path.substring(
+                  file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+                );
+                return TemplateFile.fromBytes(relativePath, content);
+              } on Exception {
+                return null;
+              } finally {
+                resource.release();
+              }
+            }();
+          })
+        : <Future<TemplateFile?>>[];
 
     return MasonGenerator(
       brickYaml.name,
