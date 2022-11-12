@@ -36,6 +36,16 @@ void main() {
         expect(files, isEmpty);
       });
 
+      test('constructs an instance (empty)', () async {
+        final brick = Brick.path(path.join('test', 'fixtures', 'empty'));
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+        );
+        expect(files, isEmpty);
+      });
+
       test('constructs an instance (hello_world)', () async {
         const name = 'Dash';
         final brick = Brick.path(
