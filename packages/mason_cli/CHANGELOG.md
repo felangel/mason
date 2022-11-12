@@ -1,3 +1,8 @@
+# 0.1.0-dev.39
+
+- perf: compile bricks
+- deps: upgrade to `mason: ^0.1.0-dev.38`
+
 # 0.1.0-dev.38
 
 - deps: upgrade to `mason: ^0.1.0-dev.35`
