@@ -2,11 +2,24 @@ import 'dart:io';
 
 import 'package:mason/mason.dart';
 import 'package:mason/src/generator.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
+class _MockLogger extends Mock implements Logger {}
+
+class _MockProgress extends Mock implements Progress {}
+
 void main() {
   group('Hooks', () {
+    setUp(() async {
+      try {
+        await Directory(
+          path.join(Directory.systemTemp.path, '.mason'),
+        ).delete(recursive: true);
+      } catch (_) {}
+    });
+
     test(
         'throws HookInvalidCharactersException '
         'when containining non-ascii characters', () async {
@@ -40,7 +53,7 @@ void main() {
     });
 
     test(
-        'throws HookRunException '
+        'throws HookCompileException '
         'when unable to resolve a type', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'spawn_exception'),
@@ -51,12 +64,12 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
     test(
-        'throws HookRunException '
+        'throws HookCompileException '
         'when unable to resolve a type (back-to-back)', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'spawn_exception'),
@@ -67,14 +80,14 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
 
       try {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
@@ -94,7 +107,7 @@ void main() {
       }
     });
 
-    test('throws HookRunException when hook cannot be run', () async {
+    test('throws HookCompileException when hook cannot be run', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'run_exception'),
       );
@@ -104,7 +117,7 @@ void main() {
         await generator.hooks.preGen();
         fail('should throw');
       } catch (error) {
-        expect(error, isA<HookRunException>());
+        expect(error, isA<HookCompileException>());
       }
     });
 
@@ -136,6 +149,51 @@ void main() {
       } catch (error) {
         expect(error, isA<HookDependencyInstallFailure>());
       }
+    });
+
+    test('installs dependencies and compiles hooks only once', () async {
+      final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+      final generator = await MasonGenerator.fromBrick(brick);
+      final logger = _MockLogger();
+      final progress = _MockProgress();
+      when(() => logger.progress(any())).thenReturn(progress);
+
+      await expectLater(generator.hooks.compile(logger: logger), completes);
+
+      verify(() => logger.progress('Compiling pre_gen.dart')).called(1);
+      verify(() => progress.complete('Compiled pre_gen.dart')).called(1);
+      verify(() => logger.progress('Compiling post_gen.dart')).called(1);
+      verify(() => progress.complete('Compiled post_gen.dart')).called(1);
+
+      await expectLater(generator.hooks.compile(logger: logger), completes);
+
+      verifyNever(() => logger.progress('Compiling pre_gen.dart'));
+      verifyNever(() => progress.complete('Compiled pre_gen.dart'));
+      verifyNever(() => logger.progress('Compiling post_gen.dart'));
+      verifyNever(() => progress.complete('Compiled post_gen.dart'));
+    });
+
+    test('compile reports compilation errors', () async {
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'run_exception'),
+      );
+      final generator = await MasonGenerator.fromBrick(brick);
+      final logger = _MockLogger();
+      final progress = _MockProgress();
+      when(() => logger.progress(any())).thenReturn(progress);
+
+      try {
+        await generator.hooks.compile(logger: logger);
+        fail('should throw');
+      } catch (error) {
+        expect(error, isA<HookCompileException>());
+      }
+      verify(() => logger.progress('Compiling pre_gen.dart')).called(1);
+      verify(
+        () => progress.fail(
+          any(that: contains("Error: Expected '{' before this.")),
+        ),
+      ).called(1);
     });
 
     test('recovers from cleared pub cache', () async {

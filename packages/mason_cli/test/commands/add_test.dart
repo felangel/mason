@@ -78,6 +78,17 @@ void main() {
       verify(() => logger.err('oops')).called(1);
     });
 
+    test('exits with code 70 on hook compilation exception', () async {
+      final progress = MockProgress();
+      when(() => logger.progress(any())).thenReturn(progress);
+      final brickPath = path.join('..', '..', 'bricks', 'compilation_error');
+      final result = await commandRunner.run(
+        ['add', 'compilation_error', '--path', brickPath],
+      );
+      expect(result, equals(ExitCode.usage.code));
+      verify(progress.fail).called(1);
+    });
+
     group('local', () {
       test('exits with code 64 when brick is not provided', () async {
         final result = await commandRunner.run(['add']);

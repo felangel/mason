@@ -640,3 +640,26 @@ extension on String {
     }
   }
 }
+
+extension on HookFile {
+  String get fileHash => sha1.convert(content).toString();
+
+  Directory get cacheDirectory {
+    return Directory(
+      p.join(
+        Directory(p.join(Directory.systemTemp.path, '.mason')).path,
+        sha1.convert(utf8.encode(File(path).parent.absolute.path)).toString(),
+      ),
+    );
+  }
+
+  Directory get buildDirectory {
+    return Directory(
+      p.join(cacheDirectory.path, 'build', p.basenameWithoutExtension(path)),
+    );
+  }
+
+  File get module {
+    return File(p.join(buildDirectory.path, '.$fileHash.dill'));
+  }
+}

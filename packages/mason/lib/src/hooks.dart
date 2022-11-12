@@ -45,15 +45,15 @@ Ensure the hook contains a 'run' method:
         );
 }
 
-/// {@template hook_run_exception}
-/// Thrown when an error occurs when trying to run hook.
+/// {@template hook_compile_exception}
+/// Thrown when an error occurs when trying to compile a hook.
 /// {@endtemplate}
-class HookRunException extends MasonException {
-  /// {@macro hook_run_exception}
-  HookRunException(String path, String error)
+class HookCompileException extends MasonException {
+  /// {@macro hook_compile_exception}
+  HookCompileException(String path, String error)
       : super(
           '''
-Unable to execute hook: $path.
+Unable to compile hook: $path.
 Error: $error''',
         );
 }
@@ -202,6 +202,7 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     String? workingDirectory,
     void Function(Map<String, dynamic> vars)? onVarsChanged,
+    Logger? logger,
   }) async {
     final preGenHook = this.preGenHook;
     if (preGenHook != null && pubspec != null) {
@@ -210,6 +211,7 @@ class GeneratorHooks {
         vars: vars,
         workingDirectory: workingDirectory,
         onVarsChanged: onVarsChanged,
+        logger: logger,
       );
     }
   }
@@ -220,6 +222,7 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     String? workingDirectory,
     void Function(Map<String, dynamic> vars)? onVarsChanged,
+    Logger? logger,
   }) async {
     final postGenHook = this.postGenHook;
     if (postGenHook != null && pubspec != null) {
@@ -228,8 +231,101 @@ class GeneratorHooks {
         vars: vars,
         workingDirectory: workingDirectory,
         onVarsChanged: onVarsChanged,
+        logger: logger,
       );
     }
+  }
+
+  /// Compile all hooks into modules for faster execution.
+  /// Hooks are compiled lazily by default but calling [compile]
+  /// can be used to compile hooks ahead of time.
+  Future<void> compile({Logger? logger}) async {
+    await _installDependencies();
+
+    if (preGenHook != null && !preGenHook!.module.existsSync()) {
+      await _compile(hook: preGenHook!, logger: logger);
+    }
+
+    if (postGenHook != null && !postGenHook!.module.existsSync()) {
+      await _compile(hook: postGenHook!, logger: logger);
+    }
+  }
+
+  Future<void> _dartPubGet({required String workingDirectory}) async {
+    final result = await Process.run(
+      'dart',
+      ['pub', 'get'],
+      workingDirectory: workingDirectory,
+      runInShell: true,
+    );
+    if (result.exitCode != ExitCode.success.code) {
+      throw HookDependencyInstallFailure(
+        workingDirectory,
+        '${result.stderr}',
+      );
+    }
+  }
+
+  Future<void> _installDependencies() async {
+    final hook = preGenHook ?? postGenHook;
+    if (hook == null) return;
+
+    final hookCacheDir = hook.cacheDirectory;
+    final pubspec = this.pubspec;
+
+    if (pubspec != null) {
+      final packageConfigFile = File(
+        p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
+      );
+
+      if (!packageConfigFile.existsSync()) {
+        await hookCacheDir.create(recursive: true);
+        await File(
+          p.join(hookCacheDir.path, 'pubspec.yaml'),
+        ).writeAsBytes(pubspec);
+        await _dartPubGet(workingDirectory: hookCacheDir.path);
+      }
+    }
+  }
+
+  Future<void> _compile({required HookFile hook, Logger? logger}) async {
+    final hookCacheDir = hook.cacheDirectory;
+    final hookBuildDir = hook.buildDirectory;
+    final hookHash = hook.fileHash;
+
+    try {
+      await hookBuildDir.delete(recursive: true);
+    } catch (_) {}
+
+    Uri? uri;
+    try {
+      uri = _getHookUri(hook.content);
+      // ignore: avoid_catching_errors
+    } on ArgumentError {
+      throw HookInvalidCharactersException(hook.path);
+    }
+
+    if (uri == null) throw HookMissingRunException(hook.path);
+
+    final hookFile = File(p.join(hookBuildDir.path, '.$hookHash.dart'))
+      ..createSync(recursive: true)
+      ..writeAsBytesSync(uri.data!.contentAsBytes());
+
+    final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
+    final result = await Process.run(
+      'dart',
+      ['compile', 'kernel', hookFile.path],
+      workingDirectory: hookCacheDir.path,
+      runInShell: true,
+    );
+
+    if (result.exitCode != ExitCode.success.code) {
+      final error = result.stderr.toString();
+      progress?.fail(error);
+      throw HookCompileException(hook.path, error);
+    }
+
+    progress?.complete('Compiled ${p.basename(hook.path)}');
   }
 
   /// Runs the provided [hook] with the specified [vars].
@@ -239,8 +335,8 @@ class GeneratorHooks {
     Map<String, dynamic> vars = const <String, dynamic>{},
     void Function(Map<String, dynamic> vars)? onVarsChanged,
     String? workingDirectory,
+    Logger? logger,
   }) async {
-    final pubspec = this.pubspec;
     final subscriptions = <StreamSubscription>[];
     final messagePort = ReceivePort();
     final errorPort = ReceivePort();
@@ -261,51 +357,16 @@ class GeneratorHooks {
       );
     }
 
-    Future<void> _dartPubGet({required String workingDirectory}) async {
-      final result = await Process.run(
-        'dart',
-        ['pub', 'get'],
-        workingDirectory: workingDirectory,
-        runInShell: true,
-      );
-      if (result.exitCode != ExitCode.success.code) {
-        throw HookDependencyInstallFailure(hook.path, '${result.stderr}');
-      }
+    await _installDependencies();
+    final hookCacheDir = hook.cacheDirectory;
+    final packageConfigUri = File(
+      p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
+    ).uri;
+    final module = hook.module;
+
+    if (!module.existsSync()) {
+      await _compile(hook: hook, logger: logger);
     }
-
-    var dependenciesInstalled = false;
-    Directory? hookCacheDir;
-    Uri? packageConfigUri;
-    if (pubspec != null) {
-      final directoryHash = sha1.convert(pubspec).toString();
-      hookCacheDir = Directory(
-        p.join(Directory.systemTemp.path, '.mason', directoryHash),
-      );
-      final packageConfigFile = File(
-        p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
-      );
-
-      if (!packageConfigFile.existsSync()) {
-        await hookCacheDir.create(recursive: true);
-        await File(
-          p.join(hookCacheDir.path, 'pubspec.yaml'),
-        ).writeAsBytes(pubspec);
-        await _dartPubGet(workingDirectory: hookCacheDir.path);
-        dependenciesInstalled = true;
-      }
-
-      packageConfigUri = packageConfigFile.uri;
-    }
-
-    Uri? uri;
-    try {
-      uri = _getHookUri(hook.content);
-      // ignore: avoid_catching_errors
-    } on ArgumentError {
-      throw HookInvalidCharactersException(hook.path);
-    }
-
-    if (uri == null) throw HookMissingRunException(hook.path);
 
     Future<Isolate> spawnIsolate(Uri uri) {
       return Isolate.spawnUri(
@@ -318,35 +379,9 @@ class GeneratorHooks {
     }
 
     final cwd = Directory.current;
-    Isolate? isolate;
-    try {
-      if (workingDirectory != null) Directory.current = workingDirectory;
-      isolate = await spawnIsolate(uri);
-    } on IsolateSpawnException catch (error) {
-      Never throwHookRunException(IsolateSpawnException error) {
-        Directory.current = cwd;
-        final msg = error.message;
-        final content =
-            msg.contains('Error: ') ? msg.split('Error: ').last : msg;
-        throw HookRunException(hook.path, content.trim());
-      }
+    if (workingDirectory != null) Directory.current = workingDirectory;
 
-      final shouldRetry = !dependenciesInstalled && hookCacheDir != null;
-
-      if (!shouldRetry) throwHookRunException(error);
-
-      // Failure to spawn the isolate could be due to changes in the pub cache.
-      // We attempt to reinstall hook dependencies.
-      await _dartPubGet(workingDirectory: hookCacheDir.path);
-
-      // Retry spawning the isolate if the hook dependencies
-      // have been successfully reinstalled.
-      try {
-        isolate = await spawnIsolate(uri);
-      } on IsolateSpawnException catch (error) {
-        throwHookRunException(error);
-      }
-    }
+    final isolate = await spawnIsolate(module.uri);
 
     isolate
       ..addErrorListener(errorPort.sendPort)

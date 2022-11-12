@@ -65,6 +65,18 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
 
     final cachedBrick = await addBrick(brick, global: isGlobal);
     final file = File(p.join(cachedBrick.path, BrickYaml.file));
+    final generator = await MasonGenerator.fromBrick(
+      Brick.path(cachedBrick.path),
+    );
+
+    final compileProgress = logger.progress('Compiling ${brick.name}');
+    try {
+      await generator.hooks.compile();
+      compileProgress.complete();
+    } catch (_) {
+      compileProgress.fail();
+      rethrow;
+    }
 
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
