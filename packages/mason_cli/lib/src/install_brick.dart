@@ -97,7 +97,7 @@ mixin InstallBrickMixin on MasonCommand {
       final masonLockJsonFile =
           global ? globalMasonLockJsonFile : localMasonLockJsonFile;
       await masonLockJsonFile.writeAsString(
-        json.encode(MasonLockJson(bricks: resolvedBricks)),
+        json.encode(MasonLockJson(bricks: resolvedBricks.sorted())),
       );
     }
   }
@@ -130,5 +130,13 @@ BrickLocation resolveBrickLocation({
 extension on GitPath {
   bool similarTo(GitPath other) {
     return url == other.url && path == other.path;
+  }
+}
+
+extension on Map<String, BrickLocation> {
+  Map<String, BrickLocation> sorted() {
+    return Map.fromEntries(
+      entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
   }
 }

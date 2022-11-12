@@ -77,7 +77,7 @@ bricks:
         );
       });
 
-      test('updates lockfile from nested directtory', () async {
+      test('updates lockfile from nested directory', () async {
         final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
         final simplePath = canonicalize(
           path.join(Directory.current.path, bricksPath, 'simple'),
@@ -92,11 +92,14 @@ bricks:
         );
         final getResult = await commandRunner.run(['get']);
         expect(getResult, equals(ExitCode.success.code));
-        final initialContents = File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync();
-        expect(initialContents, contains('"greeting":"0.1.0+1"'));
-        expect(initialContents, contains('"simple":{"path":"$simplePath"}'));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals(
+            '{"bricks":{"greeting":"0.1.0+1","simple":{"path":"$simplePath"}}}',
+          ),
+        );
         File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
           '''
 bricks:
@@ -113,11 +116,14 @@ bricks:
         final upgradeResult = await commandRunner.run(['upgrade']);
         Directory.current = workspace;
         expect(upgradeResult, equals(ExitCode.success.code));
-        final updatedContents = File(
-          path.join(Directory.current.path, MasonLockJson.file),
-        ).readAsStringSync();
-        expect(updatedContents, contains('"greeting":"0.1.0+2"'));
-        expect(updatedContents, contains('"simple":{"path":"$simplePath"}'));
+        expect(
+          File(
+            path.join(Directory.current.path, MasonLockJson.file),
+          ).readAsStringSync(),
+          equals(
+            '{"bricks":{"greeting":"0.1.0+2","simple":{"path":"$simplePath"}}}',
+          ),
+        );
       });
     });
 
