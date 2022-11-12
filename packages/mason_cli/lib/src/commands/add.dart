@@ -69,7 +69,7 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       Brick.path(cachedBrick.path),
     );
 
-    final compileProgress = logger.progress('Compiling hooks');
+    final compileProgress = logger.progress('Compiling ${brick.name}');
     try {
       await generator.hooks.compile();
       compileProgress.complete();
