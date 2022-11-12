@@ -1,3 +1,8 @@
+# 0.1.0-dev.38
+
+- perf: compile hooks
+- fix: allow optional `__brick__` directory
+
 # 0.1.0-dev.37
 
 - fix: hook execution after pub cache clean
