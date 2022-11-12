@@ -291,7 +291,7 @@ class GeneratorHooks {
   Future<void> _compile({required HookFile hook, Logger? logger}) async {
     final hookCacheDir = hook.cacheDirectory;
     final hookBuildDir = hook.buildDirectory;
-    final hookHash = hook.hash;
+    final hookHash = hook.fileHash;
 
     try {
       await hookBuildDir.delete(recursive: true);

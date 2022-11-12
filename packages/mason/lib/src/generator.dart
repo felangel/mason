@@ -640,7 +640,7 @@ extension on String {
 }
 
 extension on HookFile {
-  String get hash => sha1.convert(content).toString();
+  String get fileHash => sha1.convert(content).toString();
 
   Directory get cacheDirectory {
     return Directory(
@@ -658,6 +658,6 @@ extension on HookFile {
   }
 
   File get module {
-    return File(p.join(buildDirectory.path, '.$hash.dill'));
+    return File(p.join(buildDirectory.path, '.$fileHash.dill'));
   }
 }
