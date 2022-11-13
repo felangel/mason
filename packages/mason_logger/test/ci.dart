@@ -1,12 +1,6 @@
-// ignore_for_file: avoid_print
-
-import 'dart:io';
-
 import 'package:mason_logger/mason_logger.dart';
 
 Future<void> main() async {
-  print(stdioType(stdout));
-  print(stdout.hasTerminal);
   final logger = Logger();
   final progress = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
