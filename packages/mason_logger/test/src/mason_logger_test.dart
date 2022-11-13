@@ -503,6 +503,7 @@ void main() {
 
     group('.progress', () {
       test('writes lines to stdout', () async {
+        when(() => stdout.hasTerminal).thenReturn(true);
         await IOOverrides.runZoned(
           () async {
             const time = '(0.Xs)';
