@@ -2,7 +2,6 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:mason_logger/src/stdio_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -13,12 +12,11 @@ class MockStdin extends Mock implements Stdin {}
 void main() {
   group('Progress', () {
     late Stdout stdout;
-    late StdioType Function(dynamic) stdioType;
 
     setUp(() {
       stdout = MockStdout();
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
-      stdioType = (dynamic _) => StdioType.terminal;
+      when(() => stdout.hasTerminal).thenReturn(true);
     });
 
     test('writes ms when elapsed time is less than 0.1s', () async {
@@ -38,6 +36,7 @@ void main() {
     });
 
     test('writes static message when stdioType is not terminal', () async {
+      when(() => stdout.hasTerminal).thenReturn(false);
       await _runZoned(
         () async {
           const message = 'test message';
@@ -54,7 +53,6 @@ void main() {
           ]);
         },
         stdout: () => stdout,
-        stdioType: () => (dynamic _) => StdioType.other,
         zoneValues: {AnsiCode: true},
       );
     });
@@ -95,7 +93,6 @@ void main() {
         },
         stdout: () => stdout,
         stdin: () => stdin,
-        stdioType: () => stdioType,
       );
     });
 
@@ -135,7 +132,6 @@ void main() {
         },
         stdout: () => stdout,
         stdin: () => stdin,
-        stdioType: () => stdioType,
       );
     });
 
@@ -170,7 +166,6 @@ void main() {
             ).called(1);
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -185,7 +180,6 @@ void main() {
             verifyNever(() => stdout.write(any()));
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -231,7 +225,6 @@ void main() {
             ).called(1);
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -286,7 +279,6 @@ void main() {
             ).called(1);
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -301,7 +293,6 @@ void main() {
             verifyNever(() => stdout.write(any()));
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -344,7 +335,6 @@ void main() {
             ).called(1);
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -359,7 +349,6 @@ void main() {
             verifyNever(() => stdout.write(any()));
           },
           stdout: () => stdout,
-          stdioType: () => stdioType,
           zoneValues: {AnsiCode: true},
         );
       });
@@ -370,19 +359,11 @@ void main() {
 T _runZoned<T>(
   T Function() body, {
   Map<Object?, Object?>? zoneValues,
-  StdioType Function(dynamic) Function()? stdioType,
   Stdin Function()? stdin,
   Stdout Function()? stdout,
 }) {
   return runZoned(
-    () {
-      return StdioOverrides.runZoned(
-        () {
-          return IOOverrides.runZoned(body, stdout: stdout, stdin: stdin);
-        },
-        stdioType: stdioType,
-      );
-    },
+    () => IOOverrides.runZoned(body, stdout: stdout, stdin: stdin),
     zoneValues: zoneValues,
   );
 }
