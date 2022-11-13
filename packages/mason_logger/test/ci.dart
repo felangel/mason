@@ -3,6 +3,7 @@ import 'dart:io';
 import 'package:mason_logger/mason_logger.dart';
 
 Future<void> main() async {
+  // ignore: avoid_print
   print(stdioType(stdout));
   final logger = Logger();
   final progress = logger.progress('Calculating');

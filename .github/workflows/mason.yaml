@@ -14,8 +14,8 @@ on:
       - master
     paths:
       - .github/workflows/mason.yaml
-      - packages/mason_logger/**
-      - packages/mason/**
+      # - packages/mason_logger/**
+      # - packages/mason/**
 
 jobs:
   build:
