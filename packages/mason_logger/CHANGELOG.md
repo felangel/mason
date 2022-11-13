@@ -1,3 +1,7 @@
+# 0.2.3
+
+- fix: windows progress animation
+
 # 0.2.2
 
 - fix: only animate progress on terminals
