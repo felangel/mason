@@ -7,7 +7,7 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
-import 'package:io/io.dart' show copyPathSync;
+import 'package:io/io.dart' show copyPath;
 import 'package:mason/mason.dart';
 import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';

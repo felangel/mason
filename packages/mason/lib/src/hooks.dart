@@ -437,7 +437,7 @@ Future<Uri?> _getHookUri(HookFile hook) async {
     await hookBuildDir.delete(recursive: true);
   } catch (_) {}
 
-  copyPathSync(File(hook.path).parent.path, hookBuildDir.path);
+  await copyPath(File(hook.path).parent.path, hookBuildDir.path);
   final hookFile = File(p.join(hookBuildDir.path, '.${hook.fileHash}.dart'))
     ..createSync(recursive: true)
     ..writeAsStringSync(_generatedHookCode(decoded));
