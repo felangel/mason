@@ -13,20 +13,6 @@ Error: $error''',
         );
 }
 
-/// {@template hook_invalid_characters_exception}
-/// Thrown when a hook contains non-ascii characters.
-/// {@endtemplate}
-class HookInvalidCharactersException extends MasonException {
-  /// {@macro hook_invalid_characters_exception}
-  HookInvalidCharactersException(String path)
-      : super(
-          '''
-Unable to execute hook: $path.
-Error: Hook contains invalid characters.
-Ensure the hook does not contain non-ascii characters.''',
-        );
-}
-
 /// {@template hook_missing_run_exception}
 /// Thrown when a hook does not contain a 'run' method.
 /// {@endtemplate}
@@ -289,33 +275,15 @@ class GeneratorHooks {
   }
 
   Future<void> _compile({required HookFile hook, Logger? logger}) async {
-    final hookCacheDir = hook.cacheDirectory;
-    final hookBuildDir = hook.buildDirectory;
-    final hookHash = hook.fileHash;
-
-    try {
-      await hookBuildDir.delete(recursive: true);
-    } catch (_) {}
-
-    Uri? uri;
-    try {
-      uri = _getHookUri(hook.content);
-      // ignore: avoid_catching_errors
-    } on ArgumentError {
-      throw HookInvalidCharactersException(hook.path);
-    }
+    final uri = await _getHookUri(hook);
 
     if (uri == null) throw HookMissingRunException(hook.path);
-
-    final hookFile = File(p.join(hookBuildDir.path, '.$hookHash.dart'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(uri.data!.contentAsBytes());
 
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', hookFile.path],
-      workingDirectory: hookCacheDir.path,
+      ['compile', 'kernel', uri.path],
+      workingDirectory: hook.cacheDirectory.path,
       runInShell: true,
     );
 
@@ -459,13 +427,22 @@ final _runRegExp = RegExp(
   multiLine: true,
 );
 
-Uri? _getHookUri(List<int> content) {
-  final decoded = utf8.decode(content);
-  if (_runRegExp.hasMatch(decoded)) {
-    final code = _generatedHookCode(decoded);
-    return Uri.dataFromString(code, mimeType: 'application/dart');
-  }
-  return null;
+Future<Uri?> _getHookUri(HookFile hook) async {
+  final decoded = utf8.decode(hook.content);
+  if (!_runRegExp.hasMatch(decoded)) return null;
+
+  final hookBuildDir = hook.buildDirectory;
+
+  try {
+    await hookBuildDir.delete(recursive: true);
+  } catch (_) {}
+
+  copyPathSync(File(hook.path).parent.path, hookBuildDir.path);
+  final hookFile = File(p.join(hookBuildDir.path, '.${hook.fileHash}.dart'))
+    ..createSync(recursive: true)
+    ..writeAsStringSync(_generatedHookCode(decoded));
+
+  return Uri.file(hookFile.path);
 }
 
 String _generatedHookCode(String content) => '''

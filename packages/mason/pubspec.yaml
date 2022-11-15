@@ -16,6 +16,7 @@ dependencies:
   collection: ^1.15.0
   crypto: ^3.0.1
   http: ^0.13.3
+  io: ^1.0.3
   json_annotation: ^4.4.0
   mason_logger: ^0.2.2
   meta: ^1.7.0
