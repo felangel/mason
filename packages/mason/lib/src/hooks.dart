@@ -239,15 +239,14 @@ class GeneratorHooks {
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', canonicalize(uri.path)],
-      workingDirectory: canonicalize(hook.cacheDirectory.path),
+      ['compile', 'kernel', uri.path],
       runInShell: true,
     );
 
     if (result.exitCode != ExitCode.success.code) {
       final error = result.stderr.toString();
       progress?.fail(error);
-      throw HookCompileException(canonicalize(hook.path), error);
+      throw HookCompileException(hook.path, error);
     }
 
     progress?.complete('Compiled ${p.basename(hook.path)}');
@@ -282,14 +281,9 @@ class GeneratorHooks {
       );
     }
 
-    await _installDependencies();
-    final hookCacheDir = hook.cacheDirectory;
-    final packageConfigUri = File(
-      p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
-    ).uri;
     final module = hook.module;
-
     if (!module.existsSync()) {
+      await _installDependencies();
       await _compile(hook: hook, logger: logger);
     }
 
@@ -299,7 +293,6 @@ class GeneratorHooks {
         [json.encode(vars)],
         messagePort.sendPort,
         paused: true,
-        packageConfig: packageConfigUri,
       );
     }
 

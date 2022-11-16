@@ -623,7 +623,7 @@ extension on HookFile {
   Directory get cacheDirectory {
     return Directory(
       p.join(
-        Directory(p.join(Directory.systemTemp.path, '.mason')).path,
+        BricksJson.hooksDir.path,
         sha1.convert(utf8.encode(File(path).parent.absolute.path)).toString(),
       ),
     );

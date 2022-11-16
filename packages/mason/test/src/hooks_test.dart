@@ -14,9 +14,7 @@ void main() {
   group('Hooks', () {
     setUp(() async {
       try {
-        await Directory(
-          path.join(Directory.systemTemp.path, '.mason'),
-        ).delete(recursive: true);
+        await BricksJson.hooksDir.delete(recursive: true);
       } catch (_) {}
     });
 
