@@ -173,8 +173,6 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        
-        await generator.hooks.compile();
 
         await generator.hooks.preGen(
           vars: <String, dynamic>{'name': name},
