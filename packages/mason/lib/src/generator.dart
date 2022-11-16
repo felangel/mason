@@ -22,7 +22,6 @@ final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
-final _whiteSpace = RegExp(r'\s+');
 final _lambdas = RegExp(
   '''(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)''',
 );
@@ -61,13 +60,9 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
   static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    return MasonGenerator(
-      bundle.name,
-      bundle.description,
-      vars: bundle.vars.keys.toList(),
-      files: _decodeConcatenatedData(bundle.files),
-      hooks: GeneratorHooks.fromBundle(bundle),
-    );
+    final target = Directory.systemTemp.createTempSync();
+    unpackBundle(bundle, target);
+    return MasonGenerator._fromBrick(target.path);
   }
 
   /// Factory which creates a [MasonGenerator] based on
@@ -573,26 +568,6 @@ class _Permutations<T> {
       );
     }
   }
-}
-
-List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
-  final results = <TemplateFile>[];
-  for (final file in files) {
-    final path = file.path;
-    final type = file.type;
-    final raw = file.data.replaceAll(_whiteSpace, '');
-    final decoded = base64.decode(raw);
-    try {
-      if (type == 'binary') {
-        results.add(TemplateFile.fromBytes(path, decoded));
-      } else {
-        final source = utf8.decode(decoded);
-        results.add(TemplateFile(path, source));
-      }
-    } catch (_) {}
-  }
-
-  return results;
 }
 
 Future<Set<FileContents>> _runSubstitutionAsync(

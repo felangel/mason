@@ -88,49 +88,6 @@ class GeneratorHooks {
   /// {@macro generator_hooks}
   const GeneratorHooks({this.preGenHook, this.postGenHook, this.pubspec});
 
-  /// Creates [GeneratorHooks] from a provided [MasonBundle].
-  factory GeneratorHooks.fromBundle(MasonBundle bundle) {
-    HookFile? _decodeHookFile(MasonBundledFile? file) {
-      if (file == null) return null;
-      final path = file.path;
-      final raw = file.data.replaceAll(_whiteSpace, '');
-      final decoded = base64.decode(raw);
-      try {
-        return HookFile.fromBytes(path, decoded);
-      } catch (_) {
-        return null;
-      }
-    }
-
-    List<int>? _decodeHookPubspec(MasonBundledFile? file) {
-      if (file == null) return null;
-      final raw = file.data.replaceAll(_whiteSpace, '');
-      return base64.decode(raw);
-    }
-
-    final preGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.preGen.toFileName();
-      },
-    );
-    final postGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.postGen.toFileName();
-      },
-    );
-    final pubspec = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == 'pubspec.yaml';
-      },
-    );
-
-    return GeneratorHooks(
-      preGenHook: _decodeHookFile(preGen),
-      postGenHook: _decodeHookFile(postGen),
-      pubspec: _decodeHookPubspec(pubspec),
-    );
-  }
-
   /// Creates [GeneratorHooks] from a provided [BrickYaml].
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
     Future<HookFile?> getHookFile(GeneratorHook hook) async {
