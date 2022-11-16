@@ -239,15 +239,15 @@ class GeneratorHooks {
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', uri.path],
-      workingDirectory: hook.cacheDirectory.path,
+      ['compile', 'kernel', canonicalize(uri.path)],
+      workingDirectory: canonicalize(hook.cacheDirectory.path),
       runInShell: true,
     );
 
     if (result.exitCode != ExitCode.success.code) {
       final error = result.stderr.toString();
       progress?.fail(error);
-      throw HookCompileException(hook.path, error);
+      throw HookCompileException(canonicalize(hook.path), error);
     }
 
     progress?.complete('Compiled ${p.basename(hook.path)}');
