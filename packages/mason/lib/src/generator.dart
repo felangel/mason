@@ -59,8 +59,10 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
   static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    final target = Directory.systemTemp.createTempSync();
-    unpackBundle(bundle, target);
+    final target = Directory(
+      p.join(BricksJson.bundled.path, '${bundle.name}_${bundle.version}'),
+    );
+    if (!target.existsSync()) unpackBundle(bundle, target);
     return MasonGenerator._fromBrick(target.path);
   }
 
