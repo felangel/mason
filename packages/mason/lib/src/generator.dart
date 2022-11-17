@@ -620,22 +620,29 @@ extension on String {
 extension on HookFile {
   String get fileHash => sha1.convert(content).toString();
 
-  Directory get cacheDirectory {
+  Directory get directory => File(path).parent;
+
+  Directory get buildDirectory {
     return Directory(
+      p.join(directory.path, 'build', p.basenameWithoutExtension(path)),
+    );
+  }
+
+  File get intermediate {
+    return File(
       p.join(
-        BricksJson.hooksDir.path,
-        sha1.convert(utf8.encode(File(path).parent.absolute.path)).toString(),
+        buildDirectory.path,
+        '${p.basenameWithoutExtension(path)}_$fileHash.dart',
       ),
     );
   }
 
-  Directory get buildDirectory {
-    return Directory(
-      p.join(cacheDirectory.path, 'build', p.basenameWithoutExtension(path)),
-    );
-  }
-
   File get module {
-    return File(p.join(buildDirectory.path, '.$fileHash.dill'));
+    return File(
+      p.join(
+        buildDirectory.path,
+        '${p.basenameWithoutExtension(path)}_$fileHash.dill',
+      ),
+    );
   }
 }

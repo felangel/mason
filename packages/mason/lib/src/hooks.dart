@@ -213,20 +213,16 @@ class GeneratorHooks {
     final hook = preGenHook ?? postGenHook;
     if (hook == null) return;
 
-    final hookCacheDir = hook.cacheDirectory;
+    final hookDirectory = hook.directory;
     final pubspec = this.pubspec;
 
     if (pubspec != null) {
       final packageConfigFile = File(
-        p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
+        p.join(hookDirectory.path, '.dart_tool', 'package_config.json'),
       );
 
       if (!packageConfigFile.existsSync()) {
-        await hookCacheDir.create(recursive: true);
-        await File(
-          p.join(hookCacheDir.path, 'pubspec.yaml'),
-        ).writeAsBytes(pubspec);
-        await _dartPubGet(workingDirectory: hookCacheDir.path);
+        await _dartPubGet(workingDirectory: hookDirectory.path);
       }
     }
   }
@@ -239,9 +235,11 @@ class GeneratorHooks {
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', uri.path],
+      ['compile', 'kernel', uri.toFilePath()],
       runInShell: true,
     );
+
+    File(uri.toFilePath()).delete().ignore();
 
     if (result.exitCode != ExitCode.success.code) {
       final error = result.stderr.toString();
@@ -387,24 +385,25 @@ Future<Uri?> _getHookUri(HookFile hook) async {
     await hookBuildDir.delete(recursive: true);
   } catch (_) {}
 
-  await copyPath(File(hook.path).parent.path, hookBuildDir.path);
-  final hookFile = File(p.join(hookBuildDir.path, '.${hook.fileHash}.dart'))
+  final intermediate = hook.intermediate
     ..createSync(recursive: true)
-    ..writeAsStringSync(_generatedHookCode(decoded));
+    ..writeAsStringSync(
+      _generatedHookCode('../../${p.basename(hook.path)}'),
+    );
 
-  return Uri.file(hookFile.path);
+  return Uri.file(intermediate.path);
 }
 
-String _generatedHookCode(String content) => '''
+String _generatedHookCode(String hookPath) => '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:isolate';
-
-$content
+import 'package:mason/mason.dart';
+import '$hookPath' as hook;
 
 void main(List<String> args, SendPort port) {
-  run(_HookContext._(port, vars: json.decode(args.first)));
+  hook.run(_HookContext._(port, vars: json.decode(args.first)));
 }
 
 class _HookContext implements HookContext {

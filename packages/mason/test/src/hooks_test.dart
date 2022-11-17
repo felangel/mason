@@ -12,12 +12,6 @@ class _MockProgress extends Mock implements Progress {}
 
 void main() {
   group('Hooks', () {
-    setUp(() async {
-      try {
-        await BricksJson.hooksDir.delete(recursive: true);
-      } catch (_) {}
-    });
-
     test('supports non-ascii characters', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'unicode_hook'),

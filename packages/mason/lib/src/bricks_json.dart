@@ -424,9 +424,6 @@ class BricksJson {
     unpackBundle(bundle, directory);
   }
 
-  /// Hooks subdirectory within the mason cache.
-  static Directory get hooksDir => Directory(p.join(rootDir.path, 'hooks'));
-
   /// Global subdirectory within the mason cache.
   static Directory get globalDir => Directory(p.join(rootDir.path, 'global'));
 
