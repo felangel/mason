@@ -294,10 +294,11 @@ class GeneratorHooks {
       );
     }
 
+    final uri = Uri.file(canonicalize(module.uri.path));
     final cwd = Directory.current;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
-    final isolate = await spawnIsolate(module.uri);
+    final isolate = await spawnIsolate(uri);
 
     isolate
       ..addErrorListener(errorPort.sendPort)
