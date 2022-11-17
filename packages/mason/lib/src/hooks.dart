@@ -294,7 +294,9 @@ class GeneratorHooks {
       );
     }
 
-    final uri = Uri.file(canonicalize(module.uri.path));
+    final uri = module.uri.hasAbsolutePath
+        ? module.uri
+        : Uri.file(canonicalize(module.uri.path));
     final cwd = Directory.current;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
