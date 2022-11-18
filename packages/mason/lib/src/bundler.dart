@@ -10,7 +10,7 @@ final _binaryFileTypes = RegExp(
   caseSensitive: false,
 );
 
-final _hookFiles = RegExp('(.*.dart|pubspec.yaml)');
+final _hookFiles = RegExp(r'^(.*.dart|pubspec.yaml)$');
 
 /// Unpack the [bundle] in the [target] directory.
 void unpackBundle(MasonBundle bundle, Directory target) {
@@ -63,7 +63,7 @@ MasonBundle createBundle(Directory brick) {
           .listSync(recursive: true)
           .whereType<File>()
           .where((file) => _hookFiles.hasMatch(path.basename(file.path)))
-          .map(_bundleHookFile)
+          .map((file) => _bundleHookFile(file, hooksDirectory))
           .toList()
       : <MasonBundledFile>[];
   return MasonBundle(
@@ -102,9 +102,9 @@ MasonBundledFile _bundleBrickFile(File file) {
   return MasonBundledFile(filePath, data, fileType);
 }
 
-MasonBundledFile _bundleHookFile(File file) {
+MasonBundledFile _bundleHookFile(File file, Directory hooksDirectory) {
   final data = base64.encode(file.readAsBytesSync());
-  final filePath = path.basename(file.path);
+  final filePath = path.relative(file.path, from: hooksDirectory.path);
   return MasonBundledFile(filePath, data, 'text');
 }
 
