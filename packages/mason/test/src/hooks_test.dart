@@ -204,9 +204,17 @@ void main() {
         vars: <String, dynamic>{'name': name},
         workingDirectory: directory.path,
       );
-      final file = File(path.join(directory.path, '.pre_gen.txt'));
-      expect(file.existsSync(), isTrue);
-      expect(file.readAsStringSync(), equals('pre_gen: $name'));
+      final preGenOutput = File(path.join(directory.path, '.pre_gen.txt'));
+      expect(preGenOutput.existsSync(), isTrue);
+      expect(preGenOutput.readAsStringSync(), equals('pre_gen: $name'));
+
+      await generator.hooks.postGen(
+        vars: <String, dynamic>{'name': name},
+        workingDirectory: directory.path,
+      );
+      final postGenOutput = File(path.join(directory.path, '.post_gen.txt'));
+      expect(postGenOutput.existsSync(), isTrue);
+      expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
     });
   });
 }

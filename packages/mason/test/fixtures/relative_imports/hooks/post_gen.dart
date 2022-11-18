@@ -1,4 +1,4 @@
 import 'package:mason/mason.dart';
 import './main.dart';
 
-void run(HookContext context) => preGen(context);
+void run(HookContext context) => postGen(context);
