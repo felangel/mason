@@ -82,6 +82,32 @@ void main() {
         }
       });
 
+      test('returns a MasonBundle when brick exists (hooks w/relative imports)',
+          () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'relative_imports')),
+        );
+        expect(bundle.name, equals('relative_imports'));
+        expect(bundle.description, equals('A Test Hook'));
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.files.length, equals(1));
+        expect(bundle.hooks.length, equals(4));
+        final expectedFiles = [
+          'post_gen.dart',
+          'pre_gen.dart',
+          'pubspec.yaml',
+          'src/main.dart',
+        ];
+        for (var i = 0; i < bundle.hooks.length; i++) {
+          final hookFile = bundle.hooks[i];
+          expect(hookFile.path, equals(expectedFiles[i]));
+        }
+      });
+
       test('returns a MasonBundle when brick exists (plugin)', () {
         final expectedFilePaths = [
           'example/{{#android}}android.dart{{/android}}',
