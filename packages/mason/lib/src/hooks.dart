@@ -95,9 +95,9 @@ class GeneratorHooks {
 
   /// Creates [GeneratorHooks] from a provided [BrickYaml].
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
-    late final HookFile? preGenHook;
-    late final HookFile? postGenHook;
-    late final List<int>? pubspec;
+    HookFile? preGenHook;
+    HookFile? postGenHook;
+    List<int>? pubspec;
 
     final accumulator = AccumulatorSink<Digest>();
     final sink = sha1.startChunkedConversion(accumulator);
@@ -105,26 +105,31 @@ class GeneratorHooks {
     try {
       final brickRoot = File(brick.path!).parent.path;
       final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+      final pubspecFilePath = p.join(hooksDirectory.path, 'pubspec.yaml');
+      final preGenFilePath = p.join(
+        hooksDirectory.path,
+        GeneratorHook.preGen.toFileName(),
+      );
+      final postGenFilePath = p.join(
+        hooksDirectory.path,
+        GeneratorHook.postGen.toFileName(),
+      );
       final dartFiles = hooksDirectory.existsSync()
           ? hooksDirectory
               .listSync(recursive: true)
-              .whereType<File>()
-              .where((f) {
-              final ext = p.extension(f.path);
-              return ext == '.dart' || ext == '.yaml';
-            })
+              .where(_isHookFile)
+              .cast<File>()
           : const <File>[];
 
       for (final file in dartFiles) {
-        final basename = p.basename(file.path);
         final bytes = await file.readAsBytes();
         sink.add(bytes);
-        if (file.path == p.join(hooksDirectory.path, 'pubspec.yaml')) {
-          pubspec = bytes;
-        } else if (basename == GeneratorHook.preGen.toFileName()) {
-          preGenHook = HookFile.fromBytes(file.path, bytes);
-        } else if (basename == GeneratorHook.postGen.toFileName()) {
-          postGenHook = HookFile.fromBytes(file.path, bytes);
+        if (file.path == pubspecFilePath) {
+          pubspec ??= bytes;
+        } else if (file.path == preGenFilePath) {
+          preGenHook ??= HookFile.fromBytes(file.path, bytes);
+        } else if (file.path == postGenFilePath) {
+          postGenHook ??= HookFile.fromBytes(file.path, bytes);
         }
       }
     } finally {
@@ -476,3 +481,10 @@ class _Vars with MapMixin<String, dynamic> {
   void _updateVars() => _port.send(json.encode(_vars));
 }
 ''';
+
+bool _isHookFile(FileSystemEntity entity) {
+  final isFile = entity is File;
+  if (!isFile) return false;
+  final ext = p.extension(entity.path);
+  return ext == '.dart' || ext == '.yaml';
+}
