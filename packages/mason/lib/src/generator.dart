@@ -5,6 +5,7 @@ import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
@@ -624,30 +625,33 @@ extension on String {
 }
 
 extension on HookFile {
-  String get fileHash => sha1.convert(content).toString();
-
   Directory get directory => File(path).parent;
 
   Directory get buildDirectory {
     return Directory(
-      p.join(directory.path, 'build', p.basenameWithoutExtension(path)),
-    );
-  }
-
-  File get intermediate {
-    return File(
       p.join(
-        buildDirectory.path,
-        '${p.basenameWithoutExtension(path)}_$fileHash.dart',
+        directory.path,
+        'build',
+        'hooks',
+        p.basenameWithoutExtension(path),
       ),
     );
   }
 
-  File get module {
+  File intermediate(String checksum) {
     return File(
       p.join(
         buildDirectory.path,
-        '${p.basenameWithoutExtension(path)}_$fileHash.dill',
+        '${p.basenameWithoutExtension(path)}_$checksum.dart',
+      ),
+    );
+  }
+
+  File module(String checksum) {
+    return File(
+      p.join(
+        buildDirectory.path,
+        '${p.basenameWithoutExtension(path)}_$checksum.dill',
       ),
     );
   }

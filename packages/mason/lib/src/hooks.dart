@@ -86,47 +86,52 @@ extension GeneratorHookToFileName on GeneratorHook {
 /// {@endtemplate}
 class GeneratorHooks {
   /// {@macro generator_hooks}
-  const GeneratorHooks({this.preGenHook, this.postGenHook, this.pubspec});
+  const GeneratorHooks({
+    this.preGenHook,
+    this.postGenHook,
+    this.pubspec,
+    this.checksum = '',
+  });
 
   /// Creates [GeneratorHooks] from a provided [BrickYaml].
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
-    Future<HookFile?> getHookFile(GeneratorHook hook) async {
-      try {
-        final brickRoot = File(brick.path!).parent.path;
-        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file =
-            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
-                  (element) => p.basename(element.path) == hook.toFileName(),
-                );
+    late final HookFile? preGenHook;
+    late final HookFile? postGenHook;
+    late final List<int>? pubspec;
 
-        if (file == null) return null;
-        final content = await file.readAsBytes();
-        return HookFile.fromBytes(file.path, content);
-      } catch (_) {
-        return null;
+    final accumulator = AccumulatorSink<Digest>();
+    final sink = sha1.startChunkedConversion(accumulator);
+
+    try {
+      final brickRoot = File(brick.path!).parent.path;
+      final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+      final dartFiles =
+          hooksDirectory.listSync(recursive: true).whereType<File>().where((f) {
+        final ext = p.extension(f.path);
+        return ext == '.dart' || ext == '.yaml';
+      });
+
+      for (final file in dartFiles) {
+        final basename = p.basename(file.path);
+        final bytes = await file.readAsBytes();
+        sink.add(bytes);
+        if (file.path == p.join(hooksDirectory.path, 'pubspec.yaml')) {
+          pubspec = bytes;
+        } else if (basename == GeneratorHook.preGen.toFileName()) {
+          preGenHook = HookFile.fromBytes(file.path, bytes);
+        } else if (basename == GeneratorHook.postGen.toFileName()) {
+          postGenHook = HookFile.fromBytes(file.path, bytes);
+        }
       }
-    }
-
-    Future<List<int>?> getHookPubspec() async {
-      try {
-        final brickRoot = File(brick.path!).parent.path;
-        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file =
-            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
-                  (element) => p.basename(element.path) == 'pubspec.yaml',
-                );
-
-        if (file == null) return null;
-        return await file.readAsBytes();
-      } catch (_) {
-        return null;
-      }
+    } finally {
+      sink.close();
     }
 
     return GeneratorHooks(
-      preGenHook: await getHookFile(GeneratorHook.preGen),
-      postGenHook: await getHookFile(GeneratorHook.postGen),
-      pubspec: await getHookPubspec(),
+      preGenHook: preGenHook,
+      postGenHook: postGenHook,
+      pubspec: pubspec,
+      checksum: accumulator.events.firstOrNull?.toString() ?? '',
     );
   }
 
@@ -138,6 +143,9 @@ class GeneratorHooks {
 
   /// Contents of the hooks `pubspec.yaml` if exists.
   final List<int>? pubspec;
+
+  /// The hash of the hooks directory and its contents.
+  final String checksum;
 
   /// Runs the pre-generation (pre_gen) hook with the specified [vars].
   /// An optional [workingDirectory] can also be specified.
@@ -185,11 +193,11 @@ class GeneratorHooks {
   Future<void> compile({Logger? logger}) async {
     await _installDependencies();
 
-    if (preGenHook != null && !preGenHook!.module.existsSync()) {
+    if (preGenHook != null && !preGenHook!.module(checksum).existsSync()) {
       await _compile(hook: preGenHook!, logger: logger);
     }
 
-    if (postGenHook != null && !postGenHook!.module.existsSync()) {
+    if (postGenHook != null && !postGenHook!.module(checksum).existsSync()) {
       await _compile(hook: postGenHook!, logger: logger);
     }
   }
@@ -228,7 +236,7 @@ class GeneratorHooks {
   }
 
   Future<void> _compile({required HookFile hook, Logger? logger}) async {
-    final uri = await _getHookUri(hook);
+    final uri = await _getHookUri(hook, checksum);
 
     if (uri == null) throw HookMissingRunException(hook.path);
 
@@ -279,7 +287,7 @@ class GeneratorHooks {
       );
     }
 
-    final module = hook.module;
+    final module = hook.module(checksum);
     if (!module.existsSync()) {
       await _installDependencies();
       await _compile(hook: hook, logger: logger);
@@ -378,20 +386,18 @@ final _runRegExp = RegExp(
   multiLine: true,
 );
 
-Future<Uri?> _getHookUri(HookFile hook) async {
+Future<Uri?> _getHookUri(HookFile hook, String checksum) async {
   final decoded = utf8.decode(hook.content);
   if (!_runRegExp.hasMatch(decoded)) return null;
 
-  final hookBuildDir = hook.buildDirectory;
-
   try {
-    await hookBuildDir.delete(recursive: true);
+    await hook.buildDirectory.delete(recursive: true);
   } catch (_) {}
 
-  final intermediate = hook.intermediate
+  final intermediate = hook.intermediate(checksum)
     ..createSync(recursive: true)
     ..writeAsStringSync(
-      _generatedHookCode('../../${p.basename(hook.path)}'),
+      _generatedHookCode('../../../${p.basename(hook.path)}'),
     );
 
   return Uri.file(intermediate.path);
