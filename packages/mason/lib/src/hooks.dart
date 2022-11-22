@@ -105,11 +105,15 @@ class GeneratorHooks {
     try {
       final brickRoot = File(brick.path!).parent.path;
       final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-      final dartFiles =
-          hooksDirectory.listSync(recursive: true).whereType<File>().where((f) {
-        final ext = p.extension(f.path);
-        return ext == '.dart' || ext == '.yaml';
-      });
+      final dartFiles = hooksDirectory.existsSync()
+          ? hooksDirectory
+              .listSync(recursive: true)
+              .whereType<File>()
+              .where((f) {
+              final ext = p.extension(f.path);
+              return ext == '.dart' || ext == '.yaml';
+            })
+          : const <File>[];
 
       for (final file in dartFiles) {
         final basename = p.basename(file.path);
