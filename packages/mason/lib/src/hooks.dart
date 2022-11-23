@@ -296,10 +296,12 @@ class GeneratorHooks {
       );
     }
 
+    var compiled = false;
     final module = hook.module(checksum);
     if (!module.existsSync()) {
       await _installDependencies();
       await _compile(hook: hook, logger: logger);
+      compiled = true;
     }
 
     Future<Isolate> spawnIsolate(Uri uri) {
@@ -317,7 +319,23 @@ class GeneratorHooks {
     final cwd = Directory.current;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
-    final isolate = await spawnIsolate(uri);
+    late Isolate isolate;
+    try {
+      isolate = await spawnIsolate(uri);
+    } on IsolateSpawnException catch (error) {
+      // If we just compiled the hook, then there is no reason to retry.
+      if (compiled) throw HookExecutionException(hook.path, '$error');
+
+      // Attempt to recompile the hook and respawn the isolate.
+      await _compile(hook: hook, logger: logger);
+      try {
+        isolate = await spawnIsolate(uri);
+      } catch (error) {
+        throw HookExecutionException(hook.path, '$error');
+      }
+    } catch (error) {
+      throw HookExecutionException(hook.path, '$error');
+    }
 
     isolate
       ..addErrorListener(errorPort.sendPort)
@@ -333,6 +351,10 @@ class GeneratorHooks {
     for (final subscription in subscriptions) {
       unawaited(subscription.cancel());
     }
+
+    messagePort.close();
+    errorPort.close();
+    exitPort.close();
 
     if (hookError != null) {
       final dynamic error = hookError;
