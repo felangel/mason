@@ -41,7 +41,7 @@ void main() {
         'throws HookCompileException '
         'when unable to resolve a type', () async {
       final brick = Brick.path(
-        path.join('test', 'fixtures', 'spawn_exception'),
+        path.join('test', 'fixtures', 'compile_exception'),
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
@@ -57,7 +57,7 @@ void main() {
         'throws HookCompileException '
         'when unable to resolve a type (back-to-back)', () async {
       final brick = Brick.path(
-        path.join('test', 'fixtures', 'spawn_exception'),
+        path.join('test', 'fixtures', 'compile_exception'),
       );
       final generator = await MasonGenerator.fromBrick(brick);
 
@@ -138,6 +138,12 @@ void main() {
 
     test('installs dependencies and compiles hooks only once', () async {
       final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+      final hooksBuildDirectory = Directory(
+        path.join('test', 'fixtures', 'basic', 'hooks', 'build', 'hooks'),
+      );
+      try {
+        await hooksBuildDirectory.delete(recursive: true);
+      } catch (_) {}
       final generator = await MasonGenerator.fromBrick(brick);
       final logger = _MockLogger();
       final progress = _MockProgress();
@@ -242,6 +248,113 @@ void main() {
       expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
       expect(preGenHookBuildDirectory.existsSync(), isTrue);
       expect(postGenHookBuildDirectory.existsSync(), isTrue);
+    });
+
+    test('recompiles hooks when an IsolateSpawnException occurs', () async {
+      const name = 'Dash';
+      final directory = Directory.systemTemp.createTempSync();
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'relative_imports'),
+      );
+      final hooksBuildDirectory = Directory(
+        path.join(
+          'test',
+          'fixtures',
+          'relative_imports',
+          'hooks',
+          'build',
+          'hooks',
+        ),
+      );
+      final preGenHookBuildDirectory = Directory(
+        path.join(hooksBuildDirectory.path, 'pre_gen'),
+      );
+      final postGenHookBuildDirectory = Directory(
+        path.join(hooksBuildDirectory.path, 'post_gen'),
+      );
+
+      try {
+        await hooksBuildDirectory.delete(recursive: true);
+      } catch (_) {}
+
+      expect(hooksBuildDirectory.existsSync(), isFalse);
+      final generator = await MasonGenerator.fromBrick(brick);
+
+      await generator.hooks.preGen(
+        vars: <String, dynamic>{'name': name},
+        workingDirectory: directory.path,
+      );
+      final preGenOutput = File(path.join(directory.path, '.pre_gen.txt'));
+      expect(preGenOutput.existsSync(), isTrue);
+      expect(preGenOutput.readAsStringSync(), equals('pre_gen: $name'));
+      expect(hooksBuildDirectory.existsSync(), isTrue);
+      expect(preGenHookBuildDirectory.existsSync(), isTrue);
+      expect(postGenHookBuildDirectory.existsSync(), isFalse);
+
+      await generator.hooks.postGen(
+        vars: <String, dynamic>{'name': name},
+        workingDirectory: directory.path,
+      );
+      final postGenOutput = File(path.join(directory.path, '.post_gen.txt'));
+      expect(postGenOutput.existsSync(), isTrue);
+      expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
+      expect(preGenHookBuildDirectory.existsSync(), isTrue);
+      expect(postGenHookBuildDirectory.existsSync(), isTrue);
+
+      File? preGenModule;
+      File? postGenModule;
+      final files =
+          hooksBuildDirectory.listSync(recursive: true).whereType<File>();
+      final legacyPreGen = File(
+        path.join(
+          'test',
+          'fixtures',
+          'relative_imports',
+          'hooks',
+          'legacy',
+          'pre_gen.dill',
+        ),
+      );
+      final legacyPostGen = File(
+        path.join(
+          'test',
+          'fixtures',
+          'relative_imports',
+          'hooks',
+          'legacy',
+          'post_gen.dill',
+        ),
+      );
+      final legacyPreGenBytes = legacyPreGen.readAsBytesSync();
+      final legacyPostGenBytes = legacyPostGen.readAsBytesSync();
+      for (final file in files) {
+        if (path.basenameWithoutExtension(file.path).startsWith('pre_gen_')) {
+          preGenModule = file;
+          file.writeAsBytesSync(legacyPreGenBytes);
+        }
+        if (path.basenameWithoutExtension(file.path).startsWith('post_gen_')) {
+          postGenModule = file;
+          file.writeAsBytesSync(legacyPostGenBytes);
+        }
+      }
+
+      await generator.hooks.preGen(
+        vars: <String, dynamic>{'name': name},
+        workingDirectory: directory.path,
+      );
+      await generator.hooks.postGen(
+        vars: <String, dynamic>{'name': name},
+        workingDirectory: directory.path,
+      );
+
+      expect(
+        preGenModule!.readAsBytesSync(),
+        isNot(equals(legacyPreGenBytes)),
+      );
+      expect(
+        postGenModule!.readAsBytesSync(),
+        isNot(equals(legacyPostGenBytes)),
+      );
     });
   });
 }

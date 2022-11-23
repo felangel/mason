@@ -97,8 +97,9 @@ void main() {
         }
       });
 
-      test('returns a MasonBundle when brick exists (hooks w/relative imports)',
-          () {
+      test(
+          'returns a MasonBundle '
+          'when brick exists (hooks w/relative imports)', () {
         final bundle = createBundle(
           Directory(path.join('test', 'fixtures', 'relative_imports')),
         );
@@ -284,7 +285,7 @@ void main() {
         final preGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
         );
-        expect(preGenHookFile.existsSync(), true);
+        expect(preGenHookFile.existsSync(), isTrue);
         expect(
           preGenHookFile.readAsStringSync(),
           equals(
@@ -294,7 +295,7 @@ void main() {
         final postGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'post_gen.dart'),
         );
-        expect(postGenHookFile.existsSync(), true);
+        expect(postGenHookFile.existsSync(), isTrue);
         expect(
           postGenHookFile.readAsStringSync(),
           equals(
@@ -308,7 +309,7 @@ void main() {
           hookPubspecFile.readAsStringSync(),
           contains('name: hooks_hooks'),
         );
-        expect(hookPubspecFile.existsSync(), true);
+        expect(hookPubspecFile.existsSync(), isTrue);
       });
 
       test('unpacks a MasonBundle (hooks w/relative imports)', () {
@@ -335,7 +336,7 @@ void main() {
         final preGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
         );
-        expect(preGenHookFile.existsSync(), true);
+        expect(preGenHookFile.existsSync(), isTrue);
         expect(
           preGenHookFile.readAsStringSync(),
           equals(
@@ -350,7 +351,7 @@ void run(HookContext context) => preGen(context);
         final postGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'post_gen.dart'),
         );
-        expect(postGenHookFile.existsSync(), true);
+        expect(postGenHookFile.existsSync(), isTrue);
         expect(
           postGenHookFile.readAsStringSync(),
           equals(
@@ -365,7 +366,7 @@ void run(HookContext context) => postGen(context);
         final mainFile = File(
           path.join(tempDir.path, 'hooks', 'src', 'main.dart'),
         );
-        expect(mainFile.existsSync(), true);
+        expect(mainFile.existsSync(), isTrue);
         expect(
           mainFile.readAsStringSync(),
           equals(
@@ -390,7 +391,7 @@ void postGen(HookContext context) {
           hookPubspecFile.readAsStringSync(),
           contains('name: relative_imports_hooks'),
         );
-        expect(hookPubspecFile.existsSync(), true);
+        expect(hookPubspecFile.existsSync(), isTrue);
       });
     });
   });

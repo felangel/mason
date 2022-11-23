@@ -226,9 +226,10 @@ class GeneratorHooks {
     }
   }
 
-  Future<void> _installDependencies() async {
+  Future<bool> _installDependencies() async {
     final hook = preGenHook ?? postGenHook;
-    if (hook == null) return;
+    var installedDependencies = false;
+    if (hook == null) return installedDependencies;
 
     final hookDirectory = hook.directory;
     final pubspec = this.pubspec;
@@ -240,8 +241,10 @@ class GeneratorHooks {
 
       if (!packageConfigFile.existsSync()) {
         await _dartPubGet(workingDirectory: hookDirectory.path);
+        installedDependencies = true;
       }
     }
+    return installedDependencies;
   }
 
   Future<void> _compile({required HookFile hook, Logger? logger}) async {
@@ -296,12 +299,13 @@ class GeneratorHooks {
       );
     }
 
-    var compiled = false;
+    var installedDependencies = false;
+    var compiledHook = false;
     final module = hook.module(checksum);
     if (!module.existsSync()) {
-      await _installDependencies();
+      installedDependencies = await _installDependencies();
       await _compile(hook: hook, logger: logger);
-      compiled = true;
+      compiledHook = true;
     }
 
     Future<Isolate> spawnIsolate(Uri uri) {
@@ -319,22 +323,43 @@ class GeneratorHooks {
     final cwd = Directory.current;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
-    late Isolate isolate;
+    Isolate? isolate;
     try {
       isolate = await spawnIsolate(uri);
     } on IsolateSpawnException catch (error) {
-      // If we just compiled the hook, then there is no reason to retry.
-      if (compiled) throw HookExecutionException(hook.path, '$error');
+      Never throwHookExecutionException(IsolateSpawnException error) {
+        Directory.current = cwd;
+        final msg = error.message;
+        final content =
+            msg.contains('Error: ') ? msg.split('Error: ').last : msg;
+        throw HookExecutionException(hook.path, content.trim());
+      }
 
-      // Attempt to recompile the hook and respawn the isolate.
+      final shouldRetry = !installedDependencies || !compiledHook;
+
+      // If we just installed dependencies and compiled the hook,
+      // then there is no reason to retry.
+      if (!shouldRetry) throwHookExecutionException(error);
+
+      Directory.current = cwd;
+
+      // Failure to spawn the isolate could be due to changes in the pub cache.
+      // We attempt to reinstall hook dependencies.
+      await _dartPubGet(workingDirectory: hook.directory.path);
+
+      // Failure to spawn the isolate could be due to changes in the Dart SDK.
+      // We attempt to recompile the hook.
       await _compile(hook: hook, logger: logger);
+
+      if (workingDirectory != null) Directory.current = workingDirectory;
+
+      // Retry spawning the isolate if the hook
+      // has been successfully recompiled.
       try {
         isolate = await spawnIsolate(uri);
-      } catch (error) {
-        throw HookExecutionException(hook.path, '$error');
+      } on IsolateSpawnException catch (error) {
+        throwHookExecutionException(error);
       }
-    } catch (error) {
-      throw HookExecutionException(hook.path, '$error');
     }
 
     isolate
