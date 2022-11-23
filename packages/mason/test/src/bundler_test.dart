@@ -295,6 +295,88 @@ void main() {
         );
         expect(hookPubspecFile.existsSync(), true);
       });
+
+      test('unpacks a MasonBundle (hooks w/relative imports)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'relative_imports')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            'name: relative_imports\n'
+            'description: A Test Hook\n'
+            'version: 0.1.0+1\n'
+            'environment:\n'
+            '  mason: any\n'
+            'vars:\n',
+          ),
+        );
+        final file = File(path.join(tempDir.path, '__brick__', '.gitkeep'));
+        expect(file.existsSync(), isTrue);
+        final preGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
+        );
+        expect(preGenHookFile.existsSync(), true);
+        expect(
+          preGenHookFile.readAsStringSync(),
+          equals(
+            '''
+import 'package:mason/mason.dart';
+import './src/main.dart';
+
+void run(HookContext context) => preGen(context);
+''',
+          ),
+        );
+        final postGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'post_gen.dart'),
+        );
+        expect(postGenHookFile.existsSync(), true);
+        expect(
+          postGenHookFile.readAsStringSync(),
+          equals(
+            '''
+import 'package:mason/mason.dart';
+import './src/main.dart';
+
+void run(HookContext context) => postGen(context);
+''',
+          ),
+        );
+        final mainFile = File(
+          path.join(tempDir.path, 'hooks', 'src', 'main.dart'),
+        );
+        expect(mainFile.existsSync(), true);
+        expect(
+          mainFile.readAsStringSync(),
+          equals(
+            r'''
+import 'dart:io';
+import 'package:mason/mason.dart';
+
+void preGen(HookContext context) {
+  File('.pre_gen.txt').writeAsStringSync('pre_gen: ${context.vars['name']}');
+}
+
+void postGen(HookContext context) {
+  File('.post_gen.txt').writeAsStringSync('post_gen: ${context.vars['name']}');
+}
+''',
+          ),
+        );
+        final hookPubspecFile = File(
+          path.join(tempDir.path, 'hooks', 'pubspec.yaml'),
+        );
+        expect(
+          hookPubspecFile.readAsStringSync(),
+          contains('name: relative_imports_hooks'),
+        );
+        expect(hookPubspecFile.existsSync(), true);
+      });
     });
   });
 }

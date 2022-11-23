@@ -199,6 +199,28 @@ void main() {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'relative_imports'),
       );
+      final hooksBuildDirectory = Directory(
+        path.join(
+          'test',
+          'fixtures',
+          'relative_imports',
+          'hooks',
+          'build',
+          'hooks',
+        ),
+      );
+      final preGenHookBuildDirectory = Directory(
+        path.join(hooksBuildDirectory.path, 'pre_gen'),
+      );
+      final postGenHookBuildDirectory = Directory(
+        path.join(hooksBuildDirectory.path, 'post_gen'),
+      );
+
+      try {
+        await hooksBuildDirectory.delete(recursive: true);
+      } catch (_) {}
+
+      expect(hooksBuildDirectory.existsSync(), isFalse);
       final generator = await MasonGenerator.fromBrick(brick);
       await generator.hooks.preGen(
         vars: <String, dynamic>{'name': name},
@@ -207,6 +229,9 @@ void main() {
       final preGenOutput = File(path.join(directory.path, '.pre_gen.txt'));
       expect(preGenOutput.existsSync(), isTrue);
       expect(preGenOutput.readAsStringSync(), equals('pre_gen: $name'));
+      expect(hooksBuildDirectory.existsSync(), isTrue);
+      expect(preGenHookBuildDirectory.existsSync(), isTrue);
+      expect(postGenHookBuildDirectory.existsSync(), isFalse);
 
       await generator.hooks.postGen(
         vars: <String, dynamic>{'name': name},
@@ -215,6 +240,8 @@ void main() {
       final postGenOutput = File(path.join(directory.path, '.post_gen.txt'));
       expect(postGenOutput.existsSync(), isTrue);
       expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
+      expect(preGenHookBuildDirectory.existsSync(), isTrue);
+      expect(postGenHookBuildDirectory.existsSync(), isTrue);
     });
   });
 }
