@@ -37,6 +37,21 @@ void main() {
         expect(bundle.files.length, equals(1));
       });
 
+      test('returns a MasonBundle when brick exists (empty)', () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'empty')),
+        );
+        expect(bundle.name, equals('empty'));
+        expect(bundle.description, equals('An empty brick'));
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.hooks, isEmpty);
+        expect(bundle.files, isEmpty);
+      });
+
       test('returns a MasonBundle when brick exists (hello)', () {
         final bundle = createBundle(
           Directory(path.join('..', '..', 'bricks', 'hello')),
