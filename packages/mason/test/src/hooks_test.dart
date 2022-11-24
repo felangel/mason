@@ -165,8 +165,11 @@ void main() {
       final hooksBuildDirectory = Directory(
         path.join('test', 'fixtures', 'basic', 'hooks', 'build', 'hooks'),
       );
+
       try {
         await hooksDartToolDirectory.delete(recursive: true);
+      } catch (_) {}
+      try {
         await hooksBuildDirectory.delete(recursive: true);
       } catch (_) {}
 
@@ -297,9 +300,6 @@ void main() {
     test('supports relative imports within hooks', () async {
       const name = 'Dash';
       final directory = Directory.systemTemp.createTempSync();
-      final brick = Brick.path(
-        path.join('test', 'fixtures', 'relative_imports'),
-      );
       final hooksBuildDirectory = Directory(
         path.join(
           'test',
@@ -322,6 +322,10 @@ void main() {
       } catch (_) {}
 
       expect(hooksBuildDirectory.existsSync(), isFalse);
+
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'relative_imports'),
+      );
       final generator = await MasonGenerator.fromBrick(brick);
       await generator.hooks.preGen(
         vars: <String, dynamic>{'name': name},
@@ -348,9 +352,6 @@ void main() {
     test('recompiles hooks when an IsolateSpawnException occurs', () async {
       const name = 'Dash';
       final directory = Directory.systemTemp.createTempSync();
-      final brick = Brick.path(
-        path.join('test', 'fixtures', 'relative_imports'),
-      );
       final hooksBuildDirectory = Directory(
         path.join(
           'test',
@@ -373,6 +374,10 @@ void main() {
       } catch (_) {}
 
       expect(hooksBuildDirectory.existsSync(), isFalse);
+
+      final brick = Brick.path(
+        path.join('test', 'fixtures', 'relative_imports'),
+      );
       final generator = await MasonGenerator.fromBrick(brick);
 
       await generator.hooks.preGen(
@@ -398,8 +403,6 @@ void main() {
 
       File? preGenModule;
       File? postGenModule;
-      final files =
-          hooksBuildDirectory.listSync(recursive: true).whereType<File>();
       final legacyPreGen = File(
         path.join(
           'test',
@@ -422,6 +425,8 @@ void main() {
       );
       final legacyPreGenBytes = legacyPreGen.readAsBytesSync();
       final legacyPostGenBytes = legacyPostGen.readAsBytesSync();
+      final files =
+          hooksBuildDirectory.listSync(recursive: true).whereType<File>();
       for (final file in files) {
         if (path.basenameWithoutExtension(file.path).startsWith('pre_gen_')) {
           preGenModule = file;
