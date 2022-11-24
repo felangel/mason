@@ -179,10 +179,13 @@ void main() {
           }
         },
         createFile: (p) {
-          return files.firstWhere(
+          final file = files.firstWhere(
             (f) => path.equals(p, f.path),
             orElse: () => tempFile,
           );
+          // ignore: avoid_print
+          print('createFile($p);\nreturn ${file.path}');
+          return file;
         },
       );
       try {
