@@ -337,6 +337,15 @@ class GeneratorHooks {
 
       final shouldRetry = !installedDependencies || !compiledHook;
 
+      // ignore: avoid_print
+      print(
+        '''
+installedDependencies: $installedDependencies
+compiledHook: $compiledHook
+shouldRetry: $shouldRetry
+''',
+      );
+
       // If we just installed dependencies and compiled the hook,
       // then there is no reason to retry.
       if (!shouldRetry) throwHookExecutionException(error);
