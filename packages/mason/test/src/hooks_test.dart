@@ -158,7 +158,7 @@ void main() {
         ),
       ];
 
-      final tempFile = File('.tmp.dill')..createSync();
+      final tempFile = File('.tmp.dill');
       final hooksDartToolDirectory = Directory(
         path.join('test', 'fixtures', 'basic', 'hooks', '.dart_tool'),
       );
@@ -177,14 +177,14 @@ void main() {
       final generator = await MasonGenerator.fromBrick(brick);
       await IOOverrides.runZoned(
         () async {
-          // First time, fresh run should not retry
+          // 1st time, fresh run should not retry
           try {
             await generator.hooks.preGen();
             fail('should throw');
           } catch (error) {
             expect(error, isA<HookExecutionException>());
           }
-          // Second time, stale run should retry
+          // 2nd time, stale run should retry
           try {
             await generator.hooks.preGen();
             fail('should throw');
@@ -234,14 +234,16 @@ void main() {
       }
     });
 
-    test('installs dependencies and compiles hooks only once', () async {
-      final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+    test('compile installs dependencies and compiles hooks only once',
+        () async {
       final hooksBuildDirectory = Directory(
         path.join('test', 'fixtures', 'basic', 'hooks', 'build', 'hooks'),
       );
       try {
         await hooksBuildDirectory.delete(recursive: true);
       } catch (_) {}
+
+      final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
       final generator = await MasonGenerator.fromBrick(brick);
       final logger = _MockLogger();
       final progress = _MockProgress();
