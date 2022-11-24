@@ -147,7 +147,7 @@ void main() {
         ),
       ];
 
-      final tempFile = File('.tmp');
+      final tempFile = File('.tmp.dill')..createSync();
       final hooksDartToolDirectory = Directory(
         path.join('test', 'fixtures', 'basic', 'hooks', '.dart_tool'),
       );
@@ -185,6 +185,9 @@ void main() {
           );
         },
       );
+      try {
+        tempFile.deleteSync();
+      } catch (_) {}
     });
 
     test('throws HookExecutionException when hook throws', () async {
