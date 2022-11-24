@@ -320,7 +320,7 @@ class GeneratorHooks {
     final uri = module.uri.hasAbsolutePath
         ? module.uri
         : Uri.file(canonicalize(module.uri.path));
-    final cwd = Directory.current;
+    final cwd = Directory.current.path;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
     Isolate? isolate;

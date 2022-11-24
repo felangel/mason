@@ -106,6 +106,87 @@ void main() {
       }
     });
 
+    test('throws HookExecutionException on IsolateSpawnException', () async {
+      final hookDirectoryPath = path.join('test', 'fixtures', 'basic', 'hooks');
+      final files = [
+        File(
+          canonicalize(
+            path.join(
+              hookDirectoryPath,
+              'pre_gen.dart',
+            ),
+          ),
+        ),
+        File(
+          canonicalize(
+            path.join(
+              hookDirectoryPath,
+              'build',
+              'hooks',
+              'pre_gen',
+              'pre_gen_4eda2b9684fa8a724e89999f292f9f40e1a444cc.dart',
+            ),
+          ),
+        ),
+        File(
+          canonicalize(
+            path.join(
+              hookDirectoryPath,
+              '.dart_tool',
+              'package_config.json',
+            ),
+          ),
+        ),
+        File(
+          canonicalize(
+            path.join(
+              '.dart_tool',
+              'package_config.json',
+            ),
+          ),
+        ),
+      ];
+
+      final tempFile = File('.tmp');
+      final hooksDartToolDirectory = Directory(
+        path.join('test', 'fixtures', 'basic', 'hooks', '.dart_tool'),
+      );
+      final hooksBuildDirectory = Directory(
+        path.join('test', 'fixtures', 'basic', 'hooks', 'build', 'hooks'),
+      );
+      try {
+        await hooksDartToolDirectory.delete(recursive: true);
+        await hooksBuildDirectory.delete(recursive: true);
+      } catch (_) {}
+
+      final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+      final generator = await MasonGenerator.fromBrick(brick);
+      await IOOverrides.runZoned(
+        () async {
+          // First time, fresh run should not retry
+          try {
+            await generator.hooks.preGen();
+            fail('should throw');
+          } catch (error) {
+            expect(error, isA<HookExecutionException>());
+          }
+          // Second time, stale run should retry
+          try {
+            await generator.hooks.preGen();
+            fail('should throw');
+          } catch (error) {
+            expect(error, isA<HookExecutionException>());
+          }
+        },
+        createFile: (p) {
+          return files.firstWhere(
+            (f) => path.equals(p, f.path),
+            orElse: () => tempFile,
+          );
+        },
+      );
+    });
+
     test('throws HookExecutionException when hook throws', () async {
       final brick = Brick.path(
         path.join('test', 'fixtures', 'execution_exception'),
