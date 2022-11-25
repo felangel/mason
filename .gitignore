@@ -6,6 +6,7 @@ pubspec.lock
 
 # Local Mason Files
 .mason/
+build/
 
 # IntelliJ and Android Studio
 .idea/

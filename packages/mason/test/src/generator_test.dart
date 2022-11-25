@@ -204,6 +204,43 @@ void main() {
         expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
       });
 
+      test('constructs an instance with hooks w/relative imports', () async {
+        const name = 'Dash';
+        final brick = Brick.path(
+          path.join('test', 'fixtures', 'relative_imports'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        await generator.hooks.preGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        await generator.hooks.postGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final file = File(path.join(tempDir.path, '.gitkeep'));
+        final generatedFile = files.first;
+        expect(files.length, equals(1));
+        expect(generatedFile.status, equals(GeneratedFileStatus.created));
+        expect(generatedFile.path, equals(file.path));
+        expect(file.existsSync(), isTrue);
+
+        final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
+        expect(preGenFile.existsSync(), isTrue);
+        expect(preGenFile.readAsStringSync(), equals('pre_gen: $name'));
+
+        final postGenFile = File(path.join(tempDir.path, '.post_gen.txt'));
+        expect(postGenFile.existsSync(), isTrue);
+        expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
+      });
+
       test('constructs an instance with random_color', () async {
         const name = 'Dash';
         final brick = Brick.path(
@@ -692,6 +729,44 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(file.readAsStringSync(), equals('Hi $name!'));
+
+        final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
+        expect(preGenFile.existsSync(), isTrue);
+        expect(preGenFile.readAsStringSync(), equals('pre_gen: $name'));
+
+        final postGenFile = File(path.join(tempDir.path, '.post_gen.txt'));
+        expect(postGenFile.existsSync(), isTrue);
+        expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
+      });
+
+      test('constructs an instance with hooks w/relative imports', () async {
+        const name = 'Dash';
+        final generator = await MasonGenerator.fromBundle(
+          relativeImportsBundle,
+        );
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        await generator.hooks.preGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+
+        await generator.hooks.postGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final file = File(path.join(tempDir.path, '.gitkeep'));
+        final generatedFile = files.first;
+        expect(files.length, equals(1));
+        expect(generatedFile.status, equals(GeneratedFileStatus.created));
+        expect(generatedFile.path, equals(file.path));
+        expect(file.existsSync(), isTrue);
 
         final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
         expect(preGenFile.existsSync(), isTrue);

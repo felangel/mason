@@ -13,20 +13,6 @@ Error: $error''',
         );
 }
 
-/// {@template hook_invalid_characters_exception}
-/// Thrown when a hook contains non-ascii characters.
-/// {@endtemplate}
-class HookInvalidCharactersException extends MasonException {
-  /// {@macro hook_invalid_characters_exception}
-  HookInvalidCharactersException(String path)
-      : super(
-          '''
-Unable to execute hook: $path.
-Error: Hook contains invalid characters.
-Ensure the hook does not contain non-ascii characters.''',
-        );
-}
-
 /// {@template hook_missing_run_exception}
 /// Thrown when a hook does not contain a 'run' method.
 /// {@endtemplate}
@@ -100,90 +86,61 @@ extension GeneratorHookToFileName on GeneratorHook {
 /// {@endtemplate}
 class GeneratorHooks {
   /// {@macro generator_hooks}
-  const GeneratorHooks({this.preGenHook, this.postGenHook, this.pubspec});
-
-  /// Creates [GeneratorHooks] from a provided [MasonBundle].
-  factory GeneratorHooks.fromBundle(MasonBundle bundle) {
-    HookFile? _decodeHookFile(MasonBundledFile? file) {
-      if (file == null) return null;
-      final path = file.path;
-      final raw = file.data.replaceAll(_whiteSpace, '');
-      final decoded = base64.decode(raw);
-      try {
-        return HookFile.fromBytes(path, decoded);
-      } catch (_) {
-        return null;
-      }
-    }
-
-    List<int>? _decodeHookPubspec(MasonBundledFile? file) {
-      if (file == null) return null;
-      final raw = file.data.replaceAll(_whiteSpace, '');
-      return base64.decode(raw);
-    }
-
-    final preGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.preGen.toFileName();
-      },
-    );
-    final postGen = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == GeneratorHook.postGen.toFileName();
-      },
-    );
-    final pubspec = bundle.hooks.firstWhereOrNull(
-      (element) {
-        return p.basename(element.path) == 'pubspec.yaml';
-      },
-    );
-
-    return GeneratorHooks(
-      preGenHook: _decodeHookFile(preGen),
-      postGenHook: _decodeHookFile(postGen),
-      pubspec: _decodeHookPubspec(pubspec),
-    );
-  }
+  const GeneratorHooks({
+    this.preGenHook,
+    this.postGenHook,
+    this.pubspec,
+    this.checksum = '',
+  });
 
   /// Creates [GeneratorHooks] from a provided [BrickYaml].
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
-    Future<HookFile?> getHookFile(GeneratorHook hook) async {
-      try {
-        final brickRoot = File(brick.path!).parent.path;
-        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file =
-            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
-                  (element) => p.basename(element.path) == hook.toFileName(),
-                );
+    HookFile? preGenHook;
+    HookFile? postGenHook;
+    List<int>? pubspec;
 
-        if (file == null) return null;
-        final content = await file.readAsBytes();
-        return HookFile.fromBytes(file.path, content);
-      } catch (_) {
-        return null;
+    final accumulator = AccumulatorSink<Digest>();
+    final sink = sha1.startChunkedConversion(accumulator);
+
+    try {
+      final brickRoot = File(brick.path!).parent.path;
+      final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
+      final pubspecFilePath = p.join(hooksDirectory.path, 'pubspec.yaml');
+      final preGenFilePath = p.join(
+        hooksDirectory.path,
+        GeneratorHook.preGen.toFileName(),
+      );
+      final postGenFilePath = p.join(
+        hooksDirectory.path,
+        GeneratorHook.postGen.toFileName(),
+      );
+      final dartFiles = hooksDirectory.existsSync()
+          ? hooksDirectory
+              .listSync(recursive: true)
+              .where(_isHookFile)
+              .cast<File>()
+          : const <File>[];
+
+      for (final file in dartFiles) {
+        final bytes = await file.readAsBytes();
+        sink.add(bytes);
+        if (file.path == pubspecFilePath) {
+          pubspec ??= bytes;
+        } else if (file.path == preGenFilePath) {
+          preGenHook ??= HookFile.fromBytes(file.path, bytes);
+        } else if (file.path == postGenFilePath) {
+          postGenHook ??= HookFile.fromBytes(file.path, bytes);
+        }
       }
-    }
-
-    Future<List<int>?> getHookPubspec() async {
-      try {
-        final brickRoot = File(brick.path!).parent.path;
-        final hooksDirectory = Directory(p.join(brickRoot, BrickYaml.hooks));
-        final file =
-            hooksDirectory.listSync().whereType<File>().firstWhereOrNull(
-                  (element) => p.basename(element.path) == 'pubspec.yaml',
-                );
-
-        if (file == null) return null;
-        return await file.readAsBytes();
-      } catch (_) {
-        return null;
-      }
+    } finally {
+      sink.close();
     }
 
     return GeneratorHooks(
-      preGenHook: await getHookFile(GeneratorHook.preGen),
-      postGenHook: await getHookFile(GeneratorHook.postGen),
-      pubspec: await getHookPubspec(),
+      preGenHook: preGenHook,
+      postGenHook: postGenHook,
+      pubspec: pubspec,
+      checksum: accumulator.events.firstOrNull?.toString() ?? '',
     );
   }
 
@@ -195,6 +152,9 @@ class GeneratorHooks {
 
   /// Contents of the hooks `pubspec.yaml` if exists.
   final List<int>? pubspec;
+
+  /// The hash of the hooks directory and its contents.
+  final String checksum;
 
   /// Runs the pre-generation (pre_gen) hook with the specified [vars].
   /// An optional [workingDirectory] can also be specified.
@@ -242,11 +202,11 @@ class GeneratorHooks {
   Future<void> compile({Logger? logger}) async {
     await _installDependencies();
 
-    if (preGenHook != null && !preGenHook!.module.existsSync()) {
+    if (preGenHook != null && !preGenHook!.module(checksum).existsSync()) {
       await _compile(hook: preGenHook!, logger: logger);
     }
 
-    if (postGenHook != null && !postGenHook!.module.existsSync()) {
+    if (postGenHook != null && !postGenHook!.module(checksum).existsSync()) {
       await _compile(hook: postGenHook!, logger: logger);
     }
   }
@@ -266,58 +226,40 @@ class GeneratorHooks {
     }
   }
 
-  Future<void> _installDependencies() async {
+  Future<bool> _installDependencies() async {
     final hook = preGenHook ?? postGenHook;
-    if (hook == null) return;
+    var installedDependencies = false;
+    if (hook == null) return installedDependencies;
 
-    final hookCacheDir = hook.cacheDirectory;
+    final hookDirectory = hook.directory;
     final pubspec = this.pubspec;
 
     if (pubspec != null) {
       final packageConfigFile = File(
-        p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
+        p.join(hookDirectory.path, '.dart_tool', 'package_config.json'),
       );
 
       if (!packageConfigFile.existsSync()) {
-        await hookCacheDir.create(recursive: true);
-        await File(
-          p.join(hookCacheDir.path, 'pubspec.yaml'),
-        ).writeAsBytes(pubspec);
-        await _dartPubGet(workingDirectory: hookCacheDir.path);
+        await _dartPubGet(workingDirectory: hookDirectory.path);
+        installedDependencies = true;
       }
     }
+    return installedDependencies;
   }
 
   Future<void> _compile({required HookFile hook, Logger? logger}) async {
-    final hookCacheDir = hook.cacheDirectory;
-    final hookBuildDir = hook.buildDirectory;
-    final hookHash = hook.fileHash;
-
-    try {
-      await hookBuildDir.delete(recursive: true);
-    } catch (_) {}
-
-    Uri? uri;
-    try {
-      uri = _getHookUri(hook.content);
-      // ignore: avoid_catching_errors
-    } on ArgumentError {
-      throw HookInvalidCharactersException(hook.path);
-    }
+    final uri = await _getHookUri(hook, checksum);
 
     if (uri == null) throw HookMissingRunException(hook.path);
-
-    final hookFile = File(p.join(hookBuildDir.path, '.$hookHash.dart'))
-      ..createSync(recursive: true)
-      ..writeAsBytesSync(uri.data!.contentAsBytes());
 
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', hookFile.path],
-      workingDirectory: hookCacheDir.path,
+      ['compile', 'kernel', uri.toFilePath()],
       runInShell: true,
     );
+
+    File(uri.toFilePath()).delete().ignore();
 
     if (result.exitCode != ExitCode.success.code) {
       final error = result.stderr.toString();
@@ -357,15 +299,13 @@ class GeneratorHooks {
       );
     }
 
-    await _installDependencies();
-    final hookCacheDir = hook.cacheDirectory;
-    final packageConfigUri = File(
-      p.join(hookCacheDir.path, '.dart_tool', 'package_config.json'),
-    ).uri;
-    final module = hook.module;
-
+    var installedDependencies = false;
+    var compiledHook = false;
+    final module = hook.module(checksum);
     if (!module.existsSync()) {
+      installedDependencies = await _installDependencies();
       await _compile(hook: hook, logger: logger);
+      compiledHook = true;
     }
 
     Future<Isolate> spawnIsolate(Uri uri) {
@@ -374,14 +314,53 @@ class GeneratorHooks {
         [json.encode(vars)],
         messagePort.sendPort,
         paused: true,
-        packageConfig: packageConfigUri,
       );
     }
 
-    final cwd = Directory.current;
+    final uri = module.uri.hasAbsolutePath
+        ? module.uri
+        : Uri.file(canonicalize(module.uri.path));
+    final cwd = Directory.current.path;
     if (workingDirectory != null) Directory.current = workingDirectory;
 
-    final isolate = await spawnIsolate(module.uri);
+    Isolate? isolate;
+    try {
+      isolate = await spawnIsolate(uri);
+    } on IsolateSpawnException catch (error) {
+      Never throwHookExecutionException(IsolateSpawnException error) {
+        Directory.current = cwd;
+        final msg = error.message;
+        final content =
+            msg.contains('Error: ') ? msg.split('Error: ').last : msg;
+        throw HookExecutionException(hook.path, content.trim());
+      }
+
+      final shouldRetry = !installedDependencies || !compiledHook;
+
+      // If we just installed dependencies and compiled the hook,
+      // then there is no reason to retry.
+      if (!shouldRetry) throwHookExecutionException(error);
+
+      Directory.current = cwd;
+
+      // Failure to spawn the isolate could be due to changes in the pub cache.
+      // We attempt to reinstall hook dependencies.
+      await _dartPubGet(workingDirectory: hook.directory.path);
+
+      // Failure to spawn the isolate could be due to changes in the Dart SDK.
+      // We attempt to recompile the hook.
+      await _compile(hook: hook, logger: logger);
+
+      if (workingDirectory != null) Directory.current = workingDirectory;
+
+      // Retry spawning the isolate if the hook
+      // has been successfully recompiled.
+      try {
+        isolate = await spawnIsolate(uri);
+      } on IsolateSpawnException catch (error) {
+        throwHookExecutionException(error);
+      }
+    }
 
     isolate
       ..addErrorListener(errorPort.sendPort)
@@ -397,6 +376,10 @@ class GeneratorHooks {
     for (final subscription in subscriptions) {
       unawaited(subscription.cancel());
     }
+
+    messagePort.close();
+    errorPort.close();
+    exitPort.close();
 
     if (hookError != null) {
       final dynamic error = hookError;
@@ -459,25 +442,33 @@ final _runRegExp = RegExp(
   multiLine: true,
 );
 
-Uri? _getHookUri(List<int> content) {
-  final decoded = utf8.decode(content);
-  if (_runRegExp.hasMatch(decoded)) {
-    final code = _generatedHookCode(decoded);
-    return Uri.dataFromString(code, mimeType: 'application/dart');
-  }
-  return null;
+Future<Uri?> _getHookUri(HookFile hook, String checksum) async {
+  final decoded = utf8.decode(hook.content);
+  if (!_runRegExp.hasMatch(decoded)) return null;
+
+  try {
+    await hook.buildDirectory.delete(recursive: true);
+  } catch (_) {}
+
+  final intermediate = hook.intermediate(checksum)
+    ..createSync(recursive: true)
+    ..writeAsStringSync(
+      _generatedHookCode('../../../${p.basename(hook.path)}'),
+    );
+
+  return Uri.file(intermediate.path);
 }
 
-String _generatedHookCode(String content) => '''
+String _generatedHookCode(String hookPath) => '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'dart:collection';
 import 'dart:convert';
 import 'dart:isolate';
-
-$content
+import 'package:mason/mason.dart';
+import '$hookPath' as hook;
 
 void main(List<String> args, SendPort port) {
-  run(_HookContext._(port, vars: json.decode(args.first)));
+  hook.run(_HookContext._(port, vars: json.decode(args.first)));
 }
 
 class _HookContext implements HookContext {
@@ -537,3 +528,10 @@ class _Vars with MapMixin<String, dynamic> {
   void _updateVars() => _port.send(json.encode(_vars));
 }
 ''';
+
+bool _isHookFile(FileSystemEntity entity) {
+  final isFile = entity is File;
+  if (!isFile) return false;
+  final ext = p.extension(entity.path);
+  return ext == '.dart' || ext == '.yaml';
+}

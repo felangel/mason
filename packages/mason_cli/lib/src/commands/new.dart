@@ -212,6 +212,7 @@ dependencies:
 .dart_tool
 .packages
 pubspec.lock
+build
 ''';
 
   static const _hooksPreGenContent = '''
