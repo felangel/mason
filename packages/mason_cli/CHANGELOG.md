@@ -1,3 +1,8 @@
+# 0.1.0-dev.40
+
+- feat: add `hooks/build` to `.gitignore` when generating new brick
+- deps: upgrade to `mason: ^0.1.0-dev.39`
+
 # 0.1.0-dev.39
 
 - perf: compile bricks
