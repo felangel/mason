@@ -1,3 +1,13 @@
+# 0.1.0-dev.39
+
+- **BREAKING** refactor!: remove `GeneratorHooks.fromBundle` in favor of `GeneratorHooks.fromBrickYaml`.
+- feat: support relative imports in hooks
+- feat: support non-ascii characters in hooks
+- feat: support bricks with no `__brick__` directory
+- feat: hook artifacts are stored in the `build/hooks` directory within the corresponding hooks directory
+- feat: bundled artifacts from `MasonGenerator.fromBundle` are stored in the `bundled` directory within the mason cache.
+- fix: avoid bundling extraneous hook files (e.g. coverage files)
+
 # 0.1.0-dev.38
 
 - perf: compile hooks
