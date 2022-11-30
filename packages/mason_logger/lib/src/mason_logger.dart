@@ -32,6 +32,7 @@ class Logger {
   final _enterKey = [13];
   final _returnKey = [10];
   final _spaceKey = [32];
+  final _deleteKey = [127];
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
@@ -119,6 +120,66 @@ class Logger {
       '''$prefix$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
+  }
+
+  /// Prompts user for a free-form list of responses.
+  List<String> promptList(
+    String? message, {
+    String separator = ',',
+  }) {
+    _stdin
+      ..echoMode = false
+      ..lineMode = false;
+
+    final delimeter = '$separator ';
+    var rawString = '';
+
+    _stdout.write('$message ');
+
+    while (true) {
+      final byte = _stdin.readByteSync();
+      final character = String.fromCharCode(byte);
+
+      if ([byte].isOneOf([_enterKey, _returnKey])) break;
+
+      if ([byte].isOneOf([_deleteKey])) {
+        if (rawString.isNotEmpty) {
+          if (rawString.endsWith(delimeter)) {
+            _stdout.write('\b\b\x1b[K');
+            rawString = rawString.substring(0, rawString.length - 2);
+          } else {
+            _stdout.write('\b\x1b[K');
+            rawString = rawString.substring(0, rawString.length - 1);
+          }
+        }
+        continue;
+      }
+
+      if (character.trim().isEmpty) continue;
+
+      if (character == separator) {
+        _stdout.write(delimeter);
+        rawString += delimeter;
+      } else {
+        _stdout.write(styleUnderlined.wrap(character));
+        rawString += character;
+      }
+    }
+
+    if (rawString.endsWith(delimeter)) {
+      rawString = rawString.substring(0, rawString.length - 2);
+    }
+
+    final results = rawString.split(delimeter);
+    const _clearLine = '\u001b[2K\r';
+    _stdout.write(
+      '$_clearLine$message ${styleDim.wrap(lightCyan.wrap('$results'))}\n',
+    );
+
+    _stdin
+      ..echoMode = true
+      ..lineMode = true;
+    return results;
   }
 
   /// Prompts user with a yes/no question.

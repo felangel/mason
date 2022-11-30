@@ -42,6 +42,14 @@ Future<void> main() async {
   );
   logger.info('You chose the following shapes: $shapes!');
 
+  final favoriteProgrammingLanguages = logger.promptList(
+    'What are your favorite programming languages?',
+  );
+
+  logger.info(
+    'You chose the following languages: $favoriteProgrammingLanguages',
+  );
+
   final favoriteAnimal = logger.prompt(
     'What is your favorite animal?',
     defaultValue: '🐈',
