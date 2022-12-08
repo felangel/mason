@@ -48,9 +48,7 @@
           "properties": {
             "url": {
               "type": "string",
-              "description": "The git url for the associated brick (https://github.com/felangel/mason).",
-              "pattern": "^(https?|ssh)://",
-              "format": "uri"
+              "description": "The git url for the associated brick (https://github.com/felangel/mason)."
             },
             "path": {
               "type": "string",
