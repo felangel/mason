@@ -1,3 +1,8 @@
+# 0.1.7
+
+- fix: `mason.yaml` git url schema validation
+  - support other formats such as `ssh`
+
 # 0.1.6
 
 - feat: YAML schema validation for `mason.yaml`
