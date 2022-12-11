@@ -1,3 +1,7 @@
+# 0.1.0-dev.41
+
+- feat: add completion
+
 # 0.1.0-dev.40
 
 - feat: add `hooks/build` to `.gitignore` when generating new brick
