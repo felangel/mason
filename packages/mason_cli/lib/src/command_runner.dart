@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:cli_completion/cli_completion.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
@@ -17,7 +18,7 @@ const executableName = 'mason';
 /// {@template mason_command_runner}
 /// A [CommandRunner] for the Mason CLI.
 /// {@endtemplate}
-class MasonCommandRunner extends CommandRunner<int> {
+class MasonCommandRunner extends CompletionCommandRunner<int> {
   /// {@macro mason_command_runner}
   MasonCommandRunner({
     Logger? logger,
@@ -82,6 +83,11 @@ class MasonCommandRunner extends CommandRunner<int> {
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
+    if (topLevelResults.command?.name == 'completion') {
+      await super.runCommand(topLevelResults);
+      return ExitCode.success.code;
+    }
+
     int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
       _logger.info(packageVersion);
