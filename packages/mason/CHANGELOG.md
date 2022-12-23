@@ -1,3 +1,7 @@
+# 0.1.0-dev.40
+
+- feat: export `StringCaseExtensions`
+
 # 0.1.0-dev.39
 
 - **BREAKING** refactor!: remove `GeneratorHooks.fromBundle` in favor of `GeneratorHooks.fromBrickYaml`.
