@@ -1,3 +1,9 @@
+# 0.1.0-dev.42
+
+- deps: upgrade to `mason: ^0.1.0-dev.40`
+- feat: mason search separator length uses `terminalColumns`
+- feat: improve error when running `mason add` in an uninitialized workspace
+
 # 0.1.0-dev.41
 
 - feat: add completion
