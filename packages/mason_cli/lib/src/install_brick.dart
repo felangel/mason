@@ -9,7 +9,11 @@ mixin InstallBrickMixin on MasonCommand {
   /// Installs a specific brick and returns the [CachedBrick] reference.
   Future<CachedBrick> addBrick(Brick brick, {bool global = false}) async {
     final bricksJson = global ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) usageException('bricks.json not found');
+    if (bricksJson == null) {
+      usageException(
+        'Mason has not been initialized.\nDid you forget to run mason init?',
+      );
+    }
 
     final masonLockJsonFile =
         global ? globalMasonLockJsonFile : localMasonLockJsonFile;
