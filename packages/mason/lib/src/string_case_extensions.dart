@@ -1,7 +1,6 @@
 import 'package:recase/recase.dart' show ReCase;
 
-/// Built in String casing extensions on [String].
-/// Used within mason's built-in lambdas.
+/// Built-in [String] casing extensions.
 extension StringCaseExtensions on String {
   /// camelCase
   String get camelCase => ReCase(this).camelCase;
