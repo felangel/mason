@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide Brick;
@@ -16,6 +18,8 @@ class MockProgress extends Mock implements Progress {}
 
 class MockArgResults extends Mock implements ArgResults {}
 
+class MockStdout extends Mock implements Stdout {}
+
 void main() {
   group('SearchCommand', () {
     late Logger logger;
@@ -23,6 +27,7 @@ void main() {
     late SearchCommand searchCommand;
     late ArgResults argResults;
     late BrickSearchResult brick;
+    late Stdout stdout;
 
     setUp(() {
       brick = BrickSearchResult(
@@ -36,6 +41,7 @@ void main() {
       logger = MockLogger();
       masonApi = MockMasonApi();
       argResults = MockArgResults();
+      stdout = MockStdout();
       searchCommand = SearchCommand(logger: logger, masonApi: masonApi)
         ..testArgResults = argResults;
 
@@ -153,6 +159,66 @@ void main() {
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
       verify(() => logger.err('$exception')).called(1);
+    });
+
+    test('separator length is 80 when terminal is not available', () async {
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((_) {});
+      when(() => logger.progress(any())).thenReturn(progress);
+      when(() => argResults.rest).thenReturn(['query']);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => [brick]);
+
+      final result = await searchCommand.run();
+
+      expect(result, ExitCode.success.code);
+
+      verify(() => logger.info(darkGray.wrap('-' * 80))).called(1);
+    });
+
+    test('separator length is 80 when terminalColumns > 80', () async {
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((_) {});
+      when(() => logger.progress(any())).thenReturn(progress);
+      when(() => argResults.rest).thenReturn(['query']);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => [brick]);
+      when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(100);
+      when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+      final result = await IOOverrides.runZoned(
+        () => searchCommand.run(),
+        stdout: () => stdout,
+      );
+
+      expect(result, ExitCode.success.code);
+
+      verify(() => logger.info(darkGray.wrap('-' * 80))).called(1);
+    });
+
+    test(
+        'separator length is terminalColumns '
+        'when terminalColumns < 80', () async {
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((_) {});
+      when(() => logger.progress(any())).thenReturn(progress);
+      when(() => argResults.rest).thenReturn(['query']);
+      when(
+        () => masonApi.search(query: 'query'),
+      ).thenAnswer((_) async => [brick]);
+      when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(42);
+      when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+      final result = await IOOverrides.runZoned(
+        () => searchCommand.run(),
+        stdout: () => stdout,
+      );
+
+      expect(result, ExitCode.success.code);
+
+      verify(() => logger.info(darkGray.wrap('-' * 42))).called(1);
     });
   });
 }
