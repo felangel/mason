@@ -52,7 +52,11 @@ void main() {
       Directory.current = Directory.systemTemp.createTempSync();
       final result = await commandRunner.run(['add', 'example', '--path', '.']);
       expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('bricks.json not found')).called(1);
+      verify(
+        () => logger.err(
+          'Mason has not been initialized.\nDid you forget to run mason init?',
+        ),
+      ).called(1);
     });
 
     test('exits with code 64 when exception occurs', () async {
