@@ -93,4 +93,4 @@ jobs:
           dart pub global activate pana
 
       - name: Verify Pub Score
-        run: ../../tool/verify_pub_score.sh 100
+        run: ../../tool/verify_pub_score.sh
