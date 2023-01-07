@@ -143,28 +143,32 @@ void main() {
         expect(production.readAsStringSync(), equals('PRODUCTION'));
       });
 
-      test('constructs an instance (loops stress test)', () async {
-        const fileCount = 1000;
-        final brick = Brick.path(
-          path.join('test', 'bricks', 'loop'),
-        );
-        final generator = await MasonGenerator.fromBrick(brick);
-        final tempDir = Directory.systemTemp.createTempSync();
-        final files = await generator.generate(
-          DirectoryGeneratorTarget(tempDir),
-          vars: <String, dynamic>{
-            'values': List.generate(fileCount, (index) => '$index'),
-          },
-        );
+      test(
+        'constructs an instance (loops stress test)',
+        () async {
+          const fileCount = 1000;
+          final brick = Brick.path(
+            path.join('test', 'bricks', 'loop'),
+          );
+          final generator = await MasonGenerator.fromBrick(brick);
+          final tempDir = Directory.systemTemp.createTempSync();
+          final files = await generator.generate(
+            DirectoryGeneratorTarget(tempDir),
+            vars: <String, dynamic>{
+              'values': List.generate(fileCount, (index) => '$index'),
+            },
+          );
 
-        expect(files.length, equals(fileCount));
-        expect(
-          files.every(
-            (element) => element.status == GeneratedFileStatus.created,
-          ),
-          isTrue,
-        );
-      });
+          expect(files.length, equals(fileCount));
+          expect(
+            files.every(
+              (element) => element.status == GeneratedFileStatus.created,
+            ),
+            isTrue,
+          );
+        },
+        timeout: const Timeout(Duration(minutes: 1)),
+      );
 
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
