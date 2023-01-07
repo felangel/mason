@@ -23,7 +23,12 @@ jobs:
       run:
         working-directory: packages/mason
 
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-2019, ubuntu-latest]
 
     steps:
       - uses: actions/checkout@v3.3.0
