@@ -332,7 +332,7 @@ environment:
           'throws BrickResolveVersionException when '
           'http request returns non-200 (registry)', () async {
         final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
-        final uri = 'http://${server.address.host}:${server.port}';
+        final uri = 'http://localhost:${server.port}';
         final subscription = server.listen((request) {
           request.response
             ..statusCode = 500
@@ -372,7 +372,7 @@ environment:
           'http request returns malformed body w/out latest version (registry)',
           () async {
         final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
-        final uri = 'http://${server.address.host}:${server.port}';
+        final uri = 'http://localhost:${server.port}';
         final subscription = server.listen((request) {
           request.response
             ..statusCode = 200
@@ -412,7 +412,7 @@ environment:
           'http request returns malformed body w/out versions (registry)',
           () async {
         final server = await HttpServer.bind(InternetAddress.anyIPv4, 8080);
-        final uri = 'http://${server.address.host}:${server.port}';
+        final uri = 'http://localhost:${server.port}';
         final subscription = server.listen((request) {
           request.response
             ..statusCode = 200
