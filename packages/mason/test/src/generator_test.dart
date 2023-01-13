@@ -21,12 +21,12 @@ void main() {
           ..writeAsStringSync(
             'name: malformed\ndescription: example\nversion: 0.1.0+1',
           );
-        final brokenFile = File(
+        final lockedFile = File(
           path.join(tempDir.path, 'malformed', '__brick__', 'locked.txt'),
         )
           ..createSync(recursive: true)
           ..writeAsStringSync('secret');
-        await Process.run('chmod', ['000', brokenFile.path]);
+        lockedFile.openSync(mode: FileMode.write).lockSync();
 
         final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
@@ -66,7 +66,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -281,7 +281,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           contains('Hi $name!\nYour favorite color is'),
         );
       });
@@ -310,7 +310,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -337,7 +337,7 @@ void main() {
         expect(generatedFile2.path, equals(file1.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -377,7 +377,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -403,7 +403,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -441,7 +441,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -465,7 +465,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -547,7 +547,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -574,7 +574,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -609,7 +609,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -631,7 +631,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -664,7 +664,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -1046,4 +1046,10 @@ void main() {
       });
     });
   });
+}
+
+extension on File {
+  String readAsNormalizedStringSync() {
+    return readAsStringSync().replaceAll('\r', '');
+  }
 }
