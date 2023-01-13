@@ -9,3 +9,6 @@ import 'package:path/path.dart' as p;
 String canonicalize(String path) {
   return p.normalize(p.absolute(path)).replaceAll(r'\', '/');
 }
+
+/// Normalizes the [path].
+String normalize(String path) => p.normalize(path).replaceAll(r'\', '/');
