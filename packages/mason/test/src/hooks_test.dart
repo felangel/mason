@@ -143,6 +143,17 @@ void main() {
           canonicalize(
             path.join(
               hookDirectoryPath,
+              'build',
+              'hooks',
+              'pre_gen',
+              'pre_gen_c648b1ccbe45ae1e0894b8a25df9c108bc2e919a.dart',
+            ),
+          ),
+        ),
+        File(
+          canonicalize(
+            path.join(
+              hookDirectoryPath,
               '.dart_tool',
               'package_config.json',
             ),
