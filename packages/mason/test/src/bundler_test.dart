@@ -188,7 +188,7 @@ void main() {
         final yaml = File(path.join(tempDir.path, 'brick.yaml'));
         expect(yaml.existsSync(), isTrue);
         expect(
-          yaml.readAsStringSync(),
+          yaml.readAsNormalizedStringSync(),
           equals(
             'name: hello\n'
             'description: An example brick.\n'
@@ -212,7 +212,7 @@ void main() {
         final readme = File(path.join(tempDir.path, 'README.md'));
         expect(readme.existsSync(), isTrue);
         expect(
-          readme.readAsStringSync(),
+          readme.readAsNormalizedStringSync(),
           equals(
             '# hello\n'
             '\n'
@@ -239,7 +239,7 @@ void main() {
         final changelog = File(path.join(tempDir.path, 'CHANGELOG.md'));
         expect(changelog.existsSync(), isTrue);
         expect(
-          changelog.readAsStringSync(),
+          changelog.readAsNormalizedStringSync(),
           equals(
             '# 0.1.0+1\n'
             '\n'
@@ -250,7 +250,7 @@ void main() {
         final license = File(path.join(tempDir.path, 'LICENSE'));
         expect(license.existsSync(), isTrue);
         expect(
-          license.readAsStringSync(),
+          license.readAsNormalizedStringSync(),
           equals('TODO: Add your license here.\n'),
         );
       });
@@ -338,7 +338,7 @@ void main() {
         );
         expect(preGenHookFile.existsSync(), isTrue);
         expect(
-          preGenHookFile.readAsStringSync(),
+          preGenHookFile.readAsNormalizedStringSync(),
           equals(
             '''
 import 'package:mason/mason.dart';
@@ -353,7 +353,7 @@ void run(HookContext context) => preGen(context);
         );
         expect(postGenHookFile.existsSync(), isTrue);
         expect(
-          postGenHookFile.readAsStringSync(),
+          postGenHookFile.readAsNormalizedStringSync(),
           equals(
             '''
 import 'package:mason/mason.dart';
@@ -368,7 +368,7 @@ void run(HookContext context) => postGen(context);
         );
         expect(mainFile.existsSync(), isTrue);
         expect(
-          mainFile.readAsStringSync(),
+          mainFile.readAsNormalizedStringSync(),
           equals(
             r'''
 import 'dart:io';
@@ -395,4 +395,10 @@ void postGen(HookContext context) {
       });
     });
   });
+}
+
+extension on File {
+  String readAsNormalizedStringSync() {
+    return readAsStringSync().replaceAll('\r', '');
+  }
 }
