@@ -204,6 +204,8 @@ void main() {
           }
         },
         createFile: (p) {
+          // ignore: avoid_print
+          print(p);
           return files.firstWhere(
             (f) => path.equals(p, f.path),
             orElse: () => tempFile,
