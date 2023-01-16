@@ -27,6 +27,9 @@ void main() {
           ..createSync(recursive: true)
           ..writeAsStringSync('secret');
         lockedFile.openSync(mode: FileMode.write).lockSync();
+        try {
+          await Process.run('chmod', ['000', lockedFile.path]);
+        } catch (_) {}
 
         final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
