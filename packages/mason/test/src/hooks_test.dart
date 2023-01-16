@@ -154,6 +154,17 @@ void main() {
           canonicalize(
             path.join(
               hookDirectoryPath,
+              'build',
+              'hooks',
+              'pre_gen',
+              'pre_gen_e19e73f11217ea54ff2948c6d2d931fac9a51aa5.dart',
+            ),
+          ),
+        ),
+        File(
+          canonicalize(
+            path.join(
+              hookDirectoryPath,
               '.dart_tool',
               'package_config.json',
             ),
@@ -204,8 +215,6 @@ void main() {
           }
         },
         createFile: (p) {
-          // ignore: avoid_print
-          print(p);
           return files.firstWhere(
             (f) => path.equals(p, f.path),
             orElse: () => tempFile,
