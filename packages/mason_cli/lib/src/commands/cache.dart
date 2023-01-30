@@ -22,7 +22,7 @@ class CacheCommand extends MasonCommand {
 /// {@endtemplate}
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  ClearCacheCommand({Logger? logger}) : super(logger: logger);
+  ClearCacheCommand({super.logger});
 
   @override
   final String description = 'Clears the mason cache.';

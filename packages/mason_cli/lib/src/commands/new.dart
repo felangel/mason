@@ -9,7 +9,7 @@ import 'package:path/path.dart' as p;
 /// {@endtemplate}
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand({Logger? logger}) : super(logger: logger) {
+  NewCommand({super.logger}) {
     argParser
       ..addFlag(
         'hooks',

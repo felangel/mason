@@ -7,7 +7,7 @@ import 'package:mason_cli/src/install_brick.dart';
 /// {@endtemplate}
 class InitCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro init_command}
-  InitCommand({Logger? logger}) : super(logger: logger);
+  InitCommand({super.logger});
 
   @override
   final String description = 'Initialize mason in the current directory.';

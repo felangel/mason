@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 /// {@endtemplate}
 class BrickResolveVersionException extends MasonException {
   /// {@macro brick_resolve_version_exception}
-  const BrickResolveVersionException(String message) : super(message);
+  const BrickResolveVersionException(super.message);
 }
 
 /// {@template mason_yaml_name_mismatch}
@@ -22,7 +22,7 @@ class BrickResolveVersionException extends MasonException {
 /// {@endtemplate}
 class MasonYamlNameMismatch extends MasonException {
   /// {@macro mason_yaml_name_mismatch}
-  MasonYamlNameMismatch(String message) : super(message);
+  MasonYamlNameMismatch(super.message);
 }
 
 /// {@template brick_unsatisfied_version_constraint}
@@ -30,7 +30,7 @@ class MasonYamlNameMismatch extends MasonException {
 /// {@endtemplate}
 class BrickUnsatisfiedVersionConstraint extends MasonException {
   /// {@macro brick_unsatisfied_version_constraint}
-  BrickUnsatisfiedVersionConstraint(String message) : super(message);
+  BrickUnsatisfiedVersionConstraint(super.message);
 }
 
 /// {@template malformed_bricks_json}
@@ -38,7 +38,7 @@ class BrickUnsatisfiedVersionConstraint extends MasonException {
 /// {@endtemplate}
 class MalformedBricksJson extends MasonException {
   /// {@macro malformed_bricks_json}
-  const MalformedBricksJson(String message) : super(message);
+  const MalformedBricksJson(super.message);
 }
 
 /// {@template brick_incompatible_mason_version}

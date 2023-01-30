@@ -11,9 +11,8 @@ class UpdateCommand extends MasonCommand {
   /// {@macro update_command}
   UpdateCommand({
     required PubUpdater pubUpdater,
-    Logger? logger,
-  })  : _pubUpdater = pubUpdater,
-        super(logger: logger);
+    super.logger,
+  })  : _pubUpdater = pubUpdater;
 
   final PubUpdater _pubUpdater;
 

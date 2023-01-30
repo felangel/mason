@@ -7,9 +7,8 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class LogoutCommand extends MasonCommand {
   /// {@macro logout_command}
-  LogoutCommand({Logger? logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi(),
-        super(logger: logger);
+  LogoutCommand({super.logger, MasonApi? masonApi})
+      : _masonApi = masonApi ?? MasonApi();
 
   final MasonApi _masonApi;
 
