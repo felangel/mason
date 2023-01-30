@@ -240,6 +240,21 @@ void main() {
         );
       });
 
+      test('writes line to stderr with empty tag', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().warn(message, tag: '');
+            verify(
+              () {
+                stderr.writeln(yellow.wrap(styleBold.wrap(message)));
+              },
+            ).called(1);
+          },
+          stderr: () => stderr,
+        );
+      });
+
       test('does not write to stderr when Level > warning', () {
         IOOverrides.runZoned(
           () {

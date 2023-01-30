@@ -91,7 +91,8 @@ class Logger {
   /// Writes warning message to stderr.
   void warn(String? message, {String tag = 'WARN'}) {
     if (level.index > Level.warning.index) return;
-    _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
+    final output = tag.isEmpty ? '$message' : '[$tag] $message';
+    _stderr.writeln(yellow.wrap(styleBold.wrap(output)));
   }
 
   /// Writes success message to stdout.
