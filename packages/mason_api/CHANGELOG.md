@@ -1,3 +1,7 @@
+# 0.1.0-dev.9
+
+- deps: upgrade to `Dart >=2.17` and `very_good_analysis ^3.1.0`
+
 # 0.1.0-dev.8
 
 - fix: `login` sets in-memory credentials
