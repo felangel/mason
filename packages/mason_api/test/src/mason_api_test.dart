@@ -19,8 +19,7 @@ const email = 'test@email.com';
 const password = 'T0pS3cret!';
 
 class TestMasonApiException extends MasonApiException {
-  const TestMasonApiException({required String message, String? details})
-      : super(message: message, details: details);
+  const TestMasonApiException({required super.message, super.details});
 }
 
 void main() {
