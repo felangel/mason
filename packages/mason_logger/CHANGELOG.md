@@ -1,3 +1,8 @@
+# 0.2.4
+
+- fix: `warn` with an empty `tag` should not include `[]`
+- deps: upgrade to `Dart >=2.17` and `very_good_analysis ^3.1.0`
+
 # 0.2.3
 
 - fix: windows progress animation
