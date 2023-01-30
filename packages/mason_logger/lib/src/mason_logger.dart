@@ -38,7 +38,7 @@ class Logger {
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
 
   /// Flushes internal message queue.
-  void flush([Function(String?)? print]) {
+  void flush([void Function(String?)? print]) {
     final writeln = print ?? info;
     for (final message in _queue) {
       writeln(message);
@@ -105,18 +105,20 @@ class Logger {
   /// Set [hidden] to `true` if you want to hide user input for sensitive info.
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
-    final _defaultValue = hasDefault ? '$defaultValue' : '';
-    final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')}' : '';
-    final _message = '$message$suffix ';
-    _stdout.write(_message);
+    final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
+    final suffix =
+        hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
+    final resolvedMessage = '$message$suffix ';
+    _stdout.write(resolvedMessage);
     final input =
         hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
-    final response = input == null || input.isEmpty ? _defaultValue : input;
-    final lines = _message.split('\n').length - 1;
+    final response =
+        input == null || input.isEmpty ? resolvedDefaultValue : input;
+    final lines = resolvedMessage.split('\n').length - 1;
     final prefix =
         lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
+      '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
   }
@@ -124,17 +126,17 @@ class Logger {
   /// Prompts user with a yes/no question.
   bool confirm(String? message, {bool defaultValue = false}) {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
-    final _message = '$message$suffix ';
-    _stdout.write(_message);
+    final resolvedMessage = '$message$suffix ';
+    _stdout.write(resolvedMessage);
     final input = _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
-    final lines = _message.split('\n').length - 1;
+    final lines = resolvedMessage.split('\n').length - 1;
     final prefix =
         lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
+      '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
     return response;
   }
@@ -150,9 +152,9 @@ class Logger {
     T? defaultValue,
     String Function(T choice)? display,
   }) {
-    final _display = display ?? (value) => '$value';
+    final resolvedDisplay = display ?? (value) => '$value';
     final hasDefault =
-        defaultValue != null && _display(defaultValue).isNotEmpty;
+        defaultValue != null && resolvedDisplay(defaultValue).isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
     void writeChoices() {
@@ -169,11 +171,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
+            ..write(' $checkBox  ${lightCyan.wrap(resolvedDisplay(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  ${_display(choice)}');
+            ..write(' $checkBox  ${resolvedDisplay(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -212,7 +214,9 @@ class Logger {
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
-          ..writeln(styleDim.wrap(lightCyan.wrap(_display(choices[index]))));
+          ..writeln(
+            styleDim.wrap(lightCyan.wrap(resolvedDisplay(choices[index]))),
+          );
 
         result = choices[index];
         break;
@@ -237,7 +241,7 @@ class Logger {
     List<T>? defaultValues,
     String Function(T choice)? display,
   }) {
-    final _display = display ?? (value) => '$value';
+    final resolvedDisplay = display ?? (value) => '$value';
     final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
     final selections = hasDefaults
         ? defaultValues.map((value) => choices.indexOf(value)).toSet()
@@ -260,11 +264,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
+            ..write(' $checkBox  ${lightCyan.wrap(resolvedDisplay(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  ${_display(choice)}');
+            ..write(' $checkBox  ${resolvedDisplay(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');

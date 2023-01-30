@@ -583,7 +583,7 @@ Future<Set<FileContents>> _runSubstitutionAsync(
   Map<String, List<int>> partials,
 ) async {
   return compute(
-    (List inputs) {
+    (List<dynamic> inputs) {
       final file = inputs[0] as TemplateFile;
       final vars = inputs[1] as Map<String, dynamic>;
       final partials = inputs[2] as Map<String, List<int>>;

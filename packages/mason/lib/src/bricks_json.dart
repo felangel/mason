@@ -371,7 +371,7 @@ class BricksJson {
       );
     }
 
-    late final Map body;
+    late final Map<dynamic, dynamic> body;
     late final Version latestVersion;
     try {
       body = json.decode(response.body) as Map;
