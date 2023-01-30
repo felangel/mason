@@ -38,12 +38,12 @@ void main() {
 
       for (final forScript in [true, false]) {
         group(forScript ? 'forScript' : 'escaped', () {
-          const _ansiEscapeLiteral = '\x1B';
-          const _ansiEscapeForScript = r'\033';
+          const ansiEscapeLiteral = '\x1B';
+          const ansiEscapeForScript = r'\033';
           const sampleInput = 'sample input';
 
           final escapeLiteral =
-              forScript ? _ansiEscapeForScript : _ansiEscapeLiteral;
+              forScript ? ansiEscapeForScript : ansiEscapeLiteral;
 
           group('.wrap', () {
             _test('color', () {

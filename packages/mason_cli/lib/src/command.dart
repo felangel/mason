@@ -23,7 +23,7 @@ class MasonYamlNotFoundException extends MasonException {
 /// {@endtemplate}
 class MasonYamlParseException extends MasonException {
   /// {@macro mason_yaml_parse_exception}
-  const MasonYamlParseException(String message) : super(message);
+  const MasonYamlParseException(super.message);
 }
 
 /// {@template brick_yaml_parse_exception}
@@ -31,7 +31,7 @@ class MasonYamlParseException extends MasonException {
 /// {@endtemplate}
 class BrickYamlParseException extends MasonException {
   /// {@macro brick_yaml_parse_exception}
-  const BrickYamlParseException(String message) : super(message);
+  const BrickYamlParseException(super.message);
 }
 
 /// {@template mason_command}

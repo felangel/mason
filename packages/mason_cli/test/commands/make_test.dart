@@ -418,11 +418,7 @@ in todos.json''',
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err(
-          any(
-            that: contains(
-              "FileSystemException: Cannot open file, path = 'todos.json",
-            ),
-          ),
+          any(that: contains("Cannot open file, path = 'todos.json")),
         ),
       ).called(1);
     });

@@ -7,7 +7,7 @@ import 'package:mason_cli/src/install_brick.dart';
 /// {@endtemplate}
 class UpgradeCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro upgrade_command}
-  UpgradeCommand({Logger? logger}) : super(logger: logger) {
+  UpgradeCommand({super.logger}) {
     argParser.addFlag(
       'global',
       abbr: 'g',

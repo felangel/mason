@@ -10,9 +10,8 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class SearchCommand extends MasonCommand {
   /// {@macro logout_command}
-  SearchCommand({Logger? logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi(),
-        super(logger: logger);
+  SearchCommand({super.logger, MasonApi? masonApi})
+      : _masonApi = masonApi ?? MasonApi();
 
   final MasonApi _masonApi;
 

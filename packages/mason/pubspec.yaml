@@ -8,7 +8,7 @@ issue_tracker: https://github.com/felangel/mason/issues
 documentation: https://github.com/felangel/mason/tree/master/packages/mason_cli#readme
 
 environment:
-  sdk: ">=2.16.0 <3.0.0"
+  sdk: ">=2.17.0 <3.0.0"
 
 dependencies:
   archive: ^3.1.11
@@ -34,4 +34,4 @@ dev_dependencies:
   json_serializable: ^6.0.0
   mocktail: ^0.3.0
   test: ^1.17.0
-  very_good_analysis: ^2.4.0
+  very_good_analysis: ^3.1.0

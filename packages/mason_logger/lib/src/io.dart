@@ -8,6 +8,7 @@ import 'dart:io';
 /// Exit code constants.
 ///
 /// [Source](https://www.freebsd.org/cgi/man.cgi?query=sysexits).
+// ignore: use_enums
 class ExitCode {
   const ExitCode._(this.code, this._name);
 
@@ -113,6 +114,7 @@ T overrideAnsiOutput<T>(bool enableAnsiOutput, T Function() body) =>
     runZoned(body, zoneValues: <Object, Object>{AnsiCode: enableAnsiOutput});
 
 /// The type of code represented by [AnsiCode].
+// ignore: use_enums
 class AnsiCodeType {
   const AnsiCodeType._(this._name);
 
