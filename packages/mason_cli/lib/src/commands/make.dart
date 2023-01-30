@@ -42,7 +42,7 @@ class MakeCommand extends MasonCommand {
 }
 
 class _MakeCommand extends MasonCommand {
-  _MakeCommand(this._brick, {Logger? logger}) : super(logger: logger) {
+  _MakeCommand(this._brick, {super.logger}) {
     argParser
       ..addOptions()
       ..addSeparator('${'-' * 79}\n');

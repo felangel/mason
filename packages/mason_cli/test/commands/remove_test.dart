@@ -83,7 +83,7 @@ void main() {
         final progress = MockProgress();
         when(() => progress.complete(any())).thenAnswer((invocation) {
           final update = invocation.positionalArguments[0] as String?;
-          if (update?.startsWith('Removed') == true) {
+          if (update?.startsWith('Removed') ?? false) {
             throw const MasonException('oops');
           }
         });

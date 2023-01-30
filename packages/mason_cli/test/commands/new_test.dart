@@ -58,7 +58,7 @@ void main() {
       final progress = MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
-        if (update?.startsWith('Created new brick:') == true) {
+        if (update?.startsWith('Created new brick:') ?? false) {
           throw const MasonException('oops');
         }
       });

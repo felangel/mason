@@ -64,7 +64,7 @@ void main() {
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
 
-        if (update?.startsWith('Added') == true) {
+        if (update?.startsWith('Added') ?? false) {
           throw const MasonException('oops');
         }
       });
