@@ -12,7 +12,7 @@ class UpdateCommand extends MasonCommand {
   UpdateCommand({
     required PubUpdater pubUpdater,
     super.logger,
-  })  : _pubUpdater = pubUpdater;
+  }) : _pubUpdater = pubUpdater;
 
   final PubUpdater _pubUpdater;
 
