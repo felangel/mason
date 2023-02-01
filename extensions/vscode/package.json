@@ -116,7 +116,7 @@
     "@types/node": "16.x",
     "@types/vscode": "^1.66.0",
     "@types/yaml": "^1.9.7",
-    "@typescript-eslint/eslint-plugin": "^5.49.0",
+    "@typescript-eslint/eslint-plugin": "^5.50.0",
     "@typescript-eslint/parser": "^5.50.0",
     "eslint": "^8.33.0",
     "glob": "^8.1.0",
