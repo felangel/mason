@@ -102,7 +102,7 @@ void main() {
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Checking for updates')).called(1);
-      verify(() => logger.err(error));
+      verify(() => logger.err(error)).called(1);
       verify(
         () => pubUpdater.update(
           packageName: any(named: 'packageName'),
