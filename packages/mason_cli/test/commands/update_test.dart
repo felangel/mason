@@ -11,7 +11,7 @@ class MockLogger extends Mock implements Logger {}
 
 class MockPubUpdater extends Mock implements PubUpdater {}
 
-class FakeProcessResult extends Fake implements ProcessResult {}
+class MockProcessResult extends Mock implements ProcessResult {}
 
 class MockProgress extends Mock implements Progress {}
 
@@ -21,19 +21,25 @@ void main() {
   group('mason update', () {
     late Logger logger;
     late PubUpdater pubUpdater;
+    late ProcessResult processResult;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
       pubUpdater = MockPubUpdater();
+      processResult = MockProcessResult();
 
       when(() => logger.progress(any())).thenReturn(MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
       when(
-        () => pubUpdater.update(packageName: packageName),
-      ).thenAnswer((_) => Future.value(FakeProcessResult()));
+        () => pubUpdater.update(
+          packageName: packageName,
+          versionConstraint: latestVersion,
+        ),
+      ).thenAnswer((_) async => processResult);
+      when(() => processResult.exitCode).thenReturn(ExitCode.success.code);
 
       commandRunner = MasonCommandRunner(
         logger: logger,
@@ -50,7 +56,10 @@ void main() {
       verify(() => logger.progress('Checking for updates')).called(1);
       verify(() => logger.err('Exception: oops'));
       verifyNever(
-        () => pubUpdater.update(packageName: any(named: 'packageName')),
+        () => pubUpdater.update(
+          packageName: any(named: 'packageName'),
+          versionConstraint: any(named: 'versionConstraint'),
+        ),
       );
     });
 
@@ -59,14 +68,46 @@ void main() {
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => latestVersion);
       when(
-        () => pubUpdater.update(packageName: any(named: 'packageName')),
+        () => pubUpdater.update(
+          packageName: any(named: 'packageName'),
+          versionConstraint: any(named: 'versionConstraint'),
+        ),
       ).thenThrow(Exception('oops'));
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Checking for updates')).called(1);
       verify(() => logger.err('Exception: oops'));
       verify(
-        () => pubUpdater.update(packageName: any(named: 'packageName')),
+        () => pubUpdater.update(
+          packageName: any(named: 'packageName'),
+          versionConstraint: any(named: 'versionConstraint'),
+        ),
+      ).called(1);
+    });
+
+    test('handles pub update process errors', () async {
+      const error = 'Oops...something went wrong!';
+      when(() => processResult.exitCode).thenReturn(1);
+      when<dynamic>(() => processResult.stderr).thenReturn(error);
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => latestVersion);
+      when(
+        () => pubUpdater.update(
+          packageName: any(named: 'packageName'),
+          versionConstraint: any(named: 'versionConstraint'),
+        ),
+      ).thenAnswer((_) => Future.value(processResult));
+
+      final result = await commandRunner.run(['update']);
+      expect(result, equals(ExitCode.software.code));
+      verify(() => logger.progress('Checking for updates')).called(1);
+      verify(() => logger.err(error));
+      verify(
+        () => pubUpdater.update(
+          packageName: any(named: 'packageName'),
+          versionConstraint: any(named: 'versionConstraint'),
+        ),
       ).called(1);
     });
 
@@ -79,7 +120,12 @@ void main() {
       expect(result, equals(ExitCode.success.code));
       verify(() => logger.progress('Checking for updates')).called(1);
       verify(() => logger.progress('Updating to $latestVersion')).called(1);
-      verify(() => pubUpdater.update(packageName: packageName)).called(1);
+      verify(
+        () => pubUpdater.update(
+          packageName: packageName,
+          versionConstraint: latestVersion,
+        ),
+      ).called(1);
     });
 
     test('does not update when already on latest version', () async {
@@ -93,7 +139,12 @@ void main() {
         () => logger.info('mason is already at the latest version.'),
       ).called(1);
       verifyNever(() => logger.progress('Updating to $latestVersion'));
-      verifyNever(() => pubUpdater.update(packageName: packageName));
+      verifyNever(
+        () => pubUpdater.update(
+          packageName: packageName,
+          versionConstraint: latestVersion,
+        ),
+      );
     });
   });
 }
