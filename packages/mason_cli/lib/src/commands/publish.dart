@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
@@ -49,6 +50,19 @@ class PublishCommand extends MasonCommand {
 
     if (!user.emailVerified) {
       logger.err('You must verify your email in order to publish.');
+      return ExitCode.software.code;
+    }
+
+    final brickYaml = checkedYamlDecode(
+      brickYamlFile.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    if (brickYaml.publishTo == 'none') {
+      logger
+        ..err('A private brick cannot be published.')
+        ..err('''
+Please change the publish_to field in the brick.yaml before publishing''');
       return ExitCode.software.code;
     }
 

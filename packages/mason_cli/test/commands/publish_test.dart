@@ -72,6 +72,26 @@ void main() {
       ).called(1);
     });
 
+    test('exits with code 70 when it is a private brick', () async {
+      final brickPath =
+          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting_private');
+
+      final user = MockUser();
+      when(() => user.emailVerified).thenReturn(true);
+      when(() => masonApi.currentUser).thenReturn(user);
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+
+      final result = await publishCommand.run();
+      expect(result, equals(ExitCode.software.code));
+      verify(
+        () => logger.err('A private brick cannot be published.'),
+      ).called(1);
+      verify(
+        () => logger.err('''
+Please change the publish_to field in the brick.yaml before publishing'''),
+      ).called(1);
+    });
+
     test('exits with code 70 when email is not verified', () async {
       final user = MockUser();
       when(() => user.emailVerified).thenReturn(false);
