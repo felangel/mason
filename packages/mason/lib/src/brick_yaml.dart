@@ -13,7 +13,7 @@ part 'brick_yaml.g.dart';
 @JsonSerializable()
 class BrickYaml {
   /// {@macro mason_yaml}
-  const BrickYaml( {
+  const BrickYaml({
     required this.name,
     required this.description,
     required this.version,
