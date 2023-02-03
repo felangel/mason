@@ -97,7 +97,7 @@ void main() {
           packageName: any(named: 'packageName'),
           versionConstraint: any(named: 'versionConstraint'),
         ),
-      ).thenAnswer((_) => Future.value(processResult));
+      ).thenAnswer((_) async => processResult);
 
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.software.code));
