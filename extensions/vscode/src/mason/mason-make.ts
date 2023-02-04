@@ -18,15 +18,15 @@ export const masonMake = async ({
     async (_) => {
       try {
         await masonSpawn(
-          `make ${name} ${args} --output-dir=${targetDirectory} --on-conflict=skip`
+          `make ${name} ${args} --output-dir="${targetDirectory}" --on-conflict=skip`,
         );
         vscode.window.setStatusBarMessage(
           `✓ mason make ${name}`,
-          statusBarTimeout
+          statusBarTimeout,
         );
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }
-    }
+    },
   );
 };
