@@ -193,8 +193,7 @@
 - feat: `mason publish` command
 - feat: `mason list` includes brick source
 - fix: clear `bricks.json` prior to fetching via `mason get`
-- fix: verify/validate brick name matches name in `mason.yaml` during
-  `mason get`
+- fix: verify/validate brick name matches name in `mason.yaml` during `mason get`
 - fix: simplify update prompt styling
 - refactor: populate bricks from `bricks.json` directly
 - refactor: remove dependency on `package:archive`
@@ -277,8 +276,7 @@
 
 # 0.1.0-dev.3
 
-- feat: add `mason list --global`
-  ([#176](https://github.com/felangel/mason/pull/176))
+- feat: add `mason list --global` ([#176](https://github.com/felangel/mason/pull/176))
 - chore(deps): upgrade to `build_verify: ^3.0.0`
 
 # 0.1.0-dev.2
