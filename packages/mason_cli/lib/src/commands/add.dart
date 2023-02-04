@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 /// {@endtemplate}
 class AddCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro add_command}
-  AddCommand({Logger? logger}) : super(logger: logger) {
+  AddCommand({super.logger}) {
     argParser
       ..addFlag(
         'global',
@@ -65,6 +65,18 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
 
     final cachedBrick = await addBrick(brick, global: isGlobal);
     final file = File(p.join(cachedBrick.path, BrickYaml.file));
+    final generator = await MasonGenerator.fromBrick(
+      Brick.path(cachedBrick.path),
+    );
+
+    final compileProgress = logger.progress('Compiling ${brick.name}');
+    try {
+      await generator.hooks.compile();
+      compileProgress.complete();
+    } catch (_) {
+      compileProgress.fail();
+      rethrow;
+    }
 
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),

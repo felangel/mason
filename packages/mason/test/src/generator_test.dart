@@ -21,18 +21,31 @@ void main() {
           ..writeAsStringSync(
             'name: malformed\ndescription: example\nversion: 0.1.0+1',
           );
-        final brokenFile = File(
+        final lockedFile = File(
           path.join(tempDir.path, 'malformed', '__brick__', 'locked.txt'),
         )
           ..createSync(recursive: true)
           ..writeAsStringSync('secret');
-        await Process.run('chmod', ['000', brokenFile.path]);
+        lockedFile.openSync(mode: FileMode.write).lockSync();
+        try {
+          await Process.run('chmod', ['000', lockedFile.path]);
+        } catch (_) {}
 
         final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
         );
 
+        expect(files, isEmpty);
+      });
+
+      test('constructs an instance (empty)', () async {
+        final brick = Brick.path(path.join('test', 'fixtures', 'empty'));
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+        );
         expect(files, isEmpty);
       });
 
@@ -56,7 +69,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -133,28 +146,32 @@ void main() {
         expect(production.readAsStringSync(), equals('PRODUCTION'));
       });
 
-      test('constructs an instance (loops stress test)', () async {
-        const fileCount = 1000;
-        final brick = Brick.path(
-          path.join('test', 'bricks', 'loop'),
-        );
-        final generator = await MasonGenerator.fromBrick(brick);
-        final tempDir = Directory.systemTemp.createTempSync();
-        final files = await generator.generate(
-          DirectoryGeneratorTarget(tempDir),
-          vars: <String, dynamic>{
-            'values': List.generate(fileCount, (index) => '$index'),
-          },
-        );
+      test(
+        'constructs an instance (loops stress test)',
+        () async {
+          const fileCount = 1000;
+          final brick = Brick.path(
+            path.join('test', 'bricks', 'loop'),
+          );
+          final generator = await MasonGenerator.fromBrick(brick);
+          final tempDir = Directory.systemTemp.createTempSync();
+          final files = await generator.generate(
+            DirectoryGeneratorTarget(tempDir),
+            vars: <String, dynamic>{
+              'values': List.generate(fileCount, (index) => '$index'),
+            },
+          );
 
-        expect(files.length, equals(fileCount));
-        expect(
-          files.every(
-            (element) => element.status == GeneratedFileStatus.created,
-          ),
-          isTrue,
-        );
-      });
+          expect(files.length, equals(fileCount));
+          expect(
+            files.every(
+              (element) => element.status == GeneratedFileStatus.created,
+            ),
+            isTrue,
+          );
+        },
+        timeout: const Timeout(Duration(minutes: 1)),
+      );
 
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
@@ -184,6 +201,43 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(file.readAsStringSync(), equals('Hi $name!'));
+
+        final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
+        expect(preGenFile.existsSync(), isTrue);
+        expect(preGenFile.readAsStringSync(), equals('pre_gen: $name'));
+
+        final postGenFile = File(path.join(tempDir.path, '.post_gen.txt'));
+        expect(postGenFile.existsSync(), isTrue);
+        expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
+      });
+
+      test('constructs an instance with hooks w/relative imports', () async {
+        const name = 'Dash';
+        final brick = Brick.path(
+          path.join('test', 'fixtures', 'relative_imports'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        await generator.hooks.preGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+        await generator.hooks.postGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final file = File(path.join(tempDir.path, '.gitkeep'));
+        final generatedFile = files.first;
+        expect(files.length, equals(1));
+        expect(generatedFile.status, equals(GeneratedFileStatus.created));
+        expect(generatedFile.path, equals(file.path));
+        expect(file.existsSync(), isTrue);
 
         final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
         expect(preGenFile.existsSync(), isTrue);
@@ -230,7 +284,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           contains('Hi $name!\nYour favorite color is'),
         );
       });
@@ -259,7 +313,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -286,7 +340,7 @@ void main() {
         expect(generatedFile2.path, equals(file1.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -326,7 +380,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -352,7 +406,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -390,7 +444,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -414,7 +468,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -496,7 +550,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -523,7 +577,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -558,7 +612,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -580,7 +634,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -613,7 +667,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -682,6 +736,44 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(file.readAsStringSync(), equals('Hi $name!'));
+
+        final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
+        expect(preGenFile.existsSync(), isTrue);
+        expect(preGenFile.readAsStringSync(), equals('pre_gen: $name'));
+
+        final postGenFile = File(path.join(tempDir.path, '.post_gen.txt'));
+        expect(postGenFile.existsSync(), isTrue);
+        expect(postGenFile.readAsStringSync(), equals('post_gen: $name'));
+      });
+
+      test('constructs an instance with hooks w/relative imports', () async {
+        const name = 'Dash';
+        final generator = await MasonGenerator.fromBundle(
+          relativeImportsBundle,
+        );
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        await generator.hooks.preGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{'name': name},
+        );
+
+        await generator.hooks.postGen(
+          vars: <String, dynamic>{'name': name},
+          workingDirectory: tempDir.path,
+        );
+
+        final file = File(path.join(tempDir.path, '.gitkeep'));
+        final generatedFile = files.first;
+        expect(files.length, equals(1));
+        expect(generatedFile.status, equals(GeneratedFileStatus.created));
+        expect(generatedFile.path, equals(file.path));
+        expect(file.existsSync(), isTrue);
 
         final preGenFile = File(path.join(tempDir.path, '.pre_gen.txt'));
         expect(preGenFile.existsSync(), isTrue);
@@ -957,4 +1049,10 @@ void main() {
       });
     });
   });
+}
+
+extension on File {
+  String readAsNormalizedStringSync() {
+    return readAsStringSync().replaceAll('\r', '');
+  }
 }

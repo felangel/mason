@@ -36,5 +36,6 @@ export 'src/mason_lock_json.dart' show MasonLockJson;
 export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/path.dart' show canonicalize;
 export 'src/render.dart' show RenderTemplate;
+export 'src/string_case_extensions.dart' show StringCaseExtensions;
 export 'src/version.dart' show packageVersion;
 export 'src/yaml_encode.dart' show Yaml;

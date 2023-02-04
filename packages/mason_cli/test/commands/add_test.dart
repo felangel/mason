@@ -52,7 +52,11 @@ void main() {
       Directory.current = Directory.systemTemp.createTempSync();
       final result = await commandRunner.run(['add', 'example', '--path', '.']);
       expect(result, equals(ExitCode.usage.code));
-      verify(() => logger.err('bricks.json not found')).called(1);
+      verify(
+        () => logger.err(
+          'Mason has not been initialized.\nDid you forget to run mason init?',
+        ),
+      ).called(1);
     });
 
     test('exits with code 64 when exception occurs', () async {
@@ -60,7 +64,7 @@ void main() {
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
 
-        if (update?.startsWith('Added') == true) {
+        if (update?.startsWith('Added') ?? false) {
           throw const MasonException('oops');
         }
       });
@@ -76,6 +80,17 @@ void main() {
       expect(result, equals(ExitCode.usage.code));
       verify(() => logger.progress('Installing greeting')).called(1);
       verify(() => logger.err('oops')).called(1);
+    });
+
+    test('exits with code 70 on hook compilation exception', () async {
+      final progress = MockProgress();
+      when(() => logger.progress(any())).thenReturn(progress);
+      final brickPath = path.join('..', '..', 'bricks', 'compilation_error');
+      final result = await commandRunner.run(
+        ['add', 'compilation_error', '--path', brickPath],
+      );
+      expect(result, equals(ExitCode.usage.code));
+      verify(progress.fail).called(1);
     });
 
     group('local', () {

@@ -77,7 +77,7 @@ bricks:
         );
       });
 
-      test('updates lockfile from nested directtory', () async {
+      test('updates lockfile from nested directory', () async {
         final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
         final simplePath = canonicalize(
           path.join(Directory.current.path, bricksPath, 'simple'),

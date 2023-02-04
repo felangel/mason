@@ -3,14 +3,15 @@ import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
+import 'package:mason/src/path.dart';
 import 'package:path/path.dart' as path;
 
 final _binaryFileTypes = RegExp(
-  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf)$',
+  r'\.(jpe?g|png|gif|ico|svg|ttf|eot|woff|woff2|otf|mp3)$',
   caseSensitive: false,
 );
 
-final _hookFiles = RegExp('(pre_gen.dart|post_gen.dart|pubspec.yaml)');
+final _hookFiles = RegExp(r'^(.*.dart|pubspec.yaml)$');
 
 /// Unpack the [bundle] in the [target] directory.
 void unpackBundle(MasonBundle bundle, Directory target) {
@@ -52,18 +53,21 @@ MasonBundle createBundle(Directory brick) {
     brickYamlFile.readAsStringSync(),
     (m) => BrickYaml.fromJson(m!),
   );
-  final files = Directory(path.join(brick.path, BrickYaml.dir))
-      .listSync(recursive: true)
-      .whereType<File>()
-      .map(_bundleBrickFile)
-      .toList();
+  final brickDir = Directory(path.join(brick.path, BrickYaml.dir));
+  final files = brickDir.existsSync()
+      ? brickDir
+          .listSync(recursive: true)
+          .whereType<File>()
+          .map(_bundleBrickFile)
+          .toList()
+      : <MasonBundledFile>[];
   final hooksDirectory = Directory(path.join(brick.path, BrickYaml.hooks));
   final hooks = hooksDirectory.existsSync()
       ? hooksDirectory
           .listSync(recursive: true)
           .whereType<File>()
           .where((file) => _hookFiles.hasMatch(path.basename(file.path)))
-          .map(_bundleHookFile)
+          .map((file) => _bundleHookFile(file, hooksDirectory))
           .toList()
       : <MasonBundledFile>[];
   return MasonBundle(
@@ -99,18 +103,18 @@ MasonBundledFile _bundleBrickFile(File file) {
   final filePath = path.joinAll(
     path.split(file.path).skipWhile((value) => value != BrickYaml.dir).skip(1),
   );
-  return MasonBundledFile(filePath, data, fileType);
+  return MasonBundledFile(normalize(filePath), data, fileType);
 }
 
-MasonBundledFile _bundleHookFile(File file) {
+MasonBundledFile _bundleHookFile(File file, Directory hooksDirectory) {
   final data = base64.encode(file.readAsBytesSync());
-  final filePath = path.basename(file.path);
-  return MasonBundledFile(filePath, data, 'text');
+  final filePath = path.relative(file.path, from: hooksDirectory.path);
+  return MasonBundledFile(normalize(filePath), data, 'text');
 }
 
 File _unbundleFile(MasonBundledFile file, String target) {
   final data = base64.decode(file.data);
-  final filePath = path.join(target, file.path);
+  final filePath = normalize(path.join(target, file.path));
   return File(filePath)
     ..createSync(recursive: true)
     ..writeAsBytesSync(data);

@@ -4,7 +4,6 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as path;
-import 'package:recase/recase.dart';
 
 /// Supported Bundle Types
 enum BundleType {
@@ -21,7 +20,7 @@ enum BundleType {
 /// {@endtemplate}
 class BundleCommand extends MasonCommand {
   /// {@macro bundle_command}
-  BundleCommand({Logger? logger}) : super(logger: logger) {
+  BundleCommand({super.logger}) {
     argParser
       ..addOption(
         'output-dir',

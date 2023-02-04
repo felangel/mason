@@ -1,10 +1,11 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io' show Directory, File, FileMode, Process;
+import 'dart:io' show Directory, File, FileMode, FileSystemEntity, Process;
 import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
+import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
@@ -21,7 +22,6 @@ final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
 final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
-final _whiteSpace = RegExp(r'\s+');
 final _lambdas = RegExp(
   '''(camelCase|constantCase|dotCase|headerCase|lowerCase|pascalCase|paramCase|pathCase|sentenceCase|snakeCase|titleCase|upperCase)''',
 );
@@ -60,13 +60,16 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
   static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    return MasonGenerator(
-      bundle.name,
-      bundle.description,
-      vars: bundle.vars.keys.toList(),
-      files: _decodeConcatenatedData(bundle.files),
-      hooks: GeneratorHooks.fromBundle(bundle),
+    final bytes = await compute(
+      (MasonBundle b) => utf8.encode(json.encode(b.toJson())),
+      bundle,
     );
+    final hash = sha1.convert(bytes).toString();
+    final target = Directory(
+      p.join(BricksJson.bundled.path, '${bundle.name}_${bundle.version}_$hash'),
+    );
+    if (!target.existsSync()) unpackBundle(bundle, target);
+    return MasonGenerator._fromBrick(target.path);
   }
 
   /// Factory which creates a [MasonGenerator] based on
@@ -84,26 +87,28 @@ class MasonGenerator extends Generator {
       file.readAsStringSync(),
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
-    final brickDirectory = p.join(path, BrickYaml.dir);
-    final brickFiles = Directory(brickDirectory)
-        .listSync(recursive: true)
-        .whereType<File>()
-        .map((file) {
-      return () async {
-        final resource = await _descriptorPool.request();
-        try {
-          final content = await File(file.path).readAsBytes();
-          final relativePath = file.path.substring(
-            file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
-          );
-          return TemplateFile.fromBytes(relativePath, content);
-        } on Exception {
-          return null;
-        } finally {
-          resource.release();
-        }
-      }();
-    });
+    final brickDirectory = Directory(p.join(path, BrickYaml.dir));
+    final brickFiles = brickDirectory.existsSync()
+        ? brickDirectory
+            .listSync(recursive: true)
+            .whereType<File>()
+            .map((file) {
+            return () async {
+              final resource = await _descriptorPool.request();
+              try {
+                final content = await File(file.path).readAsBytes();
+                final relativePath = file.path.substring(
+                  file.path.indexOf(BrickYaml.dir) + 1 + BrickYaml.dir.length,
+                );
+                return TemplateFile.fromBytes(relativePath, content);
+              } on Exception {
+                return null;
+              } finally {
+                resource.release();
+              }
+            }();
+          })
+        : <Future<TemplateFile?>>[];
 
     return MasonGenerator(
       brickYaml.name,
@@ -572,33 +577,13 @@ class _Permutations<T> {
   }
 }
 
-List<TemplateFile> _decodeConcatenatedData(List<MasonBundledFile> files) {
-  final results = <TemplateFile>[];
-  for (final file in files) {
-    final path = file.path;
-    final type = file.type;
-    final raw = file.data.replaceAll(_whiteSpace, '');
-    final decoded = base64.decode(raw);
-    try {
-      if (type == 'binary') {
-        results.add(TemplateFile.fromBytes(path, decoded));
-      } else {
-        final source = utf8.decode(decoded);
-        results.add(TemplateFile(path, source));
-      }
-    } catch (_) {}
-  }
-
-  return results;
-}
-
 Future<Set<FileContents>> _runSubstitutionAsync(
   TemplateFile file,
   Map<String, dynamic> vars,
   Map<String, List<int>> partials,
 ) async {
   return compute(
-    (List inputs) {
+    (List<dynamic> inputs) {
       final file = inputs[0] as TemplateFile;
       final vars = inputs[1] as Map<String, dynamic>;
       final partials = inputs[2] as Map<String, List<int>>;
@@ -636,5 +621,38 @@ extension on String {
       default:
         return OverwriteRule.overwriteOnce;
     }
+  }
+}
+
+extension on HookFile {
+  Directory get directory => File(path).parent;
+
+  Directory get buildDirectory {
+    return Directory(
+      p.join(
+        directory.path,
+        'build',
+        'hooks',
+        p.basenameWithoutExtension(path),
+      ),
+    );
+  }
+
+  File intermediate(String checksum) {
+    return File(
+      p.join(
+        buildDirectory.path,
+        '${p.basenameWithoutExtension(path)}_$checksum.dart',
+      ),
+    );
+  }
+
+  File module(String checksum) {
+    return File(
+      p.join(
+        buildDirectory.path,
+        '${p.basenameWithoutExtension(path)}_$checksum.dill',
+      ),
+    );
   }
 }

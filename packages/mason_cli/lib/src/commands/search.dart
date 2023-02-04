@@ -1,3 +1,6 @@
+import 'dart:io';
+import 'dart:math';
+
 import 'package:mason/mason.dart' hide packageVersion, Brick;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
@@ -7,9 +10,8 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class SearchCommand extends MasonCommand {
   /// {@macro logout_command}
-  SearchCommand({Logger? logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi(),
-        super(logger: logger);
+  SearchCommand({super.logger, MasonApi? masonApi})
+      : _masonApi = masonApi ?? MasonApi();
 
   final MasonApi _masonApi;
 
@@ -52,7 +54,7 @@ class SearchCommand extends MasonCommand {
           )
           ..info(brick.description)
           ..info(brickLink)
-          ..info(darkGray.wrap('-' * 80));
+          ..info(darkGray.wrap('-' * _separatorLength()));
       }
       return ExitCode.success.code;
     } catch (error) {
@@ -60,5 +62,14 @@ class SearchCommand extends MasonCommand {
       logger.err('$error');
       return ExitCode.software.code;
     }
+  }
+}
+
+int _separatorLength() {
+  const maxSeparatorLength = 80;
+  try {
+    return min(stdout.terminalColumns, maxSeparatorLength);
+  } catch (_) {
+    return maxSeparatorLength;
   }
 }

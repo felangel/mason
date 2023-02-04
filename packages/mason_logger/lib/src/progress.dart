@@ -52,11 +52,9 @@ class Progress {
       ..reset()
       ..start();
 
-    final stdioType = StdioOverrides.current?.stdioType ?? io.stdioType;
-
     // The animation is only shown when it would be meaningful.
     // Do not animate if the stdio type is not a terminal.
-    if (stdioType(_stdout) != io.StdioType.terminal) {
+    if (!_stdout.hasTerminal) {
       final frames = _options.animation.frames;
       final char = frames.isEmpty ? '' : frames.first;
       final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
@@ -134,9 +132,8 @@ class Progress {
     final elapsedTime = _stopwatch.elapsed.inMilliseconds;
     final displayInMilliseconds = elapsedTime < 100;
     final time = displayInMilliseconds ? elapsedTime : elapsedTime / 1000;
-    final formattedTime = displayInMilliseconds
-        ? '${time.toString()}ms'
-        : '${time.toStringAsFixed(1)}s';
+    final formattedTime =
+        displayInMilliseconds ? '${time}ms' : '${time.toStringAsFixed(1)}s';
     return '${darkGray.wrap('($formattedTime)')}';
   }
 }

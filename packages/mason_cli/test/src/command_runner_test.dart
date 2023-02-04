@@ -149,6 +149,18 @@ void main() {
         }),
       );
 
+      test('handles completion', () async {
+        final result = await commandRunner.run(['completion']);
+        verifyNever(() => logger.info(any()));
+        verifyNever(() => logger.err(any()));
+        verifyNever(() => logger.warn(any()));
+        verifyNever(() => logger.write(any()));
+        verifyNever(() => logger.success(any()));
+        verifyNever(() => logger.detail(any()));
+
+        expect(result, equals(ExitCode.success.code));
+      });
+
       test('closes MasonApi', () async {
         await commandRunner.run(['--version']);
         verify(() => masonApi.close()).called(1);

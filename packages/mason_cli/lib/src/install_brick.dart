@@ -9,7 +9,11 @@ mixin InstallBrickMixin on MasonCommand {
   /// Installs a specific brick and returns the [CachedBrick] reference.
   Future<CachedBrick> addBrick(Brick brick, {bool global = false}) async {
     final bricksJson = global ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) usageException('bricks.json not found');
+    if (bricksJson == null) {
+      usageException(
+        'Mason has not been initialized.\nDid you forget to run mason init?',
+      );
+    }
 
     final masonLockJsonFile =
         global ? globalMasonLockJsonFile : localMasonLockJsonFile;
@@ -48,45 +52,56 @@ mixin InstallBrickMixin on MasonCommand {
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final lockJson = global ? globalMasonLockJson : localMasonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
-    final getBricksProgress = logger.progress(
-      upgrade ? 'Upgrading bricks' : 'Getting bricks',
-    );
+    final message = upgrade ? 'Upgrading bricks' : 'Getting bricks';
+    final getBricksProgress = logger.progress(message);
     try {
       bricksJson.clear();
       final masonYaml = global ? globalMasonYaml : localMasonYaml;
       if (masonYaml.bricks.entries.isNotEmpty) {
-        await Future.forEach<MapEntry<String, BrickLocation>>(
-          masonYaml.bricks.entries,
-          (entry) async {
-            final location = resolveBrickLocation(
-              location: entry.value,
-              lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
-            );
-            final masonYamlFile =
-                global ? globalMasonYamlFile : localMasonYamlFile;
-            final normalizedLocation = location.path != null
-                ? BrickLocation(
-                    path: canonicalize(
-                      p.join(masonYamlFile.parent.path, location.path),
-                    ),
-                  )
-                : location;
-            final cachedBrick = await bricksJson.add(
-              Brick(name: entry.key, location: normalizedLocation),
-            );
-            resolvedBricks.addAll(
-              <String, BrickLocation>{entry.key: cachedBrick.brick.location},
-            );
-          },
+        await Future.wait(
+          masonYaml.bricks.entries.map(
+            (entry) {
+              return () async {
+                getBricksProgress.update('Resolving ${entry.key}');
+                final location = resolveBrickLocation(
+                  location: entry.value,
+                  lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
+                );
+                final masonYamlFile =
+                    global ? globalMasonYamlFile : localMasonYamlFile;
+                final normalizedLocation = location.path != null
+                    ? BrickLocation(
+                        path: canonicalize(
+                          p.join(masonYamlFile.parent.path, location.path),
+                        ),
+                      )
+                    : location;
+                getBricksProgress.update('Installing ${entry.key}');
+                final cachedBrick = await bricksJson.add(
+                  Brick(name: entry.key, location: normalizedLocation),
+                );
+                resolvedBricks.addAll(
+                  <String, BrickLocation>{
+                    entry.key: cachedBrick.brick.location
+                  },
+                );
+                getBricksProgress.update('Compiling ${entry.key}');
+                final generator = await MasonGenerator.fromBrick(
+                  Brick.path(cachedBrick.path),
+                );
+                await generator.hooks.compile();
+              }();
+            },
+          ),
         );
       }
     } finally {
-      getBricksProgress.complete();
+      getBricksProgress.complete(message);
       await bricksJson.flush();
       final masonLockJsonFile =
           global ? globalMasonLockJsonFile : localMasonLockJsonFile;
       await masonLockJsonFile.writeAsString(
-        json.encode(MasonLockJson(bricks: resolvedBricks)),
+        json.encode(MasonLockJson(bricks: resolvedBricks.sorted())),
       );
     }
   }
@@ -119,5 +134,13 @@ BrickLocation resolveBrickLocation({
 extension on GitPath {
   bool similarTo(GitPath other) {
     return url == other.url && path == other.path;
+  }
+}
+
+extension on Map<String, BrickLocation> {
+  Map<String, BrickLocation> sorted() {
+    return Map.fromEntries(
+      entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
   }
 }

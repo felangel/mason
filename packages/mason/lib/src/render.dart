@@ -1,7 +1,7 @@
 import 'dart:convert';
 
+import 'package:mason/mason.dart';
 import 'package:mustache_template/mustache_template.dart';
-import 'package:recase/recase.dart';
 
 final _newlineInRegExp = RegExp(r'(\\\r\n|\\\r|\\\n)');
 final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
@@ -37,10 +37,10 @@ final _builtInLambdas = <String, LambdaFunction>{
   'headerCase': (ctx) => ctx.renderString().headerCase,
 
   /// lower case
-  'lowerCase': (ctx) => ctx.renderString().toLowerCase(),
+  'lowerCase': (ctx) => ctx.renderString().lowerCase,
 
   /// {{ mustache case }}
-  'mustacheCase': (ctx) => '{{ ${ctx.renderString()} }}',
+  'mustacheCase': (ctx) => ctx.renderString().mustacheCase,
 
   /// PascalCase
   'pascalCase': (ctx) => ctx.renderString().pascalCase,
@@ -61,7 +61,7 @@ final _builtInLambdas = <String, LambdaFunction>{
   'titleCase': (ctx) => ctx.renderString().titleCase,
 
   /// UPPER CASE
-  'upperCase': (ctx) => ctx.renderString().toUpperCase(),
+  'upperCase': (ctx) => ctx.renderString().upperCase,
 };
 
 /// [Map] of all the built-in variables.
@@ -158,7 +158,7 @@ extension on String {
 /// {@endtemplate}
 extension ResolvePartial on Map<String, List<int>> {
   /// {@macro resolve_partial}
-  Template? resolve(final String name) {
+  Template? resolve(String name) {
     final content = this['{{~ $name }}'];
     if (content == null) return null;
     final decoded = utf8.decode(content);

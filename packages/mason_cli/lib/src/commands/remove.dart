@@ -8,7 +8,7 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class RemoveCommand extends MasonCommand {
   /// {@macro remove_command}
-  RemoveCommand({Logger? logger}) : super(logger: logger) {
+  RemoveCommand({super.logger}) {
     argParser.addFlag(
       'global',
       abbr: 'g',

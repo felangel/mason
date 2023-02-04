@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
-import 'package:recase/recase.dart';
 
 /// {@template new_command}
 /// `mason new` command which creates a new brick.
 /// {@endtemplate}
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand({Logger? logger}) : super(logger: logger) {
+  NewCommand({super.logger}) {
     argParser
       ..addFlag(
         'hooks',
@@ -212,6 +211,7 @@ dependencies:
 .dart_tool
 .packages
 pubspec.lock
+build
 ''';
 
   static const _hooksPreGenContent = '''

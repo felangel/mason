@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 /// {@endtemplate}
 class UnbundleCommand extends MasonCommand {
   /// {@macro unbundle_command}
-  UnbundleCommand({Logger? logger}) : super(logger: logger) {
+  UnbundleCommand({super.logger}) {
     argParser
       ..addOption(
         'output-dir',

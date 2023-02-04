@@ -37,6 +37,21 @@ void main() {
         expect(bundle.files.length, equals(1));
       });
 
+      test('returns a MasonBundle when brick exists (empty)', () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'empty')),
+        );
+        expect(bundle.name, equals('empty'));
+        expect(bundle.description, equals('An empty brick'));
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.hooks, isEmpty);
+        expect(bundle.files, isEmpty);
+      });
+
       test('returns a MasonBundle when brick exists (hello)', () {
         final bundle = createBundle(
           Directory(path.join('..', '..', 'bricks', 'hello')),
@@ -76,6 +91,33 @@ void main() {
         expect(bundle.files.length, equals(1));
         expect(bundle.hooks.length, equals(3));
         final expectedFiles = ['post_gen.dart', 'pre_gen.dart', 'pubspec.yaml'];
+        for (var i = 0; i < bundle.hooks.length; i++) {
+          final hookFile = bundle.hooks[i];
+          expect(hookFile.path, equals(expectedFiles[i]));
+        }
+      });
+
+      test(
+          'returns a MasonBundle '
+          'when brick exists (hooks w/relative imports)', () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'relative_imports')),
+        );
+        expect(bundle.name, equals('relative_imports'));
+        expect(bundle.description, equals('A Test Hook'));
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.files.length, equals(1));
+        expect(bundle.hooks.length, equals(4));
+        final expectedFiles = [
+          'post_gen.dart',
+          'pre_gen.dart',
+          'pubspec.yaml',
+          'src/main.dart',
+        ];
         for (var i = 0; i < bundle.hooks.length; i++) {
           final hookFile = bundle.hooks[i];
           expect(hookFile.path, equals(expectedFiles[i]));
@@ -146,7 +188,7 @@ void main() {
         final yaml = File(path.join(tempDir.path, 'brick.yaml'));
         expect(yaml.existsSync(), isTrue);
         expect(
-          yaml.readAsStringSync(),
+          yaml.readAsNormalizedStringSync(),
           equals(
             'name: hello\n'
             'description: An example brick.\n'
@@ -170,7 +212,7 @@ void main() {
         final readme = File(path.join(tempDir.path, 'README.md'));
         expect(readme.existsSync(), isTrue);
         expect(
-          readme.readAsStringSync(),
+          readme.readAsNormalizedStringSync(),
           equals(
             '# hello\n'
             '\n'
@@ -197,7 +239,7 @@ void main() {
         final changelog = File(path.join(tempDir.path, 'CHANGELOG.md'));
         expect(changelog.existsSync(), isTrue);
         expect(
-          changelog.readAsStringSync(),
+          changelog.readAsNormalizedStringSync(),
           equals(
             '# 0.1.0+1\n'
             '\n'
@@ -208,7 +250,7 @@ void main() {
         final license = File(path.join(tempDir.path, 'LICENSE'));
         expect(license.existsSync(), isTrue);
         expect(
-          license.readAsStringSync(),
+          license.readAsNormalizedStringSync(),
           equals('TODO: Add your license here.\n'),
         );
       });
@@ -243,7 +285,7 @@ void main() {
         final preGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
         );
-        expect(preGenHookFile.existsSync(), true);
+        expect(preGenHookFile.existsSync(), isTrue);
         expect(
           preGenHookFile.readAsStringSync(),
           equals(
@@ -253,7 +295,7 @@ void main() {
         final postGenHookFile = File(
           path.join(tempDir.path, 'hooks', 'post_gen.dart'),
         );
-        expect(postGenHookFile.existsSync(), true);
+        expect(postGenHookFile.existsSync(), isTrue);
         expect(
           postGenHookFile.readAsStringSync(),
           equals(
@@ -267,8 +309,96 @@ void main() {
           hookPubspecFile.readAsStringSync(),
           contains('name: hooks_hooks'),
         );
-        expect(hookPubspecFile.existsSync(), true);
+        expect(hookPubspecFile.existsSync(), isTrue);
+      });
+
+      test('unpacks a MasonBundle (hooks w/relative imports)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('test', 'fixtures', 'relative_imports')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            'name: relative_imports\n'
+            'description: A Test Hook\n'
+            'version: 0.1.0+1\n'
+            'environment:\n'
+            '  mason: any\n'
+            'vars:\n',
+          ),
+        );
+        final file = File(path.join(tempDir.path, '__brick__', '.gitkeep'));
+        expect(file.existsSync(), isTrue);
+        final preGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'pre_gen.dart'),
+        );
+        expect(preGenHookFile.existsSync(), isTrue);
+        expect(
+          preGenHookFile.readAsNormalizedStringSync(),
+          equals(
+            '''
+import 'package:mason/mason.dart';
+import './src/main.dart';
+
+void run(HookContext context) => preGen(context);
+''',
+          ),
+        );
+        final postGenHookFile = File(
+          path.join(tempDir.path, 'hooks', 'post_gen.dart'),
+        );
+        expect(postGenHookFile.existsSync(), isTrue);
+        expect(
+          postGenHookFile.readAsNormalizedStringSync(),
+          equals(
+            '''
+import 'package:mason/mason.dart';
+import './src/main.dart';
+
+void run(HookContext context) => postGen(context);
+''',
+          ),
+        );
+        final mainFile = File(
+          path.join(tempDir.path, 'hooks', 'src', 'main.dart'),
+        );
+        expect(mainFile.existsSync(), isTrue);
+        expect(
+          mainFile.readAsNormalizedStringSync(),
+          equals(
+            r'''
+import 'dart:io';
+import 'package:mason/mason.dart';
+
+void preGen(HookContext context) {
+  File('.pre_gen.txt').writeAsStringSync('pre_gen: ${context.vars['name']}');
+}
+
+void postGen(HookContext context) {
+  File('.post_gen.txt').writeAsStringSync('post_gen: ${context.vars['name']}');
+}
+''',
+          ),
+        );
+        final hookPubspecFile = File(
+          path.join(tempDir.path, 'hooks', 'pubspec.yaml'),
+        );
+        expect(
+          hookPubspecFile.readAsStringSync(),
+          contains('name: relative_imports_hooks'),
+        );
+        expect(hookPubspecFile.existsSync(), isTrue);
       });
     });
   });
+}
+
+extension on File {
+  String readAsNormalizedStringSync() {
+    return readAsStringSync().replaceAll('\r', '');
+  }
 }

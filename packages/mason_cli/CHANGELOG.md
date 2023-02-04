@@ -1,3 +1,40 @@
+# 0.1.0-dev.44
+
+- fix: silent update failures
+
+# 0.1.0-dev.43
+
+- deps: upgrade dependencies
+  - `Dart >=2.17`
+  - `cli_completion ^0.2.0`
+  - `mason ^0.1.0-dev.41`
+  - `mason_api ^0.1.0-dev.9`
+  - `very_good_analysis ^3.1.0`
+
+# 0.1.0-dev.42
+
+- deps: upgrade to `mason: ^0.1.0-dev.40`
+- feat: mason search separator length uses `terminalColumns`
+- feat: improve error when running `mason add` in an uninitialized workspace
+
+# 0.1.0-dev.41
+
+- feat: add completion
+
+# 0.1.0-dev.40
+
+- feat: add `hooks/build` to `.gitignore` when generating new brick
+- deps: upgrade to `mason: ^0.1.0-dev.39`
+
+# 0.1.0-dev.39
+
+- perf: compile bricks
+- deps: upgrade to `mason: ^0.1.0-dev.38`
+
+# 0.1.0-dev.38
+
+- deps: upgrade to `mason: ^0.1.0-dev.35`
+
 # 0.1.0-dev.37
 
 - feat: support `mason upgrade -g`
