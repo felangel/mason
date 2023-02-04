@@ -88,6 +88,8 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
       return ExitCode.success.code;
     }
 
+    if (topLevelResults['verbose'] == true) _logger.level = Level.verbose;
+
     int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
       _logger.info(packageVersion);
@@ -100,10 +102,20 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
   }
 
   Future<void> _checkForUpdates() async {
+    _logger.detail('\n[updater] checking for updates...');
+
     try {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
+      _logger.detail('[updater] latest version is $latestVersion.');
+
       final isUpToDate = packageVersion == latestVersion;
+      if (isUpToDate) {
+        _logger.detail('[updater] no updates available.');
+        return;
+      }
+
       if (!isUpToDate) {
+        _logger.detail('[updater] update available.');
         final changelogLink = lightCyan.wrap(
           styleUnderlined.wrap(
             link(
@@ -122,7 +134,13 @@ ${lightYellow.wrap('Changelog:')} $changelogLink
 Run ${cyan.wrap('mason update')} to update''',
           );
       }
-    } catch (_) {}
+    } catch (error, stackTrace) {
+      _logger.detail(
+        '[updater] update check error.\n$error\n$stackTrace',
+      );
+    } finally {
+      _logger.detail('[updater] update check complete.');
+    }
   }
 }
 
@@ -132,6 +150,11 @@ extension on ArgParser {
       'version',
       negatable: false,
       help: 'Print the current version.',
+    );
+    addFlag(
+      'verbose',
+      negatable: false,
+      help: 'Output additional logs.',
     );
   }
 }

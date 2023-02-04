@@ -328,18 +328,18 @@ extension on Logger {
   void logFilesGenerated(int fileCount) {
     if (fileCount == 1) {
       this
-        ..info(
+        ..detail(
           '${lightGreen.wrap('✓')} '
           'Generated $fileCount file:',
         )
-        ..flush((message) => info(darkGray.wrap(message)));
+        ..flush(detail);
     } else {
       this
-        ..info(
+        ..detail(
           '${lightGreen.wrap('✓')} '
           'Generated $fileCount file(s):',
         )
-        ..flush((message) => info(darkGray.wrap(message)));
+        ..flush(detail);
     }
   }
 }
