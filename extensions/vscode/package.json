@@ -2,7 +2,7 @@
   "name": "mason",
   "displayName": "mason",
   "description": "Mason support for Visual Studio Code.",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "publisher": "FelixAngelov",
   "repository": {
     "type": "git",
