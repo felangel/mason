@@ -58,8 +58,8 @@ class BrickYaml {
   /// Optional url pointing to the brick's source code repository.
   final String? repository;
 
-  /// Optional specification for the bricks published address,
-  /// brick hub by default.
+  /// This setting can be used to specify a brick registry as the publish target.
+  /// Defaults to https://registry.brickhub.dev.
   @JsonKey(name: 'publish_to')
   final String? publishTo;
 
