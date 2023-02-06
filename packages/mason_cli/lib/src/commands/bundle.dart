@@ -103,9 +103,13 @@ class BundleCommand extends MasonCommand {
         bundlePaths.add(bundlePath);
       }
 
-      logger.info('${lightGreen.wrap('✓')} Generated ${bricks.length} files:');
+      bundleProgress
+          .update('${lightGreen.wrap('✓')} Generated ${bricks.length} files:');
       for (final bundlePath in bundlePaths) {
-        logger.info(darkGray.wrap('  $bundlePath'));
+        final logLine = darkGray.wrap('  $bundlePath');
+        if (logLine != null) {
+          bundleProgress.update(logLine);
+        }
       }
       bundleProgress.complete();
     } catch (_) {
