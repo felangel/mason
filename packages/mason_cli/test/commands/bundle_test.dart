@@ -356,7 +356,7 @@ void main() {
 
       test('exists with code 64 when exception occurs on bundling', () async {
         final progress = MockProgress();
-        when(() => progress.complete(any())).thenAnswer((invocation) {
+        when(() => progress.update(any())).thenAnswer((invocation) {
           final update = invocation.positionalArguments[0] as String?;
 
           if (update == 'Bundled greeting') {
@@ -420,7 +420,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
-        verify(() => logger.progress('Bundling greeting')).called(1);
+        verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => logger.info(
             '${lightGreen.wrap('✓')} '
@@ -458,10 +458,10 @@ void main() {
 
         expect(result, equals(ExitCode.usage.code));
 
+        verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(
           () => logger.err('Could not find brick at $url'),
         ).called(1);
-        verifyNever(() => logger.progress(any()));
       });
     });
 
