@@ -87,13 +87,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
@@ -150,13 +150,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling hooks')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
@@ -204,13 +204,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
@@ -279,13 +279,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling hooks')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
@@ -322,16 +322,18 @@ void main() {
         verify(() => progress.update('Bundling hello')).called(1);
         verify(() => progress.update('Bundled hello')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 2 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file1.path)}')),
+          () =>
+              progress.update(darkGray.wrap('  ${canonicalize(file1.path)}')!),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file2.path)}')),
+          () =>
+              progress.update(darkGray.wrap('  ${canonicalize(file2.path)}')!),
         ).called(1);
       });
 
@@ -422,13 +424,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
@@ -500,13 +502,13 @@ void main() {
         verify(() => logger.progress('Bundling 1 bricks')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
-          () => logger.info(
+          () => progress.update(
             '${lightGreen.wrap('✓')} '
             'Generated 1 files:',
           ),
         ).called(1);
         verify(
-          () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
+          () => progress.update(darkGray.wrap('  ${canonicalize(file.path)}')!),
         ).called(1);
       });
 
