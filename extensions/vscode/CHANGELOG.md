@@ -1,3 +1,7 @@
+# 0.1.8
+
+- fix: support spaces in mason make `--output-dir`
+
 # 0.1.7
 
 - fix: `mason.yaml` git url schema validation
