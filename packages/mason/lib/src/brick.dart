@@ -5,10 +5,7 @@ import 'package:mason/mason.dart';
 /// {@endtemplate}
 class Brick {
   /// {@macro brick}
-  const Brick({
-    this.name,
-    required this.location,
-  });
+  const Brick({required this.location, this.name});
 
   /// Brick from a local path.
   Brick.path(String path) : this(location: BrickLocation(path: path));
