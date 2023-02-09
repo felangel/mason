@@ -102,20 +102,11 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
   }
 
   Future<void> _checkForUpdates() async {
-    _logger.detail('\n[updater] checking for updates...');
-
     try {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
-      _logger.detail('[updater] latest version is $latestVersion.');
-
       final isUpToDate = packageVersion == latestVersion;
-      if (isUpToDate) {
-        _logger.detail('[updater] no updates available.');
-        return;
-      }
 
       if (!isUpToDate) {
-        _logger.detail('[updater] update available.');
         final changelogLink = lightCyan.wrap(
           styleUnderlined.wrap(
             link(
@@ -136,10 +127,8 @@ Run ${cyan.wrap('mason update')} to update''',
       }
     } catch (error, stackTrace) {
       _logger.detail(
-        '[updater] update check error.\n$error\n$stackTrace',
+        '[update] update check error.\n$error\n$stackTrace',
       );
-    } finally {
-      _logger.detail('[updater] update check complete.');
     }
   }
 }
