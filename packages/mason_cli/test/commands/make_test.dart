@@ -1040,7 +1040,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1058,7 +1058,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('skip'))),
+        () => logger.delayed(any(that: contains('skip '))),
       ).called(1);
     });
 
@@ -1080,7 +1080,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1098,7 +1098,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name2!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
     });
 
@@ -1120,7 +1120,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1138,7 +1138,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name2!'));
       verify(
-        () => logger.delayed(any(that: contains('modified'))),
+        () => logger.delayed(any(that: contains('modified '))),
       ).called(1);
     });
 
@@ -1157,7 +1157,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1179,7 +1179,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('identical'))),
+        () => logger.delayed(any(that: contains('identical '))),
       ).called(1);
       verify(
         () => logger.info(any(that: contains('0 files changed'))),
@@ -1201,7 +1201,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1223,7 +1223,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name1!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1245,7 +1245,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1267,7 +1267,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('skip'))),
+        () => logger.delayed(any(that: contains('skip '))),
       ).called(1);
       verify(
         () => logger.info(any(that: contains('0 files changed'))),
@@ -1289,7 +1289,7 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('new'))),
+        () => logger.delayed(any(that: contains('new '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1311,7 +1311,7 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name1!'));
       verify(
-        () => logger.delayed(any(that: contains('modified'))),
+        () => logger.delayed(any(that: contains('modified '))),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
