@@ -342,6 +342,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   }) async {
     _overwriteRule ??= overwriteRule;
     final file = File(p.join(dir.path, path));
+    final filePath = darkGray.wrap(p.relative(file.path));
     final fileExists = file.existsSync();
 
     if (!fileExists) {
@@ -349,7 +350,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
           .create(recursive: true)
           .then<File>((_) => file.writeAsBytes(contents))
           .whenComplete(
-            () => logger?.delayed('  ${file.path} ${lightGreen.wrap('(new)')}'),
+            () => logger?.delayed('  ${lightGreen.wrap('new')} $filePath'),
           );
       return GeneratedFile.created(path: file.path);
     }
@@ -357,7 +358,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final existingContents = file.readAsBytesSync();
 
     if (const ListEquality<int>().equals(existingContents, contents)) {
-      logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+      logger?.delayed('  ${lightCyan.wrap('identical')} $filePath');
       return GeneratedFile.identical(path: file.path);
     }
 
@@ -367,7 +368,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             _overwriteRule != OverwriteRule.alwaysAppend);
 
     if (shouldPrompt) {
-      logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
       _overwriteRule = logger
           .prompt(
             yellow.wrap(
@@ -380,7 +381,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     switch (_overwriteRule) {
       case OverwriteRule.alwaysSkip:
       case OverwriteRule.skipOnce:
-        logger?.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        logger?.delayed('  ${yellow.wrap('skip')} $filePath');
         return GeneratedFile.skipped(path: file.path);
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
@@ -400,10 +401,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             .whenComplete(
               () => shouldAppend
                   ? logger?.delayed(
-                      '  ${file.path} ${lightBlue.wrap('(modified)')}',
+                      '  ${lightBlue.wrap('modified')} $filePath',
                     )
                   : logger?.delayed(
-                      '  ${file.path} ${lightGreen.wrap('(new)')}',
+                      '  ${lightGreen.wrap('new')} $filePath',
                     ),
             );
 

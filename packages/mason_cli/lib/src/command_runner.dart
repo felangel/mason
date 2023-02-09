@@ -142,6 +142,7 @@ extension on ArgParser {
     );
     addFlag(
       'verbose',
+      abbr: 'v',
       negatable: false,
       help: 'Output additional logs.',
     );

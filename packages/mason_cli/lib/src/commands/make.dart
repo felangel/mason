@@ -183,8 +183,10 @@ class _MakeCommand extends MasonCommand {
         fileConflictResolution: fileConflictResolution,
         logger: logger,
       );
-      generateProgress.complete('Made brick ${_brick.name}');
-      logger.logFilesGenerated(files.length);
+      generateProgress.complete(
+        'Generated ${files.length} ${files.length == 1 ? 'file' : 'files'}.',
+      );
+      logger.flush(logger.detail);
 
       if (!disableHooks) {
         await generator.hooks.postGen(
@@ -323,23 +325,5 @@ extension on Logger {
     return fileCount == 1
         ? err('${lightRed.wrap('✗')} $fileCount file changed')
         : err('${lightRed.wrap('✗')} $fileCount files changed');
-  }
-
-  void logFilesGenerated(int fileCount) {
-    if (fileCount == 1) {
-      this
-        ..detail(
-          '${lightGreen.wrap('✓')} '
-          'Generated $fileCount file:',
-        )
-        ..flush(detail);
-    } else {
-      this
-        ..detail(
-          '${lightGreen.wrap('✓')} '
-          'Generated $fileCount file(s):',
-        )
-        ..flush(detail);
-    }
   }
 }
