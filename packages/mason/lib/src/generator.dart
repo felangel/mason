@@ -370,11 +370,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     if (shouldPrompt) {
       logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
       _overwriteRule = logger
-          .prompt(
-            yellow.wrap(
-              styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
-            ),
-          )
+          .prompt(yellow.wrap('Overwrite ${p.basename(file.path)}? (Yyna)'))
           .toOverwriteRule();
     }
 

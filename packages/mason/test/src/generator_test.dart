@@ -322,9 +322,9 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
+        verify(() => logger.delayed(any(that: contains('new ')))).called(1);
         verifyNever(
-          () => logger.delayed(any(that: contains('(identical)'))),
+          () => logger.delayed(any(that: contains('identical '))),
         );
 
         final files2 = await generator.generate(
@@ -350,9 +350,9 @@ void main() {
           ),
         );
         verify(
-          () => logger.delayed(any(that: contains('(identical)'))),
+          () => logger.delayed(any(that: contains('identical '))),
         ).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
+        verifyNever(() => logger.delayed(any(that: contains('new '))));
       });
 
       test(
@@ -389,8 +389,8 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(skip)'))));
+        verify(() => logger.delayed(any(that: contains('new ')))).called(1);
+        verifyNever(() => logger.delayed(any(that: contains('skip '))));
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -415,8 +415,8 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(skip)')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
+        verify(() => logger.delayed(any(that: contains('skip ')))).called(1);
+        verifyNever(() => logger.delayed(any(that: contains('new '))));
       });
 
       test(
