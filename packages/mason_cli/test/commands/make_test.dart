@@ -502,8 +502,9 @@ bricks:
     });
 
     test('exits with code 70 when exception occurs post generation', () async {
-      when(() => logger.info(any(that: contains('Generated'))))
-          .thenThrow(Exception('oops'));
+      when(
+        () => logger.detail(any(that: contains('Generated'))),
+      ).thenThrow(Exception('oops'));
       final result = await commandRunner.run(
         ['make', 'greeting', '--name', 'test-name'],
       );
