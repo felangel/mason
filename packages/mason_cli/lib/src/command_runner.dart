@@ -125,11 +125,7 @@ ${lightYellow.wrap('Changelog:')} $changelogLink
 Run ${cyan.wrap('mason update')} to update''',
           );
       }
-    } catch (error, stackTrace) {
-      _logger.detail(
-        '[update] update check error.\n$error\n$stackTrace',
-      );
-    }
+    } catch (_) {}
   }
 }
 
