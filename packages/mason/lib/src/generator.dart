@@ -350,7 +350,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
           .create(recursive: true)
           .then<File>((_) => file.writeAsBytes(contents))
           .whenComplete(
-            () => logger?.delayed('  ${lightGreen.wrap('new')} $filePath'),
+            () => logger?.delayed('  ${green.wrap('created')} $filePath'),
           );
       return GeneratedFile.created(path: file.path);
     }
@@ -377,7 +377,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     switch (_overwriteRule) {
       case OverwriteRule.alwaysSkip:
       case OverwriteRule.skipOnce:
-        logger?.delayed('  ${yellow.wrap('skip')} $filePath');
+        logger?.delayed('  ${yellow.wrap('skipped')} $filePath');
         return GeneratedFile.skipped(path: file.path);
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
@@ -400,7 +400,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
                       '  ${lightBlue.wrap('modified')} $filePath',
                     )
                   : logger?.delayed(
-                      '  ${lightGreen.wrap('new')} $filePath',
+                      '  ${green.wrap('created')} $filePath',
                     ),
             );
 
