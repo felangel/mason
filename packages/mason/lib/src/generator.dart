@@ -358,7 +358,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final existingContents = file.readAsBytesSync();
 
     if (const ListEquality<int>().equals(existingContents, contents)) {
-      logger?.delayed('  ${lightCyan.wrap('identical')} $filePath');
+      logger?.delayed('  ${cyan.wrap('identical')} $filePath');
       return GeneratedFile.identical(path: file.path);
     }
 
@@ -396,12 +396,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             )
             .whenComplete(
               () => shouldAppend
-                  ? logger?.delayed(
-                      '  ${lightBlue.wrap('modified')} $filePath',
-                    )
-                  : logger?.delayed(
-                      '  ${green.wrap('created')} $filePath',
-                    ),
+                  ? logger?.delayed('  ${lightBlue.wrap('modified')} $filePath')
+                  : logger?.delayed('  ${green.wrap('created')} $filePath'),
             );
 
         return shouldAppend
