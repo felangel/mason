@@ -31,6 +31,39 @@ class PublishCommand extends MasonCommand {
   @override
   final String name = 'publish';
 
+  /// Validate if host is a valid domain registry url.
+  bool isValidHost(String hostURI) {
+    return true;
+  }
+
+  MasonApi? _apiForHost(String? host) {
+    if (host == null) {
+      return _masonApi;
+    }
+
+    if (host == 'none') {
+      logger
+        ..err('A private brick cannot be published.')
+        ..err('''
+Please change or remove the publish_to field in the brick.yaml before publishing''');
+      return null;
+    }
+
+    final hostUri = Uri.tryParse(host);
+
+    if (hostUri == null || hostUri.host.isEmpty) {
+      logger
+        ..err('Invalid host on brick.yaml: "$host"')
+        ..err(
+          'publishTo should contain a valid registry address such as '
+          '"https://registry.brickhub.dev" or "none" for private bricks.',
+        );
+      return null;
+    }
+
+    return _masonApi.withCustomHostedUri(Uri.parse(host));
+  }
+
   @override
   Future<int> run() async {
     final directoryPath = results['directory'] as String;
@@ -47,23 +80,9 @@ class PublishCommand extends MasonCommand {
 
     final publishTo = brickYaml.publishTo;
 
-    if (publishTo == 'none') {
-      logger
-        ..err('A private brick cannot be published.')
-        ..err('''
-Please change or remove the publish_to field in the brick.yaml before publishing''');
+    final _masonApi = _apiForHost(publishTo);
+    if (_masonApi == null) {
       return ExitCode.software.code;
-    }
-
-    final MasonApi _masonApi;
-    if (publishTo != null && publishTo.isNotEmpty) {
-      logger.info('Publishing brick to $publishTo');
-      _masonApi = MasonApi(
-        hostedUri: Uri.parse(publishTo),
-        httpClient: this._masonApi.httpClient,
-      );
-    } else {
-      _masonApi = this._masonApi;
     }
 
     final user = _masonApi.currentUser;

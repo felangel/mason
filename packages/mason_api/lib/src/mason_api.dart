@@ -62,7 +62,7 @@ class MasonApiSearchFailure extends MasonApiException {
 class MasonApi {
   /// {@macro mason_api}
   MasonApi({http.Client? httpClient, Uri? hostedUri})
-      : httpClient = httpClient ?? http.Client(),
+      : _httpClient = httpClient ?? http.Client(),
         _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev', '') {
     _loadCredentials();
   }
@@ -72,9 +72,15 @@ class MasonApi {
   static const _unknownErrorMessage = 'An unknown error occurred.';
 
   final Uri _hostedUri;
+  final http.Client _httpClient;
 
-  /// The [http.Client] that is used to make requests.
-  final http.Client httpClient;
+  /// Create another [MasonApi] with a new hosted URI.
+  MasonApi withCustomHostedUri(Uri hostedUri) {
+    return MasonApi(
+      httpClient: _httpClient,
+      hostedUri: hostedUri,
+    );
+  }
 
   /// The location for mason-specific configuration.
   ///
@@ -103,7 +109,7 @@ class MasonApi {
   Future<Iterable<BrickSearchResult>> search({required String query}) async {
     final http.Response response;
     try {
-      response = await httpClient.get(
+      response = await _httpClient.get(
         Uri.parse('$_hostedUri/api/v1/search?q=$query'),
       );
     } catch (error) {
@@ -137,7 +143,7 @@ class MasonApi {
   Future<User> login({required String email, required String password}) async {
     final http.Response response;
     try {
-      response = await httpClient.post(
+      response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/oauth/token'),
         body: json.encode({
           'grant_type': 'password',
@@ -208,7 +214,7 @@ class MasonApi {
 
     final http.Response response;
     try {
-      response = await httpClient.post(
+      response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/bricks'),
         headers: {
           'Authorization':
@@ -239,14 +245,14 @@ class MasonApi {
   /// Closes the client and cleans up any resources associated with it.
   /// It's important to close each client when it's done being used;
   /// failing to do so can cause the Dart process to hang.
-  void close() => httpClient.close();
+  void close() => _httpClient.close();
 
   /// Attempt to refresh the current credentials and return
   /// refreshed credentials.
   Future<Credentials> _refresh() async {
     final http.Response response;
     try {
-      response = await httpClient.post(
+      response = await _httpClient.post(
         Uri.parse('$_hostedUri/api/v1/oauth/token'),
         body: json.encode({
           'grant_type': 'refresh_token',

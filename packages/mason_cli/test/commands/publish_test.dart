@@ -20,8 +20,14 @@ class MockArgResults extends Mock implements ArgResults {}
 
 class MockProgress extends Mock implements Progress {}
 
+class FakeUri extends Fake implements Uri {}
+
 void main() {
   final cwd = Directory.current;
+
+  setUpAll(() {
+    registerFallbackValue(FakeUri());
+  });
 
   group('PublishCommand', () {
     final brickPath =
@@ -62,23 +68,10 @@ void main() {
       ).called(1);
     });
 
-    test('exits with code 70 when not logged in', () async {
-      when(() => argResults['directory'] as String).thenReturn(brickPath);
-      final result = await publishCommand.run();
-      expect(result, equals(ExitCode.software.code));
-      verify(() => logger.err('You must be logged in to publish.')).called(1);
-      verify(
-        () => logger.err("Run 'mason login' to log in and try again."),
-      ).called(1);
-    });
-
     test('exits with code 70 when it is a private brick', () async {
       final brickPath =
           p.join('..', '..', '..', '..', '..', 'bricks', 'greeting_private');
 
-      final user = MockUser();
-      when(() => user.emailVerified).thenReturn(true);
-      when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
 
       final result = await publishCommand.run();
@@ -88,7 +81,44 @@ void main() {
       ).called(1);
       verify(
         () => logger.err('''
-Please change the publish_to field in the brick.yaml before publishing'''),
+Please change or remove the publish_to field in the brick.yaml before publishing'''),
+      ).called(1);
+    });
+
+    test('exits with code 70 when publishTo has an invalid value', () async {
+      final brickPath = p.join(
+        '..',
+        '..',
+        '..',
+        '..',
+        '..',
+        'bricks',
+        'greeting_invalid_host',
+      );
+
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+      final result = await publishCommand.run();
+
+      verify(
+        () => logger.err('Invalid host on brick.yaml: "somewhere I guess?"'),
+      ).called(1);
+      verify(
+        () => logger.err(
+          'publishTo should contain a valid registry address such as '
+          '"https://registry.brickhub.dev" or "none" for private bricks.',
+        ),
+      ).called(1);
+
+      expect(result, equals(ExitCode.software.code));
+    });
+
+    test('exits with code 70 when not logged in', () async {
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+      final result = await publishCommand.run();
+      expect(result, equals(ExitCode.software.code));
+      verify(() => logger.err('You must be logged in to publish.')).called(1);
+      verify(
+        () => logger.err("Run 'mason login' to log in and try again."),
       ).called(1);
     });
 
@@ -221,5 +251,67 @@ Please change the publish_to field in the brick.yaml before publishing'''),
       }).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
     });
+
+    test(
+      'exits with code 0 when publish succeeds on custom host (publishTo)',
+      () async {
+        final brickPath = p.join(
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          'bricks',
+          'greeting_custom_host',
+        );
+
+        final user = MockUser();
+        final progressLogs = <String>[];
+        when(() => user.emailVerified).thenReturn(true);
+
+        final customMasonApi = MockMasonApi();
+
+        when(() => masonApi.withCustomHostedUri(any()))
+            .thenReturn(customMasonApi);
+
+        when(() => customMasonApi.currentUser).thenReturn(user);
+        when(
+          () => customMasonApi.publish(bundle: any(named: 'bundle')),
+        ).thenAnswer((_) async {});
+        final progress = MockProgress();
+        when(() => progress.complete(any())).thenAnswer((invocation) {
+          final update = invocation.positionalArguments[0] as String?;
+          if (update != null) progressLogs.add(update);
+        });
+        when(() => logger.progress(any())).thenReturn(progress);
+        when(() => logger.confirm(any())).thenReturn(true);
+        when(() => argResults['directory'] as String).thenReturn(brickPath);
+        final result = await publishCommand.run();
+        expect(result, equals(ExitCode.success.code));
+        expect(
+          progressLogs,
+          equals([
+            'Bundled greeting_custom_host',
+            'Published greeting_custom_host 0.1.0+1',
+          ]),
+        );
+
+        verify(
+          () => masonApi
+              .withCustomHostedUri(Uri.parse('https://not-brickhub.dev')),
+        ).called(1);
+        verify(
+          () => logger.progress('Publishing greeting_custom_host 0.1.0+1'),
+        ).called(1);
+        verify(
+          () => logger.success(
+            '''\nPublished greeting_custom_host 0.1.0+1 to ${BricksJson.hostedUri}.''',
+          ),
+        ).called(1);
+        verify(
+          () => customMasonApi.publish(bundle: any(named: 'bundle')),
+        ).called(1);
+      },
+    );
   });
 }
