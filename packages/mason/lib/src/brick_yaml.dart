@@ -181,10 +181,10 @@ class BrickVariableProperties {
   /// Creates an instance of a [BrickVariableProperties]
   /// of type [BrickVariableType.enumeration].
   const BrickVariableProperties.enumeration({
+    required List<String> values,
     String? description,
     String? defaultValue,
     String? prompt,
-    required List<String> values,
   }) : this(
           type: BrickVariableType.enumeration,
           description: description,
@@ -198,10 +198,10 @@ class BrickVariableProperties {
   /// Creates an instance of a [BrickVariableProperties]
   /// of type [BrickVariableType.array].
   const BrickVariableProperties.array({
+    required List<String> values,
     String? description,
     List<String>? defaultValues,
     String? prompt,
-    required List<String> values,
   }) : this(
           type: BrickVariableType.array,
           description: description,

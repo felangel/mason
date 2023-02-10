@@ -1,3 +1,7 @@
+# 0.1.0-dev.44
+
+- fix: silent update failures
+
 # 0.1.0-dev.43
 
 - deps: upgrade dependencies
