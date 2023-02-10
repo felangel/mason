@@ -40,6 +40,32 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
+    final brickYaml = checkedYamlDecode(
+      brickYamlFile.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    final publishTo = brickYaml.publishTo;
+
+    if (publishTo == 'none') {
+      logger
+        ..err('A private brick cannot be published.')
+        ..err('''
+Please change or remove the publish_to field in the brick.yaml before publishing''');
+      return ExitCode.software.code;
+    }
+
+    final MasonApi _masonApi;
+    if (publishTo != null && publishTo.isNotEmpty) {
+      logger.info('Publishing brick to $publishTo');
+      _masonApi = MasonApi(
+        hostedUri: Uri.parse(publishTo),
+        httpClient: this._masonApi.httpClient,
+      );
+    } else {
+      _masonApi = this._masonApi;
+    }
+
     final user = _masonApi.currentUser;
     if (user == null) {
       logger
@@ -50,19 +76,6 @@ class PublishCommand extends MasonCommand {
 
     if (!user.emailVerified) {
       logger.err('You must verify your email in order to publish.');
-      return ExitCode.software.code;
-    }
-
-    final brickYaml = checkedYamlDecode(
-      brickYamlFile.readAsStringSync(),
-      (m) => BrickYaml.fromJson(m!),
-    );
-
-    if (brickYaml.publishTo == 'none') {
-      logger
-        ..err('A private brick cannot be published.')
-        ..err('''
-Please change the publish_to field in the brick.yaml before publishing''');
       return ExitCode.software.code;
     }
 
