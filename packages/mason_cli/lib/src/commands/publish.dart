@@ -31,11 +31,6 @@ class PublishCommand extends MasonCommand {
   @override
   final String name = 'publish';
 
-  /// Validate if host is a valid domain registry url.
-  bool isValidHost(String hostURI) {
-    return true;
-  }
-
   MasonApi? _apiForHost(String? host) {
     if (host == null) {
       return _masonApi;

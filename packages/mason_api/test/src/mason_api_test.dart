@@ -86,6 +86,30 @@ void main() {
       });
     });
 
+    group('withCustomHostedUri', () {
+      test('Creates another MasonAPI with a enw hosted URI', () async {
+
+        final customHostedUri = Uri.http('not-brickhub.dev');
+        masonApi = MasonApi(httpClient: httpClient);
+        final customMasonApi = masonApi.withCustomHostedUri(customHostedUri);
+        try {
+          await customMasonApi.login(email: email, password: password);
+        } catch (_) {}
+        verify(
+              () => httpClient.post(
+            Uri.http(customHostedUri.authority, 'api/v1/oauth/token'),
+            body: json.encode({
+              'grant_type': 'password',
+              'username': email,
+              'password': password,
+            }),
+          ),
+        ).called(1);
+
+
+      });
+    });
+
     group('close', () {
       test('closes the underlying httpClient', () {
         MasonApi(httpClient: httpClient).close();
