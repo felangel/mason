@@ -58,41 +58,38 @@ mixin InstallBrickMixin on MasonCommand {
       bricksJson.clear();
       final masonYaml = global ? globalMasonYaml : localMasonYaml;
       if (masonYaml.bricks.entries.isNotEmpty) {
-        await Future.wait(
-          masonYaml.bricks.entries.map(
-            (entry) {
-              return () async {
-                getBricksProgress.update('Resolving ${entry.key}');
-                final location = resolveBrickLocation(
-                  location: entry.value,
-                  lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
-                );
-                final masonYamlFile =
-                    global ? globalMasonYamlFile : localMasonYamlFile;
-                final normalizedLocation = location.path != null
-                    ? BrickLocation(
-                        path: canonicalize(
-                          p.join(masonYamlFile.parent.path, location.path),
-                        ),
-                      )
-                    : location;
-                getBricksProgress.update('Installing ${entry.key}');
-                final cachedBrick = await bricksJson.add(
-                  Brick(name: entry.key, location: normalizedLocation),
-                );
-                resolvedBricks.addAll(
-                  <String, BrickLocation>{
-                    entry.key: cachedBrick.brick.location
-                  },
-                );
-                getBricksProgress.update('Compiling ${entry.key}');
-                final generator = await MasonGenerator.fromBrick(
-                  Brick.path(cachedBrick.path),
-                );
-                await generator.hooks.compile();
-              }();
-            },
-          ),
+        await Future.forEach(
+          masonYaml.bricks.entries,
+          (entry) {
+            return () async {
+              getBricksProgress.update('Resolving ${entry.key}');
+              final location = resolveBrickLocation(
+                location: entry.value,
+                lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
+              );
+              final masonYamlFile =
+                  global ? globalMasonYamlFile : localMasonYamlFile;
+              final normalizedLocation = location.path != null
+                  ? BrickLocation(
+                      path: canonicalize(
+                        p.join(masonYamlFile.parent.path, location.path),
+                      ),
+                    )
+                  : location;
+              getBricksProgress.update('Installing ${entry.key}');
+              final cachedBrick = await bricksJson.add(
+                Brick(name: entry.key, location: normalizedLocation),
+              );
+              resolvedBricks.addAll(
+                <String, BrickLocation>{entry.key: cachedBrick.brick.location},
+              );
+              getBricksProgress.update('Compiling ${entry.key}');
+              final generator = await MasonGenerator.fromBrick(
+                Brick.path(cachedBrick.path),
+              );
+              await generator.hooks.compile();
+            }();
+          },
         );
       }
     } finally {
