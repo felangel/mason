@@ -1347,5 +1347,25 @@ bricks:
         () => logger.err(any(that: contains('5 files changed'))),
       ).called(1);
     });
+
+    test('generates hello_world (--quiet mode)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hello_world_quiet'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'hello_world', '--name', 'dash', '--quiet'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hello_world_quiet'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+      verifyNever(() => logger.flush(any()));
+    });
   });
 }
