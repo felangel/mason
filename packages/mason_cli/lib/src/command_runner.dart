@@ -88,8 +88,6 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
       return ExitCode.success.code;
     }
 
-    if (topLevelResults['verbose'] == true) _logger.level = Level.verbose;
-
     int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
       _logger.info(packageVersion);
@@ -105,7 +103,6 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
     try {
       final latestVersion = await _pubUpdater.getLatestVersion(packageName);
       final isUpToDate = packageVersion == latestVersion;
-
       if (!isUpToDate) {
         final changelogLink = lightCyan.wrap(
           styleUnderlined.wrap(
@@ -135,12 +132,6 @@ extension on ArgParser {
       'version',
       negatable: false,
       help: 'Print the current version.',
-    );
-    addFlag(
-      'verbose',
-      abbr: 'v',
-      negatable: false,
-      help: 'Output additional logs.',
-    );
+    );  
   }
 }

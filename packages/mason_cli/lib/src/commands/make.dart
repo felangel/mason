@@ -84,6 +84,7 @@ class _MakeCommand extends MasonCommand {
     final setExitIfChanged = results['set-exit-if-changed'] as bool;
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
+    final quietMode = results['quiet'] as bool;
     final path = File(_brick.path!).parent.path;
     final generator = await MasonGenerator.fromBrick(Brick.path(path));
     final vars = <String, dynamic>{};
@@ -186,7 +187,10 @@ class _MakeCommand extends MasonCommand {
       generateProgress.complete(
         'Generated ${files.length} ${files.length == 1 ? 'file' : 'files'}.',
       );
-      logger.flush(logger.detail);
+
+      if (!quietMode) {
+        logger.flush((message) => logger.info(darkGray.wrap(message)));
+      }
 
       if (!disableHooks) {
         await generator.hooks.postGen(
@@ -272,7 +276,13 @@ extension on BrickVariableProperties {
 
 extension on ArgParser {
   void addOptions() {
-    addFlag('no-hooks', help: 'skips running hooks', negatable: false);
+    addFlag(
+      'quiet',
+      abbr: 'q',
+      help: 'Run with reduced verbosity.',
+      negatable: false,
+    );
+    addFlag('no-hooks', help: 'Skips running hooks.', negatable: false);
     addFlag(
       'set-exit-if-changed',
       help: 'Return exit code 70 if there are files modified.',
