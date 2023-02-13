@@ -132,6 +132,6 @@ extension on ArgParser {
       'version',
       negatable: false,
       help: 'Print the current version.',
-    );  
+    );
   }
 }
