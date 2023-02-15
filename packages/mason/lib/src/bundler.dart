@@ -114,7 +114,9 @@ MasonBundledFile _bundleHookFile(File file, Directory hooksDirectory) {
 
 File _unbundleFile(MasonBundledFile file, String target) {
   final data = base64.decode(file.data);
-  final filePath = normalize(path.join(target, file.path)).replaceAll('//?/', r'\\?\');
+  print('SEPERATOR: ${path.context.separator}');
+  print(normalize(path.join(target, file.path)).replaceAll('//?/', r'\\?\'));
+  final filePath = normalize(path.join(target, file.path));
   return File(filePath)
     ..createSync(recursive: true)
     ..writeAsBytesSync(data);
