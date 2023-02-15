@@ -1,3 +1,25 @@
+# 0.1.0-dev.45
+
+- feat: add `--quiet` flag to `make` command
+- deps: upgrade dependencies
+  - `Dart >=2.19`
+  - `mason ^0.1.0-dev.42`
+  - `mason_api ^0.1.0-dev.10`
+  - `very_good_analysis ^4.0.0`
+
+# 0.1.0-dev.44
+
+- fix: silent update failures
+
+# 0.1.0-dev.43
+
+- deps: upgrade dependencies
+  - `Dart >=2.17`
+  - `cli_completion ^0.2.0`
+  - `mason ^0.1.0-dev.41`
+  - `mason_api ^0.1.0-dev.9`
+  - `very_good_analysis ^3.1.0`
+
 # 0.1.0-dev.42
 
 - deps: upgrade to `mason: ^0.1.0-dev.40`

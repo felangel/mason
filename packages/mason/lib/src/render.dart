@@ -158,7 +158,7 @@ extension on String {
 /// {@endtemplate}
 extension ResolvePartial on Map<String, List<int>> {
   /// {@macro resolve_partial}
-  Template? resolve(final String name) {
+  Template? resolve(String name) {
     final content = this['{{~ $name }}'];
     if (content == null) return null;
     final decoded = utf8.decode(content);

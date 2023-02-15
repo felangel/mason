@@ -342,6 +342,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   }) async {
     _overwriteRule ??= overwriteRule;
     final file = File(p.join(dir.path, path));
+    final filePath = darkGray.wrap(p.relative(file.path));
     final fileExists = file.existsSync();
 
     if (!fileExists) {
@@ -349,7 +350,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
           .create(recursive: true)
           .then<File>((_) => file.writeAsBytes(contents))
           .whenComplete(
-            () => logger?.delayed('  ${file.path} ${lightGreen.wrap('(new)')}'),
+            () => logger?.delayed('  ${green.wrap('created')} $filePath'),
           );
       return GeneratedFile.created(path: file.path);
     }
@@ -357,7 +358,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final existingContents = file.readAsBytesSync();
 
     if (const ListEquality<int>().equals(existingContents, contents)) {
-      logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+      logger?.delayed('  ${cyan.wrap('identical')} $filePath');
       return GeneratedFile.identical(path: file.path);
     }
 
@@ -367,12 +368,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             _overwriteRule != OverwriteRule.alwaysAppend);
 
     if (shouldPrompt) {
-      logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
       _overwriteRule = logger
           .prompt(
-            yellow.wrap(
-              styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
-            ),
+            lightYellow.wrap('Overwrite ${p.basename(file.path)}? (Yyna)'),
           )
           .toOverwriteRule();
     }
@@ -380,7 +379,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     switch (_overwriteRule) {
       case OverwriteRule.alwaysSkip:
       case OverwriteRule.skipOnce:
-        logger?.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        logger?.delayed('  ${yellow.wrap('skipped')} $filePath');
         return GeneratedFile.skipped(path: file.path);
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
@@ -399,12 +398,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             )
             .whenComplete(
               () => shouldAppend
-                  ? logger?.delayed(
-                      '  ${file.path} ${lightBlue.wrap('(modified)')}',
-                    )
-                  : logger?.delayed(
-                      '  ${file.path} ${lightGreen.wrap('(new)')}',
-                    ),
+                  ? logger?.delayed('  ${lightBlue.wrap('modified')} $filePath')
+                  : logger?.delayed('  ${green.wrap('created')} $filePath'),
             );
 
         return shouldAppend
@@ -583,7 +578,7 @@ Future<Set<FileContents>> _runSubstitutionAsync(
   Map<String, List<int>> partials,
 ) async {
   return compute(
-    (List inputs) {
+    (List<dynamic> inputs) {
       final file = inputs[0] as TemplateFile;
       final vars = inputs[1] as Map<String, dynamic>;
       final partials = inputs[2] as Map<String, List<int>>;

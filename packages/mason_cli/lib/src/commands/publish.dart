@@ -15,10 +15,9 @@ const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
 /// {@endtemplate}
 class PublishCommand extends MasonCommand {
   /// {@macro publish_command}
-  PublishCommand({Logger? logger, MasonApi? masonApi, int? maxBundleSize})
+  PublishCommand({super.logger, MasonApi? masonApi, int? maxBundleSize})
       : _masonApi = masonApi ?? MasonApi(),
-        _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes,
-        super(logger: logger) {
+        _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes {
     argParser.addOptions();
   }
 

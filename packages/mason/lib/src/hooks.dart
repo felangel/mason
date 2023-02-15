@@ -279,7 +279,7 @@ class GeneratorHooks {
     String? workingDirectory,
     Logger? logger,
   }) async {
-    final subscriptions = <StreamSubscription>[];
+    final subscriptions = <StreamSubscription<dynamic>>[];
     final messagePort = ReceivePort();
     final errorPort = ReceivePort();
     final exitPort = ReceivePort();

@@ -11,7 +11,7 @@ import 'package:path/path.dart' as p;
 /// {@endtemplate}
 class AddCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro add_command}
-  AddCommand({Logger? logger}) : super(logger: logger) {
+  AddCommand({super.logger}) {
     argParser
       ..addFlag(
         'global',

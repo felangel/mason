@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:mason/mason.dart' hide packageVersion, Brick;
+import 'package:mason/mason.dart' hide Brick, packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
 
@@ -10,9 +10,8 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class SearchCommand extends MasonCommand {
   /// {@macro logout_command}
-  SearchCommand({Logger? logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi(),
-        super(logger: logger);
+  SearchCommand({super.logger, MasonApi? masonApi})
+      : _masonApi = masonApi ?? MasonApi();
 
   final MasonApi _masonApi;
 

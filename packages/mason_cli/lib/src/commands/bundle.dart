@@ -20,7 +20,7 @@ enum BundleType {
 /// {@endtemplate}
 class BundleCommand extends MasonCommand {
   /// {@macro bundle_command}
-  BundleCommand({Logger? logger}) : super(logger: logger) {
+  BundleCommand({super.logger}) {
     argParser
       ..addOption(
         'output-dir',

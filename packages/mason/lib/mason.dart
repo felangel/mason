@@ -12,10 +12,10 @@ export 'src/brick.dart' show Brick;
 export 'src/brick_compatibility.dart' show isBrickCompatibleWithMason;
 export 'src/brick_yaml.dart'
     show
-        BrickYaml,
         BrickEnvironment,
         BrickVariableProperties,
-        BrickVariableType;
+        BrickVariableType,
+        BrickYaml;
 export 'src/bricks_json.dart' show BricksJson, CachedBrick;
 export 'src/bundler.dart' show createBundle, unpackBundle;
 export 'src/exception.dart' show BrickNotFoundException, MasonException;
