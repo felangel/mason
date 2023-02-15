@@ -7,17 +7,10 @@ import 'package:path/path.dart' as p;
 /// However, it does not change the ASCII case of the path.
 /// See https://github.com/dart-lang/path/issues/102.
 String canonicalize(String path) {
-  if (path.startsWith(r'\\?\')) {
-    return '${r'\\?\'}${p.normalize(p.absolute(path.substring(4))).replaceAll(r'\', '/')}';
-  }
-
   return p.normalize(p.absolute(path)).replaceAll(r'\', '/');
 }
 
 /// Normalizes the [path].
 String normalize(String path) {
-  if (path.startsWith(r'\\?\')) {
-    return '${r'\\?\'}${p.normalize(path.substring(4)).replaceAll(r'\', '/')}';
-  }
   return p.normalize(path).replaceAll(r'\', '/');
 }
