@@ -1,5 +1,12 @@
 part of 'mason_logger.dart';
 
+final RegExp _stripRegex = RegExp(
+  [
+    r'[\u001B\u009B][[\]()#;?]*(?:(?:(?:[a-zA-Z\d]*(?:;[-a-zA-Z\d\/#&.:=?%@~_]*)*)?\u0007)',
+    r'(?:(?:\d{1,4}(?:;\\d{0,4})*)?[\dA-PR-TZcf-ntqry=><~]))'
+  ].join('|'),
+);
+
 /// {@template progress_options}
 /// An object containing configuration for a [Progress] instance.
 /// {@endtemplate}
@@ -86,6 +93,8 @@ class Progress {
 
   int _index = 0;
 
+  String? _prevMessage;
+
   /// End the progress and mark it as a successful completion.
   ///
   /// See also:
@@ -95,7 +104,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
+      '''$_clearPrevMessage${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer?.cancel();
   }
@@ -108,27 +117,49 @@ class Progress {
   /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
-    _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
+    _write('$_clearPrevMessage${red.wrap('✗')} ${update ?? _message} $_time\n');
     _stopwatch.stop();
   }
 
   /// Update the progress message.
   void update(String update) {
-    if (_timer != null) _write(_clearLine);
+    if (_timer != null) _write(_clearPrevMessage);
     _message = update;
     _onTick(_timer);
   }
 
-  /// Cancel the progress and remove the written line.
+  /// Cancel the progress and remove the previous message.
   void cancel() {
     _timer?.cancel();
-    _write(_clearLine);
+    _write(_clearPrevMessage);
     _stopwatch.stop();
   }
 
-  String get _clearLine {
+  String get _clearPrevMessage {
+    if (_stdout.hasTerminal) {
+      final prevMessageLength = _strip(_prevMessage ?? '').length;
+      final maxLineLength = _stdout.terminalColumns;
+      final linesToClear = (prevMessageLength / maxLineLength).ceil();
+
+      return <String>[
+        for (var i = 0; i < linesToClear; i++) ...[
+          '\u001b[2K', // clear current line
+          if (i == linesToClear - 1) ...[
+            '\r', // bring cursor to the start of the current line
+          ] else ...[
+            '\u001b[1A', // move cursor up one line
+          ]
+        ],
+      ].join(); // for each line of previous message
+    }
+
     return '\u001b[2K' // clear current line
         '\r'; // bring cursor to the start of the current line
+  }
+
+  /// Removes any ANSI styling from [input].
+  String _strip(String input) {
+    return input.replaceAll(_stripRegex, '');
   }
 
   void _onTick(Timer? _) {
@@ -137,11 +168,12 @@ class Progress {
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
 
-    _write('$_clearLine$prefix$_message${_options.trailing} $_time');
+    _write('$_clearPrevMessage$prefix$_message${_options.trailing} $_time');
   }
 
   void _write(String object) {
     if (_level.index > Level.info.index) return;
+    _prevMessage = object;
     _stdout.write(object);
   }
 
