@@ -7,8 +7,8 @@ import 'package:path/path.dart' as p;
 /// However, it does not change the ASCII case of the path.
 /// See https://github.com/dart-lang/path/issues/102.
 String canonicalize(String path) {
-  return p.normalize(p.absolute(path)).replaceAll(r'\', '/');
+  return p.normalize(p.absolute(path));
 }
 
 /// Normalizes the [path].
-String normalize(String path) => p.normalize(path).replaceAll(r'\', '/');
+String normalize(String path) => p.normalize(path);

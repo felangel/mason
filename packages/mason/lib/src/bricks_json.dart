@@ -445,11 +445,14 @@ class BricksJson {
     if (environment.containsKey('MASON_CACHE')) {
       return Directory(environment['MASON_CACHE']!);
     } else if (isWindows) {
+      const longPathPrefix = r'\\?\';
       final appData = environment['APPDATA']!;
       final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
-      if (appDataCacheDir.existsSync()) return Directory(appDataCacheDir.path);
+      if (appDataCacheDir.existsSync()) {
+        return Directory(longPathPrefix + appDataCacheDir.path);
+      }
       final localAppData = environment['LOCALAPPDATA']!;
-      return Directory(p.join(localAppData, 'Mason', 'Cache'));
+      return Directory(longPathPrefix + p.join(localAppData, 'Mason', 'Cache'));
     } else {
       return Directory(p.join(environment['HOME']!, '.mason-cache'));
     }

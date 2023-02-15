@@ -684,7 +684,10 @@ environment:
         )..createSync(recursive: true);
         BricksJson.testEnvironment = {'APPDATA': directory.path};
         BricksJson.testIsWindows = true;
-        expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));
+        expect(
+          BricksJson.rootDir.path,
+          equals('${r'\\?\'}${appDataCacheDirectory.path}'),
+        );
       });
 
       test(
@@ -699,7 +702,10 @@ environment:
           'LOCALAPPDATA': directory.path
         };
         BricksJson.testIsWindows = true;
-        expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));
+        expect(
+          BricksJson.rootDir.path,
+          equals('${r'\\?\'}${appDataCacheDirectory.path}'),
+        );
       });
 
       test('uses HOME by default', () {
