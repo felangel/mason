@@ -123,7 +123,6 @@ class Progress {
 
   /// Update the progress message.
   void update(String update) {
-    if (_timer != null) _write(_clearPrevMessage);
     _message = update;
     _onTick(_timer);
   }

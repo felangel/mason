@@ -24,6 +24,7 @@ void main() {
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(80);
     });
 
     group('theme', () {
@@ -622,7 +623,6 @@ void main() {
     group('.progress', () {
       test('writes lines to stdout', () async {
         when(() => stdout.hasTerminal).thenReturn(true);
-        when(() => stdout.terminalColumns).thenReturn(16);
         await IOOverrides.runZoned(
           () async {
             const time = '(0.Xs)';
