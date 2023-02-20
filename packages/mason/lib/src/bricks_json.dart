@@ -198,19 +198,6 @@ class BricksJson {
   /// Writes remote brick via git url to cache
   /// and returns the local path to the brick.
   Future<CachedBrick> _addRemoteBrickFromGit(Brick brick) async {
-    final gitPath = brick.location.git!;
-    final tempDirectory = await _clone(gitPath);
-    final commitHash = await _revParse(tempDirectory);
-    final resolvedBrick = Brick.git(
-      GitPath(gitPath.url, path: gitPath.path, ref: commitHash),
-    );
-    final dirName = _encodedGitDir(gitPath, commitHash);
-
-    final directory = Directory(p.join(rootDir.path, 'git', dirName));
-    final directoryExists = directory.existsSync();
-    final directoryIsNotEmpty =
-        directoryExists && directory.listSync(recursive: true).isNotEmpty;
-
     BrickYaml _getBrickYaml(Directory directory) {
       final gitPath = brick.location.git!;
       final brickYaml = File(
@@ -233,31 +220,36 @@ class BricksJson {
       return yaml;
     }
 
-    /// Even if a cached version exists, still try to update.
-    /// Fall-back to cached version if update fails.
-    if (directoryExists && directoryIsNotEmpty) {
-      try {
-        await directory.delete(recursive: true);
-        await directory.parent.create(recursive: true);
-        await tempDirectory.rename(directory.path);
-      } catch (_) {}
+    final gitPath = brick.location.git!;
 
-      final yaml = _getBrickYaml(directory);
-      final name = brick.name ?? yaml.name;
+    // Attempt to fetch brick from cache.
+    if (gitPath.ref != null) {
+      final commitHash = gitPath.ref!;
+      final dirName = _encodedGitDir(gitPath, commitHash);
+      final directory = Directory(p.join(rootDir.path, 'git', dirName));
 
-      if (yaml.name != name) {
-        throw MasonYamlNameMismatch(
-          'Brick name "$name" '
-          'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
-        );
+      if (directory.existsSync()) {
+        final brickYaml = _getBrickYaml(directory);
+        final name = brick.name ?? brickYaml.name;
+        final localPath =
+            _cache[name] ?? canonicalize(p.join(directory.path, gitPath.path));
+
+        if (_cache[name] == null) _cache[name] = localPath;
+
+        return CachedBrick(brick: brick, path: localPath);
       }
-
-      _verifyMasonVersionConstraint(yaml);
-
-      final localPath = canonicalize(p.join(directory.path, gitPath.path));
-      _cache[name] = localPath;
-      return CachedBrick(brick: resolvedBrick, path: localPath);
     }
+
+    // Fetch brick from remote git repository.
+    final tempDirectory = await _clone(gitPath);
+    final commitHash = await _revParse(tempDirectory);
+    final resolvedBrick = Brick.git(
+      GitPath(gitPath.url, path: gitPath.path, ref: commitHash),
+    );
+    final dirName = _encodedGitDir(gitPath, commitHash);
+
+    final directory = Directory(p.join(rootDir.path, 'git', dirName));
+    final directoryExists = directory.existsSync();
 
     if (directoryExists) await directory.delete(recursive: true);
 

@@ -52,46 +52,98 @@ mixin InstallBrickMixin on MasonCommand {
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final lockJson = global ? globalMasonLockJson : localMasonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
+    final cachedBricks = <CachedBrick>[];
     final message = upgrade ? 'Upgrading bricks' : 'Getting bricks';
     final getBricksProgress = logger.progress(message);
+
+    Future<CachedBrick> _resolveBrickEntry(
+      MapEntry<String, BrickLocation> entry,
+    ) async {
+      return () async {
+        final location = resolveBrickLocation(
+          location: entry.value,
+          lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
+        );
+        final masonYamlFile = global ? globalMasonYamlFile : localMasonYamlFile;
+        final normalizedLocation = location.path != null
+            ? BrickLocation(
+                path: canonicalize(
+                  p.join(masonYamlFile.parent.path, location.path),
+                ),
+              )
+            : location;
+        getBricksProgress.update('Installing ${entry.key}');
+        final cachedBrick = await bricksJson.add(
+          Brick(name: entry.key, location: normalizedLocation),
+        );
+        resolvedBricks.addAll(
+          <String, BrickLocation>{entry.key: cachedBrick.brick.location},
+        );
+        cachedBricks.add(cachedBrick);
+        return cachedBrick;
+      }();
+    }
+
     try {
-      bricksJson.clear();
+      if (upgrade) bricksJson.clear();
       final masonYaml = global ? globalMasonYaml : localMasonYaml;
       if (masonYaml.bricks.entries.isNotEmpty) {
-        await Future.forEach(
-          masonYaml.bricks.entries,
-          (entry) {
-            return () async {
-              getBricksProgress.update('Resolving ${entry.key}');
-              final location = resolveBrickLocation(
-                location: entry.value,
-                lockedLocation: upgrade ? null : lockJson.bricks[entry.key],
+        final nonGitEntries = <MapEntry<String, BrickLocation>>[];
+        final gitEntries = <String, List<MapEntry<String, BrickLocation>>>{};
+
+        for (final entry in masonYaml.bricks.entries) {
+          if (entry.value.git != null) {
+            final path = entry.value.git!.url.replaceAll(r'\', '/');
+            final url = base64.encode(utf8.encode(path));
+            final key = '${url}_${entry.value.git!.ref ?? ''}';
+            if (gitEntries.containsKey(key)) {
+              gitEntries[key]!.add(entry);
+            } else {
+              gitEntries[key] = [entry];
+            }
+          } else {
+            nonGitEntries.add(entry);
+          }
+        }
+
+        Future<void> _resolveGitBrickEntry(String key) async {
+          final entries = gitEntries[key];
+          final firstEntry = entries!.first;
+          final result = await _resolveBrickEntry(firstEntry);
+          final commitHash = result.brick.location.git!.ref;
+
+          if (entries.length > 1) {
+            for (final entry in entries.sublist(1)) {
+              final git = entry.value.git!;
+              await _resolveBrickEntry(
+                MapEntry(
+                  entry.key,
+                  BrickLocation(
+                    git: GitPath(git.url, path: git.path, ref: commitHash),
+                  ),
+                ),
               );
-              final masonYamlFile =
-                  global ? globalMasonYamlFile : localMasonYamlFile;
-              final normalizedLocation = location.path != null
-                  ? BrickLocation(
-                      path: canonicalize(
-                        p.join(masonYamlFile.parent.path, location.path),
-                      ),
-                    )
-                  : location;
-              getBricksProgress.update('Installing ${entry.key}');
-              final cachedBrick = await bricksJson.add(
-                Brick(name: entry.key, location: normalizedLocation),
-              );
-              resolvedBricks.addAll(
-                <String, BrickLocation>{entry.key: cachedBrick.brick.location},
-              );
-              getBricksProgress.update('Compiling ${entry.key}');
-              final generator = await MasonGenerator.fromBrick(
-                Brick.path(cachedBrick.path),
-              );
-              await generator.hooks.compile();
-            }();
-          },
-        );
+            }
+          }
+        }
+
+        await Future.wait([
+          ...gitEntries.keys.map(_resolveGitBrickEntry),
+          ...nonGitEntries.map(_resolveBrickEntry),
+        ]);
       }
+
+      getBricksProgress.update('Compiling bricks');
+      await Future.wait(
+        cachedBricks.map((cachedBrick) {
+          return () async {
+            final generator = await MasonGenerator.fromBrick(
+              Brick.path(cachedBrick.path),
+            );
+            await generator.hooks.compile();
+          }();
+        }),
+      );
     } finally {
       getBricksProgress.complete(message);
       await bricksJson.flush();
