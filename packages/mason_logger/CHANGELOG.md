@@ -1,3 +1,7 @@
+# 0.2.5
+
+- deps: upgrade to `Dart >=2.19` and `very_good_analysis ^4.0.0`
+
 # 0.2.4
 
 - fix: `warn` with an empty `tag` should not include `[]`

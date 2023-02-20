@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:math';
 
-import 'package:mason/mason.dart' hide packageVersion, Brick;
+import 'package:mason/mason.dart' hide Brick, packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
 

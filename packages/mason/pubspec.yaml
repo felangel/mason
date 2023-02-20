@@ -1,14 +1,14 @@
 name: mason
 description: >
   A Dart template generator which helps teams generate files quickly and consistently.
-version: 0.1.0-dev.41
+version: 0.1.0-dev.42
 homepage: https://github.com/felangel/mason
 repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
 documentation: https://github.com/felangel/mason/tree/master/packages/mason_cli#readme
 
 environment:
-  sdk: ">=2.17.0 <3.0.0"
+  sdk: ">=2.19.0 <3.0.0"
 
 dependencies:
   archive: ^3.1.11
@@ -18,7 +18,7 @@ dependencies:
   crypto: ^3.0.1
   http: ^0.13.3
   json_annotation: ^4.4.0
-  mason_logger: ^0.2.4
+  mason_logger: ^0.2.5
   meta: ^1.7.0
   mustache_template: ^2.0.0
   path: ^1.8.0
@@ -34,4 +34,4 @@ dev_dependencies:
   json_serializable: ^6.0.0
   mocktail: ^0.3.0
   test: ^1.17.0
-  very_good_analysis: ^3.1.0
+  very_good_analysis: ^4.0.0
