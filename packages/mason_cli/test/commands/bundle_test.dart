@@ -84,12 +84,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
           ),
         );
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(
@@ -147,12 +147,12 @@ void main() {
             '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
           ),
         );
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling hooks')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(
@@ -201,12 +201,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}});''',
           ),
         );
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(
@@ -276,12 +276,12 @@ void main() {
             '''"name":"hooks","description":"A Hooks Example Template","version":"0.1.0+1","environment":{"mason":"any"},"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}''',
           ),
         );
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling hooks')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(
@@ -421,12 +421,12 @@ void main() {
             '''"vars":{"name":{"type":"string","description":"Your name","default":"Dash","prompt":"What is your name?"}}}''',
           ),
         );
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(
@@ -460,7 +460,7 @@ void main() {
 
         expect(result, equals(ExitCode.usage.code));
 
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(
           () => logger.err('Could not find brick at $url'),
         ).called(1);
@@ -499,12 +499,12 @@ void main() {
         expect(actual, contains('"changelog":{"path":"CHANGELOG.md","data":"'));
         expect(actual, contains('"license":{"path":"LICENSE","data":"'));
 
-        verify(() => logger.progress('Bundling 1 bricks')).called(1);
+        verify(() => logger.progress('Bundling 1 brick')).called(1);
         verify(() => progress.update('Bundling greeting')).called(1);
         verify(
           () => progress.update(
             '${lightGreen.wrap('✓')} '
-            'Generated 1 files:',
+            'Generated 1 file:',
           ),
         ).called(1);
         verify(

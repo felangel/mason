@@ -68,7 +68,10 @@ class BundleCommand extends MasonCommand {
 
     final bricks = _parseBricks(source);
     final tempBricksJson = <BricksJson>[];
-    final bundleProgress = logger.progress('Bundling ${bricks.length} bricks');
+    final pluralBrick = _pluralize('brick', bricks.length > 1);
+    final bundleProgress = logger.progress(
+      'Bundling ${bricks.length} $pluralBrick',
+    );
 
     final bundlePaths = <String>[];
     try {
@@ -103,8 +106,8 @@ class BundleCommand extends MasonCommand {
         bundlePaths.add(bundlePath);
       }
 
-      bundleProgress
-          .update('${lightGreen.wrap('✓')} Generated ${bricks.length} files:');
+      final message = 'Generated ${bricks.length} $pluralBrick';
+      bundleProgress.update('${lightGreen.wrap('✓')} $message:');
       for (final bundlePath in bundlePaths) {
         final logLine = darkGray.wrap('  $bundlePath');
         if (logLine != null) {
@@ -122,6 +125,10 @@ class BundleCommand extends MasonCommand {
     }
 
     return ExitCode.success.code;
+  }
+
+  String _pluralize(String word, bool isPlural) {
+    return '$word${isPlural ? 's' : ''}';
   }
 
   List<Brick> _parseBricks(String source) {
