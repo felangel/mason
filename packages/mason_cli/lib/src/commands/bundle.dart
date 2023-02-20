@@ -68,9 +68,8 @@ class BundleCommand extends MasonCommand {
 
     final bricks = _parseBricks(source);
     final tempBricksJson = <BricksJson>[];
-    final pluralBrick = _pluralize('brick', bricks.length > 1);
     final bundleProgress = logger.progress(
-      'Bundling ${bricks.length} $pluralBrick',
+      'Bundling ${bricks.length} ${_pluralize('brick', bricks.length > 1)}',
     );
 
     final bundlePaths = <String>[];
@@ -106,7 +105,8 @@ class BundleCommand extends MasonCommand {
         bundlePaths.add(bundlePath);
       }
 
-      final message = 'Generated ${bricks.length} $pluralBrick';
+      final message =
+          'Generated ${bricks.length} ${_pluralize('file', bricks.length > 1)}';
       bundleProgress.update('${lightGreen.wrap('✓')} $message:');
       for (final bundlePath in bundlePaths) {
         final logLine = darkGray.wrap('  $bundlePath');
