@@ -207,7 +207,8 @@ void main() {
         expect(result1.path, equals(result2.path));
       });
 
-      test('adds bricks to bricks.json (git + ref)', () async {
+      test('adds bricks to bricks.json (git + ref) from remote', () async {
+        BricksJson.rootDir.deleteSync(recursive: true);
         final directory = Directory.systemTemp.createTempSync();
         final bricksJson = BricksJson(directory: directory);
         final file = File(
@@ -223,6 +224,38 @@ void main() {
           ),
         );
         final result = await bricksJson.add(brick);
+        expect(result.path, isNotEmpty);
+        expect(result.brick.name, equals(brick.name));
+        expect(result.brick.location.git!.url, equals(brick.location.git!.url));
+        expect(
+          result.brick.location.git!.path,
+          equals(brick.location.git!.path),
+        );
+        expect(result.brick.location.git!.ref, equals(brick.location.git!.ref));
+        expect(bricksJson.encode, contains('"simple"'));
+      });
+
+      test('adds bricks to bricks.json (git + ref) from cache', () async {
+        BricksJson.rootDir.deleteSync(recursive: true);
+        final directory = Directory.systemTemp.createTempSync();
+        final bricksJson = BricksJson(directory: directory);
+        final file = File(
+          path.join(directory.path, '.mason', 'bricks.json'),
+        )..createSync(recursive: true);
+        expect(file.existsSync(), isTrue);
+        expect(bricksJson.encode, equals('{}'));
+        final brick = Brick.git(
+          GitPath(
+            'https://github.com/felangel/mason',
+            path: 'bricks/simple',
+            ref: '58a7ba95b01082dfcbcdfc0fb5208551b4cbf558',
+          ),
+        );
+        await bricksJson.add(brick);
+        final stopwatch = Stopwatch()..start();
+        final result = await bricksJson.add(brick);
+        stopwatch.stop();
+        expect(stopwatch.elapsedMilliseconds, lessThan(100));
         expect(result.path, isNotEmpty);
         expect(result.brick.name, equals(brick.name));
         expect(result.brick.location.git!.url, equals(brick.location.git!.url));
