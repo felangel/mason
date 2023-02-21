@@ -219,7 +219,7 @@ void main() {
         final brick = Brick.git(
           GitPath(
             'https://github.com/felangel/mason',
-            path: 'bricks/simple',
+            path: 'bricks/hooks',
             ref: '58a7ba95b01082dfcbcdfc0fb5208551b4cbf558',
           ),
         );
@@ -232,7 +232,7 @@ void main() {
           equals(brick.location.git!.path),
         );
         expect(result.brick.location.git!.ref, equals(brick.location.git!.ref));
-        expect(bricksJson.encode, contains('"simple"'));
+        expect(bricksJson.encode, contains('"hooks"'));
       });
 
       test('adds bricks to bricks.json (git + ref) from cache', () async {
@@ -247,7 +247,7 @@ void main() {
         final brick = Brick.git(
           GitPath(
             'https://github.com/felangel/mason',
-            path: 'bricks/simple',
+            path: 'bricks/hooks',
             ref: '58a7ba95b01082dfcbcdfc0fb5208551b4cbf558',
           ),
         );
@@ -255,7 +255,7 @@ void main() {
         final stopwatch = Stopwatch()..start();
         final result = await bricksJson.add(brick);
         stopwatch.stop();
-        expect(stopwatch.elapsedMilliseconds, lessThan(100));
+        expect(stopwatch.elapsedMilliseconds, lessThan(10));
         expect(result.path, isNotEmpty);
         expect(result.brick.name, equals(brick.name));
         expect(result.brick.location.git!.url, equals(brick.location.git!.url));
@@ -264,7 +264,7 @@ void main() {
           equals(brick.location.git!.path),
         );
         expect(result.brick.location.git!.ref, equals(brick.location.git!.ref));
-        expect(bricksJson.encode, contains('"simple"'));
+        expect(bricksJson.encode, contains('"hooks"'));
       });
 
       test('adds bricks to bricks.json (path)', () async {
