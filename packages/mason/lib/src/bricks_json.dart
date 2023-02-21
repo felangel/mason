@@ -141,6 +141,9 @@ class BricksJson {
   /// Flushes cache contents to `bricks.json`.
   Future<void> flush() async {
     await _bricksJsonFile.create(recursive: true);
+    _cache = Map.fromEntries(
+      _cache.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
     await _bricksJsonFile.writeAsString(encode);
   }
 

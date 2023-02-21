@@ -51,6 +51,11 @@ bricks:
     path: ../../../../../bricks/documentation
   greeting:
     path: ../../../../../bricks/greeting
+  hooks:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/hooks
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
   simple:
     path: ../../../../../bricks/simple
   todos:
@@ -105,6 +110,15 @@ bricks:
       final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
+      final hooksPath = canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          'bricks',
+          'hooks',
+        ),
+      );
       final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
@@ -128,6 +142,7 @@ bricks:
             'app_icon': appIconPath,
             'documentation': docPath,
             'greeting': greetingPath,
+            'hooks': hooksPath,
             'simple': simplePath,
             'todos': todosPath,
             'widget': widgetPath,
@@ -142,6 +157,13 @@ bricks:
               'app_icon': {'path': appIconPath},
               'documentation': {'path': docPath},
               'greeting': {'path': greetingPath},
+              'hooks': {
+                'git': {
+                  'url': 'https://github.com/felangel/mason',
+                  'path': 'bricks/hooks',
+                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53'
+                }
+              },
               'simple': {'path': simplePath},
               'todos': {'path': todosPath},
               'widget': {
