@@ -1,3 +1,8 @@
+# 0.1.0-dev.42
+
+- feat: improve generated file output
+- deps: upgrade to `Dart >=2.19`, `mason_logger ^0.2.5`, and `very_good_analysis ^4.0.0`
+
 # 0.1.0-dev.41
 
 - deps: upgrade to `Dart >=2.17`, `mason_logger ^0.2.4`, and `very_good_analysis ^3.1.0`
