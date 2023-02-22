@@ -1,3 +1,8 @@
+# 0.1.0-dev.43
+
+- fix: sort contents of `bricks.json`
+- fix: brick git installation algorithm
+
 # 0.1.0-dev.42
 
 - feat: improve generated file output
