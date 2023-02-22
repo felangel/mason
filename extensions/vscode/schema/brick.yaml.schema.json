@@ -66,7 +66,7 @@
     "url": { "type": "string", "pattern": "^https?://", "format": "uri" },
     "publishTo": {
       "type": "string",
-      "pattern": "(^https?://|none)"
+      "pattern": "(^https?://|^none$)"
     },
     "varDescription": {
       "type": ["string", "null"],
