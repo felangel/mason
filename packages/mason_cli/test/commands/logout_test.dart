@@ -40,6 +40,7 @@ void main() {
       verify(
         () => logger.info('You are already logged out.'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when exception occurs', () async {

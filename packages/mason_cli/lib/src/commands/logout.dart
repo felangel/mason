@@ -25,6 +25,7 @@ class LogoutCommand extends MasonCommand {
     final user = masonApi.currentUser;
     if (user == null) {
       logger.info('You are already logged out.');
+      masonApi.close();
       return ExitCode.success.code;
     }
 
