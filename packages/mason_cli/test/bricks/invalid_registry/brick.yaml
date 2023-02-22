@@ -1,0 +1,4 @@
+name: invalid_registry
+description: A Simple Template that should be published to an invalid custom registry
+version: 0.1.0+1
+publish_to: invalid registry

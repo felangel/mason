@@ -7,6 +7,7 @@ import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
@@ -16,13 +17,16 @@ const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
 /// {@endtemplate}
 class PublishCommand extends MasonCommand {
   /// {@macro publish_command}
-  PublishCommand({super.logger, MasonApi? masonApi, int? maxBundleSize})
-      : _masonApi = masonApi ?? MasonApi(),
+  PublishCommand({
+    super.logger,
+    MasonApiBuilder? masonApiBuilder,
+    int? maxBundleSize,
+  })  : _masonApiBuilder = masonApiBuilder ?? MasonApi.new,
         _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes {
     argParser.addOptions();
   }
 
-  final MasonApi _masonApi;
+  final MasonApiBuilder _masonApiBuilder;
   final int _maxBundleSize;
 
   @override
@@ -31,10 +35,8 @@ class PublishCommand extends MasonCommand {
   @override
   final String name = 'publish';
 
-  MasonApi? _apiForHost(String? host) {
-    if (host == null) {
-      return _masonApi;
-    }
+  Uri? _resolveHostedUri(String? host) {
+    if (host == null) return BricksJson.hostedUri;
 
     if (host == 'none') {
       logger
@@ -50,13 +52,13 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       logger
         ..err('Invalid host on brick.yaml: "$host"')
         ..err(
-          'publishTo should contain a valid registry address such as '
+          'publish_to should contain a valid registry address such as '
           '"https://registry.brickhub.dev" or "none" for private bricks.',
         );
       return null;
     }
 
-    return _masonApi.withCustomHostedUri(Uri.parse(host));
+    return hostUri;
   }
 
   @override
@@ -74,22 +76,23 @@ Please change or remove the publish_to field in the brick.yaml before publishing
     );
 
     final publishTo = brickYaml.publishTo;
+    final hostedUri = _resolveHostedUri(publishTo);
 
-    final _masonApi = _apiForHost(publishTo);
-    if (_masonApi == null) {
-      return ExitCode.software.code;
-    }
+    if (hostedUri == null) return ExitCode.software.code;
 
-    final user = _masonApi.currentUser;
+    final masonApi = _masonApiBuilder(hostedUri: hostedUri);
+    final user = masonApi.currentUser;
     if (user == null) {
       logger
         ..err('You must be logged in to publish.')
         ..err("Run 'mason login' to log in and try again.");
+      masonApi.close();
       return ExitCode.software.code;
     }
 
     if (!user.emailVerified) {
       logger.err('You must verify your email in order to publish.');
+      masonApi.close();
       return ExitCode.software.code;
     }
 
@@ -105,6 +108,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       logger.err(
         '''Your bundle is $sizeInMb MB. Hosted bricks must be smaller than $maxSizeInMb MB.''',
       );
+      masonApi.close();
       return ExitCode.software.code;
     }
     final policyLink = styleUnderlined.wrap(
@@ -126,6 +130,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
 
     if (!confirmed) {
       logger.err('Brick was not published.');
+      masonApi.close();
       return ExitCode.software.code;
     }
 
@@ -134,7 +139,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
     );
 
     try {
-      await _masonApi.publish(bundle: universalBundle);
+      await masonApi.publish(bundle: universalBundle);
       publishProgress.complete('Published ${bundle.name} ${bundle.version}');
       logger.success(
         '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
@@ -146,6 +151,8 @@ Please change or remove the publish_to field in the brick.yaml before publishing
     } catch (_) {
       publishProgress.fail();
       rethrow;
+    } finally {
+      masonApi.close();
     }
 
     return ExitCode.success.code;

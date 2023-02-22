@@ -42,8 +42,10 @@ void main() {
       masonApi = MockMasonApi();
       argResults = MockArgResults();
       stdout = MockStdout();
-      searchCommand = SearchCommand(logger: logger, masonApi: masonApi)
-        ..testArgResults = argResults;
+      searchCommand = SearchCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      )..testArgResults = argResults;
 
       when(() => logger.progress(any())).thenReturn(MockProgress());
     });
@@ -77,6 +79,7 @@ void main() {
       verify(
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
       expect(progressDoneCalls, equals(['No bricks found.']));
     });
 
@@ -108,6 +111,7 @@ void main() {
         ),
       ).called(1);
       verify(() => logger.info(brick.description)).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when more than one result is shown', () async {
@@ -137,6 +141,7 @@ void main() {
         ),
       ).called(2);
       verify(() => logger.info(brick.description)).called(2);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when exception occurs', () async {
@@ -159,6 +164,7 @@ void main() {
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
       verify(() => logger.err('$exception')).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('separator length is 80 when terminal is not available', () async {

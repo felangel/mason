@@ -41,8 +41,10 @@ void main() {
       logger = MockLogger();
       masonApi = MockMasonApi();
       argResults = MockArgResults();
-      publishCommand = PublishCommand(logger: logger, masonApi: masonApi)
-        ..testArgResults = argResults;
+      publishCommand = PublishCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      )..testArgResults = argResults;
       when(() => logger.progress(any())).thenReturn(MockProgress());
       setUpTestingEnvironment(cwd, suffix: '.publish');
     });
@@ -66,11 +68,11 @@ void main() {
       verify(
         () => logger.err('Could not find ${BrickYaml.file} at $brickYamlPath.'),
       ).called(1);
+      verifyNever(() => masonApi.close());
     });
 
     test('exits with code 70 when it is a private brick', () async {
-      final brickPath =
-          p.join('..', '..', '..', '..', '..', 'bricks', 'greeting_private');
+      final brickPath = p.join('..', '..', 'bricks', 'no_registry');
 
       when(() => argResults['directory'] as String).thenReturn(brickPath);
 
@@ -83,31 +85,25 @@ void main() {
         () => logger.err('''
 Please change or remove the publish_to field in the brick.yaml before publishing'''),
       ).called(1);
+      verifyNever(() => masonApi.close());
     });
 
-    test('exits with code 70 when publishTo has an invalid value', () async {
-      final brickPath = p.join(
-        '..',
-        '..',
-        '..',
-        '..',
-        '..',
-        'bricks',
-        'greeting_invalid_host',
-      );
+    test('exits with code 70 when publish_to has an invalid value', () async {
+      final brickPath = p.join('..', '..', 'bricks', 'invalid_registry');
 
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
 
       verify(
-        () => logger.err('Invalid host on brick.yaml: "somewhere I guess?"'),
+        () => logger.err('Invalid host on brick.yaml: "invalid registry"'),
       ).called(1);
       verify(
         () => logger.err(
-          'publishTo should contain a valid registry address such as '
+          'publish_to should contain a valid registry address such as '
           '"https://registry.brickhub.dev" or "none" for private bricks.',
         ),
       ).called(1);
+      verifyNever(() => masonApi.close());
 
       expect(result, equals(ExitCode.software.code));
     });
@@ -120,6 +116,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       verify(
         () => logger.err("Run 'mason login' to log in and try again."),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when email is not verified', () async {
@@ -132,6 +129,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       verify(
         () => logger.err('You must verify your email in order to publish.'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when bundle is too large', () async {
@@ -140,7 +138,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final publishCommand = PublishCommand(
-        masonApi: masonApi,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
         logger: logger,
         maxBundleSize: 100,
       )..testArgResults = argResults;
@@ -154,6 +152,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
           ),
         ),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish is aborted', () async {
@@ -186,6 +185,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       verify(() => logger.err('Brick was not published.')).called(1);
       verifyNever(() => logger.progress('Publishing greeting 0.1.0+1'));
       verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish fails', () async {
@@ -203,6 +203,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
       verify(() => logger.err('$exception')).called(1);
     });
 
@@ -219,6 +220,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       await expectLater(publishCommand.run, throwsA(exception));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when publish succeeds', () async {
@@ -250,33 +252,31 @@ Please change or remove the publish_to field in the brick.yaml before publishing
         );
       }).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test(
-      'exits with code 0 when publish succeeds on custom host (publishTo)',
+      'exits with code 0 when publish succeeds '
+      'with a custom registry (publish_to)',
       () async {
-        final brickPath = p.join(
-          '..',
-          '..',
-          '..',
-          '..',
-          '..',
-          'bricks',
-          'greeting_custom_host',
-        );
+        final brickPath = p.join('..', '..', 'bricks', 'custom_registry');
 
         final user = MockUser();
         final progressLogs = <String>[];
         when(() => user.emailVerified).thenReturn(true);
 
-        final customMasonApi = MockMasonApi();
+        Uri? publishTo;
+        final publishCommand = PublishCommand(
+          masonApiBuilder: ({Uri? hostedUri}) {
+            publishTo = hostedUri;
+            return masonApi;
+          },
+          logger: logger,
+        )..testArgResults = argResults;
 
-        when(() => masonApi.withCustomHostedUri(any()))
-            .thenReturn(customMasonApi);
-
-        when(() => customMasonApi.currentUser).thenReturn(user);
+        when(() => masonApi.currentUser).thenReturn(user);
         when(
-          () => customMasonApi.publish(bundle: any(named: 'bundle')),
+          () => masonApi.publish(bundle: any(named: 'bundle')),
         ).thenAnswer((_) async {});
         final progress = MockProgress();
         when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -291,26 +291,25 @@ Please change or remove the publish_to field in the brick.yaml before publishing
         expect(
           progressLogs,
           equals([
-            'Bundled greeting_custom_host',
-            'Published greeting_custom_host 0.1.0+1',
+            'Bundled custom_registry',
+            'Published custom_registry 0.1.0+1',
           ]),
         );
 
+        expect(publishTo, equals(Uri.parse('https://custom.brickhub.dev')));
+
         verify(
-          () => masonApi
-              .withCustomHostedUri(Uri.parse('https://not-brickhub.dev')),
-        ).called(1);
-        verify(
-          () => logger.progress('Publishing greeting_custom_host 0.1.0+1'),
+          () => logger.progress('Publishing custom_registry 0.1.0+1'),
         ).called(1);
         verify(
           () => logger.success(
-            '''\nPublished greeting_custom_host 0.1.0+1 to ${BricksJson.hostedUri}.''',
+            '''\nPublished custom_registry 0.1.0+1 to ${BricksJson.hostedUri}.''',
           ),
         ).called(1);
         verify(
-          () => customMasonApi.publish(bundle: any(named: 'bundle')),
+          () => masonApi.publish(bundle: any(named: 'bundle')),
         ).called(1);
+        verify(() => masonApi.close()).called(1);
       },
     );
   });

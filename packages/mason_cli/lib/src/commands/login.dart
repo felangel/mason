@@ -1,16 +1,17 @@
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/command_runner.dart';
 
 /// {@template login_command}
 /// `mason login` command which allows users to authenticate.
 /// {@endtemplate}
 class LoginCommand extends MasonCommand {
   /// {@macro login_command}
-  LoginCommand({super.logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi();
+  LoginCommand({super.logger, MasonApiBuilder? masonApiBuilder})
+      : _masonApiBuilder = masonApiBuilder ?? MasonApi.new;
 
-  final MasonApi _masonApi;
+  final MasonApiBuilder _masonApiBuilder;
 
   @override
   final String description = 'Log into brickhub.dev.';
@@ -20,7 +21,8 @@ class LoginCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final user = _masonApi.currentUser;
+    final masonApi = _masonApiBuilder();
+    final user = masonApi.currentUser;
     if (user != null) {
       logger
         ..info('You are already logged in as <${user.email}>')
@@ -33,7 +35,7 @@ class LoginCommand extends MasonCommand {
 
     final loginProgress = logger.progress('Logging into brickhub.dev');
     try {
-      final user = await _masonApi.login(email: email, password: password);
+      final user = await masonApi.login(email: email, password: password);
       loginProgress.complete('Logged into brickhub.dev');
       logger.success('You are now logged in as <${user.email}>');
       return ExitCode.success.code;
@@ -41,6 +43,8 @@ class LoginCommand extends MasonCommand {
       loginProgress.fail();
       logger.err(error.message);
       return ExitCode.software.code;
+    } finally {
+      masonApi.close();
     }
   }
 }

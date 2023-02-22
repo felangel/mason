@@ -74,14 +74,6 @@ class MasonApi {
   final Uri _hostedUri;
   final http.Client _httpClient;
 
-  /// Create another [MasonApi] with a new hosted URI.
-  MasonApi withCustomHostedUri(Uri hostedUri) {
-    return MasonApi(
-      httpClient: _httpClient,
-      hostedUri: hostedUri,
-    );
-  }
-
   /// The location for mason-specific configuration.
   ///
   /// `null` if no config dir could be found.
