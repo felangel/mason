@@ -1,3 +1,7 @@
+# 0.1.0-dev.45
+
+- feat: add `publishTo` to `MasonBundle`
+
 # 0.1.0-dev.44
 
 - feat: support optional `publish_to` in `brick.yaml`
