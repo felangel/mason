@@ -1,3 +1,7 @@
+# 0.1.0-dev.46
+
+- fix: `MasonBundle` use `fieldRename: FieldRename.snake`
+
 # 0.1.0-dev.45
 
 - feat: add `publishTo` to `MasonBundle`
