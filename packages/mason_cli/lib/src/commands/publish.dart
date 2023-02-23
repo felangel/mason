@@ -41,24 +41,25 @@ class PublishCommand extends MasonCommand {
     if (host == 'none') {
       logger
         ..err('A private brick cannot be published.')
-        ..err('''
-Please change or remove the publish_to field in the brick.yaml before publishing''');
+        ..err(
+          '''Please change or remove the "publish_to" field in the brick.yaml before publishing.''',
+        );
       return null;
     }
 
-    final hostUri = Uri.tryParse(host);
+    final hostedUri = Uri.tryParse(host);
 
-    if (hostUri == null || hostUri.host.isEmpty) {
+    if (hostedUri == null || hostedUri.host.isEmpty) {
       logger
-        ..err('Invalid host on brick.yaml: "$host"')
+        ..err('Invalid "publish_to" in brick.yaml: "$host"')
         ..err(
-          'publish_to should contain a valid registry address such as '
+          '"publish_to" must be a valid registry url such as '
           '"https://registry.brickhub.dev" or "none" for private bricks.',
         );
       return null;
     }
 
-    return hostUri;
+    return hostedUri;
   }
 
   @override
@@ -142,7 +143,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       await masonApi.publish(bundle: universalBundle);
       publishProgress.complete('Published ${bundle.name} ${bundle.version}');
       logger.success(
-        '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
+        '''\nPublished ${bundle.name} ${bundle.version} to $hostedUri.''',
       );
     } on MasonApiPublishFailure catch (error) {
       publishProgress.fail();

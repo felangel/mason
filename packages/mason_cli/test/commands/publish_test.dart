@@ -83,7 +83,7 @@ void main() {
       ).called(1);
       verify(
         () => logger.err('''
-Please change or remove the publish_to field in the brick.yaml before publishing'''),
+Please change or remove the "publish_to" field in the brick.yaml before publishing.'''),
       ).called(1);
       verifyNever(() => masonApi.close());
     });
@@ -95,11 +95,13 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       final result = await publishCommand.run();
 
       verify(
-        () => logger.err('Invalid host on brick.yaml: "invalid registry"'),
+        () => logger.err(
+          'Invalid "publish_to" in brick.yaml: "invalid registry"',
+        ),
       ).called(1);
       verify(
         () => logger.err(
-          'publish_to should contain a valid registry address such as '
+          '"publish_to" must be a valid registry url such as '
           '"https://registry.brickhub.dev" or "none" for private bricks.',
         ),
       ).called(1);
@@ -260,7 +262,7 @@ Please change or remove the publish_to field in the brick.yaml before publishing
       'with a custom registry (publish_to)',
       () async {
         final brickPath = p.join('..', '..', 'bricks', 'custom_registry');
-
+        final customHostedUri = Uri.parse('https://custom.brickhub.dev');
         final user = MockUser();
         final progressLogs = <String>[];
         when(() => user.emailVerified).thenReturn(true);
@@ -296,14 +298,14 @@ Please change or remove the publish_to field in the brick.yaml before publishing
           ]),
         );
 
-        expect(publishTo, equals(Uri.parse('https://custom.brickhub.dev')));
+        expect(publishTo, equals(customHostedUri));
 
         verify(
           () => logger.progress('Publishing custom_registry 0.1.0+1'),
         ).called(1);
         verify(
           () => logger.success(
-            '''\nPublished custom_registry 0.1.0+1 to ${BricksJson.hostedUri}.''',
+            '''\nPublished custom_registry 0.1.0+1 to $customHostedUri.''',
           ),
         ).called(1);
         verify(
