@@ -1,3 +1,8 @@
+# 0.1.9
+
+- feat: add support for `publish_to` field in `brick.yaml`
+- deps: various dependency updates
+
 # 0.1.8
 
 - fix: support spaces in mason make `--output-dir`
