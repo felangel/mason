@@ -32,7 +32,7 @@
       "$ref": "#/$defs/url"
     },
     "publish_to": {
-      "description": "A url pointing to a custom brick registry or 'none'.",
+      "description": "A url pointing to a custom brick registry or 'none' for private bricks.",
       "$ref": "#/$defs/publishTo"
     },
     "vars": {
