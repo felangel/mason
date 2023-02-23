@@ -1,0 +1,4 @@
+name: no_registry
+description: A Simple Template that cannot be published
+version: 0.1.0+1
+publish_to: none
