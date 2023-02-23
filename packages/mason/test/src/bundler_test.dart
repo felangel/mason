@@ -30,6 +30,7 @@ void main() {
         expect(bundle.description, equals('A Simple Static Template'));
         expect(bundle.version, equals('0.1.0+1'));
         expect(bundle.repository, isNull);
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -45,6 +46,7 @@ void main() {
         expect(bundle.description, equals('An empty brick'));
         expect(bundle.version, equals('0.1.0+1'));
         expect(bundle.repository, isNull);
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -70,6 +72,7 @@ void main() {
           bundle.repository,
           equals('https://github.com/felangel/mason/tree/master/bricks/hello'),
         );
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isBundledFile('README.md'));
         expect(bundle.changelog, isBundledFile('CHANGELOG.md'));
         expect(bundle.license, isBundledFile('LICENSE'));
@@ -85,6 +88,7 @@ void main() {
         expect(bundle.description, equals('A Hooks Example Template'));
         expect(bundle.version, equals('0.1.0+1'));
         expect(bundle.repository, isNull);
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -107,6 +111,7 @@ void main() {
         expect(bundle.description, equals('A Test Hook'));
         expect(bundle.version, equals('0.1.0+1'));
         expect(bundle.repository, isNull);
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -143,6 +148,7 @@ void main() {
         expect(bundle.description, equals('An example plugin template'));
         expect(bundle.version, equals('0.1.0+1'));
         expect(bundle.repository, isNull);
+        expect(bundle.publishTo, isNull);
         expect(bundle.readme, isNull);
         expect(bundle.changelog, isNull);
         expect(bundle.license, isNull);
@@ -151,6 +157,46 @@ void main() {
         for (var i = 0; i < bundle.files.length; i++) {
           expect(bundle.files[i].path, equals(expectedFilePaths[i]));
         }
+      });
+
+      test('returns a MasonBundle when brick exists (custom_registry)', () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'bricks', 'custom_registry')),
+        );
+        expect(bundle.name, equals('custom_registry'));
+        expect(
+          bundle.description,
+          equals(
+            'A Simple Template that should be published to a custom registry',
+          ),
+        );
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.publishTo, equals('https://custom.brickhub.dev'));
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.hooks, isEmpty);
+        expect(bundle.files, isEmpty);
+      });
+
+      test('returns a MasonBundle when brick exists (no_registry)', () {
+        final bundle = createBundle(
+          Directory(path.join('test', 'bricks', 'no_registry')),
+        );
+        expect(bundle.name, equals('no_registry'));
+        expect(
+          bundle.description,
+          equals('A Simple Template that cannot be published'),
+        );
+        expect(bundle.version, equals('0.1.0+1'));
+        expect(bundle.repository, isNull);
+        expect(bundle.publishTo, equals('none'));
+        expect(bundle.readme, isNull);
+        expect(bundle.changelog, isNull);
+        expect(bundle.license, isNull);
+        expect(bundle.hooks, isEmpty);
+        expect(bundle.files, isEmpty);
       });
     });
 
@@ -392,6 +438,50 @@ void postGen(HookContext context) {
           contains('name: relative_imports_hooks'),
         );
         expect(hookPubspecFile.existsSync(), isTrue);
+      });
+
+      test('unpacks a MasonBundle (custom_registry)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('test', 'bricks', 'custom_registry')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            'name: custom_registry\n'
+            '''description: A Simple Template that should be published to a custom registry\n'''
+            'version: 0.1.0+1\n'
+            'environment:\n'
+            '  mason: any\n'
+            'publish_to: "https://custom.brickhub.dev"\n'
+            'vars:\n',
+          ),
+        );
+      });
+
+      test('unpacks a MasonBundle (no_registry)', () {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final bundle = createBundle(
+          Directory(path.join('test', 'bricks', 'no_registry')),
+        );
+        unpackBundle(bundle, tempDir);
+        final yaml = File(path.join(tempDir.path, 'brick.yaml'));
+        expect(yaml.existsSync(), isTrue);
+        expect(
+          yaml.readAsStringSync(),
+          equals(
+            'name: no_registry\n'
+            'description: A Simple Template that cannot be published\n'
+            'version: 0.1.0+1\n'
+            'environment:\n'
+            '  mason: any\n'
+            'publish_to: none\n'
+            'vars:\n',
+          ),
+        );
       });
     });
   });
