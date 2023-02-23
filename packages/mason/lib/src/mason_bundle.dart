@@ -35,7 +35,7 @@ class MasonBundledFile {
 /// {@template mason_bundle}
 /// A bundled version of a mason template.
 /// {@endtemplate}
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class MasonBundle {
   /// {@macro mason_bundle}
   const MasonBundle({
