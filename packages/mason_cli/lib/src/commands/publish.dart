@@ -125,14 +125,18 @@ class PublishCommand extends MasonCommand {
       )
       ..info('See policy details at $policyLink\n');
 
-    final confirmed = logger.confirm(
-      'Do you want to publish ${bundle.name} ${bundle.version}?',
-    );
+    final needsConfirmation = results['force'] != true;
 
-    if (!confirmed) {
-      logger.err('Brick was not published.');
-      masonApi.close();
-      return ExitCode.software.code;
+    if (needsConfirmation) {
+      final confirmed = logger.confirm(
+        'Do you want to publish ${bundle.name} ${bundle.version}?',
+      );
+
+      if (!confirmed) {
+        logger.err('Brick was not published.');
+        masonApi.close();
+        return ExitCode.software.code;
+      }
     }
 
     final publishProgress = logger.progress(
@@ -171,6 +175,12 @@ extension on ArgParser {
       abbr: 'C',
       help: 'Run this in the specified directory',
       defaultsTo: '.',
+    );
+    addFlag(
+      'force',
+      abbr: 'f',
+      negatable: false,
+      help: 'Publish without confirmation if there are no errors.',
     );
   }
 }
