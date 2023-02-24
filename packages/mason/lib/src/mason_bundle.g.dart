@@ -44,7 +44,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
             'version',
             'environment',
             'repository',
-            'publish-to',
+            'publish_to',
             'readme',
             'changelog',
             'license',
@@ -82,7 +82,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
                       .toList() ??
                   const []),
           repository: $checkedConvert('repository', (v) => v as String?),
-          publishTo: $checkedConvert('publish-to', (v) => v as String?),
+          publishTo: $checkedConvert('publish_to', (v) => v as String?),
           readme: $checkedConvert(
               'readme',
               (v) => v == null
@@ -104,7 +104,7 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
         );
         return val;
       },
-      fieldKeyMap: const {'publishTo': 'publish-to'},
+      fieldKeyMap: const {'publishTo': 'publish_to'},
     );
 
 Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
@@ -124,7 +124,7 @@ Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
   }
 
   writeNotNull('repository', instance.repository);
-  writeNotNull('publish-to', instance.publishTo);
+  writeNotNull('publish_to', instance.publishTo);
   writeNotNull('readme', instance.readme?.toJson());
   writeNotNull('changelog', instance.changelog?.toJson());
   writeNotNull('license', instance.license?.toJson());

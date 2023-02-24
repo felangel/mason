@@ -5,6 +5,7 @@
 - Initialize mason in the current workspace
 - Detect missing mason installation
 - Automatically gets bricks when `mason.yaml` is saved
+- Create new bricks
 - Add bricks to the local workspace
 - Add bricks globally
 - Remove bricks from the local workspace
