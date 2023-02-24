@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
@@ -55,6 +56,23 @@ void main() {
 
     test('can be instantiated without any parameters', () {
       expect(PublishCommand.new, returnsNormally);
+    });
+
+    test(
+        'throws usageException when '
+        'called with both --force and --dry-run', () async {
+      final runner = CommandRunner<int>('mason', '')
+        ..addCommand(publishCommand..testArgResults = null);
+      await expectLater(
+        () => runner.run(['publish', '--dry-run', '--force']),
+        throwsA(
+          isA<UsageException>().having(
+            (e) => e.message,
+            'message',
+            'Cannot use both --force and --dry-run.',
+          ),
+        ),
+      );
     });
 
     test('exits with code 70 when brick could not be found', () async {
@@ -157,6 +175,40 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       verify(() => masonApi.close()).called(1);
     });
 
+    test('exits with code 0 without publishing when using --dry-run', () async {
+      final user = MockUser();
+      final progressLogs = <String>[];
+      when(() => user.emailVerified).thenReturn(true);
+      when(() => masonApi.currentUser).thenReturn(user);
+      when(
+        () => masonApi.publish(bundle: any(named: 'bundle')),
+      ).thenAnswer((_) async {});
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
+        if (update != null) progressLogs.add(update);
+      });
+      when(() => logger.progress(any())).thenReturn(progress);
+      when(() => logger.confirm(any())).thenReturn(true);
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+      when(() => argResults['dry-run'] as bool).thenReturn(true);
+      final result = await publishCommand.run();
+      expect(result, equals(ExitCode.success.code));
+      expect(progressLogs, equals(['Bundled greeting']));
+      verify(() => logger.info('No issues detected.')).called(1);
+      verify(
+        () => logger.info('The server may enforce additional checks.'),
+      ).called(1);
+      verifyNever(() => logger.progress('Publishing greeting 0.1.0+1'));
+      verifyNever(() {
+        logger.success(
+          '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
+        );
+      });
+      verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+      verify(() => masonApi.close()).called(1);
+    });
+
     test('exits with code 70 when publish is aborted', () async {
       final policyLink = styleUnderlined.wrap(
         link(uri: Uri.parse('https://brickhub.dev/policy')),
@@ -253,6 +305,39 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
         );
       }).called(1);
+      verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
+    });
+
+    test('exits with code 0 when publish succeeds with --force', () async {
+      final user = MockUser();
+      final progressLogs = <String>[];
+      when(() => user.emailVerified).thenReturn(true);
+      when(() => masonApi.currentUser).thenReturn(user);
+      when(
+        () => masonApi.publish(bundle: any(named: 'bundle')),
+      ).thenAnswer((_) async {});
+      final progress = MockProgress();
+      when(() => progress.complete(any())).thenAnswer((invocation) {
+        final update = invocation.positionalArguments[0] as String?;
+        if (update != null) progressLogs.add(update);
+      });
+      when(() => logger.progress(any())).thenReturn(progress);
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+      when(() => argResults['force'] as bool).thenReturn(true);
+      final result = await publishCommand.run();
+      expect(result, equals(ExitCode.success.code));
+      expect(
+        progressLogs,
+        equals(['Bundled greeting', 'Published greeting 0.1.0+1']),
+      );
+      verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
+      verify(() {
+        logger.success(
+          '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
+        );
+      }).called(1);
+      verifyNever(() => logger.confirm(any()));
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
       verify(() => masonApi.close()).called(1);
     });
