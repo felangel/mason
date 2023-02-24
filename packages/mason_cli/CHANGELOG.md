@@ -1,3 +1,14 @@
+# 0.1.0-dev.47
+
+- feat: add `repository` field and `README` updates to new brick
+- feat: support `publish_to` field in `brick.yaml`
+- deps: upgrade to `mason ^0.1.0-dev.46`
+
+# 0.1.0-dev.46
+
+- fix: brick git installation algorithm
+- deps: upgrade to `mason ^0.1.0-dev.43`
+
 # 0.1.0-dev.45
 
 - feat: add `--quiet` flag to `make` command

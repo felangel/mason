@@ -20,8 +20,14 @@ class MockArgResults extends Mock implements ArgResults {}
 
 class MockProgress extends Mock implements Progress {}
 
+class FakeUri extends Fake implements Uri {}
+
 void main() {
   final cwd = Directory.current;
+
+  setUpAll(() {
+    registerFallbackValue(FakeUri());
+  });
 
   group('PublishCommand', () {
     final brickPath =
@@ -35,8 +41,10 @@ void main() {
       logger = MockLogger();
       masonApi = MockMasonApi();
       argResults = MockArgResults();
-      publishCommand = PublishCommand(logger: logger, masonApi: masonApi)
-        ..testArgResults = argResults;
+      publishCommand = PublishCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      )..testArgResults = argResults;
       when(() => logger.progress(any())).thenReturn(MockProgress());
       setUpTestingEnvironment(cwd, suffix: '.publish');
     });
@@ -60,6 +68,46 @@ void main() {
       verify(
         () => logger.err('Could not find ${BrickYaml.file} at $brickYamlPath.'),
       ).called(1);
+      verifyNever(() => masonApi.close());
+    });
+
+    test('exits with code 70 when it is a private brick', () async {
+      final brickPath = p.join('..', '..', 'bricks', 'no_registry');
+
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+
+      final result = await publishCommand.run();
+      expect(result, equals(ExitCode.software.code));
+      verify(
+        () => logger.err('A private brick cannot be published.'),
+      ).called(1);
+      verify(
+        () => logger.err('''
+Please change or remove the "publish_to" field in the brick.yaml before publishing.'''),
+      ).called(1);
+      verifyNever(() => masonApi.close());
+    });
+
+    test('exits with code 70 when publish_to has an invalid value', () async {
+      final brickPath = p.join('..', '..', 'bricks', 'invalid_registry');
+
+      when(() => argResults['directory'] as String).thenReturn(brickPath);
+      final result = await publishCommand.run();
+
+      verify(
+        () => logger.err(
+          'Invalid "publish_to" in brick.yaml: "invalid registry"',
+        ),
+      ).called(1);
+      verify(
+        () => logger.err(
+          '"publish_to" must be a valid registry url such as '
+          '"https://registry.brickhub.dev" or "none" for private bricks.',
+        ),
+      ).called(1);
+      verifyNever(() => masonApi.close());
+
+      expect(result, equals(ExitCode.software.code));
     });
 
     test('exits with code 70 when not logged in', () async {
@@ -70,6 +118,7 @@ void main() {
       verify(
         () => logger.err("Run 'mason login' to log in and try again."),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when email is not verified', () async {
@@ -82,6 +131,7 @@ void main() {
       verify(
         () => logger.err('You must verify your email in order to publish.'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when bundle is too large', () async {
@@ -90,7 +140,7 @@ void main() {
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final publishCommand = PublishCommand(
-        masonApi: masonApi,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
         logger: logger,
         maxBundleSize: 100,
       )..testArgResults = argResults;
@@ -104,6 +154,7 @@ void main() {
           ),
         ),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish is aborted', () async {
@@ -136,6 +187,7 @@ void main() {
       verify(() => logger.err('Brick was not published.')).called(1);
       verifyNever(() => logger.progress('Publishing greeting 0.1.0+1'));
       verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish fails', () async {
@@ -153,6 +205,7 @@ void main() {
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
       verify(() => logger.err('$exception')).called(1);
     });
 
@@ -169,6 +222,7 @@ void main() {
       await expectLater(publishCommand.run, throwsA(exception));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when publish succeeds', () async {
@@ -200,6 +254,65 @@ void main() {
         );
       }).called(1);
       verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
+
+    test(
+      'exits with code 0 when publish succeeds '
+      'with a custom registry (publish_to)',
+      () async {
+        final brickPath = p.join('..', '..', 'bricks', 'custom_registry');
+        final customHostedUri = Uri.parse('https://custom.brickhub.dev');
+        final user = MockUser();
+        final progressLogs = <String>[];
+        when(() => user.emailVerified).thenReturn(true);
+
+        Uri? publishTo;
+        final publishCommand = PublishCommand(
+          masonApiBuilder: ({Uri? hostedUri}) {
+            publishTo = hostedUri;
+            return masonApi;
+          },
+          logger: logger,
+        )..testArgResults = argResults;
+
+        when(() => masonApi.currentUser).thenReturn(user);
+        when(
+          () => masonApi.publish(bundle: any(named: 'bundle')),
+        ).thenAnswer((_) async {});
+        final progress = MockProgress();
+        when(() => progress.complete(any())).thenAnswer((invocation) {
+          final update = invocation.positionalArguments[0] as String?;
+          if (update != null) progressLogs.add(update);
+        });
+        when(() => logger.progress(any())).thenReturn(progress);
+        when(() => logger.confirm(any())).thenReturn(true);
+        when(() => argResults['directory'] as String).thenReturn(brickPath);
+        final result = await publishCommand.run();
+        expect(result, equals(ExitCode.success.code));
+        expect(
+          progressLogs,
+          equals([
+            'Bundled custom_registry',
+            'Published custom_registry 0.1.0+1',
+          ]),
+        );
+
+        expect(publishTo, equals(customHostedUri));
+
+        verify(
+          () => logger.progress('Publishing custom_registry 0.1.0+1'),
+        ).called(1);
+        verify(
+          () => logger.success(
+            '''\nPublished custom_registry 0.1.0+1 to $customHostedUri.''',
+          ),
+        ).called(1);
+        verify(
+          () => masonApi.publish(bundle: any(named: 'bundle')),
+        ).called(1);
+        verify(() => masonApi.close()).called(1);
+      },
+    );
   });
 }

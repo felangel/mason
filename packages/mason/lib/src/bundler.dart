@@ -28,6 +28,7 @@ void unpackBundle(MasonBundle bundle, Directory target) {
     environment: bundle.environment,
     vars: bundle.vars,
     repository: bundle.repository,
+    publishTo: bundle.publishTo,
   );
   File(path.join(target.path, BrickYaml.file)).writeAsStringSync(
     Yaml.encode(brickYaml.toJson()),
@@ -77,6 +78,7 @@ MasonBundle createBundle(Directory brick) {
     environment: brickYaml.environment,
     vars: brickYaml.vars,
     repository: brickYaml.repository,
+    publishTo: brickYaml.publishTo,
     files: files..sort(_comparePaths),
     hooks: hooks..sort(_comparePaths),
     readme: _bundleTopLevelFile(brick, 'README.md'),

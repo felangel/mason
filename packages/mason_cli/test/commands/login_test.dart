@@ -21,7 +21,10 @@ void main() {
     setUp(() {
       logger = MockLogger();
       masonApi = MockMasonApi();
-      loginCommand = LoginCommand(logger: logger, masonApi: masonApi);
+      loginCommand = LoginCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      );
 
       when(() => logger.progress(any())).thenReturn(MockProgress());
     });
@@ -78,6 +81,7 @@ void main() {
         () => masonApi.login(email: email, password: password),
       ).called(1);
       verify(() => logger.err(message)).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when logged in successfully', () async {
@@ -113,6 +117,7 @@ void main() {
       verify(
         () => logger.success('You are now logged in as <${user.email}>'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
   });
 }

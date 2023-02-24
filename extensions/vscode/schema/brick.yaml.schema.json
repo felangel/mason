@@ -31,6 +31,10 @@
       "description": "A url pointing to the brick's source code repository.",
       "$ref": "#/$defs/url"
     },
+    "publish_to": {
+      "description": "A url pointing to a custom brick registry or 'none' for private bricks.",
+      "$ref": "#/$defs/publishTo"
+    },
     "vars": {
       "type": ["object", "array"],
       "description": "Input variable properties used when templating a brick.",
@@ -60,6 +64,10 @@
       "pattern": "^(0|[1-9]\\d*)\\.(0|[1-9]\\d*)\\.(0|[1-9]\\d*)(?:-((?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\\.(?:0|[1-9]\\d*|\\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\\+([0-9a-zA-Z-]+(?:\\.[0-9a-zA-Z-]+)*))?$"
     },
     "url": { "type": "string", "pattern": "^https?://", "format": "uri" },
+    "publishTo": {
+      "type": "string",
+      "pattern": "(^https?://|^none$)"
+    },
     "varDescription": {
       "type": ["string", "null"],
       "description": "An optional description of the variable."

@@ -17,6 +17,7 @@ class BrickYaml {
     required this.name,
     required this.description,
     required this.version,
+    this.publishTo,
     this.environment = const BrickEnvironment(),
     this.vars = const <String, BrickVariableProperties>{},
     this.repository,
@@ -57,6 +58,14 @@ class BrickYaml {
   /// Optional url pointing to the brick's source code repository.
   final String? repository;
 
+  /// Optional url used to specify a custom brick registry
+  /// as the publish target.
+  ///
+  /// Can either be "none" or a custom brick registry url.
+  /// Defaults to https://registry.brickhub.dev when not specified.
+  @JsonKey(name: 'publish_to')
+  final String? publishTo;
+
   /// Map of variable properties used when templating a brick.
   @VarsConverter()
   final Map<String, BrickVariableProperties> vars;
@@ -75,6 +84,7 @@ class BrickYaml {
       environment: environment,
       repository: repository,
       path: path ?? this.path,
+      publishTo: publishTo,
     );
   }
 

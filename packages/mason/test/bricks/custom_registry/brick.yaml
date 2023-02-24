@@ -1,0 +1,4 @@
+name: custom_registry
+description: A Simple Template that should be published to a custom registry
+version: 0.1.0+1
+publish_to: https://custom.brickhub.dev

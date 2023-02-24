@@ -35,7 +35,7 @@ class MasonBundledFile {
 /// {@template mason_bundle}
 /// A bundled version of a mason template.
 /// {@endtemplate}
-@JsonSerializable()
+@JsonSerializable(fieldRename: FieldRename.snake)
 class MasonBundle {
   /// {@macro mason_bundle}
   const MasonBundle({
@@ -47,6 +47,7 @@ class MasonBundle {
     this.files = const [],
     this.hooks = const [],
     this.repository,
+    this.publishTo,
     this.readme,
     this.changelog,
     this.license,
@@ -100,6 +101,10 @@ class MasonBundle {
 
   /// Optional url pointing to the brick's source code repository.
   final String? repository;
+
+  /// Optional url used to specify a custom brick registry
+  /// as the publish target.
+  final String? publishTo;
 
   /// The brick's README.md file.
   final MasonBundledFile? readme;

@@ -2,7 +2,7 @@
   "name": "mason",
   "displayName": "mason",
   "description": "Mason support for Visual Studio Code.",
-  "version": "0.1.8",
+  "version": "0.1.10",
   "publisher": "FelixAngelov",
   "repository": {
     "type": "git",
@@ -14,7 +14,7 @@
   },
   "homepage": "https://brickhub.dev",
   "engines": {
-    "vscode": "^1.66.0"
+    "vscode": "^1.75.0"
   },
   "categories": [
     "Other"
@@ -30,14 +30,7 @@
   "icon": "assets/logo.png",
   "activationEvents": [
     "workspaceContains:**/mason.yaml",
-    "workspaceContains:**/brick.yaml",
-    "onCommand:mason.init",
-    "onCommand:mason.add-local-brick",
-    "onCommand:mason.add-global-brick",
-    "onCommand:mason.make-local-brick",
-    "onCommand:mason.make-global-brick",
-    "onCommand:mason.remove-local-brick",
-    "onCommand:mason.remove-global-brick"
+    "workspaceContains:**/brick.yaml"
   ],
   "main": "./dist/extension.js",
   "extensionDependencies": [
@@ -58,6 +51,10 @@
       {
         "command": "mason.init",
         "title": "Mason: Init"
+      },
+      {
+        "command": "mason.new-brick",
+        "title": "Mason: New Brick"
       },
       {
         "command": "mason.add-local-brick",
@@ -95,6 +92,11 @@
           "command": "mason.make-global-brick",
           "group": "masonGroup@1",
           "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "mason.new-brick",
+          "group": "masonGroup@1",
+          "when": "explorerResourceIsFolder"
         }
       ]
     }
@@ -110,14 +112,14 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@types/glob": "^8.0.1",
+    "@types/glob": "^8.1.0",
     "@types/lodash": "^4.14.191",
     "@types/mocha": "^10.0.1",
     "@types/node": "16.x",
-    "@types/vscode": "^1.66.0",
+    "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
-    "@typescript-eslint/eslint-plugin": "^5.51.0",
-    "@typescript-eslint/parser": "^5.51.0",
+    "@typescript-eslint/eslint-plugin": "^5.53.0",
+    "@typescript-eslint/parser": "^5.53.0",
     "eslint": "^8.34.0",
     "glob": "^8.1.0",
     "prettier": "2.8.4",
