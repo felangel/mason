@@ -53,6 +53,10 @@
         "title": "Mason: Init"
       },
       {
+        "command": "mason.new-brick",
+        "title": "Mason: New Brick"
+      },
+      {
         "command": "mason.add-local-brick",
         "title": "Mason: Add Local Brick"
       },
@@ -86,6 +90,11 @@
         },
         {
           "command": "mason.make-global-brick",
+          "group": "masonGroup@1",
+          "when": "explorerResourceIsFolder"
+        },
+        {
+          "command": "mason.new-brick",
           "group": "masonGroup@1",
           "when": "explorerResourceIsFolder"
         }

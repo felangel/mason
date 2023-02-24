@@ -5,6 +5,7 @@ export * from "./mason-exec";
 export * from "./mason-get";
 export * from "./mason-init";
 export * from "./mason-make";
+export * from "./mason-new";
 export * from "./mason-remove";
 
 export const statusBarTimeout = 3000;
