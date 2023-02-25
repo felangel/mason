@@ -1,3 +1,7 @@
+# 0.1.0-dev.48
+
+- feat: add `--force` and `--dry-run` to `publish` command
+
 # 0.1.0-dev.47
 
 - feat: add `repository` field and `README` updates to new brick
