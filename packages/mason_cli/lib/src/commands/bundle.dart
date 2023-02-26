@@ -63,81 +63,108 @@ class BundleCommand extends MasonCommand {
   @override
   Future<int> run() async {
     final source = results['source'] as String;
-
-    final Brick brick;
-    if (source == 'git') {
-      if (results.rest.isEmpty) {
-        usageException('A repository url must be provided');
-      }
-      brick = Brick(
-        location: BrickLocation(
-          git: GitPath(
-            results.rest.first,
-            path: results['git-path'] as String?,
-            ref: results['git-ref'] as String?,
-          ),
-        ),
-      );
-    } else if (source == 'hosted') {
-      if (results.rest.isEmpty) {
-        usageException('A brick name must be provided');
-      }
-      brick = Brick(
-        name: results.rest.first,
-        location: const BrickLocation(version: 'any'),
-      );
-    } else {
-      if (results.rest.isEmpty) {
-        usageException('A path to the brick template must be provided');
-      }
-      brick = Brick(location: BrickLocation(path: results.rest.first));
-    }
-
-    BricksJson? tempBricksJson;
-
-    final Directory brickDirectory;
-    if (brick.location.path != null) {
-      brickDirectory = Directory(brick.location.path!);
-    } else {
-      tempBricksJson = BricksJson.temp();
-      final cachedBrick = await tempBricksJson.add(brick);
-      brickDirectory = Directory(cachedBrick.path);
-    }
-
-    if (!brickDirectory.existsSync()) {
-      throw BrickNotFoundException(brickDirectory.path);
-    }
-
-    final bundle = createBundle(brickDirectory);
     final outputDir = results['output-dir'] as String;
     final bundleType = (results['type'] as String).toBundleType();
-    final bundleProgress = logger.progress('Bundling ${bundle.name}');
 
+    final bricks = _parseBricks(source);
+    final tempBricksJson = <BricksJson>[];
+    final bundleProgress = logger.progress(
+      'Bundling ${bricks.length} ${_pluralize('brick', bricks.length > 1)}',
+    );
+
+    final bundlePaths = <String>[];
     try {
-      late final String bundlePath;
-      switch (bundleType) {
-        case BundleType.dart:
-          bundlePath = await _generateDartBundle(bundle, outputDir);
-          break;
-        case BundleType.universal:
-          bundlePath = await _generateUniversalBundle(bundle, outputDir);
-          break;
+      for (final brick in bricks) {
+        final Directory brickDirectory;
+        if (brick.location.path != null) {
+          brickDirectory = Directory(brick.location.path!);
+        } else {
+          final tempBrickJson = BricksJson.temp();
+          final cachedBrick = await tempBrickJson.add(brick);
+          tempBricksJson.add(tempBrickJson);
+          brickDirectory = Directory(cachedBrick.path);
+        }
+
+        if (!brickDirectory.existsSync()) {
+          throw BrickNotFoundException(brickDirectory.path);
+        }
+
+        final bundle = createBundle(brickDirectory);
+        bundleProgress.update('Bundling ${bundle.name}');
+
+        final String bundlePath;
+        switch (bundleType) {
+          case BundleType.dart:
+            bundlePath = await _generateDartBundle(bundle, outputDir);
+            break;
+          case BundleType.universal:
+            bundlePath = await _generateUniversalBundle(bundle, outputDir);
+            break;
+        }
+        bundleProgress.update('Bundled ${bundle.name}');
+        bundlePaths.add(bundlePath);
       }
-      bundleProgress.complete('Bundled ${bundle.name}');
-      logger
-        ..info(
-          '${lightGreen.wrap('✓')} '
-          'Generated 1 file:',
-        )
-        ..info(darkGray.wrap('  $bundlePath'));
+
+      final message =
+          'Generated ${bricks.length} ${_pluralize('file', bricks.length > 1)}';
+      bundleProgress.update('${lightGreen.wrap('✓')} $message:');
+      for (final bundlePath in bundlePaths) {
+        final logLine = darkGray.wrap('  $bundlePath');
+        if (logLine != null) {
+          bundleProgress.update(logLine);
+        }
+      }
+      bundleProgress.complete();
     } catch (_) {
       bundleProgress.fail();
       rethrow;
     } finally {
-      tempBricksJson?.clear();
+      for (final tmp in tempBricksJson) {
+        tmp.clear();
+      }
     }
 
     return ExitCode.success.code;
+  }
+
+  String _pluralize(String word, bool isPlural) {
+    return '$word${isPlural ? 's' : ''}';
+  }
+
+  List<Brick> _parseBricks(String source) {
+    if (source == 'git') {
+      if (results.rest.isEmpty) {
+        usageException('A repository url must be provided');
+      }
+      return results.rest.map((url) {
+        return Brick(
+          location: BrickLocation(
+            git: GitPath(
+              url,
+              path: results['git-path'] as String?,
+              ref: results['git-ref'] as String?,
+            ),
+          ),
+        );
+      }).toList();
+    } else if (source == 'hosted') {
+      if (results.rest.isEmpty) {
+        usageException('A brick name must be provided');
+      }
+      return results.rest.map((name) {
+        return Brick(
+          name: name,
+          location: const BrickLocation(version: 'any'),
+        );
+      }).toList();
+    } else {
+      if (results.rest.isEmpty) {
+        usageException('A path to the brick template must be provided');
+      }
+      return results.rest.map((location) {
+        return Brick(location: BrickLocation(path: location));
+      }).toList();
+    }
   }
 }
 
