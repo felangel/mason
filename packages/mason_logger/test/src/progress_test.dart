@@ -5,16 +5,14 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockStdout extends Mock implements Stdout {}
-
-class MockStdin extends Mock implements Stdin {}
+class _MockStdout extends Mock implements Stdout {}
 
 void main() {
   group('Progress', () {
     late Stdout stdout;
 
     setUp(() {
-      stdout = MockStdout();
+      stdout = _MockStdout();
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
     });

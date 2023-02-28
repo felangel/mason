@@ -8,17 +8,15 @@ import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockUser extends Mock implements User {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockLogger extends Mock implements Logger {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
-class MockMasonApi extends Mock implements MasonApi {}
+class _MockProgress extends Mock implements Progress {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockArgResults extends Mock implements ArgResults {}
 
-class MockArgResults extends Mock implements ArgResults {}
-
-class MockStdout extends Mock implements Stdout {}
+class _MockStdout extends Mock implements Stdout {}
 
 void main() {
   group('SearchCommand', () {
@@ -38,16 +36,16 @@ void main() {
         createdAt: DateTime(0, 0, 0),
         downloads: 42,
       );
-      logger = MockLogger();
-      masonApi = MockMasonApi();
-      argResults = MockArgResults();
-      stdout = MockStdout();
+      logger = _MockLogger();
+      masonApi = _MockMasonApi();
+      argResults = _MockArgResults();
+      stdout = _MockStdout();
       searchCommand = SearchCommand(
         logger: logger,
         masonApiBuilder: ({Uri? hostedUri}) => masonApi,
       )..testArgResults = argResults;
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
     });
 
     test('can be instantiated without any parameters', () {
@@ -61,7 +59,7 @@ void main() {
     });
 
     test('exits with code 0 when no results are shown', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       final progressDoneCalls = <String?>[];
 
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -84,7 +82,7 @@ void main() {
     });
 
     test('exits with code 0 when one result is shown', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       final progressDoneCalls = <String?>[];
 
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -115,7 +113,7 @@ void main() {
     });
 
     test('exits with code 0 when more than one result is shown', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       final progressDoneCalls = <String?>[];
 
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -145,7 +143,7 @@ void main() {
     });
 
     test('exits with code 70 when exception occurs', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       final progressDoneCalls = <String?>[];
       final exception = Exception('oops');
 
@@ -168,7 +166,7 @@ void main() {
     });
 
     test('separator length is 80 when terminal is not available', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((_) {});
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
@@ -184,7 +182,7 @@ void main() {
     });
 
     test('separator length is 80 when terminalColumns > 80', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((_) {});
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
@@ -207,7 +205,7 @@ void main() {
     test(
         'separator length is terminalColumns '
         'when terminalColumns < 80', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((_) {});
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);

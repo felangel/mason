@@ -10,11 +10,11 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   final cwd = Directory.current;
@@ -25,10 +25,10 @@ void main() {
     late MasonCommandRunner commandRunner;
 
     setUp(() {
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -60,7 +60,7 @@ void main() {
     });
 
     test('exits with code 64 when exception occurs', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
 
@@ -83,7 +83,7 @@ void main() {
     });
 
     test('exits with code 70 on hook compilation exception', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => logger.progress(any())).thenReturn(progress);
       final brickPath = path.join('..', '..', 'bricks', 'compilation_error');
       final result = await commandRunner.run(

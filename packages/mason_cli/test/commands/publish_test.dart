@@ -11,15 +11,15 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockMasonApi extends Mock implements MasonApi {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
-class MockUser extends Mock implements User {}
+class _MockUser extends Mock implements User {}
 
-class MockArgResults extends Mock implements ArgResults {}
+class _MockArgResults extends Mock implements ArgResults {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 class FakeUri extends Fake implements Uri {}
 
@@ -39,14 +39,14 @@ void main() {
     late PublishCommand publishCommand;
 
     setUp(() async {
-      logger = MockLogger();
-      masonApi = MockMasonApi();
-      argResults = MockArgResults();
+      logger = _MockLogger();
+      masonApi = _MockMasonApi();
+      argResults = _MockArgResults();
       publishCommand = PublishCommand(
         logger: logger,
         masonApiBuilder: ({Uri? hostedUri}) => masonApi,
       )..testArgResults = argResults;
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       setUpTestingEnvironment(cwd, suffix: '.publish');
     });
 
@@ -140,7 +140,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 70 when email is not verified', () async {
-      final user = MockUser();
+      final user = _MockUser();
       when(() => user.emailVerified).thenReturn(false);
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
@@ -153,7 +153,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 70 when bundle is too large', () async {
-      final user = MockUser();
+      final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
@@ -176,14 +176,14 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 0 without publishing when using --dry-run', () async {
-      final user = MockUser();
+      final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
         if (update != null) progressLogs.add(update);
@@ -213,7 +213,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       final policyLink = styleUnderlined.wrap(
         link(uri: Uri.parse('https://brickhub.dev/policy')),
       );
-      final user = MockUser();
+      final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => logger.confirm(any())).thenReturn(false);
@@ -243,7 +243,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 70 when publish fails', () async {
-      final user = MockUser();
+      final user = _MockUser();
       const message = 'oops';
       const exception = MasonApiPublishFailure(message: message);
       when(() => user.emailVerified).thenReturn(true);
@@ -263,7 +263,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
 
     test('exits with code 70 when publish fails (generic)', () async {
       final exception = Exception('oops');
-      final user = MockUser();
+      final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
@@ -278,14 +278,14 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 0 when publish succeeds', () async {
-      final user = MockUser();
+      final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
         if (update != null) progressLogs.add(update);
@@ -310,14 +310,14 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
     });
 
     test('exits with code 0 when publish succeeds with --force', () async {
-      final user = MockUser();
+      final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
       when(() => masonApi.currentUser).thenReturn(user);
       when(
         () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
         if (update != null) progressLogs.add(update);
@@ -348,7 +348,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       () async {
         final brickPath = p.join('..', '..', 'bricks', 'custom_registry');
         final customHostedUri = Uri.parse('https://custom.brickhub.dev');
-        final user = MockUser();
+        final user = _MockUser();
         final progressLogs = <String>[];
         when(() => user.emailVerified).thenReturn(true);
 
@@ -365,7 +365,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
         when(
           () => masonApi.publish(bundle: any(named: 'bundle')),
         ).thenAnswer((_) async {});
-        final progress = MockProgress();
+        final progress = _MockProgress();
         when(() => progress.complete(any())).thenAnswer((invocation) {
           final update = invocation.positionalArguments[0] as String?;
           if (update != null) progressLogs.add(update);
