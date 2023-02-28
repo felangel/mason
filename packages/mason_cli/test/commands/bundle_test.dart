@@ -22,14 +22,16 @@ void main() {
 
   group('mason bundle', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = MockLogger();
+      progress = MockProgress();
       pubUpdater = MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -83,12 +85,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling greeting')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
@@ -145,12 +142,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling hooks')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
@@ -198,12 +190,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling greeting')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
@@ -272,12 +259,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling hooks')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
@@ -307,7 +289,7 @@ void main() {
         when(() => progress.complete(any())).thenAnswer((invocation) {
           final update = invocation.positionalArguments[0] as String?;
 
-          if (update == 'Bundled greeting') {
+          if (update == 'Generated 1 file.') {
             throw const MasonException('oops');
           }
         });
@@ -368,12 +350,7 @@ void main() {
           ),
         );
         verify(() => logger.progress('Bundling greeting')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
@@ -445,12 +422,7 @@ void main() {
         expect(actual, contains('"license":{"path":"LICENSE","data":"'));
 
         verify(() => logger.progress('Bundling greeting')).called(1);
-        verify(
-          () => logger.info(
-            '${lightGreen.wrap('✓')} '
-            'Generated 1 file:',
-          ),
-        ).called(1);
+        verify(() => progress.complete('Generated 1 file.')).called(1);
         verify(
           () => logger.info(darkGray.wrap('  ${canonicalize(file.path)}')),
         ).called(1);
