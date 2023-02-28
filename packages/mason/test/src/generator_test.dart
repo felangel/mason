@@ -8,7 +8,7 @@ import 'package:test/test.dart';
 
 import '../bundles/bundles.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
@@ -298,7 +298,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -365,7 +365,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -429,7 +429,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -493,7 +493,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{
@@ -560,7 +560,7 @@ void main() {
           ),
         );
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         when(() => logger.prompt(any())).thenReturn('Y');
 
         final files2 = await generator.generate(

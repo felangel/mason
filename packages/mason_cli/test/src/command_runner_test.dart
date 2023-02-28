@@ -9,9 +9,9 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
 const expectedUsage = [
   '🧱  mason • lay the foundation!\n'
@@ -66,8 +66,8 @@ void main() {
 
     setUp(() {
       printLogs = [];
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
       when(
         () => pubUpdater.getLatestVersion(any()),
