@@ -48,15 +48,6 @@ class NewCommand extends MasonCommand {
     );
     final createHooks = results['hooks'] == true;
     final directory = Directory(outputDir);
-    final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
-
-    if (brickYaml.existsSync()) {
-      logger.err(
-        'Existing brick: $name at ${canonicalize(brickYaml.parent.path)}',
-      );
-      return ExitCode.usage.code;
-    }
-
     final target = DirectoryGeneratorTarget(directory);
     const vars = <String, dynamic>{'name': '{{name}}'};
     final generator = _BrickGenerator(
