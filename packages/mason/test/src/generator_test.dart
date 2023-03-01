@@ -173,6 +173,54 @@ void main() {
         timeout: const Timeout(Duration(minutes: 1)),
       );
 
+      test('constructs an instance (nested conditional, true)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'nested_conditional'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'brick mason',
+            'generate': true,
+          },
+        );
+
+        expect(files.length, equals(1));
+        expect(
+          files.every(
+            (element) => element.status == GeneratedFileStatus.created,
+          ),
+          isTrue,
+        );
+
+        final file = File(path.join(tempDir.path, 'brick_mason.txt'));
+
+        expect(file.existsSync(), isTrue);
+
+        expect(file.readAsStringSync(), equals('Hello Brick Mason'));
+      });
+
+      test('constructs an instance (nested conditional, false)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'nested_conditional'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'brick mason',
+            'generate': false,
+          },
+        );
+
+        expect(files, isEmpty);
+      });
+
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
         final brick = Brick.path(
