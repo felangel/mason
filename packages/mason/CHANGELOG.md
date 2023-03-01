@@ -1,3 +1,8 @@
+# 0.1.0-dev.47
+
+- fix: loop detection in `runSubstitution`
+- test: use private mocks
+
 # 0.1.0-dev.46
 
 - fix: `MasonBundle` use `fieldRename: FieldRename.snake`

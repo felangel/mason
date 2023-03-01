@@ -1,3 +1,11 @@
+# 0.1.0-dev.49
+
+- fix: loop detection in `runSubstitution`
+  - deps: upgrade to `mason ^0.1.0-dev.47`
+- feat: `mason new` updates existing brick
+- refactor: streamline stdout from `mason bundle`
+- refactor: `mason add` uses "build" instead of "compile"
+
 # 0.1.0-dev.48
 
 - feat: add `--force` and `--dry-run` to `publish` command

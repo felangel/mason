@@ -453,6 +453,7 @@ class TemplateFile {
       for (final match in matches) {
         final key = match.group(1);
         if (key == null || _lambdas.hasMatch(key)) continue;
+        if (parameters[key] is! Iterable) continue;
         final value = _loopValueRegExp(key).firstMatch(filePath)![1];
         if (value == '.') {
           filePath = filePath.replaceFirst(_loopRegExp(key), '{{$key}}');
