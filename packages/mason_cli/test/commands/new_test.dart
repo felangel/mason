@@ -122,7 +122,7 @@ void main() {
       verify(() => logger.flush(any())).called(1);
     });
 
-    test('exits with code 64 when brick already exists', () async {
+    test('updates existing brick when brick already exists', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'simple'),
       )..createSync(recursive: true);
@@ -137,14 +137,10 @@ void main() {
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
 
-      final secondResult = await commandRunner.run(['new', 'hello world']);
-      expect(secondResult, equals(ExitCode.usage.code));
-      final expectedBrickPath = canonicalize(
-        path.join(Directory.current.path, 'hello_world'),
+      final secondResult = await commandRunner.run(
+        ['new', 'hello world', '--hooks'],
       );
-      verify(
-        () => logger.err('Existing brick: hello_world at $expectedBrickPath'),
-      ).called(1);
+      expect(secondResult, equals(ExitCode.success.code));
     });
   });
 }
