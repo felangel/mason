@@ -21,14 +21,16 @@ void main() {
 
   group('mason upgrade', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = _MockLogger();
+      progress = _MockProgress();
       pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -45,6 +47,21 @@ void main() {
     });
 
     group('local', () {
+      test('throws when unable to resolve brick', () async {
+        File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
+          '''
+bricks:
+  greeting:
+    path: ./bad/path
+''',
+        );
+
+        final upgradeResult = await commandRunner.run(['upgrade']);
+        expect(upgradeResult, equals(ExitCode.usage.code));
+        verify(() => logger.progress('Upgrading bricks')).called(1);
+        verify(progress.fail).called(1);
+      });
+
       test('updates lockfile', () async {
         File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
           '''

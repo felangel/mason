@@ -21,14 +21,16 @@ void main() {
 
   group('mason unbundle', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = _MockLogger();
+      progress = _MockProgress();
       pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -69,12 +71,7 @@ void main() {
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
       verify(() => logger.progress('Unbundling greeting')).called(1);
-      verify(
-        () => logger.info(
-          '${lightGreen.wrap('✓')} '
-          'Generated 1 brick:',
-        ),
-      ).called(1);
+      verify(() => progress.complete('Generated 1 brick.')).called(1);
       verify(
         () => logger.info(darkGray.wrap('  ${canonicalize(actual.path)}')),
       ).called(1);
@@ -107,12 +104,7 @@ void main() {
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
       verify(() => logger.progress('Unbundling greeting_bundle')).called(1);
-      verify(
-        () => logger.info(
-          '${lightGreen.wrap('✓')} '
-          'Generated 1 brick:',
-        ),
-      ).called(1);
+      verify(() => progress.complete('Generated 1 brick.')).called(1);
       verify(
         () => logger.info(darkGray.wrap('  ${canonicalize(actual.path)}')),
       ).called(1);
@@ -142,7 +134,7 @@ void main() {
       final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
-        if (update == 'Unbundled greeting') throw const MasonException('oops');
+        if (update == 'Generated 1 brick.') throw const MasonException('oops');
       });
       when(() => logger.progress(any())).thenReturn(progress);
       final bundlePath = path.join(
