@@ -6,44 +6,6 @@ import 'package:path/path.dart' as p;
 
 /// Mixin on [MasonCommand] which adds support for installing bricks.
 mixin InstallBrickMixin on MasonCommand {
-  /// Installs a specific brick and returns the [CachedBrick] reference.
-  Future<CachedBrick> addBrick(Brick brick, {bool global = false}) async {
-    final bricksJson = global ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) {
-      usageException(
-        'Mason has not been initialized.\nDid you forget to run mason init?',
-      );
-    }
-
-    final masonLockJsonFile =
-        global ? globalMasonLockJsonFile : localMasonLockJsonFile;
-    final masonLockJson = global ? globalMasonLockJson : localMasonLockJson;
-    final installProgress = logger.progress('Installing ${brick.name}');
-    try {
-      final location = resolveBrickLocation(
-        location: brick.location,
-        lockedLocation: masonLockJson.bricks[brick.name],
-      );
-      final cachedBrick = await bricksJson.add(
-        Brick(name: brick.name, location: location),
-      );
-      await bricksJson.flush();
-      await masonLockJsonFile.writeAsString(
-        json.encode(
-          MasonLockJson(
-            bricks: {
-              ...masonLockJson.bricks,
-              brick.name!: cachedBrick.brick.location
-            },
-          ),
-        ),
-      );
-      return cachedBrick;
-    } finally {
-      installProgress.complete();
-    }
-  }
-
   /// Installs all bricks either locally or globally depending on [global].
   /// If [upgrade] is true, bricks are upgraded to the latest version
   /// and the lock file is regenerated.
