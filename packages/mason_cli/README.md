@@ -13,6 +13,8 @@
 
 ---
 
+[简体中文](https://github.com/felangel/mason/blob/master/packages/mason_cli/README_cn.md)
+
 Mason CLI allows developers to create and consume reusable templates called bricks powered by the [mason](https://pub.dev/packages/mason) generator.
 
 ![Mason Demo][mason_demo]
@@ -34,6 +36,8 @@ mason make hello
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
+- [Table of Contents](#table-of-contents)
 - [Overview](#overview)
   - [Installation](#installation)
   - [Initializing](#initializing)
@@ -52,7 +56,7 @@ mason make hello
     - [Custom Script Execution (Hooks)](#custom-script-execution-hooks)
       - [Hooks Usage](#hooks-usage)
 - [Searching for Bricks](#searching-for-bricks)
-  - [Search Usage](#search-usage)
+  - [Search usage](#search-usage)
 - [Adding Bricks](#adding-bricks)
   - [Add Usage](#add-usage)
 - [Removing Bricks](#removing-bricks)
