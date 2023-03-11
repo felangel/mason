@@ -1,3 +1,9 @@
+# 0.1.0-dev.50
+
+- feat: standardize stdout across commands
+- feat: `mason init` does not automatically install the "hello" brick
+- feat: `mason init` enhancements to the comments in the generated `mason.yaml`
+
 # 0.1.0-dev.49
 
 - fix: loop detection in `runSubstitution`
