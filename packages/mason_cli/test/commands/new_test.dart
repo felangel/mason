@@ -58,7 +58,7 @@ void main() {
       final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
-        if (update?.startsWith('Created new brick:') ?? false) {
+        if (update == 'Generated 5 file(s).') {
           throw const MasonException('oops');
         }
       });

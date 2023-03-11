@@ -14,8 +14,6 @@ mixin InstallBrickMixin on MasonCommand {
     if (bricksJson == null) throw const MasonYamlNotFoundException();
     final lockJson = global ? globalMasonLockJson : localMasonLockJson;
     final resolvedBricks = <String, BrickLocation>{};
-    final message = upgrade ? 'Upgrading bricks' : 'Getting bricks';
-    final getBricksProgress = logger.progress(message);
 
     Future<CachedBrick> _resolveBrickEntry(
       MapEntry<String, BrickLocation> entry,
@@ -33,14 +31,12 @@ mixin InstallBrickMixin on MasonCommand {
                 ),
               )
             : location;
-        getBricksProgress.update('Installing ${entry.key}');
         final cachedBrick = await bricksJson.add(
           Brick(name: entry.key, location: normalizedLocation),
         );
         resolvedBricks.addAll(
           <String, BrickLocation>{entry.key: cachedBrick.brick.location},
         );
-        getBricksProgress.update('Building ${entry.key}');
         final generator = await MasonGenerator.fromBrick(
           Brick.path(cachedBrick.path),
         );
@@ -83,7 +79,6 @@ mixin InstallBrickMixin on MasonCommand {
         ]);
       }
     } finally {
-      getBricksProgress.complete(message);
       await bricksJson.flush();
       final masonLockJsonFile =
           global ? globalMasonLockJsonFile : localMasonLockJsonFile;

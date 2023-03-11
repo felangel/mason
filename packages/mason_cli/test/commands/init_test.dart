@@ -21,14 +21,16 @@ void main() {
 
   group('mason init', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = _MockLogger();
+      progress = _MockProgress();
       pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -63,19 +65,13 @@ void main() {
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'init')),
       );
-      expect(
-        directoriesDeepEqual(actual, expected, ignore: ['bricks.json']),
-        isTrue,
-      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
       expect(
         File(path.join(actual.path, '.mason', 'bricks.json')).existsSync(),
-        isTrue,
+        isFalse,
       );
       verify(() => logger.progress('Initializing')).called(1);
-      verify(() => logger.progress('Getting bricks')).called(1);
-      verify(
-        () => logger.info('Run "mason make hello" to use your first brick.'),
-      ).called(1);
+      verify(() => progress.complete('Generated 1 file.')).called(1);
     });
   });
 }
