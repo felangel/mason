@@ -1,9 +1,9 @@
 import 'dart:convert';
+import 'dart:isolate';
 
 import 'package:archive/archive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:mason/src/brick_yaml.dart';
-import 'package:mason/src/compute.dart';
 
 part 'mason_bundle.g.dart';
 
@@ -59,11 +59,10 @@ class MasonBundle {
 
   /// Converts a universal bundle into a [MasonBundle] instance.
   static Future<MasonBundle> fromUniversalBundle(List<int> bytes) async {
-    final bundleJson = await compute(
-      (List<int> bytes) => json.decode(
+    final bundleJson = await Isolate.run(
+      () => json.decode(
         utf8.decode(BZip2Decoder().decodeBytes(bytes)),
       ) as Map<String, dynamic>,
-      bytes,
     );
     return MasonBundle.fromJson(bundleJson);
   }
@@ -74,9 +73,8 @@ class MasonBundle {
       content.indexOf('{'),
       content.lastIndexOf('}') + 1,
     );
-    final bundleJson = await compute(
-      (String jsonString) => json.decode(jsonString) as Map<String, dynamic>,
-      bundleJsonString,
+    final bundleJson = await Isolate.run(
+      () => json.decode(bundleJsonString) as Map<String, dynamic>,
     );
     return MasonBundle.fromJson(bundleJson);
   }
@@ -123,7 +121,9 @@ class MasonBundle {
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);
 
   /// Converts a [MasonBundle] into universal bundle bytes.
-  Future<List<int>> toUniversalBundle() => compute(_encodeBundle, this);
+  Future<List<int>> toUniversalBundle() {
+    return Isolate.run(() => _encodeBundle(this));
+  }
 
   Future<List<int>> _encodeBundle(MasonBundle bundle) async {
     return BZip2Encoder().encode(utf8.encode(json.encode(bundle.toJson())));
