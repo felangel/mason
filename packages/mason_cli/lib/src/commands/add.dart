@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
@@ -63,18 +64,18 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       brick = Brick(name: name, location: BrickLocation(version: version));
     }
 
-    final cachedBrick = await addBrick(brick, global: isGlobal);
+    final progress = logger.progress('Installing ${brick.name}');
+    final cachedBrick = await _addBrick(brick, global: isGlobal);
     final file = File(p.join(cachedBrick.path, BrickYaml.file));
     final generator = await MasonGenerator.fromBrick(
       Brick.path(cachedBrick.path),
     );
 
-    final compileProgress = logger.progress('Compiling ${brick.name}');
+    progress.update('Building ${brick.name}');
     try {
       await generator.hooks.compile();
-      compileProgress.complete();
     } catch (_) {
-      compileProgress.fail();
+      progress.fail();
       rethrow;
     }
 
@@ -96,18 +97,51 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
               )
             : brick.location;
     final bricks = Map.of(masonYaml.bricks)..addAll({name: location});
-    final addProgress = logger.progress('Adding ${brickYaml.name}');
+    progress.update('Adding ${brickYaml.name}');
     try {
       if (!masonYaml.bricks.containsKey(name)) {
         await masonYamlFile.writeAsString(
           Yaml.encode(MasonYaml(bricks).toJson()),
         );
       }
-      addProgress.complete('Added ${brickYaml.name}');
+      progress.complete('Added ${brickYaml.name}');
     } catch (_) {
-      addProgress.fail();
+      progress.fail();
       rethrow;
     }
     return ExitCode.success.code;
+  }
+
+  /// Installs a specific brick and returns the [CachedBrick] reference.
+  Future<CachedBrick> _addBrick(Brick brick, {bool global = false}) async {
+    final bricksJson = global ? globalBricksJson : localBricksJson;
+    if (bricksJson == null) {
+      usageException(
+        'Mason has not been initialized.\nDid you forget to run mason init?',
+      );
+    }
+
+    final masonLockJsonFile =
+        global ? globalMasonLockJsonFile : localMasonLockJsonFile;
+    final masonLockJson = global ? globalMasonLockJson : localMasonLockJson;
+    final location = resolveBrickLocation(
+      location: brick.location,
+      lockedLocation: masonLockJson.bricks[brick.name],
+    );
+    final cachedBrick = await bricksJson.add(
+      Brick(name: brick.name, location: location),
+    );
+    await bricksJson.flush();
+    await masonLockJsonFile.writeAsString(
+      json.encode(
+        MasonLockJson(
+          bricks: {
+            ...masonLockJson.bricks,
+            brick.name!: cachedBrick.brick.location
+          },
+        ),
+      ),
+    );
+    return cachedBrick;
   }
 }

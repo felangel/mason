@@ -24,7 +24,14 @@ class UpgradeCommand extends MasonCommand with InstallBrickMixin {
   @override
   Future<int> run() async {
     final isGlobal = results['global'] == true;
-    await getBricks(upgrade: true, global: isGlobal);
+    final progress = logger.progress('Upgrading bricks');
+    try {
+      await getBricks(upgrade: true, global: isGlobal);
+    } catch (_) {
+      progress.fail();
+      rethrow;
+    }
+    progress.complete('Upgraded bricks');
     return ExitCode.success.code;
   }
 }

@@ -4,9 +4,9 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockStdout extends Mock implements Stdout {}
+class _MockStdout extends Mock implements Stdout {}
 
-class MockStdin extends Mock implements Stdin {}
+class _MockStdin extends Mock implements Stdin {}
 
 void main() {
   group('Logger', () {
@@ -15,9 +15,9 @@ void main() {
     late Stdout stderr;
 
     setUp(() {
-      stdout = MockStdout();
-      stdin = MockStdin();
-      stderr = MockStdout();
+      stdout = _MockStdout();
+      stdin = _MockStdin();
+      stderr = _MockStdout();
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
     });

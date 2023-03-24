@@ -21,7 +21,7 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       logger.err('Existing ${MasonYaml.file} at ${localMasonYamlFile.path}');
       return ExitCode.usage.code;
     }
-    final fetchProgress = logger.progress('Initializing');
+    final progress = logger.progress('Initializing');
     final target = DirectoryGeneratorTarget(cwd);
     final generator = _MasonYamlGenerator();
     await generator.generate(
@@ -29,17 +29,9 @@ class InitCommand extends MasonCommand with InstallBrickMixin {
       vars: <String, String>{'name': '{{name}}'},
       logger: logger,
     );
-    fetchProgress.complete();
 
-    await getBricks();
-
-    logger
-      ..info(
-        '${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):',
-      )
-      ..flush((message) => logger.info(darkGray.wrap(message)))
-      ..info('')
-      ..info('Run "mason make hello" to use your first brick.');
+    progress.complete('Generated 1 file.');
+    logger.flush((message) => logger.info(darkGray.wrap(message)));
     return ExitCode.success.code;
   }
 }
@@ -54,14 +46,14 @@ class _MasonYamlGenerator extends MasonGenerator {
 
   static const _masonYamlContent = '''
 # Register bricks which can be consumed via the Mason CLI.
-# https://github.com/felangel/mason
+# Run "mason get" to install all registered bricks.
+# To learn more, visit https://docs.brickhub.dev.
 bricks:
-  # Sample Brick
-  # Run `mason make hello` to try it out.
-  hello: 0.1.0+1
-  # Bricks can also be imported via git url.
-  # Uncomment the following lines to import
-  # a brick from a remote git url.
+  # Bricks can be imported via version constraint from a registry.
+  # Uncomment the following line to import the "hello" brick from BrickHub.
+  # hello: 0.1.0+1
+  # Bricks can also be imported via remote git url.
+  # Uncomment the following lines to import the "widget" brick from git.
   # widget:
   #   git:
   #     url: https://github.com/felangel/mason.git

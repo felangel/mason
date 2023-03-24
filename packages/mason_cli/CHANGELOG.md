@@ -1,3 +1,21 @@
+# 0.1.0-dev.50
+
+- feat: standardize stdout across commands
+- feat: `mason init` does not automatically install the "hello" brick
+- feat: `mason init` enhancements to the comments in the generated `mason.yaml`
+
+# 0.1.0-dev.49
+
+- fix: loop detection in `runSubstitution`
+  - deps: upgrade to `mason ^0.1.0-dev.47`
+- feat: `mason new` updates existing brick
+- refactor: streamline stdout from `mason bundle`
+- refactor: `mason add` uses "build" instead of "compile"
+
+# 0.1.0-dev.48
+
+- feat: add `--force` and `--dry-run` to `publish` command
+
 # 0.1.0-dev.47
 
 - feat: add `repository` field and `README` updates to new brick

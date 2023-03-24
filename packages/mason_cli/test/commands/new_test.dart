@@ -10,11 +10,11 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   final cwd = Directory.current;
@@ -25,10 +25,10 @@ void main() {
     late MasonCommandRunner commandRunner;
 
     setUp(() {
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -55,10 +55,10 @@ void main() {
     test(
         'exits with code 64 when '
         'exception occurs during generation', () async {
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
-        if (update?.startsWith('Created new brick:') ?? false) {
+        if (update == 'Generated 5 file(s).') {
           throw const MasonException('oops');
         }
       });
@@ -122,7 +122,7 @@ void main() {
       verify(() => logger.flush(any())).called(1);
     });
 
-    test('exits with code 64 when brick already exists', () async {
+    test('updates existing brick when brick already exists', () async {
       final testDir = Directory(
         path.join(Directory.current.path, 'simple'),
       )..createSync(recursive: true);
@@ -137,14 +137,10 @@ void main() {
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
 
-      final secondResult = await commandRunner.run(['new', 'hello world']);
-      expect(secondResult, equals(ExitCode.usage.code));
-      final expectedBrickPath = canonicalize(
-        path.join(Directory.current.path, 'hello_world'),
+      final secondResult = await commandRunner.run(
+        ['new', 'hello world', '--hooks'],
       );
-      verify(
-        () => logger.err('Existing brick: hello_world at $expectedBrickPath'),
-      ).called(1);
+      expect(secondResult, equals(ExitCode.success.code));
     });
   });
 }
