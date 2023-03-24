@@ -12,6 +12,10 @@ class _MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
+    final identicalString = '  ${cyan.wrap('identical')} ';
+    final createdString = '  ${green.wrap('created')} ';
+    final skippedString = '  ${yellow.wrap('skipped')} ';
+
     group('.fromBrick (path)', () {
       test('handles malformed brick', () async {
         final tempDir = Directory.systemTemp.createTempSync();
@@ -370,9 +374,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('created ')))).called(1);
+        verify(() => logger.delayed(any(that: contains(createdString))))
+            .called(1);
         verifyNever(
-          () => logger.delayed(any(that: contains('identical '))),
+          () => logger.delayed(any(that: contains(identicalString))),
         );
 
         final files2 = await generator.generate(
@@ -398,9 +403,9 @@ void main() {
           ),
         );
         verify(
-          () => logger.delayed(any(that: contains('identical '))),
+          () => logger.delayed(any(that: contains(identicalString))),
         ).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('created '))));
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
@@ -437,8 +442,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('created ')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('skipped '))));
+        verify(
+          () => logger.delayed(any(that: contains(createdString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(skippedString))));
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -463,8 +470,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('skipped ')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('created '))));
+        verify(
+          () => logger.delayed(any(that: contains(skippedString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
