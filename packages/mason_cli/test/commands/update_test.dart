@@ -7,13 +7,13 @@ import 'package:mocktail/mocktail.dart';
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockProcessResult extends Mock implements ProcessResult {}
+class _MockProcessResult extends Mock implements ProcessResult {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   const latestVersion = '0.0.0';
@@ -25,11 +25,11 @@ void main() {
     late MasonCommandRunner commandRunner;
 
     setUp(() {
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
-      processResult = MockProcessResult();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
+      processResult = _MockProcessResult();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -115,7 +115,7 @@ void main() {
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => latestVersion);
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.success.code));
       verify(() => logger.progress('Checking for updates')).called(1);
@@ -132,7 +132,7 @@ void main() {
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.success.code));
       verify(

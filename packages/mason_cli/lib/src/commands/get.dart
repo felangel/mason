@@ -17,7 +17,14 @@ class GetCommand extends MasonCommand with InstallBrickMixin {
 
   @override
   Future<int> run() async {
-    await getBricks();
+    final progress = logger.progress('Getting bricks');
+    try {
+      await getBricks();
+    } catch (_) {
+      progress.fail();
+      rethrow;
+    }
+    progress.complete('Got bricks');
     return ExitCode.success.code;
   }
 }

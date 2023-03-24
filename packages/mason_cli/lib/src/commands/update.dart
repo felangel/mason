@@ -43,7 +43,7 @@ class UpdateCommand extends MasonCommand {
       return ExitCode.success.code;
     }
 
-    final updateProgress = logger.progress('Updating to $latestVersion');
+    final progress = logger.progress('Updating to $latestVersion');
     late final ProcessResult result;
     try {
       result = await _pubUpdater.update(
@@ -51,18 +51,18 @@ class UpdateCommand extends MasonCommand {
         versionConstraint: latestVersion,
       );
     } catch (error) {
-      updateProgress.fail();
+      progress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
 
     if (result.exitCode != ExitCode.success.code) {
-      updateProgress.fail('Unable to update to $latestVersion');
+      progress.fail('Unable to update to $latestVersion');
       logger.err('${result.stderr}');
       return ExitCode.software.code;
     }
 
-    updateProgress.complete('Updated to $latestVersion');
+    progress.complete('Updated to $latestVersion');
 
     return ExitCode.success.code;
   }

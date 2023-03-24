@@ -8,9 +8,9 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:test/test.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   group('Command', () {
@@ -55,8 +55,8 @@ bricks:
 ''',
         );
         Directory.current = directory;
-        final logger = MockLogger();
-        when(() => logger.progress(any())).thenReturn(MockProgress());
+        final logger = _MockLogger();
+        when(() => logger.progress(any())).thenReturn(_MockProgress());
         final command = GetCommand(logger: logger);
         await command.run();
         brickYaml.writeAsStringSync('{]');

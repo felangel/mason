@@ -64,6 +64,13 @@ class PublishCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
+    final force = results['force'] == true;
+    final dryRun = results['dry-run'] == true;
+
+    if (force && dryRun) {
+      usageException('Cannot use both --force and --dry-run.');
+    }
+
     final directoryPath = results['directory'] as String;
     final brickYamlFile = File(path.join(directoryPath, BrickYaml.file));
     if (!brickYamlFile.existsSync()) {
@@ -112,6 +119,15 @@ class PublishCommand extends MasonCommand {
       masonApi.close();
       return ExitCode.software.code;
     }
+
+    if (dryRun) {
+      logger
+        ..info('No issues detected.')
+        ..info('The server may enforce additional checks.');
+      masonApi.close();
+      return ExitCode.success.code;
+    }
+
     final policyLink = styleUnderlined.wrap(
       link(uri: Uri.parse('https://brickhub.dev/policy')),
     );
@@ -125,14 +141,17 @@ class PublishCommand extends MasonCommand {
       )
       ..info('See policy details at $policyLink\n');
 
-    final confirmed = logger.confirm(
-      'Do you want to publish ${bundle.name} ${bundle.version}?',
-    );
+    final needsConfirmation = !force;
+    if (needsConfirmation) {
+      final confirmed = logger.confirm(
+        'Do you want to publish ${bundle.name} ${bundle.version}?',
+      );
 
-    if (!confirmed) {
-      logger.err('Brick was not published.');
-      masonApi.close();
-      return ExitCode.software.code;
+      if (!confirmed) {
+        logger.err('Brick was not published.');
+        masonApi.close();
+        return ExitCode.software.code;
+      }
     }
 
     final publishProgress = logger.progress(
@@ -171,6 +190,18 @@ extension on ArgParser {
       abbr: 'C',
       help: 'Run this in the specified directory',
       defaultsTo: '.',
+    );
+    addFlag(
+      'force',
+      abbr: 'f',
+      negatable: false,
+      help: 'Publish without confirmation if there are no errors.',
+    );
+    addFlag(
+      'dry-run',
+      abbr: 'n',
+      negatable: false,
+      help: 'Validate but do not publish the brick.',
     );
   }
 }

@@ -1,5 +1,9 @@
 name: mason
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -26,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.4.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -53,7 +57,7 @@ jobs:
         os: [macos-latest, windows-2019, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.4.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -77,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.3.0
+      - uses: actions/checkout@v3.4.0
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies

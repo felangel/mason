@@ -123,13 +123,8 @@ class BundleCommand extends MasonCommand {
           bundlePath = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
-      bundleProgress.complete('Bundled ${bundle.name}');
-      logger
-        ..info(
-          '${lightGreen.wrap('✓')} '
-          'Generated 1 file:',
-        )
-        ..info(darkGray.wrap('  $bundlePath'));
+      bundleProgress.complete('Generated 1 file.');
+      logger.info(darkGray.wrap('  $bundlePath'));
     } catch (_) {
       bundleProgress.fail();
       rethrow;

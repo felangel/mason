@@ -7,14 +7,14 @@ import 'package:test/test.dart';
 
 import 'bundles/bundles.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
     late Logger logger;
 
     setUp(() {
-      logger = MockLogger();
+      logger = _MockLogger();
     });
 
     group('.fromBundle', () {

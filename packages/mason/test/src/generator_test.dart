@@ -8,10 +8,14 @@ import 'package:test/test.dart';
 
 import '../bundles/bundles.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
+    final identicalString = '  ${cyan.wrap('identical')} ';
+    final createdString = '  ${green.wrap('created')} ';
+    final skippedString = '  ${yellow.wrap('skipped')} ';
+
     group('.fromBrick (path)', () {
       test('handles malformed brick', () async {
         final tempDir = Directory.systemTemp.createTempSync();
@@ -173,6 +177,54 @@ void main() {
         timeout: const Timeout(Duration(minutes: 1)),
       );
 
+      test('constructs an instance (nested conditional, true)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'nested_conditional'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'brick mason',
+            'generate': true,
+          },
+        );
+
+        expect(files.length, equals(1));
+        expect(
+          files.every(
+            (element) => element.status == GeneratedFileStatus.created,
+          ),
+          isTrue,
+        );
+
+        final file = File(path.join(tempDir.path, 'brick_mason.txt'));
+
+        expect(file.existsSync(), isTrue);
+
+        expect(file.readAsStringSync(), equals('Hello Brick Mason'));
+      });
+
+      test('constructs an instance (nested conditional, false)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'nested_conditional'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'brick mason',
+            'generate': false,
+          },
+        );
+
+        expect(files, isEmpty);
+      });
+
       test('constructs an instance with hooks', () async {
         const name = 'Dash';
         final brick = Brick.path(
@@ -298,7 +350,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -322,9 +374,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('created ')))).called(1);
+        verify(() => logger.delayed(any(that: contains(createdString))))
+            .called(1);
         verifyNever(
-          () => logger.delayed(any(that: contains('identical '))),
+          () => logger.delayed(any(that: contains(identicalString))),
         );
 
         final files2 = await generator.generate(
@@ -350,9 +403,9 @@ void main() {
           ),
         );
         verify(
-          () => logger.delayed(any(that: contains('identical '))),
+          () => logger.delayed(any(that: contains(identicalString))),
         ).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('created '))));
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
@@ -365,7 +418,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -389,8 +442,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('created ')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('skipped '))));
+        verify(
+          () => logger.delayed(any(that: contains(createdString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(skippedString))));
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -415,8 +470,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('skipped ')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('created '))));
+        verify(
+          () => logger.delayed(any(that: contains(skippedString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
@@ -429,7 +486,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -493,7 +550,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{
@@ -560,7 +617,7 @@ void main() {
           ),
         );
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         when(() => logger.prompt(any())).thenReturn('Y');
 
         final files2 = await generator.generate(
