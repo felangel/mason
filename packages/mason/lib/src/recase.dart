@@ -67,7 +67,7 @@ class ReCase {
   /// Returns the text in PascalCase format.
   String get pascalCase => _getPascalCase();
 
-  /// Returns the text in PascalDotCase format.
+  /// Returns the text in Pascal.Dot.Case format.
   String get pascalDotCase => _getPascalCase(separator: '.');
 
   /// Returns the text in Header-Case format.
