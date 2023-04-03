@@ -23,7 +23,7 @@ extension StringCaseExtensions on String {
   /// PascalCase
   String get pascalCase => ReCase(this).pascalCase;
 
-  /// Title.Case
+  /// Pascal.Dot.Case
   String get pascalDotCase => ReCase(this).pascalDotCase;
 
   /// param-case
