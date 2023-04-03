@@ -45,7 +45,7 @@ final _builtInLambdas = <String, LambdaFunction>{
   /// PascalCase
   'pascalCase': (ctx) => ctx.renderString().pascalCase,
 
-  /// Title.Case
+  /// Pascal.Dot.Case
   'pascalDotCase': (ctx) => ctx.renderString().pascalDotCase,
 
   /// param-case
