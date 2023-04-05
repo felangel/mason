@@ -1,3 +1,8 @@
+# 0.1.0-dev.48
+
+- fix: git brick install across file systems
+- refactor: use `Isolate.run`
+
 # 0.1.0-dev.47
 
 - fix: loop detection in `runSubstitution`

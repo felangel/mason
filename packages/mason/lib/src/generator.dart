@@ -9,7 +9,6 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
-import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
@@ -60,9 +59,8 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
   static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    final bytes = await compute(
-      (MasonBundle b) => utf8.encode(json.encode(b.toJson())),
-      bundle,
+    final bytes = await Isolate.run(
+      () => utf8.encode(json.encode(bundle.toJson())),
     );
     final hash = sha1.convert(bytes).toString();
     final target = Directory(
@@ -578,15 +576,7 @@ Future<Set<FileContents>> _runSubstitutionAsync(
   Map<String, dynamic> vars,
   Map<String, List<int>> partials,
 ) async {
-  return compute(
-    (List<dynamic> inputs) {
-      final file = inputs[0] as TemplateFile;
-      final vars = inputs[1] as Map<String, dynamic>;
-      final partials = inputs[2] as Map<String, List<int>>;
-      return file.runSubstitution(vars, partials);
-    },
-    [file, vars, partials],
-  );
+  return Isolate.run(() => file.runSubstitution(vars, partials));
 }
 
 extension on FileConflictResolution {

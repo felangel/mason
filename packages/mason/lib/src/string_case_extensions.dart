@@ -1,4 +1,4 @@
-import 'package:recase/recase.dart' show ReCase;
+import 'package:mason/src/recase.dart';
 
 /// Built-in [String] casing extensions.
 extension StringCaseExtensions on String {
@@ -22,6 +22,9 @@ extension StringCaseExtensions on String {
 
   /// PascalCase
   String get pascalCase => ReCase(this).pascalCase;
+
+  /// Pascal.Dot.Case
+  String get pascalDotCase => ReCase(this).pascalDotCase;
 
   /// param-case
   String get paramCase => ReCase(this).paramCase;
