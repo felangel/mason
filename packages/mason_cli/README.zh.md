@@ -13,7 +13,7 @@
 
 ---
 
-[![en](https://img.shields.io/badge/language-english-red.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
+[![en](https://img.shields.io/badge/language-english-cyan.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
 
 Mason CLI 允许开发人员创建和使用称为 bricks 的复用模板，这些模板由 [mason](https://pub.dev/packages/mason) 生成器支援。
 
