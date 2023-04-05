@@ -13,6 +13,9 @@
 
 ---
 
+[![en](https://img.shields.io/badge/language-english-cyan.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
+[![zh](https://img.shields.io/badge/language-chinese-cyan.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.zh.md)
+
 Mason CLI allows developers to create and consume reusable templates called bricks powered by the [mason](https://pub.dev/packages/mason) generator.
 
 ![Mason Demo][mason_demo]
@@ -37,6 +40,8 @@ mason make hello
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
+- [Table of Contents](#table-of-contents)
 - [Overview](#overview)
   - [Installation](#installation)
   - [Initializing](#initializing)
@@ -525,7 +530,7 @@ mason make example --name Dash --no-hooks
 
 The `search` command allows developers to search published bricks on https://brickhub.dev.
 
-### Search usage
+### Search Usage
 
 ```sh
 # search for bricks related to "bloc"
