@@ -60,7 +60,7 @@ mason make hello
     - [Custom Script Execution (Hooks)](#custom-script-execution-hooks)
       - [Hooks Usage](#hooks-usage)
 - [Searching for Bricks](#searching-for-bricks)
-  - [Search usage](#search-usage)
+  - [Search Usage](#search-usage)
 - [Adding Bricks](#adding-bricks)
   - [Add Usage](#add-usage)
 - [Removing Bricks](#removing-bricks)
@@ -530,7 +530,7 @@ mason make example --name Dash --no-hooks
 
 The `search` command allows developers to search published bricks on https://brickhub.dev.
 
-### Search usage
+### Search Usage
 
 ```sh
 # search for bricks related to "bloc"
