@@ -13,7 +13,8 @@
 
 ---
 
-[简体中文](https://github.com/felangel/mason/blob/master/packages/mason_cli/README_cn.md)
+[![en](https://img.shields.io/badge/language-english-red.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
+[![zh](https://img.shields.io/badge/language-chinese-blue.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.zh.md)
 
 Mason CLI allows developers to create and consume reusable templates called bricks powered by the [mason](https://pub.dev/packages/mason) generator.
 

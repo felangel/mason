@@ -13,7 +13,7 @@
 
 ---
 
-[English](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
+[![en](https://img.shields.io/badge/language-english-red.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
 
 Mason CLI 允许开发人员创建和使用称为 bricks 的复用模板，这些模板由 [mason](https://pub.dev/packages/mason) 生成器支援。
 
@@ -98,7 +98,6 @@ mason init
 
 `mason init` 在当前目录中初始化 Mason CLI。
 
-
 运行 `mason init` 会生成一个 `mason.yaml`，以便您可以立即开始。
 
 ```yaml
@@ -118,6 +117,7 @@ bricks:
 ```
 
 要在 `mason.yaml` 中載入所有积木，请运行：
+
 ```sh
 mason get
 ```
@@ -262,7 +262,7 @@ vars:
 
 ### 磚塊模板
 
-使用 [mustache 模板](https://mustache.github.io/) 在 __brick__ 目录中编写您的磚塊模板。 有关详细的使用信息，请参阅 [mustache 手册](https://mustache.github.io/mustache.5.html)。
+使用 [mustache 模板](https://mustache.github.io/) 在 **brick** 目录中编写您的磚塊模板。 有关详细的使用信息，请参阅 [mustache 手册](https://mustache.github.io/mustache.5.html)。
 
 `__brick__/example.md`
 
@@ -427,7 +427,7 @@ Mason 支持通過 `hooks` 執行自定義腳本。 支持的 Hooks 是：
     └── pubspec.yaml
 ```
 
-❗目前 mason 只支持用 [Dart](https://dart.dev) 写的hooks。
+❗ 目前 mason 只支持用 [Dart](https://dart.dev) 写的 hooks。
 
 ##### Hooks 使用
 
@@ -530,6 +530,7 @@ mason search bloc
 `add` 命令允许开发人员从本地路径或 git url 在本地或全局添加 brick 模板。 默认情况下，`mason add` 将在本地添加模板，但可以通过提供 `--global` (`-g`) 标志在全局添加砖块。
 
 ### 添加用法
+
 ```sh
 # add latest version from registry
 mason add my_brick
