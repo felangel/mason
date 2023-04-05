@@ -24,7 +24,6 @@ dependencies:
   path: ^1.8.0
   pool: ^1.5.1
   pub_semver: ^2.1.0
-  recase: ^4.0.0
   yaml: ^3.1.0
 
 dev_dependencies:
