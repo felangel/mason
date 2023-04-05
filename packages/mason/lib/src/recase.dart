@@ -6,16 +6,14 @@
 class ReCase {
   /// Constructs an instance of [ReCase] by analyzing the given [text] and
   /// grouping it into words.
-  ReCase(String text) {
-    _words = _groupIntoWords(text);
-  }
+  ReCase(String text) : _words = _groupIntoWords(text);
 
-  final _upperAlphaRegex = RegExp('[A-Z]');
-  final _symbolSet = {' ', '.', '/', '_', r'\', '-'};
-  late List<String> _words;
+  static final _upperAlphaRegex = RegExp('[A-Z]');
+  static final _symbolSet = {' ', '.', '/', '_', r'\', '-'};
+  final List<String> _words;
 
   /// Groups the [text] into words considering different separators and casing.
-  List<String> _groupIntoWords(String text) {
+  static List<String> _groupIntoWords(String text) {
     final sb = StringBuffer();
     final words = <String>[];
     final isAllCaps = text.toUpperCase() == text;
