@@ -10,7 +10,7 @@ class ReCase {
     _words = _groupIntoWords(text);
   }
 
-  final RegExp _upperAlphaRegex = RegExp('[A-Z]');
+  final _upperAlphaRegex = RegExp('[A-Z]');
   final _symbolSet = {' ', '.', '/', '_', r'\', '-'};
   late List<String> _words;
 
