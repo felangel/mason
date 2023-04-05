@@ -28,6 +28,9 @@ dart pub global activate mason_cli
 # 🚀 Initialize mason
 mason init
 
+# 📦 Install your first brick
+mason add hello
+
 # 🧱 Use your first brick
 mason make hello
 ```
@@ -102,18 +105,25 @@ mason init
 
 ```yaml
 # Register bricks which can be consumed via the Mason CLI.
-# https://github.com/felangel/mason
+# Run "mason get" to install all registered bricks.
+# To learn more, visit https://docs.brickhub.dev.
 bricks:
-  # Sample Brick
-  # Run `mason make hello` to try it out.
-  hello: any
-  # Bricks can also be imported via git url.
-  # Uncomment the following lines to import
-  # a brick from a remote git url.
+  # Bricks can be imported via version constraint from a registry.
+  # Uncomment the following line to import the "hello" brick from BrickHub.
+  # hello: 0.1.0+1
+  # Bricks can also be imported via remote git url.
+  # Uncomment the following lines to import the "widget" brick from git.
   # widget:
   #   git:
   #     url: https://github.com/felangel/mason.git
   #     path: bricks/widget
+```
+
+例如，我们可以取消注释“hello”砖 (`hello: 0.1.0+1`):
+
+```yaml
+bricks:
+  hello: 0.1.0+1
 ```
 
 要在 `mason.yaml` 中載入所有积木，请运行：
