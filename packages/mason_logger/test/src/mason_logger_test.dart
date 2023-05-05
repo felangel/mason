@@ -969,15 +969,8 @@ void main() {
             verifyInOrder([
               () => stdout.write('\x1b8'),
               () => stdout.write('\x1b[J'),
-              () => stdout.write('\x1b[?25h'),
               () => stdout.write('$message '),
-              () => stdout.write(
-                    styleDim.wrap(
-                      lightCyan.wrap(
-                        'Key: a, Key: c',
-                      ),
-                    ),
-                  ),
+              () => stdout.writeln('[Key: a, Key: c]'),
             ]);
           },
           stdout: () => stdout,

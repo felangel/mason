@@ -317,9 +317,7 @@ class Logger {
           ..write('$message ')
           ..writeln(
             styleDim.wrap(
-              lightCyan.wrap(
-                results.map(resolvedDisplay).join(', '),
-              ),
+              lightCyan.wrap('${results.map(resolvedDisplay).toList()}'),
             ),
           );
 
