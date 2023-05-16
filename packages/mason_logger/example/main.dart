@@ -3,6 +3,10 @@ import 'package:mason_logger/mason_logger.dart';
 enum Shape { square, circle, triangle }
 
 Future<void> main() async {
+  String? customInfoStyle(String? m) {
+    return backgroundDarkGray.wrap(styleBold.wrap(white.wrap(m)));
+  }
+
   final logger = Logger(level: Level.verbose)
     ..info('info')
     ..alert('alert')
@@ -10,7 +14,7 @@ Future<void> main() async {
     ..success('success')
     ..warn('warning')
     ..detail('detail')
-    ..info('');
+    ..info('custom info', style: customInfoStyle);
 
   final favoriteColor = logger.chooseOne(
     'Pick a color.',

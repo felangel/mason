@@ -6,6 +6,16 @@ import 'package:mason_logger/mason_logger.dart';
 
 part 'progress.dart';
 
+/// Type definition for a function which accepts a log message
+/// and returns a styled version of that message.
+///
+/// Generally, [AnsiCode] values are used to generate a [LogStyle].
+///
+/// ```dart
+/// final alertStyle = (m) => backgroundRed.wrap(styleBold.wrap(white.wrap(m)));
+/// ```
+typedef LogStyle = String? Function(String? message);
+
 /// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
 /// {@endtemplate}
@@ -50,9 +60,9 @@ class Logger {
   void write(String? message) => _stdout.write(message);
 
   /// Writes info message to stdout.
-  void info(String? message) {
+  void info(String? message, {LogStyle? style}) {
     if (level.index > Level.info.index) return;
-    _stdout.writeln(message);
+    _stdout.writeln(style?.call(message) ?? message);
   }
 
   /// Writes delayed message to stdout.
@@ -71,34 +81,39 @@ class Logger {
   }
 
   /// Writes error message to stderr.
-  void err(String? message) {
+  void err(String? message, {LogStyle? style}) {
     if (level.index > Level.error.index) return;
-    _stderr.writeln(lightRed.wrap(message));
+    style ??= lightRed.wrap;
+    _stderr.writeln(style(message));
   }
 
   /// Writes alert message to stdout.
-  void alert(String? message) {
+  void alert(String? message, {LogStyle? style}) {
     if (level.index > Level.critical.index) return;
-    _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
+    style ??= (m) => backgroundRed.wrap(styleBold.wrap(white.wrap(m)));
+    _stderr.writeln(style(message));
   }
 
   /// Writes detail message to stdout.
-  void detail(String? message) {
+  void detail(String? message, {LogStyle? style}) {
     if (level.index > Level.debug.index) return;
-    _stdout.writeln(darkGray.wrap(message));
+    style ??= darkGray.wrap;
+    _stdout.writeln(style(message));
   }
 
   /// Writes warning message to stderr.
-  void warn(String? message, {String tag = 'WARN'}) {
+  void warn(String? message, {String tag = 'WARN', LogStyle? style}) {
     if (level.index > Level.warning.index) return;
     final output = tag.isEmpty ? '$message' : '[$tag] $message';
-    _stderr.writeln(yellow.wrap(styleBold.wrap(output)));
+    style ??= (m) => yellow.wrap(styleBold.wrap(m));
+    _stderr.writeln(style(output));
   }
 
   /// Writes success message to stdout.
-  void success(String? message) {
+  void success(String? message, {LogStyle? style}) {
     if (level.index > Level.info.index) return;
-    _stdout.writeln(lightGreen.wrap(message));
+    style ??= lightGreen.wrap;
+    _stdout.writeln(style(message));
   }
 
   /// Prompts user and returns response.
