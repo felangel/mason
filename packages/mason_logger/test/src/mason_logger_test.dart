@@ -952,6 +952,31 @@ void main() {
           stdin: () => stdin,
         );
       });
+
+      test('converts results to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = ['a', 'c'];
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny<String>(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValues: ['a', 'c'],
+              display: (data) => 'Key: $data',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b8'),
+              () => stdout.write('\x1b[J'),
+              () => stdout.write('$message '),
+              () => stdout.writeln('[Key: a, Key: c]'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
     });
 
     group('.chooseOne', () {
