@@ -22,6 +22,51 @@ void main() {
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
     });
 
+    group('theme', () {
+      test('can be overridden at the logger level', () {
+        final theme = LogTheme(
+          info: (message) => '[message]: $message',
+        );
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(theme: theme).info(message);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('can be overridden at the method level', () {
+        String? style(String? message) => '[message]: $message';
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().info(message, style: style);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('is ignored when a method override is used.', () {
+        final theme = LogTheme(
+          info: (message) => '[message]: $message',
+        );
+        String? style(String? message) => '[info]: $message';
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(theme: theme).info(message, style: style);
+            verify(() => stdout.writeln('[info]: $message')).called(1);
+            Logger(theme: theme).info(message);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+    });
+
     group('level', () {
       test('is mutable', () {
         final logger = Logger();

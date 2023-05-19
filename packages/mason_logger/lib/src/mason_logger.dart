@@ -74,7 +74,7 @@ class Logger {
   });
 
   /// The current theme for this logger.
-  LogTheme theme;
+  final LogTheme theme;
 
   /// The current log level for this logger.
   Level level;
