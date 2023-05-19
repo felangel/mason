@@ -315,7 +315,11 @@ class Logger {
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
-          ..writeln(styleDim.wrap(lightCyan.wrap('$results')));
+          ..writeln(
+            styleDim.wrap(
+              lightCyan.wrap('${results.map(resolvedDisplay).toList()}'),
+            ),
+          );
 
         break;
       }

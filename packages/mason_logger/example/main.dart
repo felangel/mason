@@ -30,7 +30,7 @@ Future<void> main() async {
   final shape = logger.chooseOne<Shape>(
     'What is your favorite shape?',
     choices: Shape.values,
-    display: (shape) => 'Is it a ${shape.name}?',
+    display: (shape) => shape.name,
   );
   logger.info('You chose the following shape: $shape!');
 
@@ -38,7 +38,7 @@ Future<void> main() async {
     'Or did you want to choose multiple?',
     choices: Shape.values,
     defaultValues: [shape],
-    display: (shape) => 'Is it a ${shape.name}?',
+    display: (shape) => shape.name,
   );
   logger.info('You chose the following shapes: $shapes!');
 
