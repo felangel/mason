@@ -5,6 +5,7 @@ import * as vscode from "vscode";
 import { Uri, window } from "vscode";
 import { getBrickYaml, masonMake } from "../mason";
 import { env, platform } from "node:process";
+import { promptForTargetDirectory } from "../utils";
 
 export const makeLocalBrick = async (uri: Uri) => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
@@ -231,21 +232,6 @@ const promptForArray = async (
   const selections = results?.map((r) => r.label);
   return JSON.stringify(JSON.stringify(selections));
 };
-
-async function promptForTargetDirectory(): Promise<string | undefined> {
-  const options: vscode.OpenDialogOptions = {
-    canSelectMany: false,
-    openLabel: "Select a folder",
-    canSelectFolders: true,
-  };
-
-  return window.showOpenDialog(options).then((uri) => {
-    if (_.isNil(uri) || _.isEmpty(uri)) {
-      return undefined;
-    }
-    return uri[0].fsPath;
-  });
-}
 
 function _rootDir(): string {
   const masonCache = env["MASON_CACHE"];

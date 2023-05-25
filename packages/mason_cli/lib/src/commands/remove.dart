@@ -8,7 +8,7 @@ import 'package:mason_cli/src/command.dart';
 /// {@endtemplate}
 class RemoveCommand extends MasonCommand {
   /// {@macro remove_command}
-  RemoveCommand({Logger? logger}) : super(logger: logger) {
+  RemoveCommand({super.logger}) {
     argParser.addFlag(
       'global',
       abbr: 'g',
@@ -42,7 +42,7 @@ class RemoveCommand extends MasonCommand {
     final masonLockJson = isGlobal ? globalMasonLockJson : localMasonLockJson;
 
     final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
-    final removeProgress = logger.progress('Removing $brickName');
+    final progress = logger.progress('Removing $brickName');
     try {
       bricksJson.remove(Brick(name: brickName, location: brickLocation));
       final bricks = Map.of(masonYaml.bricks)
@@ -60,9 +60,9 @@ class RemoveCommand extends MasonCommand {
         );
       }
 
-      removeProgress.complete('Removed $brickName');
+      progress.complete('Removed $brickName');
     } catch (_) {
-      removeProgress.fail();
+      progress.fail();
       rethrow;
     }
 

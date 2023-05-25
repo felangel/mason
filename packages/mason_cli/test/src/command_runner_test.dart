@@ -1,7 +1,6 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
-import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -10,11 +9,9 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockMasonApi extends Mock implements MasonApi {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockLogger extends Mock implements Logger {}
-
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
 const expectedUsage = [
   '🧱  mason • lay the foundation!\n'
@@ -64,15 +61,13 @@ Run ${cyan.wrap('mason update')} to update''';
 void main() {
   group('MasonCommandRunner', () {
     late Logger logger;
-    late MasonApi masonApi;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       printLogs = [];
-      logger = MockLogger();
-      masonApi = MockMasonApi();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
       when(
         () => pubUpdater.getLatestVersion(any()),
@@ -80,7 +75,6 @@ void main() {
 
       commandRunner = MasonCommandRunner(
         logger: logger,
-        masonApi: masonApi,
         pubUpdater: pubUpdater,
       );
     });
@@ -149,9 +143,16 @@ void main() {
         }),
       );
 
-      test('closes MasonApi', () async {
-        await commandRunner.run(['--version']);
-        verify(() => masonApi.close()).called(1);
+      test('handles completion', () async {
+        final result = await commandRunner.run(['completion']);
+        verifyNever(() => logger.info(any()));
+        verifyNever(() => logger.err(any()));
+        verifyNever(() => logger.warn(any()));
+        verifyNever(() => logger.write(any()));
+        verifyNever(() => logger.success(any()));
+        verifyNever(() => logger.detail(any()));
+
+        expect(result, equals(ExitCode.success.code));
       });
 
       group('--help', () {

@@ -19,8 +19,7 @@ const email = 'test@email.com';
 const password = 'T0pS3cret!';
 
 class TestMasonApiException extends MasonApiException {
-  const TestMasonApiException({required String message, String? details})
-      : super(message: message, details: details);
+  const TestMasonApiException({required super.message, super.details});
 }
 
 void main() {
@@ -134,7 +133,7 @@ void main() {
       });
 
       test('makes correct request (custom)', () async {
-        final customHostedUri = Uri.http('localhost:8080', '');
+        final customHostedUri = Uri.http('localhost:8080');
         masonApi = MasonApi(httpClient: httpClient, hostedUri: customHostedUri);
         try {
           await masonApi.login(email: email, password: password);

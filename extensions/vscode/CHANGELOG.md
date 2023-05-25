@@ -1,3 +1,22 @@
+# 0.1.10
+
+- feat: support mason new brick
+- deps: dependency updates
+
+# 0.1.9
+
+- feat: add support for `publish_to` field in `brick.yaml`
+- deps: various dependency updates
+
+# 0.1.8
+
+- fix: support spaces in mason make `--output-dir`
+
+# 0.1.7
+
+- fix: `mason.yaml` git url schema validation
+  - support other formats such as `ssh`
+
 # 0.1.6
 
 - feat: YAML schema validation for `mason.yaml`

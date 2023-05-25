@@ -1,5 +1,9 @@
 name: mason_api
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -24,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.5.2
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -54,7 +58,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.5.2
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies

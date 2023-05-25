@@ -13,11 +13,11 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   final cwd = Directory.current;
@@ -28,10 +28,10 @@ void main() {
     late MasonCommandRunner commandRunner;
 
     setUp(() {
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -51,6 +51,11 @@ bricks:
     path: ../../../../../bricks/documentation
   greeting:
     path: ../../../../../bricks/greeting
+  hooks:
+    git:
+      url: https://github.com/felangel/mason
+      path: bricks/hooks
+      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
   simple:
     path: ../../../../../bricks/simple
   todos:
@@ -80,7 +85,7 @@ bricks:
         'mason-lock.json',
       );
       var doneCallCount = 0;
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         doneCallCount++;
       });
@@ -105,6 +110,15 @@ bricks:
       final greetingPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'greeting'),
       );
+      final hooksPath = canonicalize(
+        path.join(
+          BricksJson.rootDir.path,
+          'git',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          'bricks',
+          'hooks',
+        ),
+      );
       final simplePath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'simple'),
       );
@@ -128,6 +142,7 @@ bricks:
             'app_icon': appIconPath,
             'documentation': docPath,
             'greeting': greetingPath,
+            'hooks': hooksPath,
             'simple': simplePath,
             'todos': todosPath,
             'widget': widgetPath,
@@ -142,6 +157,13 @@ bricks:
               'app_icon': {'path': appIconPath},
               'documentation': {'path': docPath},
               'greeting': {'path': greetingPath},
+              'hooks': {
+                'git': {
+                  'url': 'https://github.com/felangel/mason',
+                  'path': 'bricks/hooks',
+                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53'
+                }
+              },
               'simple': {'path': simplePath},
               'todos': {'path': todosPath},
               'widget': {

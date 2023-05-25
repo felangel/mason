@@ -1,17 +1,20 @@
-import 'package:mason/mason.dart' hide packageVersion, Brick;
+import 'dart:io';
+import 'dart:math';
+
+import 'package:mason/mason.dart' hide Brick, packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/command_runner.dart';
 
 /// {@template logout_command}
 /// `mason search` command which searches registered bricks on `brickhub.dev`.
 /// {@endtemplate}
 class SearchCommand extends MasonCommand {
   /// {@macro logout_command}
-  SearchCommand({Logger? logger, MasonApi? masonApi})
-      : _masonApi = masonApi ?? MasonApi(),
-        super(logger: logger);
+  SearchCommand({super.logger, MasonApiBuilder? masonApiBuilder})
+      : _masonApiBuilder = masonApiBuilder ?? MasonApi.new;
 
-  final MasonApi _masonApi;
+  final MasonApiBuilder _masonApiBuilder;
 
   @override
   final String description = 'Search published bricks on brickhub.dev.';
@@ -28,8 +31,9 @@ class SearchCommand extends MasonCommand {
       'Searching "$query" on brickhub.dev',
     );
 
+    final masonApi = _masonApiBuilder();
     try {
-      final results = await _masonApi.search(query: query);
+      final results = await masonApi.search(query: query);
       searchProgress.complete(
         results.isEmpty
             ? 'No bricks found.'
@@ -52,13 +56,24 @@ class SearchCommand extends MasonCommand {
           )
           ..info(brick.description)
           ..info(brickLink)
-          ..info(darkGray.wrap('-' * 80));
+          ..info(darkGray.wrap('-' * _separatorLength()));
       }
       return ExitCode.success.code;
     } catch (error) {
       searchProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
+    } finally {
+      masonApi.close();
     }
+  }
+}
+
+int _separatorLength() {
+  const maxSeparatorLength = 80;
+  try {
+    return min(stdout.terminalColumns, maxSeparatorLength);
+  } catch (_) {
+    return maxSeparatorLength;
   }
 }

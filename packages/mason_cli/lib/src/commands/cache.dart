@@ -22,7 +22,7 @@ class CacheCommand extends MasonCommand {
 /// {@endtemplate}
 class ClearCacheCommand extends MasonCommand {
   /// {@macro cache_command}
-  ClearCacheCommand({Logger? logger}) : super(logger: logger);
+  ClearCacheCommand({super.logger});
 
   @override
   final String description = 'Clears the mason cache.';
@@ -32,14 +32,14 @@ class ClearCacheCommand extends MasonCommand {
 
   @override
   Future<int> run() async {
-    final clearProgress = logger.progress('clearing cache');
+    final progress = logger.progress('Clearing cache');
 
     localBricksJson?.clear();
     try {
       BricksJson.rootDir.deleteSync(recursive: true);
     } catch (_) {}
 
-    clearProgress.complete();
+    progress.complete('Cache cleared');
     return ExitCode.success.code;
   }
 }

@@ -1,3 +1,64 @@
+# 0.1.0-dev.50
+
+- feat: standardize stdout across commands
+- feat: `mason init` does not automatically install the "hello" brick
+- feat: `mason init` enhancements to the comments in the generated `mason.yaml`
+
+# 0.1.0-dev.49
+
+- fix: loop detection in `runSubstitution`
+  - deps: upgrade to `mason ^0.1.0-dev.47`
+- feat: `mason new` updates existing brick
+- refactor: streamline stdout from `mason bundle`
+- refactor: `mason add` uses "build" instead of "compile"
+
+# 0.1.0-dev.48
+
+- feat: add `--force` and `--dry-run` to `publish` command
+
+# 0.1.0-dev.47
+
+- feat: add `repository` field and `README` updates to new brick
+- feat: support `publish_to` field in `brick.yaml`
+- deps: upgrade to `mason ^0.1.0-dev.46`
+
+# 0.1.0-dev.46
+
+- fix: brick git installation algorithm
+- deps: upgrade to `mason ^0.1.0-dev.43`
+
+# 0.1.0-dev.45
+
+- feat: add `--quiet` flag to `make` command
+- deps: upgrade dependencies
+  - `Dart >=2.19`
+  - `mason ^0.1.0-dev.42`
+  - `mason_api ^0.1.0-dev.10`
+  - `very_good_analysis ^4.0.0`
+
+# 0.1.0-dev.44
+
+- fix: silent update failures
+
+# 0.1.0-dev.43
+
+- deps: upgrade dependencies
+  - `Dart >=2.17`
+  - `cli_completion ^0.2.0`
+  - `mason ^0.1.0-dev.41`
+  - `mason_api ^0.1.0-dev.9`
+  - `very_good_analysis ^3.1.0`
+
+# 0.1.0-dev.42
+
+- deps: upgrade to `mason: ^0.1.0-dev.40`
+- feat: mason search separator length uses `terminalColumns`
+- feat: improve error when running `mason add` in an uninitialized workspace
+
+# 0.1.0-dev.41
+
+- feat: add completion
+
 # 0.1.0-dev.40
 
 - feat: add `hooks/build` to `.gitignore` when generating new brick

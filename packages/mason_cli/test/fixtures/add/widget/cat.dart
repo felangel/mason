@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 
 class Cat extends StatelessWidget {
-  const Cat({Key? key}) : super(key: key);
+  const Cat({super.key});
 
   @override
   Widget build(BuildContext context) {

@@ -8,10 +8,14 @@ import 'package:test/test.dart';
 
 import '../bundles/bundles.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
 void main() {
   group('MasonGenerator', () {
+    final identicalString = '  ${cyan.wrap('identical')} ';
+    final createdString = '  ${green.wrap('created')} ';
+    final skippedString = '  ${yellow.wrap('skipped')} ';
+
     group('.fromBrick (path)', () {
       test('handles malformed brick', () async {
         final tempDir = Directory.systemTemp.createTempSync();
@@ -21,12 +25,15 @@ void main() {
           ..writeAsStringSync(
             'name: malformed\ndescription: example\nversion: 0.1.0+1',
           );
-        final brokenFile = File(
+        final lockedFile = File(
           path.join(tempDir.path, 'malformed', '__brick__', 'locked.txt'),
         )
           ..createSync(recursive: true)
           ..writeAsStringSync('secret');
-        await Process.run('chmod', ['000', brokenFile.path]);
+        lockedFile.openSync(mode: FileMode.write).lockSync();
+        try {
+          await Process.run('chmod', ['000', lockedFile.path]);
+        } catch (_) {}
 
         final generator = await MasonGenerator.fromBrick(brick);
         final files = await generator.generate(
@@ -66,7 +73,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -143,27 +150,79 @@ void main() {
         expect(production.readAsStringSync(), equals('PRODUCTION'));
       });
 
-      test('constructs an instance (loops stress test)', () async {
-        const fileCount = 1000;
+      test(
+        'constructs an instance (loops stress test)',
+        () async {
+          const fileCount = 1000;
+          final brick = Brick.path(
+            path.join('test', 'bricks', 'loop'),
+          );
+          final generator = await MasonGenerator.fromBrick(brick);
+          final tempDir = Directory.systemTemp.createTempSync();
+          final files = await generator.generate(
+            DirectoryGeneratorTarget(tempDir),
+            vars: <String, dynamic>{
+              'values': List.generate(fileCount, (index) => '$index'),
+            },
+          );
+
+          expect(files.length, equals(fileCount));
+          expect(
+            files.every(
+              (element) => element.status == GeneratedFileStatus.created,
+            ),
+            isTrue,
+          );
+        },
+        timeout: const Timeout(Duration(minutes: 1)),
+      );
+
+      test('constructs an instance (nested conditional, true)', () async {
         final brick = Brick.path(
-          path.join('test', 'bricks', 'loop'),
+          path.join('test', 'bricks', 'nested_conditional'),
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
+
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{
-            'values': List.generate(fileCount, (index) => '$index'),
+            'name': 'brick mason',
+            'generate': true,
           },
         );
 
-        expect(files.length, equals(fileCount));
+        expect(files.length, equals(1));
         expect(
           files.every(
             (element) => element.status == GeneratedFileStatus.created,
           ),
           isTrue,
         );
+
+        final file = File(path.join(tempDir.path, 'brick_mason.txt'));
+
+        expect(file.existsSync(), isTrue);
+
+        expect(file.readAsStringSync(), equals('Hello Brick Mason'));
+      });
+
+      test('constructs an instance (nested conditional, false)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'nested_conditional'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'name': 'brick mason',
+            'generate': false,
+          },
+        );
+
+        expect(files, isEmpty);
       });
 
       test('constructs an instance with hooks', () async {
@@ -277,7 +336,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           contains('Hi $name!\nYour favorite color is'),
         );
       });
@@ -291,7 +350,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -306,7 +365,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -315,9 +374,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
+        verify(() => logger.delayed(any(that: contains(createdString))))
+            .called(1);
         verifyNever(
-          () => logger.delayed(any(that: contains('(identical)'))),
+          () => logger.delayed(any(that: contains(identicalString))),
         );
 
         final files2 = await generator.generate(
@@ -333,7 +393,7 @@ void main() {
         expect(generatedFile2.path, equals(file1.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -343,9 +403,9 @@ void main() {
           ),
         );
         verify(
-          () => logger.delayed(any(that: contains('(identical)'))),
+          () => logger.delayed(any(that: contains(identicalString))),
         ).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
@@ -358,7 +418,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -373,7 +433,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -382,8 +442,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(new)')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(skip)'))));
+        verify(
+          () => logger.delayed(any(that: contains(createdString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(skippedString))));
 
         final files2 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -399,7 +461,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -408,8 +470,10 @@ void main() {
             '_made with 💖 by mason_',
           ),
         );
-        verify(() => logger.delayed(any(that: contains('(skip)')))).called(1);
-        verifyNever(() => logger.delayed(any(that: contains('(new)'))));
+        verify(
+          () => logger.delayed(any(that: contains(skippedString))),
+        ).called(1);
+        verifyNever(() => logger.delayed(any(that: contains(createdString))));
       });
 
       test(
@@ -422,7 +486,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
-        final logger = MockLogger();
+        final logger = _MockLogger();
 
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
@@ -437,7 +501,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -461,7 +525,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -486,7 +550,7 @@ void main() {
         final generator = await MasonGenerator.fromBrick(brick);
         final tempDir = Directory.systemTemp.createTempSync();
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         final files1 = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{
@@ -543,7 +607,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -553,7 +617,7 @@ void main() {
           ),
         );
 
-        final logger = MockLogger();
+        final logger = _MockLogger();
         when(() => logger.prompt(any())).thenReturn('Y');
 
         final files2 = await generator.generate(
@@ -570,7 +634,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -605,7 +669,7 @@ void main() {
         expect(generatedFile1.path, equals(file1.path));
         expect(file1.existsSync(), isTrue);
         expect(
-          file1.readAsStringSync(),
+          file1.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -627,7 +691,7 @@ void main() {
         expect(generatedFile2.path, equals(file2.path));
         expect(file2.existsSync(), isTrue);
         expect(
-          file2.readAsStringSync(),
+          file2.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $otherName\n'
             '\n'
@@ -660,7 +724,7 @@ void main() {
         expect(generatedFile.path, equals(file.path));
         expect(file.existsSync(), isTrue);
         expect(
-          file.readAsStringSync(),
+          file.readAsNormalizedStringSync(),
           equals(
             '# 🧱 $name\n'
             '\n'
@@ -1042,4 +1106,10 @@ void main() {
       });
     });
   });
+}
+
+extension on File {
+  String readAsNormalizedStringSync() {
+    return readAsStringSync().replaceAll('\r', '');
+  }
 }

@@ -1,3 +1,39 @@
+# 0.2.6
+
+- fix: `chooseAny` renders selected results using `display` when specified
+- feat: add `LogStyle` and `LogTheme`
+
+  ```dart
+  // Create a custom `LogTheme` by overriding zero or more log styles.
+  final customTheme = LogTheme(
+    detail: (m) => darkGray.wrap(m),
+    info: (m) => m,
+    success: (m) => lightGreen.wrap(m),
+    warn: (m) => yellow.wrap(m),
+    err: (m) => lightRed.wrap(m),
+    alert: (m) => backgroundRed.wrap(white.wrap(m)),
+  );
+
+  // Create a logger with the custom theme
+  final logger = Logger(theme: customTheme);
+
+  // Use the logger
+  logger.info('hello world');
+
+  // Perform a one-off override
+  String? myCustomStyle(String? m) => lightCyan.wrap(m);
+  logger.info('custom style', style: myCustomStyle);
+  ```
+
+# 0.2.5
+
+- deps: upgrade to `Dart >=2.19` and `very_good_analysis ^4.0.0`
+
+# 0.2.4
+
+- fix: `warn` with an empty `tag` should not include `[]`
+- deps: upgrade to `Dart >=2.17` and `very_good_analysis ^3.1.0`
+
 # 0.2.3
 
 - fix: windows progress animation

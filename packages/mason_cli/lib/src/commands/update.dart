@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
@@ -11,9 +13,8 @@ class UpdateCommand extends MasonCommand {
   /// {@macro update_command}
   UpdateCommand({
     required PubUpdater pubUpdater,
-    Logger? logger,
-  })  : _pubUpdater = pubUpdater,
-        super(logger: logger);
+    super.logger,
+  }) : _pubUpdater = pubUpdater;
 
   final PubUpdater _pubUpdater;
 
@@ -42,15 +43,26 @@ class UpdateCommand extends MasonCommand {
       return ExitCode.success.code;
     }
 
-    final updateProgress = logger.progress('Updating to $latestVersion');
+    final progress = logger.progress('Updating to $latestVersion');
+    late final ProcessResult result;
     try {
-      await _pubUpdater.update(packageName: packageName);
+      result = await _pubUpdater.update(
+        packageName: packageName,
+        versionConstraint: latestVersion,
+      );
     } catch (error) {
-      updateProgress.fail();
+      progress.fail();
       logger.err('$error');
       return ExitCode.software.code;
     }
-    updateProgress.complete('Updated to $latestVersion');
+
+    if (result.exitCode != ExitCode.success.code) {
+      progress.fail('Unable to update to $latestVersion');
+      logger.err('${result.stderr}');
+      return ExitCode.software.code;
+    }
+
+    progress.complete('Updated to $latestVersion');
 
     return ExitCode.success.code;
   }

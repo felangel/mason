@@ -3,14 +3,13 @@ import 'dart:io';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
-import 'package:recase/recase.dart';
 
 /// {@template new_command}
 /// `mason new` command which creates a new brick.
 /// {@endtemplate}
 class NewCommand extends MasonCommand {
   /// {@macro new_command}
-  NewCommand({Logger? logger}) : super(logger: logger) {
+  NewCommand({super.logger}) {
     argParser
       ..addFlag(
         'hooks',
@@ -49,15 +48,6 @@ class NewCommand extends MasonCommand {
     );
     final createHooks = results['hooks'] == true;
     final directory = Directory(outputDir);
-    final brickYaml = File(p.join(directory.path, name, BrickYaml.file));
-
-    if (brickYaml.existsSync()) {
-      logger.err(
-        'Existing brick: $name at ${canonicalize(brickYaml.parent.path)}',
-      );
-      return ExitCode.usage.code;
-    }
-
     final target = DirectoryGeneratorTarget(directory);
     const vars = <String, dynamic>{'name': '{{name}}'};
     final generator = _BrickGenerator(
@@ -65,19 +55,15 @@ class NewCommand extends MasonCommand {
       description,
       createHooks: createHooks,
     );
-    final newProgress = logger.progress('Creating new brick: $name.');
+    final progress = logger.progress('Creating new brick: $name.');
 
     try {
       await generator.generate(target, vars: vars, logger: logger);
-      newProgress.complete('Created new brick: $name');
-      logger
-        ..info(
-          '''${lightGreen.wrap('✓')} Generated ${generator.files.length} file(s):''',
-        )
-        ..flush((message) => logger.info(darkGray.wrap(message)));
+      progress.complete('Generated ${generator.files.length} file(s).');
+      logger.flush((message) => logger.info(darkGray.wrap(message)));
       return ExitCode.success.code;
     } catch (_) {
-      newProgress.fail();
+      progress.fail();
       rethrow;
     }
   }
@@ -137,6 +123,10 @@ class _BrickGenerator extends MasonGenerator {
 name: $name
 description: $description
 
+# The following defines the brick repository url.
+# Uncomment and update the following line before publishing the brick.
+# repository: https://github.com/my_org/my_repo
+
 # The following defines the version and build number for your brick.
 # A version number is three numbers separated by dots, like 1.2.34
 # followed by an optional build number (separated by a +).
@@ -181,11 +171,17 @@ A few resources to get you started if this is your first brick template:
 - [Official Mason Documentation][2]
 - [Code generation with Mason Blog][3]
 - [Very Good Livestream: Felix Angelov Demos Mason][4]
+- [Flutter Package of the Week: Mason][5]
+- [Observable Flutter: Building a Mason brick][6]
+- [Meet Mason: Flutter Vikings 2022][7]
 
 [1]: https://github.com/felangel/mason
-[2]: https://github.com/felangel/mason/tree/master/packages/mason_cli#readme
+[2]: https://docs.brickhub.dev
 [3]: https://verygood.ventures/blog/code-generation-with-mason
 [4]: https://youtu.be/G4PTjA6tpTU
+[5]: https://youtu.be/qjA0JFiPMnQ
+[6]: https://youtu.be/o8B1EfcUisw
+[7]: https://youtu.be/LXhgiF5HiQg
 ''';
 
   static const _brickChangelogContent = '''

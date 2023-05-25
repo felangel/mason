@@ -1,3 +1,49 @@
+# 0.1.0-dev.49
+
+- feat: add `PascalDotCase` lambda and `String` extension
+- deps: integrate `package:recase`
+
+# 0.1.0-dev.48
+
+- fix: git brick install across file systems
+- refactor: use `Isolate.run`
+
+# 0.1.0-dev.47
+
+- fix: loop detection in `runSubstitution`
+- test: use private mocks
+
+# 0.1.0-dev.46
+
+- fix: `MasonBundle` use `fieldRename: FieldRename.snake`
+
+# 0.1.0-dev.45
+
+- feat: add `publishTo` to `MasonBundle`
+
+# 0.1.0-dev.44
+
+- feat: support optional `publish_to` in `brick.yaml`
+
+# 0.1.0-dev.43
+
+- fix: sort contents of `bricks.json`
+- fix: brick git installation algorithm
+
+# 0.1.0-dev.42
+
+- feat: improve generated file output
+- deps: upgrade to `Dart >=2.19`, `mason_logger ^0.2.5`, and `very_good_analysis ^4.0.0`
+
+# 0.1.0-dev.41
+
+- deps: upgrade to `Dart >=2.17`, `mason_logger ^0.2.4`, and `very_good_analysis ^3.1.0`
+- fix: `createBundle` and `unpackBundle` normalize bundled file paths.
+
+# 0.1.0-dev.40
+
+- feat: export `StringCaseExtensions`
+
 # 0.1.0-dev.39
 
 - **BREAKING** refactor!: remove `GeneratorHooks.fromBundle` in favor of `GeneratorHooks.fromBrickYaml`.

@@ -11,7 +11,7 @@ import 'package:path/path.dart' as path;
 /// {@endtemplate}
 class UnbundleCommand extends MasonCommand {
   /// {@macro unbundle_command}
-  UnbundleCommand({Logger? logger}) : super(logger: logger) {
+  UnbundleCommand({super.logger}) {
     argParser
       ..addOption(
         'output-dir',
@@ -49,7 +49,7 @@ class UnbundleCommand extends MasonCommand {
     final bundleType = (results['type'] as String).toBundleType();
 
     final bundleName = path.basenameWithoutExtension(file.path);
-    final unbundleProgress = logger.progress('Unbundling $bundleName');
+    final progress = logger.progress('Unbundling $bundleName');
 
     try {
       late final MasonBundle bundle;
@@ -62,15 +62,10 @@ class UnbundleCommand extends MasonCommand {
           break;
       }
       unpackBundle(bundle, Directory(outputDir));
-      unbundleProgress.complete('Unbundled ${bundle.name}');
-      logger
-        ..info(
-          '${lightGreen.wrap('✓')} '
-          'Generated 1 brick:',
-        )
-        ..info(darkGray.wrap('  ${canonicalize(outputDir)}'));
+      progress.complete('Generated 1 brick.');
+      logger.info(darkGray.wrap('  ${canonicalize(outputDir)}'));
     } catch (_) {
-      unbundleProgress.fail();
+      progress.fail();
       rethrow;
     }
 

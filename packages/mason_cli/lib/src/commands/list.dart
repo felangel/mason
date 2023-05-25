@@ -9,7 +9,7 @@ import 'package:path/path.dart' as path;
 /// {@endtemplate}
 class ListCommand extends MasonCommand {
   /// {@macro list_command}
-  ListCommand({Logger? logger}) : super(logger: logger) {
+  ListCommand({super.logger}) {
     argParser.addFlag(
       'global',
       abbr: 'g',

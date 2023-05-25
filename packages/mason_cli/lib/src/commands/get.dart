@@ -7,7 +7,7 @@ import 'package:mason_cli/src/install_brick.dart';
 /// {@endtemplate}
 class GetCommand extends MasonCommand with InstallBrickMixin {
   /// {@macro get_command}
-  GetCommand({Logger? logger}) : super(logger: logger);
+  GetCommand({super.logger});
 
   @override
   final String description = 'Gets all bricks in the nearest mason.yaml.';
@@ -17,7 +17,14 @@ class GetCommand extends MasonCommand with InstallBrickMixin {
 
   @override
   Future<int> run() async {
-    await getBricks();
+    final progress = logger.progress('Getting bricks');
+    try {
+      await getBricks();
+    } catch (_) {
+      progress.fail();
+      rethrow;
+    }
+    progress.complete('Got bricks');
     return ExitCode.success.code;
   }
 }

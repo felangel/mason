@@ -29,8 +29,7 @@ abstract class MasonApiException implements Exception {
 /// {@endtemplate}
 class MasonApiLoginFailure extends MasonApiException {
   /// {@macro mason_api_login_failure}
-  const MasonApiLoginFailure({required String message, String? details})
-      : super(message: message, details: details);
+  const MasonApiLoginFailure({required super.message, super.details});
 }
 
 /// {@template mason_api_refresh_failure}
@@ -38,8 +37,7 @@ class MasonApiLoginFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApiRefreshFailure extends MasonApiException {
   /// {@macro mason_api_refresh_failure}
-  const MasonApiRefreshFailure({required String message, String? details})
-      : super(message: message, details: details);
+  const MasonApiRefreshFailure({required super.message, super.details});
 }
 
 /// {@template mason_api_publish_failure}
@@ -47,8 +45,7 @@ class MasonApiRefreshFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApiPublishFailure extends MasonApiException {
   /// {@macro mason_api_publish_failure}
-  const MasonApiPublishFailure({required String message, String? details})
-      : super(message: message, details: details);
+  const MasonApiPublishFailure({required super.message, super.details});
 }
 
 /// {@template mason_api_search_failure}
@@ -56,8 +53,7 @@ class MasonApiPublishFailure extends MasonApiException {
 /// {@endtemplate}
 class MasonApiSearchFailure extends MasonApiException {
   /// {@macro mason_api_search_failure}
-  const MasonApiSearchFailure({required String message, String? details})
-      : super(message: message, details: details);
+  const MasonApiSearchFailure({required super.message, super.details});
 }
 
 /// {@template mason_api}
@@ -67,7 +63,7 @@ class MasonApi {
   /// {@macro mason_api}
   MasonApi({http.Client? httpClient, Uri? hostedUri})
       : _httpClient = httpClient ?? http.Client(),
-        _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev', '') {
+        _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev') {
     _loadCredentials();
   }
 

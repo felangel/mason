@@ -4,13 +4,13 @@ import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockMasonApi extends Mock implements MasonApi {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
-class MockUser extends Mock implements User {}
+class _MockUser extends Mock implements User {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   group('LogoutCommand', () {
@@ -19,11 +19,14 @@ void main() {
     late LogoutCommand logoutCommand;
 
     setUp(() {
-      logger = MockLogger();
-      masonApi = MockMasonApi();
-      logoutCommand = LogoutCommand(logger: logger, masonApi: masonApi);
+      logger = _MockLogger();
+      masonApi = _MockMasonApi();
+      logoutCommand = LogoutCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      );
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
     });
 
     test('can be instantiated without any parameters', () {
@@ -37,10 +40,11 @@ void main() {
       verify(
         () => logger.info('You are already logged out.'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when exception occurs', () async {
-      final user = MockUser();
+      final user = _MockUser();
       final exception = Exception('oops');
       when(() => masonApi.currentUser).thenReturn(user);
       when(() => masonApi.logout()).thenThrow(exception);
@@ -50,14 +54,15 @@ void main() {
 
       verify(() => logger.progress('Logging out of brickhub.dev.')).called(1);
       verify(() => logger.err('$exception')).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when logged out successfully', () async {
-      final user = MockUser();
+      final user = _MockUser();
       final progressDoneCalls = <String?>[];
       when(() => masonApi.currentUser).thenReturn(user);
 
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
         progressDoneCalls.add(update);
@@ -69,6 +74,7 @@ void main() {
 
       verify(() => logger.progress('Logging out of brickhub.dev.')).called(1);
       verify(() => masonApi.logout()).called(1);
+      verify(() => masonApi.close()).called(1);
       expect(progressDoneCalls, equals(['Logged out of brickhub.dev']));
     });
   });

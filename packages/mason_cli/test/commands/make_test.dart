@@ -13,11 +13,11 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockPubUpdater extends Mock implements PubUpdater {}
+class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   final cwd = Directory.current;
@@ -29,13 +29,13 @@ void main() {
 
     setUpAll(() async {
       registerFallbackValue(Object());
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -143,13 +143,13 @@ bricks:
           }),
         );
       printLogs = [];
-      logger = MockLogger();
-      pubUpdater = MockPubUpdater();
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
 
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -172,7 +172,8 @@ bricks:
               '\n'
               'Usage: mason make <subcommand> [arguments]\n'
               '-h, --help                      Print this usage information.\n'
-              '    --no-hooks                  skips running hooks\n'
+              '-q, --quiet                     Run with reduced verbosity.\n'
+              '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
@@ -216,7 +217,8 @@ bricks:
               '\n'
               'Usage: mason make greeting [arguments]\n'
               '-h, --help                      Print this usage information.\n'
-              '    --no-hooks                  skips running hooks\n'
+              '-q, --quiet                     Run with reduced verbosity.\n'
+              '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
@@ -249,7 +251,8 @@ bricks:
               '\n'
               'Usage: mason make legacy [arguments]\n'
               '-h, --help                      Print this usage information.\n'
-              '    --no-hooks                  skips running hooks\n'
+              '-q, --quiet                     Run with reduced verbosity.\n'
+              '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
@@ -281,7 +284,8 @@ bricks:
               '\n'
               'Usage: mason make bio [arguments]\n'
               '-h, --help                      Print this usage information.\n'
-              '    --no-hooks                  skips running hooks\n'
+              '-q, --quiet                     Run with reduced verbosity.\n'
+              '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
@@ -418,11 +422,7 @@ in todos.json''',
       expect(result, equals(ExitCode.usage.code));
       verify(
         () => logger.err(
-          any(
-            that: contains(
-              "FileSystemException: Cannot open file, path = 'todos.json",
-            ),
-          ),
+          any(that: contains("Cannot open file, path = 'todos.json")),
         ),
       ).called(1);
     });
@@ -494,10 +494,10 @@ bricks:
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn(url);
-      final progress = MockProgress();
+      final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
         final update = invocation.positionalArguments[0] as String?;
-        if (update == 'Made brick app_icon') throw Exception('oops');
+        if (update?.contains('Generated') ?? false) throw Exception('oops');
       });
       when(() => logger.progress(any())).thenReturn(progress);
       final result = await commandRunner.run(['make', 'app_icon']);
@@ -506,8 +506,7 @@ bricks:
     });
 
     test('exits with code 70 when exception occurs post generation', () async {
-      when(() => logger.info(any(that: contains('Generated'))))
-          .thenThrow(Exception('oops'));
+      when(() => logger.flush(any())).thenThrow(Exception('oops'));
       final result = await commandRunner.run(
         ['make', 'greeting', '--name', 'test-name'],
       );
@@ -1045,7 +1044,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1063,7 +1064,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(skip)'))),
+        () => logger.delayed(
+          '''  ${yellow.wrap('skipped')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
     });
 
@@ -1085,7 +1088,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1103,7 +1108,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name2!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
     });
 
@@ -1125,7 +1132,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
 
       result = await commandRunner.run([
@@ -1143,7 +1152,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name2!'));
       verify(
-        () => logger.delayed(any(that: contains('(modified)'))),
+        () => logger.delayed(
+          '''  ${lightBlue.wrap('modified')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
     });
 
@@ -1162,7 +1173,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1184,7 +1197,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(identical)'))),
+        () => logger.delayed(
+          '''  ${cyan.wrap('identical')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.info(any(that: contains('0 files changed'))),
@@ -1206,7 +1221,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1228,7 +1245,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name1!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1250,7 +1269,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1272,7 +1293,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(skip)'))),
+        () => logger.delayed(
+          '''  ${yellow.wrap('skipped')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.info(any(that: contains('0 files changed'))),
@@ -1294,7 +1317,9 @@ bricks:
       );
       expect(fileA.readAsStringSync(), contains('Hi test-name!'));
       verify(
-        () => logger.delayed(any(that: contains('(new)'))),
+        () => logger.delayed(
+          '''  ${green.wrap('created')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1316,7 +1341,9 @@ bricks:
       );
       expect(fileB.readAsStringSync(), contains('Hi test-name!Hi test-name1!'));
       verify(
-        () => logger.delayed(any(that: contains('(modified)'))),
+        () => logger.delayed(
+          '''  ${lightBlue.wrap('modified')} ${darkGray.wrap('GREETINGS.md')}''',
+        ),
       ).called(1);
       verify(
         () => logger.err(any(that: contains('1 file changed'))),
@@ -1347,6 +1374,26 @@ bricks:
       verify(
         () => logger.err(any(that: contains('5 files changed'))),
       ).called(1);
+    });
+
+    test('generates hello_world (--quiet mode)', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'hello_world_quiet'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      final result = await commandRunner.run(
+        ['make', 'hello_world', '--name', 'dash', '--quiet'],
+      );
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'hello_world_quiet'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'hello_world'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+      verifyNever(() => logger.flush(any()));
     });
   });
 }

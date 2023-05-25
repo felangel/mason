@@ -8,4 +8,6 @@
 /// # See usage
 /// mason --help
 /// ```
+///
+/// Get started at [https://github.com/felangel/mason](https://github.com/felangel/mason) 🧱
 library mason_cli;

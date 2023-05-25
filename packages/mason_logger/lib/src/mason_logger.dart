@@ -6,15 +6,75 @@ import 'package:mason_logger/mason_logger.dart';
 
 part 'progress.dart';
 
+/// Type definition for a function which accepts a log message
+/// and returns a styled version of that message.
+///
+/// Generally, [AnsiCode] values are used to generate a [LogStyle].
+///
+/// ```dart
+/// final alertStyle = (m) => backgroundRed.wrap(styleBold.wrap(white.wrap(m)));
+/// ```
+typedef LogStyle = String? Function(String? message);
+
+String? _detailStyle(String? m) => darkGray.wrap(m);
+String? _infoStyle(String? m) => m;
+String? _errStyle(String? m) => lightRed.wrap(m);
+String? _warnStyle(String? m) => yellow.wrap(styleBold.wrap(m));
+String? _alertStyle(String? m) =>
+    backgroundRed.wrap(styleBold.wrap(white.wrap(m)));
+String? _successStyle(String? m) => lightGreen.wrap(m);
+
+/// {@template log_theme}
+/// A theme object which contains styles for all log message types.
+/// {@endtemplate}
+class LogTheme {
+  /// {@macro log_theme}
+  const LogTheme({
+    LogStyle? detail,
+    LogStyle? info,
+    LogStyle? err,
+    LogStyle? warn,
+    LogStyle? alert,
+    LogStyle? success,
+  })  : detail = detail ?? _detailStyle,
+        info = info ?? _infoStyle,
+        err = err ?? _errStyle,
+        warn = warn ?? _warnStyle,
+        alert = alert ?? _alertStyle,
+        success = success ?? _successStyle;
+
+  /// The [LogStyle] used by [detail].
+  final LogStyle detail;
+
+  /// The [LogStyle] used by [info].
+  final LogStyle info;
+
+  /// The [LogStyle] used by [err].
+  final LogStyle err;
+
+  /// The [LogStyle] used by [warn].
+  final LogStyle warn;
+
+  /// The [LogStyle] used by [alert].
+  final LogStyle alert;
+
+  /// The [LogStyle] used by [success].
+  final LogStyle success;
+}
+
 /// {@template logger}
 /// A basic Logger which wraps `stdio` and applies various styles.
 /// {@endtemplate}
 class Logger {
   /// {@macro logger}
   Logger({
+    this.theme = const LogTheme(),
     this.level = Level.info,
     this.progressOptions = const ProgressOptions(),
   });
+
+  /// The current theme for this logger.
+  final LogTheme theme;
 
   /// The current log level for this logger.
   Level level;
@@ -39,7 +99,7 @@ class Logger {
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
 
   /// Flushes internal message queue.
-  void flush([Function(String?)? print]) {
+  void flush([void Function(String?)? print]) {
     final writeln = print ?? info;
     for (final message in _queue) {
       writeln(message);
@@ -51,9 +111,10 @@ class Logger {
   void write(String? message) => _stdout.write(message);
 
   /// Writes info message to stdout.
-  void info(String? message) {
+  void info(String? message, {LogStyle? style}) {
     if (level.index > Level.info.index) return;
-    _stdout.writeln(message);
+    style ??= theme.info;
+    _stdout.writeln(style.call(message) ?? message);
   }
 
   /// Writes delayed message to stdout.
@@ -72,33 +133,39 @@ class Logger {
   }
 
   /// Writes error message to stderr.
-  void err(String? message) {
+  void err(String? message, {LogStyle? style}) {
     if (level.index > Level.error.index) return;
-    _stderr.writeln(lightRed.wrap(message));
+    style ??= theme.err;
+    _stderr.writeln(style(message));
   }
 
   /// Writes alert message to stdout.
-  void alert(String? message) {
+  void alert(String? message, {LogStyle? style}) {
     if (level.index > Level.critical.index) return;
-    _stderr.writeln(backgroundRed.wrap(styleBold.wrap(white.wrap(message))));
+    style ??= theme.alert;
+    _stderr.writeln(style(message));
   }
 
   /// Writes detail message to stdout.
-  void detail(String? message) {
+  void detail(String? message, {LogStyle? style}) {
     if (level.index > Level.debug.index) return;
-    _stdout.writeln(darkGray.wrap(message));
+    style ??= theme.detail;
+    _stdout.writeln(style(message));
   }
 
   /// Writes warning message to stderr.
-  void warn(String? message, {String tag = 'WARN'}) {
+  void warn(String? message, {String tag = 'WARN', LogStyle? style}) {
     if (level.index > Level.warning.index) return;
-    _stderr.writeln(yellow.wrap(styleBold.wrap('[$tag] $message')));
+    final output = tag.isEmpty ? '$message' : '[$tag] $message';
+    style ??= theme.warn;
+    _stderr.writeln(style(output));
   }
 
   /// Writes success message to stdout.
-  void success(String? message) {
+  void success(String? message, {LogStyle? style}) {
     if (level.index > Level.info.index) return;
-    _stdout.writeln(lightGreen.wrap(message));
+    style ??= theme.success;
+    _stdout.writeln(style(message));
   }
 
   /// Prompts user and returns response.
@@ -106,18 +173,20 @@ class Logger {
   /// Set [hidden] to `true` if you want to hide user input for sensitive info.
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
-    final _defaultValue = hasDefault ? '$defaultValue' : '';
-    final suffix = hasDefault ? ' ${darkGray.wrap('($_defaultValue)')}' : '';
-    final _message = '$message$suffix ';
-    _stdout.write(_message);
+    final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
+    final suffix =
+        hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
+    final resolvedMessage = '$message$suffix ';
+    _stdout.write(resolvedMessage);
     final input =
         hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
-    final response = input == null || input.isEmpty ? _defaultValue : input;
-    final lines = _message.split('\n').length - 1;
+    final response =
+        input == null || input.isEmpty ? resolvedDefaultValue : input;
+    final lines = resolvedMessage.split('\n').length - 1;
     final prefix =
         lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
+      '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
     return response;
   }
@@ -185,17 +254,17 @@ class Logger {
   /// Prompts user with a yes/no question.
   bool confirm(String? message, {bool defaultValue = false}) {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
-    final _message = '$message$suffix ';
-    _stdout.write(_message);
+    final resolvedMessage = '$message$suffix ';
+    _stdout.write(resolvedMessage);
     final input = _stdin.readLineSync()?.trim();
     final response = input == null || input.isEmpty
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
-    final lines = _message.split('\n').length - 1;
+    final lines = resolvedMessage.split('\n').length - 1;
     final prefix =
         lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
     _stdout.writeln(
-      '''$prefix$_message${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
+      '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
     return response;
   }
@@ -211,9 +280,9 @@ class Logger {
     T? defaultValue,
     String Function(T choice)? display,
   }) {
-    final _display = display ?? (value) => '$value';
+    final resolvedDisplay = display ?? (value) => '$value';
     final hasDefault =
-        defaultValue != null && _display(defaultValue).isNotEmpty;
+        defaultValue != null && resolvedDisplay(defaultValue).isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
     void writeChoices() {
@@ -230,11 +299,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
+            ..write(' $checkBox  ${lightCyan.wrap(resolvedDisplay(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  ${_display(choice)}');
+            ..write(' $checkBox  ${resolvedDisplay(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -273,7 +342,9 @@ class Logger {
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
-          ..writeln(styleDim.wrap(lightCyan.wrap(_display(choices[index]))));
+          ..writeln(
+            styleDim.wrap(lightCyan.wrap(resolvedDisplay(choices[index]))),
+          );
 
         result = choices[index];
         break;
@@ -298,7 +369,7 @@ class Logger {
     List<T>? defaultValues,
     String Function(T choice)? display,
   }) {
-    final _display = display ?? (value) => '$value';
+    final resolvedDisplay = display ?? (value) => '$value';
     final hasDefaults = defaultValues != null && defaultValues.isNotEmpty;
     final selections = hasDefaults
         ? defaultValues.map((value) => choices.indexOf(value)).toSet()
@@ -321,11 +392,11 @@ class Logger {
         if (isCurrent) {
           _stdout
             ..write(green.wrap('❯'))
-            ..write(' $checkBox  ${lightCyan.wrap(_display(choice))}');
+            ..write(' $checkBox  ${lightCyan.wrap(resolvedDisplay(choice))}');
         } else {
           _stdout
             ..write(' ')
-            ..write(' $checkBox  ${_display(choice)}');
+            ..write(' $checkBox  ${resolvedDisplay(choice)}');
         }
         if (choices.last != choice) {
           _stdout.write('\n');
@@ -371,7 +442,11 @@ class Logger {
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
-          ..writeln(styleDim.wrap(lightCyan.wrap('$results')));
+          ..writeln(
+            styleDim.wrap(
+              lightCyan.wrap('${results.map(resolvedDisplay).toList()}'),
+            ),
+          );
 
         break;
       }

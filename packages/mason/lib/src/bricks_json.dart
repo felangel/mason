@@ -13,7 +13,7 @@ import 'package:path/path.dart' as p;
 /// {@endtemplate}
 class BrickResolveVersionException extends MasonException {
   /// {@macro brick_resolve_version_exception}
-  const BrickResolveVersionException(String message) : super(message);
+  const BrickResolveVersionException(super.message);
 }
 
 /// {@template mason_yaml_name_mismatch}
@@ -22,7 +22,7 @@ class BrickResolveVersionException extends MasonException {
 /// {@endtemplate}
 class MasonYamlNameMismatch extends MasonException {
   /// {@macro mason_yaml_name_mismatch}
-  MasonYamlNameMismatch(String message) : super(message);
+  MasonYamlNameMismatch(super.message);
 }
 
 /// {@template brick_unsatisfied_version_constraint}
@@ -30,7 +30,7 @@ class MasonYamlNameMismatch extends MasonException {
 /// {@endtemplate}
 class BrickUnsatisfiedVersionConstraint extends MasonException {
   /// {@macro brick_unsatisfied_version_constraint}
-  BrickUnsatisfiedVersionConstraint(String message) : super(message);
+  BrickUnsatisfiedVersionConstraint(super.message);
 }
 
 /// {@template malformed_bricks_json}
@@ -38,7 +38,7 @@ class BrickUnsatisfiedVersionConstraint extends MasonException {
 /// {@endtemplate}
 class MalformedBricksJson extends MasonException {
   /// {@macro malformed_bricks_json}
-  const MalformedBricksJson(String message) : super(message);
+  const MalformedBricksJson(super.message);
 }
 
 /// {@template brick_incompatible_mason_version}
@@ -141,6 +141,9 @@ class BricksJson {
   /// Flushes cache contents to `bricks.json`.
   Future<void> flush() async {
     await _bricksJsonFile.create(recursive: true);
+    _cache = Map.fromEntries(
+      _cache.entries.toList()..sort((a, b) => a.key.compareTo(b.key)),
+    );
     await _bricksJsonFile.writeAsString(encode);
   }
 
@@ -198,19 +201,6 @@ class BricksJson {
   /// Writes remote brick via git url to cache
   /// and returns the local path to the brick.
   Future<CachedBrick> _addRemoteBrickFromGit(Brick brick) async {
-    final gitPath = brick.location.git!;
-    final tempDirectory = await _clone(gitPath);
-    final commitHash = await _revParse(tempDirectory);
-    final resolvedBrick = Brick.git(
-      GitPath(gitPath.url, path: gitPath.path, ref: commitHash),
-    );
-    final dirName = _encodedGitDir(gitPath, commitHash);
-
-    final directory = Directory(p.join(rootDir.path, 'git', dirName));
-    final directoryExists = directory.existsSync();
-    final directoryIsNotEmpty =
-        directoryExists && directory.listSync(recursive: true).isNotEmpty;
-
     BrickYaml _getBrickYaml(Directory directory) {
       final gitPath = brick.location.git!;
       final brickYaml = File(
@@ -233,36 +223,41 @@ class BricksJson {
       return yaml;
     }
 
-    /// Even if a cached version exists, still try to update.
-    /// Fall-back to cached version if update fails.
-    if (directoryExists && directoryIsNotEmpty) {
-      try {
-        await directory.delete(recursive: true);
-        await directory.parent.create(recursive: true);
-        await tempDirectory.rename(directory.path);
-      } catch (_) {}
+    final gitPath = brick.location.git!;
 
-      final yaml = _getBrickYaml(directory);
-      final name = brick.name ?? yaml.name;
+    // Attempt to fetch brick from cache.
+    if (gitPath.ref != null) {
+      final commitHash = gitPath.ref!;
+      final dirName = _encodedGitDir(gitPath, commitHash);
+      final directory = Directory(p.join(rootDir.path, 'git', dirName));
 
-      if (yaml.name != name) {
-        throw MasonYamlNameMismatch(
-          'Brick name "$name" '
-          'doesn\'t match provided name "${yaml.name}" in ${MasonYaml.file}.',
-        );
+      if (directory.existsSync()) {
+        final brickYaml = _getBrickYaml(directory);
+        final name = brick.name ?? brickYaml.name;
+        final localPath =
+            _cache[name] ?? canonicalize(p.join(directory.path, gitPath.path));
+
+        if (_cache[name] == null) _cache[name] = localPath;
+
+        return CachedBrick(brick: brick, path: localPath);
       }
-
-      _verifyMasonVersionConstraint(yaml);
-
-      final localPath = canonicalize(p.join(directory.path, gitPath.path));
-      _cache[name] = localPath;
-      return CachedBrick(brick: resolvedBrick, path: localPath);
     }
+
+    // Fetch brick from remote git repository.
+    final tempDirectory = await _clone(gitPath);
+    final commitHash = await _revParse(tempDirectory);
+    final resolvedBrick = Brick.git(
+      GitPath(gitPath.url, path: gitPath.path, ref: commitHash),
+    );
+    final dirName = _encodedGitDir(gitPath, commitHash);
+
+    final directory = Directory(p.join(rootDir.path, 'git', dirName));
+    final directoryExists = directory.existsSync();
 
     if (directoryExists) await directory.delete(recursive: true);
 
     await directory.parent.create(recursive: true);
-    await tempDirectory.rename(directory.path);
+    await _copyPath(tempDirectory.path, directory.path);
 
     final yaml = _getBrickYaml(directory);
     final name = brick.name ?? yaml.name;
@@ -371,7 +366,7 @@ class BricksJson {
       );
     }
 
-    late final Map body;
+    late final Map<dynamic, dynamic> body;
     late final Version latestVersion;
     try {
       body = json.decode(response.body) as Map;
@@ -469,5 +464,17 @@ void _verifyMasonVersionConstraint(BrickYaml brickYaml) {
       brickName: brickYaml.name,
       constraint: brickYaml.environment.mason,
     );
+  }
+}
+
+Future<void> _copyPath(String from, String to) async {
+  await Directory(to).create(recursive: true);
+  await for (final file in Directory(from).list(recursive: true)) {
+    final copyTo = p.join(to, p.relative(file.path, from: from));
+    if (file is Directory) {
+      await Directory(copyTo).create(recursive: true);
+    } else if (file is File) {
+      await File(file.path).copy(copyTo);
+    }
   }
 }

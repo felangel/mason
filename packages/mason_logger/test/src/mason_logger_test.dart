@@ -4,9 +4,9 @@ import 'package:mason_logger/mason_logger.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockStdout extends Mock implements Stdout {}
+class _MockStdout extends Mock implements Stdout {}
 
-class MockStdin extends Mock implements Stdin {}
+class _MockStdin extends Mock implements Stdin {}
 
 void main() {
   group('Logger', () {
@@ -15,11 +15,56 @@ void main() {
     late Stdout stderr;
 
     setUp(() {
-      stdout = MockStdout();
-      stdin = MockStdin();
-      stderr = MockStdout();
+      stdout = _MockStdout();
+      stdin = _MockStdin();
+      stderr = _MockStdout();
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+    });
+
+    group('theme', () {
+      test('can be overridden at the logger level', () {
+        final theme = LogTheme(
+          info: (message) => '[message]: $message',
+        );
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(theme: theme).info(message);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('can be overridden at the method level', () {
+        String? style(String? message) => '[message]: $message';
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().info(message, style: style);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
+
+      test('is ignored when a method override is used.', () {
+        final theme = LogTheme(
+          info: (message) => '[message]: $message',
+        );
+        String? style(String? message) => '[info]: $message';
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger(theme: theme).info(message, style: style);
+            verify(() => stdout.writeln('[info]: $message')).called(1);
+            Logger(theme: theme).info(message);
+            verify(() => stdout.writeln('[message]: $message')).called(1);
+          },
+          stdout: () => stdout,
+        );
+      });
     });
 
     group('level', () {
@@ -233,6 +278,21 @@ void main() {
             verify(
               () {
                 stderr.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
+              },
+            ).called(1);
+          },
+          stderr: () => stderr,
+        );
+      });
+
+      test('writes line to stderr with empty tag', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            Logger().warn(message, tag: '');
+            verify(
+              () {
+                stderr.writeln(yellow.wrap(styleBold.wrap(message)));
               },
             ).called(1);
           },
@@ -931,6 +991,31 @@ void main() {
               () => stdout.write(' ◯  Key: b'),
               () => stdout.write(' '),
               () => stdout.write(' ◯  Key: c'),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
+      test('converts results to a preferred display', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const expected = ['a', 'c'];
+            when(() => stdin.readByteSync()).thenReturn(10);
+            final actual = Logger().chooseAny<String>(
+              message,
+              choices: ['a', 'b', 'c'],
+              defaultValues: ['a', 'c'],
+              display: (data) => 'Key: $data',
+            );
+            expect(actual, equals(expected));
+            verifyInOrder([
+              () => stdout.write('\x1b8'),
+              () => stdout.write('\x1b[J'),
+              () => stdout.write('$message '),
+              () => stdout.writeln('[Key: a, Key: c]'),
             ]);
           },
           stdout: () => stdout,

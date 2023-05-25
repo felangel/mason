@@ -1,5 +1,9 @@
 name: mason
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   push:
     branches:
@@ -18,7 +22,7 @@ on:
       - packages/mason/**
 
 jobs:
-  build:
+  setup:
     defaults:
       run:
         working-directory: packages/mason
@@ -26,7 +30,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.5.2
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -36,7 +40,28 @@ jobs:
         run: dart format --set-exit-if-changed lib
 
       - name: Analyze
-        run: dart analyze --fatal-infos --fatal-warnings .
+        run: dart analyze --fatal-infos --fatal-warnings .      
+
+  build:
+    needs: setup
+
+    defaults:
+      run:
+        working-directory: packages/mason
+
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [macos-latest, windows-2019, ubuntu-latest]
+
+    steps:
+      - uses: actions/checkout@v3.5.2
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install Dependencies
+        run: dart pub get
 
       - name: Run Tests
         run: |
@@ -56,7 +81,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3.1.0
+      - uses: actions/checkout@v3.5.2
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies

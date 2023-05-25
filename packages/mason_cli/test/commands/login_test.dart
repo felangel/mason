@@ -4,13 +4,13 @@ import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
-class MockLogger extends Mock implements Logger {}
+class _MockLogger extends Mock implements Logger {}
 
-class MockMasonApi extends Mock implements MasonApi {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
-class MockUser extends Mock implements User {}
+class _MockUser extends Mock implements User {}
 
-class MockProgress extends Mock implements Progress {}
+class _MockProgress extends Mock implements Progress {}
 
 void main() {
   group('LoginCommand', () {
@@ -19,11 +19,14 @@ void main() {
     late LoginCommand loginCommand;
 
     setUp(() {
-      logger = MockLogger();
-      masonApi = MockMasonApi();
-      loginCommand = LoginCommand(logger: logger, masonApi: masonApi);
+      logger = _MockLogger();
+      masonApi = _MockMasonApi();
+      loginCommand = LoginCommand(
+        logger: logger,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
+      );
 
-      when(() => logger.progress(any())).thenReturn(MockProgress());
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
     });
 
     test('can be instantiated without any parameters', () {
@@ -32,7 +35,7 @@ void main() {
 
     test('exits with code 0 when already logged in', () async {
       const email = 'test@email.com';
-      final user = MockUser();
+      final user = _MockUser();
 
       when(() => user.email).thenReturn(email);
       when(() => masonApi.currentUser).thenReturn(user);
@@ -78,12 +81,13 @@ void main() {
         () => masonApi.login(email: email, password: password),
       ).called(1);
       verify(() => logger.err(message)).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when logged in successfully', () async {
       const email = 'test@email.com';
       const password = 'T0pS3cret!';
-      final user = MockUser();
+      final user = _MockUser();
       when(() => user.email).thenReturn(email);
       when(
         () => logger.prompt('email:', defaultValue: any(named: 'defaultValue')),
@@ -113,6 +117,7 @@ void main() {
       verify(
         () => logger.success('You are now logged in as <${user.email}>'),
       ).called(1);
+      verify(() => masonApi.close()).called(1);
     });
   });
 }

@@ -2,11 +2,15 @@ import 'dart:io';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
+import 'package:cli_completion/cli_completion.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:pub_updater/pub_updater.dart';
+
+/// Type definition for `MasonApi.new`.
+typedef MasonApiBuilder = MasonApi Function({Uri? hostedUri});
 
 /// The package name.
 const packageName = 'mason_cli';
@@ -17,15 +21,13 @@ const executableName = 'mason';
 /// {@template mason_command_runner}
 /// A [CommandRunner] for the Mason CLI.
 /// {@endtemplate}
-class MasonCommandRunner extends CommandRunner<int> {
+class MasonCommandRunner extends CompletionCommandRunner<int> {
   /// {@macro mason_command_runner}
   MasonCommandRunner({
     Logger? logger,
     PubUpdater? pubUpdater,
-    MasonApi? masonApi,
   })  : _logger = logger ?? Logger(),
         _pubUpdater = pubUpdater ?? PubUpdater(),
-        _masonApi = masonApi ?? MasonApi(hostedUri: BricksJson.hostedUri),
         super(executableName, '🧱  mason \u{2022} lay the foundation!') {
     argParser.addFlags();
     addCommand(AddCommand(logger: _logger));
@@ -34,20 +36,19 @@ class MasonCommandRunner extends CommandRunner<int> {
     addCommand(GetCommand(logger: _logger));
     addCommand(InitCommand(logger: _logger));
     addCommand(ListCommand(logger: _logger));
-    addCommand(LoginCommand(logger: _logger, masonApi: _masonApi));
-    addCommand(LogoutCommand(logger: _logger, masonApi: _masonApi));
+    addCommand(LoginCommand(logger: _logger));
+    addCommand(LogoutCommand(logger: _logger));
     addCommand(MakeCommand(logger: _logger));
     addCommand(NewCommand(logger: _logger));
-    addCommand(PublishCommand(logger: _logger, masonApi: _masonApi));
+    addCommand(PublishCommand(logger: _logger));
     addCommand(RemoveCommand(logger: _logger));
-    addCommand(SearchCommand(logger: _logger, masonApi: _masonApi));
+    addCommand(SearchCommand(logger: _logger));
     addCommand(UnbundleCommand(logger: _logger));
     addCommand(UpdateCommand(logger: _logger, pubUpdater: _pubUpdater));
     addCommand(UpgradeCommand(logger: _logger));
   }
 
   final Logger _logger;
-  final MasonApi _masonApi;
   final PubUpdater _pubUpdater;
 
   @override
@@ -75,13 +76,16 @@ class MasonCommandRunner extends CommandRunner<int> {
     } catch (error) {
       _logger.err('$error');
       return ExitCode.software.code;
-    } finally {
-      _masonApi.close();
     }
   }
 
   @override
   Future<int?> runCommand(ArgResults topLevelResults) async {
+    if (topLevelResults.command?.name == 'completion') {
+      await super.runCommand(topLevelResults);
+      return ExitCode.success.code;
+    }
+
     int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
       _logger.info(packageVersion);

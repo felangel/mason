@@ -3,9 +3,11 @@ import 'dart:math' as math;
 import 'dart:typed_data';
 
 import 'package:args/args.dart';
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:mason_cli/src/command_runner.dart';
 import 'package:path/path.dart' as path;
 
 const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
@@ -15,14 +17,16 @@ const _maxBundleSizeInBytes = 2 * 1024 * 1024; // 2 MB
 /// {@endtemplate}
 class PublishCommand extends MasonCommand {
   /// {@macro publish_command}
-  PublishCommand({Logger? logger, MasonApi? masonApi, int? maxBundleSize})
-      : _masonApi = masonApi ?? MasonApi(),
-        _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes,
-        super(logger: logger) {
+  PublishCommand({
+    super.logger,
+    MasonApiBuilder? masonApiBuilder,
+    int? maxBundleSize,
+  })  : _masonApiBuilder = masonApiBuilder ?? MasonApi.new,
+        _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes {
     argParser.addOptions();
   }
 
-  final MasonApi _masonApi;
+  final MasonApiBuilder _masonApiBuilder;
   final int _maxBundleSize;
 
   @override
@@ -31,8 +35,42 @@ class PublishCommand extends MasonCommand {
   @override
   final String name = 'publish';
 
+  Uri? _resolveHostedUri(String? host) {
+    if (host == null) return BricksJson.hostedUri;
+
+    if (host == 'none') {
+      logger
+        ..err('A private brick cannot be published.')
+        ..err(
+          '''Please change or remove the "publish_to" field in the brick.yaml before publishing.''',
+        );
+      return null;
+    }
+
+    final hostedUri = Uri.tryParse(host);
+
+    if (hostedUri == null || hostedUri.host.isEmpty) {
+      logger
+        ..err('Invalid "publish_to" in brick.yaml: "$host"')
+        ..err(
+          '"publish_to" must be a valid registry url such as '
+          '"https://registry.brickhub.dev" or "none" for private bricks.',
+        );
+      return null;
+    }
+
+    return hostedUri;
+  }
+
   @override
   Future<int> run() async {
+    final force = results['force'] == true;
+    final dryRun = results['dry-run'] == true;
+
+    if (force && dryRun) {
+      usageException('Cannot use both --force and --dry-run.');
+    }
+
     final directoryPath = results['directory'] as String;
     final brickYamlFile = File(path.join(directoryPath, BrickYaml.file));
     if (!brickYamlFile.existsSync()) {
@@ -40,16 +78,29 @@ class PublishCommand extends MasonCommand {
       return ExitCode.software.code;
     }
 
-    final user = _masonApi.currentUser;
+    final brickYaml = checkedYamlDecode(
+      brickYamlFile.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    );
+
+    final publishTo = brickYaml.publishTo;
+    final hostedUri = _resolveHostedUri(publishTo);
+
+    if (hostedUri == null) return ExitCode.software.code;
+
+    final masonApi = _masonApiBuilder(hostedUri: hostedUri);
+    final user = masonApi.currentUser;
     if (user == null) {
       logger
         ..err('You must be logged in to publish.')
         ..err("Run 'mason login' to log in and try again.");
+      masonApi.close();
       return ExitCode.software.code;
     }
 
     if (!user.emailVerified) {
       logger.err('You must verify your email in order to publish.');
+      masonApi.close();
       return ExitCode.software.code;
     }
 
@@ -65,8 +116,18 @@ class PublishCommand extends MasonCommand {
       logger.err(
         '''Your bundle is $sizeInMb MB. Hosted bricks must be smaller than $maxSizeInMb MB.''',
       );
+      masonApi.close();
       return ExitCode.software.code;
     }
+
+    if (dryRun) {
+      logger
+        ..info('No issues detected.')
+        ..info('The server may enforce additional checks.');
+      masonApi.close();
+      return ExitCode.success.code;
+    }
+
     final policyLink = styleUnderlined.wrap(
       link(uri: Uri.parse('https://brickhub.dev/policy')),
     );
@@ -80,13 +141,17 @@ class PublishCommand extends MasonCommand {
       )
       ..info('See policy details at $policyLink\n');
 
-    final confirmed = logger.confirm(
-      'Do you want to publish ${bundle.name} ${bundle.version}?',
-    );
+    final needsConfirmation = !force;
+    if (needsConfirmation) {
+      final confirmed = logger.confirm(
+        'Do you want to publish ${bundle.name} ${bundle.version}?',
+      );
 
-    if (!confirmed) {
-      logger.err('Brick was not published.');
-      return ExitCode.software.code;
+      if (!confirmed) {
+        logger.err('Brick was not published.');
+        masonApi.close();
+        return ExitCode.software.code;
+      }
     }
 
     final publishProgress = logger.progress(
@@ -94,10 +159,10 @@ class PublishCommand extends MasonCommand {
     );
 
     try {
-      await _masonApi.publish(bundle: universalBundle);
+      await masonApi.publish(bundle: universalBundle);
       publishProgress.complete('Published ${bundle.name} ${bundle.version}');
       logger.success(
-        '''\nPublished ${bundle.name} ${bundle.version} to ${BricksJson.hostedUri}.''',
+        '''\nPublished ${bundle.name} ${bundle.version} to $hostedUri.''',
       );
     } on MasonApiPublishFailure catch (error) {
       publishProgress.fail();
@@ -106,6 +171,8 @@ class PublishCommand extends MasonCommand {
     } catch (_) {
       publishProgress.fail();
       rethrow;
+    } finally {
+      masonApi.close();
     }
 
     return ExitCode.success.code;
@@ -123,6 +190,18 @@ extension on ArgParser {
       abbr: 'C',
       help: 'Run this in the specified directory',
       defaultsTo: '.',
+    );
+    addFlag(
+      'force',
+      abbr: 'f',
+      negatable: false,
+      help: 'Publish without confirmation if there are no errors.',
+    );
+    addFlag(
+      'dry-run',
+      abbr: 'n',
+      negatable: false,
+      help: 'Validate but do not publish the brick.',
     );
   }
 }

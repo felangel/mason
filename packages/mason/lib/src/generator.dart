@@ -9,7 +9,6 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
-import 'package:mason/src/compute.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
@@ -60,9 +59,8 @@ class MasonGenerator extends Generator {
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
   static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
-    final bytes = await compute(
-      (MasonBundle b) => utf8.encode(json.encode(b.toJson())),
-      bundle,
+    final bytes = await Isolate.run(
+      () => utf8.encode(json.encode(bundle.toJson())),
     );
     final hash = sha1.convert(bytes).toString();
     final target = Directory(
@@ -342,6 +340,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   }) async {
     _overwriteRule ??= overwriteRule;
     final file = File(p.join(dir.path, path));
+    final filePath = darkGray.wrap(p.relative(file.path));
     final fileExists = file.existsSync();
 
     if (!fileExists) {
@@ -349,7 +348,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
           .create(recursive: true)
           .then<File>((_) => file.writeAsBytes(contents))
           .whenComplete(
-            () => logger?.delayed('  ${file.path} ${lightGreen.wrap('(new)')}'),
+            () => logger?.delayed('  ${green.wrap('created')} $filePath'),
           );
       return GeneratedFile.created(path: file.path);
     }
@@ -357,7 +356,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final existingContents = file.readAsBytesSync();
 
     if (const ListEquality<int>().equals(existingContents, contents)) {
-      logger?.delayed('  ${file.path} ${lightCyan.wrap('(identical)')}');
+      logger?.delayed('  ${cyan.wrap('identical')} $filePath');
       return GeneratedFile.identical(path: file.path);
     }
 
@@ -367,12 +366,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             _overwriteRule != OverwriteRule.alwaysAppend);
 
     if (shouldPrompt) {
-      logger.info('${red.wrap(styleBold.wrap('conflict'))} ${file.path}');
+      logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
       _overwriteRule = logger
           .prompt(
-            yellow.wrap(
-              styleBold.wrap('Overwrite ${p.basename(file.path)}? (Yyna) '),
-            ),
+            lightYellow.wrap('Overwrite ${p.basename(file.path)}? (Yyna)'),
           )
           .toOverwriteRule();
     }
@@ -380,7 +377,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     switch (_overwriteRule) {
       case OverwriteRule.alwaysSkip:
       case OverwriteRule.skipOnce:
-        logger?.delayed('  ${file.path} ${yellow.wrap('(skip)')}');
+        logger?.delayed('  ${yellow.wrap('skipped')} $filePath');
         return GeneratedFile.skipped(path: file.path);
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
@@ -399,12 +396,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
             )
             .whenComplete(
               () => shouldAppend
-                  ? logger?.delayed(
-                      '  ${file.path} ${lightBlue.wrap('(modified)')}',
-                    )
-                  : logger?.delayed(
-                      '  ${file.path} ${lightGreen.wrap('(new)')}',
-                    ),
+                  ? logger?.delayed('  ${lightBlue.wrap('modified')} $filePath')
+                  : logger?.delayed('  ${green.wrap('created')} $filePath'),
             );
 
         return shouldAppend
@@ -458,6 +451,7 @@ class TemplateFile {
       for (final match in matches) {
         final key = match.group(1);
         if (key == null || _lambdas.hasMatch(key)) continue;
+        if (parameters[key] is! Iterable) continue;
         final value = _loopValueRegExp(key).firstMatch(filePath)![1];
         if (value == '.') {
           filePath = filePath.replaceFirst(_loopRegExp(key), '{{$key}}');
@@ -582,15 +576,7 @@ Future<Set<FileContents>> _runSubstitutionAsync(
   Map<String, dynamic> vars,
   Map<String, List<int>> partials,
 ) async {
-  return compute(
-    (List inputs) {
-      final file = inputs[0] as TemplateFile;
-      final vars = inputs[1] as Map<String, dynamic>;
-      final partials = inputs[2] as Map<String, List<int>>;
-      return file.runSubstitution(vars, partials);
-    },
-    [file, vars, partials],
-  );
+  return Isolate.run(() => file.runSubstitution(vars, partials));
 }
 
 extension on FileConflictResolution {
