@@ -1,3 +1,8 @@
+# 0.1.0-dev.49
+
+- feat: add `PascalDotCase` lambda and `String` extension
+- deps: integrate `package:recase`
+
 # 0.1.0-dev.48
 
 - fix: git brick install across file systems

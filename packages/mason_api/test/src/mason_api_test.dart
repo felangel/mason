@@ -133,7 +133,7 @@ void main() {
       });
 
       test('makes correct request (custom)', () async {
-        final customHostedUri = Uri.http('localhost:8080', '');
+        final customHostedUri = Uri.http('localhost:8080');
         masonApi = MasonApi(httpClient: httpClient, hostedUri: customHostedUri);
         try {
           await masonApi.login(email: email, password: password);

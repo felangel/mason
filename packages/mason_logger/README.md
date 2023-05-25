@@ -11,18 +11,27 @@ A reusable logger used by the [Mason CLI](https://github.com/felangel/mason).
 ```dart
 import 'package:mason_logger/mason_logger.dart';
 
+// Use the various APIs to log to stdout.
 Future<void> main() async {
-  // Use the various APIs to log to stdout.
+  // Define a custom `LogStyle`
+  String? customInfoStyle(String? m) {
+    return backgroundDarkGray.wrap(styleBold.wrap(white.wrap(m)));
+  }
+
   final logger = Logger(
-    // Specify a log level (defaults to Level.info).
+    // Optionally, specify a log level (defaults to Level.info).
     level: Level.verbose,
+    // Optionally, specify a custom `LogTheme` to override log styles.
+    theme: LogTheme(),
   )
     ..info('info')
     ..alert('alert')
     ..err('error')
     ..success('success')
     ..warn('warning')
-    ..detail('detail');
+    ..detail('detail')
+    // Override the log style for a particular method invocation.
+    ..info('custom info', style: customInfoStyle);
 
   // Prompt for user input.
   final favoriteAnimal = logger.prompt(

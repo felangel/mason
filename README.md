@@ -33,13 +33,16 @@ dart pub global activate mason_cli
 # 🚀 Initialize mason
 mason init
 
+# 📦 Install your first brick
+mason add hello
+
 # 🧱 Use your first brick
 mason make hello
 ```
 
 ## Documentation
 
-View the full documentation [here](https://github.com/felangel/mason/tree/master/packages/mason_cli).
+View the full documentation [here](https://docs.brickhub.dev).
 
 ## Video Tutorials
 

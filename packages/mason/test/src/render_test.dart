@@ -270,6 +270,16 @@ void main() {
         );
       });
 
+      test('pascalDotCase outputs correct string', () {
+        const greeting = 'Hello World';
+        const input = 'Greeting: {{greeting.pascalDotCase()}}!';
+        const expected = 'Greeting: Hello.World!';
+        expect(
+          input.render(<String, dynamic>{'greeting': greeting}),
+          equals(expected),
+        );
+      });
+
       test('paramCase outputs correct string', () {
         const greeting = 'hello world';
         const input = 'Greeting: {{greeting.paramCase()}}!';

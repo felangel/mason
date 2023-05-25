@@ -63,7 +63,7 @@ class MasonApi {
   /// {@macro mason_api}
   MasonApi({http.Client? httpClient, Uri? hostedUri})
       : _httpClient = httpClient ?? http.Client(),
-        _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev', '') {
+        _hostedUri = hostedUri ?? Uri.https('registry.brickhub.dev') {
     _loadCredentials();
   }
 

@@ -13,6 +13,9 @@
 
 ---
 
+[![en](https://img.shields.io/badge/language-english-cyan.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.md)
+[![zh](https://img.shields.io/badge/language-chinese-cyan.svg)](https://github.com/felangel/mason/blob/master/packages/mason_cli/README.zh.md)
+
 Mason CLI allows developers to create and consume reusable templates called bricks powered by the [mason](https://pub.dev/packages/mason) generator.
 
 ![Mason Demo][mason_demo]
@@ -37,6 +40,8 @@ mason make hello
 
 ## Table of Contents
 
+- [Quick Start](#quick-start)
+- [Table of Contents](#table-of-contents)
 - [Overview](#overview)
   - [Installation](#installation)
   - [Initializing](#initializing)
@@ -353,22 +358,22 @@ Running `mason make app_icon --url path/to/icon.png` will generate `icon.png` wi
 #### Built-in Lambdas
 
 Mason supports a handful of built-in lambdas that can help with customizing generated code:
-
-| Name           | Example             | Shorthand Syntax              | Full Syntax                                      |
-| -------------- | ------------------- | ----------------------------- | ------------------------------------------------ |
-| `camelCase`    | `helloWorld`        | `{{variable.camelCase()}}`    | `{{#camelCase}}{{variable}}{{/camelCase}}`       |
-| `constantCase` | `HELLO_WORLD`       | `{{variable.constantCase()}}` | `{{#constantCase}}{{variable}}{{/constantCase}}` |
-| `dotCase`      | `hello.world`       | `{{variable.dotCase()}}`      | `{{#dotCase}}{{variable}}{{/dotCase}}`           |
-| `headerCase`   | `Hello-World`       | `{{variable.headerCase()}}`   | `{{#headerCase}}{{variable}}{{/headerCase}}`     |
-| `lowerCase`    | `hello world`       | `{{variable.lowerCase()}}`    | `{{#lowerCase}}{{variable}}{{/lowerCase}}`       |
-| `mustacheCase` | `{{ Hello World }}` | `{{variable.mustacheCase()}}` | `{{#mustacheCase}}{{variable}}{{/mustacheCase}}` |
-| `pascalCase`   | `HelloWorld`        | `{{variable.pascalCase()}}`   | `{{#pascalCase}}{{variable}}{{/pascalCase}}`     |
-| `paramCase`    | `hello-world`       | `{{variable.paramCase()}}`    | `{{#paramCase}}{{variable}}{{/paramCase}}`       |
-| `pathCase`     | `hello/world`       | `{{variable.pathCase()}}`     | `{{#pathCase}}{{variable}}{{/pathCase}}`         |
-| `sentenceCase` | `Hello world`       | `{{variable.sentenceCase()}}` | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}` |
-| `snakeCase`    | `hello_world`       | `{{variable.snakeCase()}}`    | `{{#snakeCase}}{{variable}}{{/snakeCase}}`       |
-| `titleCase`    | `Hello World`       | `{{variable.titleCase()}}`    | `{{#titleCase}}{{variable}}{{/titleCase}}`       |
-| `upperCase`    | `HELLO WORLD`       | `{{variable.upperCase()}}`    | `{{#upperCase}}{{variable}}{{/upperCase}}`       |
+| Name            | Example             | Shorthand Syntax               | Full Syntax                                        |
+| --------------- | ------------------- | ------------------------------ | -------------------------------------------------- |
+| `camelCase`     | `helloWorld`        | `{{variable.camelCase()}}`     | `{{#camelCase}}{{variable}}{{/camelCase}}`         |
+| `constantCase`  | `HELLO_WORLD`       | `{{variable.constantCase()}}`  | `{{#constantCase}}{{variable}}{{/constantCase}}`   |
+| `dotCase`       | `hello.world`       | `{{variable.dotCase()}}`       | `{{#dotCase}}{{variable}}{{/dotCase}}`             |
+| `headerCase`    | `Hello-World`       | `{{variable.headerCase()}}`    | `{{#headerCase}}{{variable}}{{/headerCase}}`       |
+| `lowerCase`     | `hello world`       | `{{variable.lowerCase()}}`     | `{{#lowerCase}}{{variable}}{{/lowerCase}}`         |
+| `mustacheCase`  | `{{ Hello World }}` | `{{variable.mustacheCase()}}`  | `{{#mustacheCase}}{{variable}}{{/mustacheCase}}`   |
+| `pascalCase`    | `HelloWorld`        | `{{variable.pascalCase()}}`    | `{{#pascalCase}}{{variable}}{{/pascalCase}}`       |
+| `pascalDotCase` | `Hello.World`       | `{{variable.pascalDotCase()}}` | `{{#pascalDotCase}}{{variable}}{{/pascalDotCase}}` |
+| `paramCase`     | `hello-world`       | `{{variable.paramCase()}}`     | `{{#paramCase}}{{variable}}{{/paramCase}}`         |
+| `pathCase`      | `hello/world`       | `{{variable.pathCase()}}`      | `{{#pathCase}}{{variable}}{{/pathCase}}`           |
+| `sentenceCase`  | `Hello world`       | `{{variable.sentenceCase()}}`  | `{{#sentenceCase}}{{variable}}{{/sentenceCase}}`   |
+| `snakeCase`     | `hello_world`       | `{{variable.snakeCase()}}`     | `{{#snakeCase}}{{variable}}{{/snakeCase}}`         |
+| `titleCase`     | `Hello World`       | `{{variable.titleCase()}}`     | `{{#titleCase}}{{variable}}{{/titleCase}}`         |
+| `upperCase`     | `HELLO WORLD`       | `{{variable.upperCase()}}`     | `{{#upperCase}}{{variable}}{{/upperCase}}`         |
 
 _Example Usage_
 
@@ -525,7 +530,7 @@ mason make example --name Dash --no-hooks
 
 The `search` command allows developers to search published bricks on https://brickhub.dev.
 
-### Search usage
+### Search Usage
 
 ```sh
 # search for bricks related to "bloc"
