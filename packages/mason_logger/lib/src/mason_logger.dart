@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:mason_logger/src/key.dart';
+import 'package:mason_logger/src/key_stroke.dart';
 
 part 'progress.dart';
 
@@ -198,7 +198,7 @@ class Logger {
     _stdout.write('$message ');
 
     while (true) {
-      final key = readKey();
+      final key = readKeyStroke();
       final isEnterKey = key.controlChar == ControlCharacter.ctrlJ;
       final isDeleteOrBackspaceKey =
           key.controlChar == ControlCharacter.delete ||
@@ -314,7 +314,7 @@ class Logger {
 
     T? result;
     while (result == null) {
-      final key = readKey();
+      final key = readKeyStroke();
       final isArrowUpOrKKey =
           key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
       final isArrowDownOrJKey =
@@ -411,7 +411,7 @@ class Logger {
 
     List<T>? results;
     while (results == null) {
-      final key = readKey();
+      final key = readKeyStroke();
       final keyIsUpOrKKey =
           key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
       final keyIsDownOrJKey =
