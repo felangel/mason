@@ -15,6 +15,7 @@ void main() {
       stdout = _MockStdout();
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(1);
     });
 
     test('writes ms when elapsed time is less than 0.1s', () async {
@@ -134,10 +135,11 @@ void main() {
     });
 
     group('.complete', () {
-      test('writes lines to stdout', () async {
+      test('writes lines shorter than terminal columns to stdout', () async {
         await _runZoned(
           () async {
-            const message = 'test message';
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'short message';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.complete();
@@ -147,18 +149,51 @@ void main() {
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                        r'\[92m⠙\[0m short message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
                 );
               },
             ).called(1);
-
             verify(
               () {
                 stdout.write(
-                  '''[2K\r[92m✓[0m test message [90m(0.1s)[0m\n''',
+                  '''[2K\r[92m✓[0m short message [90m(0.1s)[0m\n''',
+                );
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          zoneValues: {AnsiCode: true},
+        );
+      });
+
+      test('writes lines longer than terminal columns to stdout', () async {
+        await _runZoned(
+          () async {
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'looooooooooooooooonger message';
+            final progress = Logger().progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            progress.complete();
+            verify(
+              () {
+                stdout.write(
+                  any(
+                    that: matches(
+                      RegExp(
+                        r'\[92m⠙\[0m looooooooooooooooonger message... \[90m\(\d{2}ms\)\[0m',
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K[1A[2K\r[92m✓[0m looooooooooooooooonger message [90m(0.1s)[0m\n''',
                 );
               },
             ).called(1);
@@ -184,40 +219,83 @@ void main() {
     });
 
     group('.update', () {
-      test('writes lines to stdout', () async {
+      test('writes lines shorter than terminal columns to stdout', () async {
         await _runZoned(
           () async {
-            const message = 'message';
-            const update = 'update';
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'short message';
+            const update = 'short update';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.update(update);
             await Future<void>.delayed(const Duration(milliseconds: 100));
-
             verify(
               () {
                 stdout.write(
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m message... \[90m\(8\dms\)\[0m',
+                        r'\[92m⠙\[0m short message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
                 );
               },
             ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K\r[92m⠹[0m short update... [90m(0.1s)[0m''',
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K\r[92m⠸[0m short update... [90m(0.2s)[0m''',
+                );
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          zoneValues: {AnsiCode: true},
+        );
+      });
 
+      test('writes lines longer than terminal columns to stdout', () async {
+        await _runZoned(
+          () async {
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'looooooooooooooooonger message';
+            const update = 'looooooooooooooooonger update';
+            final progress = Logger().progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            progress.update(update);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
             verify(
               () {
                 stdout.write(
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D\[92m⠹\[0m update... \[90m\(0\.1s\)\[0m',
+                        r'\[92m⠙\[0m looooooooooooooooonger message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K[1A[2K\r[92m⠹[0m looooooooooooooooonger update... [90m(0.1s)[0m''',
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K[1A[2K\r[92m⠸[0m looooooooooooooooonger update... [90m(0.2s)[0m''',
                 );
               },
             ).called(1);
@@ -245,33 +323,65 @@ void main() {
     });
 
     group('.fail', () {
-      test('writes lines to stdout', () async {
+      test('writes lines shorter than terminal columns to stdout', () async {
         await _runZoned(
           () async {
-            const time = '(0.1s)';
-            const message = 'test message';
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'short message';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.fail();
-
             verify(
               () {
                 stdout.write(
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                        r'\[92m⠙\[0m short message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
                 );
               },
             ).called(1);
-
             verify(
               () {
                 stdout.write(
-                  '''[2K\u000D[31m✗[0m $message [90m$time[0m\n''',
+                  '''[2K\r[31m✗[0m short message [90m(0.1s)[0m\n''',
+                );
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          zoneValues: {AnsiCode: true},
+        );
+      });
+
+      test('writes lines longer than terminal columns to stdout', () async {
+        await _runZoned(
+          () async {
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'looooooooooooooooonger message';
+            final progress = Logger().progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            progress.fail();
+            verify(
+              () {
+                stdout.write(
+                  any(
+                    that: matches(
+                      RegExp(
+                        r'\[92m⠙\[0m looooooooooooooooonger message... \[90m\(\d{2}ms\)\[0m',
+                      ),
+                    ),
+                  ),
+                );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write(
+                  '''[2K[1A[2K\r[31m✗[0m looooooooooooooooonger message [90m(0.1s)[0m\n''',
                 );
               },
             ).called(1);
@@ -297,9 +407,10 @@ void main() {
     });
 
     group('.cancel', () {
-      test('writes lines to stdout', () async {
+      test('writes lines shorter than terminal columns to stdout', () async {
         await _runZoned(
           () async {
+            when(() => stdout.terminalColumns).thenReturn(32);
             const message = 'test message';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -310,25 +421,48 @@ void main() {
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                        r'\[92m⠙\[0m test message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
                 );
               },
             ).called(1);
+            verify(
+              () {
+                stdout.write('[2K\r');
+              },
+            ).called(1);
+          },
+          stdout: () => stdout,
+          zoneValues: {AnsiCode: true},
+        );
+      });
 
+      test('writes lines longer than terminal columns to stdout', () async {
+        await _runZoned(
+          () async {
+            when(() => stdout.terminalColumns).thenReturn(32);
+            const message = 'looooooooooooooooonger message';
+            final progress = Logger().progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 100));
+            progress.cancel();
             verify(
               () {
                 stdout.write(
                   any(
                     that: matches(
                       RegExp(
-                        r'\[2K\u000D',
+                        r'\[92m⠙\[0m looooooooooooooooonger message... \[90m\(\d{2}ms\)\[0m',
                       ),
                     ),
                   ),
                 );
+              },
+            ).called(1);
+            verify(
+              () {
+                stdout.write('[2K[1A[2K\r');
               },
             ).called(1);
           },

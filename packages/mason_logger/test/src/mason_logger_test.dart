@@ -20,6 +20,7 @@ void main() {
       stderr = _MockStdout();
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(1);
     });
 
     group('theme', () {
