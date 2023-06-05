@@ -442,10 +442,9 @@ class BricksJson {
     } else if (isWindows) {
       const longPathPrefix = r'\\?\';
       final appData = environment['APPDATA']!;
-      final appDataCacheDir = Directory(p.join(appData, 'Mason', 'Cache'));
-      if (appDataCacheDir.existsSync()) {
-        return Directory(longPathPrefix + appDataCacheDir.path);
-      }
+      final appDataCacheDir =
+          Directory(longPathPrefix + p.join(appData, 'Mason', 'Cache'));
+      if (appDataCacheDir.existsSync()) return appDataCacheDir;
       final localAppData = environment['LOCALAPPDATA']!;
       return Directory(longPathPrefix + p.join(localAppData, 'Mason', 'Cache'));
     } else {
