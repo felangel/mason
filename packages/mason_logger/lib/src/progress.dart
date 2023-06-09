@@ -79,7 +79,7 @@ class Progress {
 
   int _index = 0;
 
-  /// End the progress and mark it as a sucessful completion.
+  /// End the progress and mark it as a successful completion.
   ///
   /// See also:
   ///
