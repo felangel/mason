@@ -97,7 +97,7 @@ class Progress {
   ///
   /// See also:
   ///
-  /// * [complete], to end the progress and mark it as a sucessful completion.
+  /// * [complete], to end the progress and mark it as a successful completion.
   /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
