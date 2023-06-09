@@ -79,7 +79,7 @@ class Progress {
 
   int _index = 0;
 
-  /// End the progress and mark it as sucessfull completed.
+  /// End the progress and mark it as a sucessful completion.
   ///
   /// See also:
   ///
@@ -97,7 +97,7 @@ class Progress {
   ///
   /// See also:
   ///
-  /// * [complete], to end the progress and mark it as a sucessfull completion.
+  /// * [complete], to end the progress and mark it as a sucessful completion.
   /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
