@@ -79,7 +79,12 @@ class Progress {
 
   int _index = 0;
 
-  /// End the progress and mark it as completed.
+  /// End the progress and mark it as a successful completion.
+  ///
+  /// See also:
+  ///
+  /// * [fail], to end the progress and mark it as failed.
+  /// * [cancel], to cancel the progress entirely and remove the written line.
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
@@ -89,6 +94,11 @@ class Progress {
   }
 
   /// End the progress and mark it as failed.
+  ///
+  /// See also:
+  ///
+  /// * [complete], to end the progress and mark it as a successful completion.
+  /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
     _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
