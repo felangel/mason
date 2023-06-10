@@ -656,7 +656,7 @@ void main() {
         );
       });
 
-      test('space selected/deselects the values.', () {
+      test('space selects/deselects the values.', () {
         IOOverrides.runZoned(
           () {
             const message = 'test message';

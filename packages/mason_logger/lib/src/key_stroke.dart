@@ -1,60 +1,148 @@
 import 'dart:io';
 
 /// Non-printable characters that can be entered from the keyboard.
+///
 enum ControlCharacter {
+  /// null
   none,
-  ctrlA,
-  ctrlB,
-  ctrlC, // Break
-  ctrlD, // End of File
-  ctrlE,
-  ctrlF,
-  ctrlG, // Bell
-  ctrlH, // Backspace
-  tab,
-  ctrlJ, // Return
-  ctrlK,
-  ctrlL,
-  enter,
-  ctrlN,
-  ctrlO,
-  ctrlP,
-  ctrlQ,
-  ctrlR,
-  ctrlS,
-  ctrlT,
-  ctrlU,
-  ctrlV,
-  ctrlW,
-  ctrlX,
-  ctrlY,
-  ctrlZ, // Suspend
 
+  /// Start of heading
+  ctrlA,
+
+  /// Start of text
+  ctrlB,
+
+  /// End of text
+  ctrlC,
+
+  /// End of xmit/file
+  ctrlD,
+
+  /// Enquiry
+  ctrlE,
+
+  /// Acknowledge
+  ctrlF,
+
+  /// Bell
+  ctrlG,
+
+  /// Backspace
+  ctrlH,
+
+  /// Horizontal tab
+  ctrlI,
+
+  /// Line feed (return)
+  ctrlJ,
+
+  /// Vertical tab
+  ctrlK,
+
+  /// Form feed
+  ctrlL,
+
+  /// Carriage feed (enter)
+  ctrlM,
+
+  /// Shift out
+  ctrlN,
+
+  /// Shift in
+  ctrlO,
+
+  /// Data line escape
+  ctrlP,
+
+  /// Device control 1
+  ctrlQ,
+
+  /// Device control 2
+  ctrlR,
+
+  /// Device control 3
+  ctrlS,
+
+  /// Device control 4
+  ctrlT,
+
+  /// Neg acknowledge
+  ctrlU,
+
+  /// Syncronous idel
+  ctrlV,
+
+  /// End of xmit block
+  ctrlW,
+
+  /// Cancel
+  ctrlX,
+
+  /// End of medium
+  ctrlY,
+
+  /// Substitue (suspend)
+  ctrlZ,
+
+  /// Left arrow
   arrowLeft,
+
+  /// Right arrow
   arrowRight,
+
+  /// Up arrow
   arrowUp,
+
+  /// Down arrow
   arrowDown,
+
+  /// Page up
   pageUp,
+
+  /// Page down
   pageDown,
+
+  /// Word left
   wordLeft,
+
+  /// Word right
   wordRight,
 
+  /// Home
   home,
+
+  /// End
   end,
+
+  /// Escape
   escape,
+
+  /// Delete
   delete,
+
+  /// Backspace
   backspace,
+
+  /// Word backspace
   wordBackspace,
 
+  /// Function 1
   // ignore: constant_identifier_names
   F1,
+
+  /// Function 2
   // ignore: constant_identifier_names
   F2,
+
+  /// Function 3
   // ignore: constant_identifier_names
   F3,
+
+  /// Function 4
   // ignore: constant_identifier_names
   F4,
 
+  /// Unknown control character
   unknown
 }
 
