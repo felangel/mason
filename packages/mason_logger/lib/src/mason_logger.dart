@@ -3,7 +3,7 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
-import 'package:mason_logger/src/key_stroke.dart' as key_stroke;
+import 'package:mason_logger/src/io.dart';
 import 'package:mason_logger/src/key_stroke_overrides.dart';
 
 part 'progress.dart';
@@ -91,8 +91,9 @@ class Logger {
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
-  key_stroke.KeyStroke readKeyStroke() {
-    return _keyStrokeOverrides?.readKeyStroke() ?? key_stroke.readKeyStroke();
+
+  KeyStroke _readKey() {
+    return _keyStrokeOverrides?.readKeyStroke() ?? readKeyStroke();
   }
 
   /// Flushes internal message queue.
@@ -203,11 +204,11 @@ class Logger {
     _stdout.write('$message ');
 
     while (true) {
-      final key = readKeyStroke();
-      final isEnterKey = key.controlChar == key_stroke.ControlCharacter.ctrlJ;
+      final key = _readKey();
+      final isEnterKey = key.controlChar == ControlCharacter.ctrlJ;
       final isDeleteOrBackspaceKey =
-          key.controlChar == key_stroke.ControlCharacter.delete ||
-              key.controlChar == key_stroke.ControlCharacter.backspace;
+          key.controlChar == ControlCharacter.delete ||
+              key.controlChar == ControlCharacter.backspace;
 
       if (isEnterKey) break;
 
@@ -319,16 +320,14 @@ class Logger {
 
     T? result;
     while (result == null) {
-      final key = readKeyStroke();
+      final key = _readKey();
       final isArrowUpOrKKey =
-          key.controlChar == key_stroke.ControlCharacter.arrowUp ||
-              key.char == 'k';
+          key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
       final isArrowDownOrJKey =
-          key.controlChar == key_stroke.ControlCharacter.arrowDown ||
-              key.char == 'j';
+          key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final isReturnOrEnterOrSpaceKey =
-          key.controlChar == key_stroke.ControlCharacter.ctrlJ ||
-              key.controlChar == key_stroke.ControlCharacter.ctrlM ||
+          key.controlChar == ControlCharacter.ctrlJ ||
+              key.controlChar == ControlCharacter.ctrlM ||
               key.char == ' ';
 
       if (isArrowUpOrKKey) {
@@ -418,17 +417,14 @@ class Logger {
 
     List<T>? results;
     while (results == null) {
-      final key = readKeyStroke();
+      final key = _readKey();
       final keyIsUpOrKKey =
-          key.controlChar == key_stroke.ControlCharacter.arrowUp ||
-              key.char == 'k';
+          key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
       final keyIsDownOrJKey =
-          key.controlChar == key_stroke.ControlCharacter.arrowDown ||
-              key.char == 'j';
+          key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final keyIsSpaceKey = key.char == ' ';
-      final keyIsEnterOrReturnKey =
-          key.controlChar == key_stroke.ControlCharacter.ctrlJ ||
-              key.controlChar == key_stroke.ControlCharacter.ctrlM;
+      final keyIsEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+          key.controlChar == ControlCharacter.ctrlM;
 
       if (keyIsUpOrKKey) {
         index = (index - 1) % (choices.length);

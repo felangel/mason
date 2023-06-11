@@ -1,5 +1,5 @@
 import 'dart:async';
-import 'package:mason_logger/src/key_stroke.dart' as key_stroke;
+import 'package:mason_logger/src/io.dart' as io;
 
 const _asyncRunZoned = runZoned;
 
@@ -25,24 +25,24 @@ abstract class KeyStrokeOverrides {
   /// Runs [body] in a fresh [Zone] using the provided overrides.
   static R runZoned<R>(
     R Function() body, {
-    key_stroke.KeyStroke Function()? readKeyStroke,
+    io.KeyStroke Function()? readKeyStroke,
   }) {
     final overrides = _KeyStrokeOverridesScope(readKeyStroke);
     return _asyncRunZoned(body, zoneValues: {_token: overrides});
   }
 
   /// The function used to read key strokes from stdin.
-  key_stroke.KeyStroke Function() get readKeyStroke => key_stroke.readKeyStroke;
+  io.KeyStroke Function() get readKeyStroke => io.readKeyStroke;
 }
 
 class _KeyStrokeOverridesScope extends KeyStrokeOverrides {
   _KeyStrokeOverridesScope(this._readKeyStroke);
 
   final KeyStrokeOverrides? _previous = KeyStrokeOverrides.current;
-  final key_stroke.KeyStroke Function()? _readKeyStroke;
+  final io.KeyStroke Function()? _readKeyStroke;
 
   @override
-  key_stroke.KeyStroke Function() get readKeyStroke {
+  io.KeyStroke Function() get readKeyStroke {
     return _readKeyStroke ?? _previous?.readKeyStroke ?? super.readKeyStroke;
   }
 }
