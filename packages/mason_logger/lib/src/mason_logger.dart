@@ -91,9 +91,8 @@ class Logger {
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
-
-  KeyStroke _readKey() {
-    return _keyStrokeOverrides?.readKeyStroke() ?? readKeyStroke();
+  KeyStroke Function() get _readKey {
+    return _keyStrokeOverrides?.readKeyStroke ?? readKeyStroke;
   }
 
   /// Flushes internal message queue.
