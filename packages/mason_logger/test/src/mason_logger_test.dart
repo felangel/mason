@@ -1569,6 +1569,67 @@ void main() {
         );
       });
 
+      test('ignores other control characters', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.control(ControlCharacter.ctrlM),
+          KeyStroke.control(ControlCharacter.arrowLeft),
+          KeyStroke.control(ControlCharacter.arrowLeft),
+          KeyStroke.control(ControlCharacter.arrowRight),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.char(','),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('custom separator (;)', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(';'),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptList(message, separator: ';');
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
       test('backspace deletes delimeter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
