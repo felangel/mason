@@ -579,19 +579,10 @@ class KeyStroke {
 
   /// The control character value.
   final ControlCharacter controlChar;
-
-  /// Copy the current [KeyStroke] and optionally
-  /// override either [char] or [controlChar].
-  KeyStroke copyWith({String? char, ControlCharacter? controlChar}) {
-    return KeyStroke(
-      char: char ?? this.char,
-      controlChar: controlChar ?? this.controlChar,
-    );
-  }
 }
 
 /// Read key stroke from stdin.
-KeyStroke readKeyStroke() {
+KeyStroke readKey() {
   KeyStroke keyStroke;
   int charCode;
   var codeUnit = 0;
@@ -625,25 +616,22 @@ KeyStroke readKeyStroke() {
 
       switch (escapeSequence[1]) {
         case 'A':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.arrowUp);
+          keyStroke = KeyStroke.control(ControlCharacter.arrowUp);
           break;
         case 'B':
-          keyStroke =
-              keyStroke.copyWith(controlChar: ControlCharacter.arrowDown);
+          keyStroke = KeyStroke.control(ControlCharacter.arrowDown);
           break;
         case 'C':
-          keyStroke =
-              keyStroke.copyWith(controlChar: ControlCharacter.arrowRight);
+          keyStroke = KeyStroke.control(ControlCharacter.arrowRight);
           break;
         case 'D':
-          keyStroke =
-              keyStroke.copyWith(controlChar: ControlCharacter.arrowLeft);
+          keyStroke = KeyStroke.control(ControlCharacter.arrowLeft);
           break;
         case 'H':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.home);
+          keyStroke = KeyStroke.control(ControlCharacter.home);
           break;
         case 'F':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.end);
+          keyStroke = KeyStroke.control(ControlCharacter.end);
           break;
         default:
           if (escapeSequence[1].codeUnits[0] > '0'.codeUnits[0] &&
@@ -653,55 +641,55 @@ KeyStroke readKeyStroke() {
 
             escapeSequence.add(String.fromCharCode(charCode));
             if (escapeSequence[2] != '~') {
-              keyStroke = keyStroke.copyWith(
-                controlChar: ControlCharacter.unknown,
+              keyStroke = KeyStroke.control(
+                ControlCharacter.unknown,
               );
             } else {
               switch (escapeSequence[1]) {
                 case '1':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.home,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.home,
                   );
                   break;
                 case '3':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.delete,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.delete,
                   );
                   break;
                 case '4':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.end,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.end,
                   );
                   break;
                 case '5':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.pageUp,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.pageUp,
                   );
                   break;
                 case '6':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.pageDown,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.pageDown,
                   );
                   break;
                 case '7':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.home,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.home,
                   );
                   break;
                 case '8':
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.end,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.end,
                   );
                   break;
                 default:
-                  keyStroke = keyStroke.copyWith(
-                    controlChar: ControlCharacter.unknown,
+                  keyStroke = KeyStroke.control(
+                    ControlCharacter.unknown,
                   );
               }
             }
           } else {
-            keyStroke = keyStroke.copyWith(
-              controlChar: ControlCharacter.unknown,
+            keyStroke = KeyStroke.control(
+              ControlCharacter.unknown,
             );
           }
       }
@@ -715,31 +703,31 @@ KeyStroke readKeyStroke() {
       );
       switch (escapeSequence[1]) {
         case 'H':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.home);
+          keyStroke = KeyStroke.control(ControlCharacter.home);
           break;
         case 'F':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.end);
+          keyStroke = KeyStroke.control(ControlCharacter.end);
           break;
         case 'P':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.F1);
+          keyStroke = KeyStroke.control(ControlCharacter.F1);
           break;
         case 'Q':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.F2);
+          keyStroke = KeyStroke.control(ControlCharacter.F2);
           break;
         case 'R':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.F3);
+          keyStroke = KeyStroke.control(ControlCharacter.F3);
           break;
         case 'S':
-          keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.F4);
+          keyStroke = KeyStroke.control(ControlCharacter.F4);
           break;
         default:
       }
     } else if (escapeSequence[0] == 'b') {
-      keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.wordLeft);
+      keyStroke = KeyStroke.control(ControlCharacter.wordLeft);
     } else if (escapeSequence[0] == 'f') {
-      keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.wordRight);
+      keyStroke = KeyStroke.control(ControlCharacter.wordRight);
     } else {
-      keyStroke = keyStroke.copyWith(controlChar: ControlCharacter.unknown);
+      keyStroke = KeyStroke.control(ControlCharacter.unknown);
     }
   } else if (codeUnit == 0x7f) {
     keyStroke = KeyStroke.control(ControlCharacter.backspace);

@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/key_stroke_overrides.dart';
+import 'package:mason_logger/src/stdin_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -602,7 +602,7 @@ void main() {
           'enter/return selects the nothing '
           'when defaultValues is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -626,13 +626,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('enter/return selects the default values when specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -660,7 +660,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -674,7 +674,7 @@ void main() {
           KeyStroke.char(' '),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -757,7 +757,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -766,7 +766,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -799,7 +799,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -808,7 +808,7 @@ void main() {
           KeyStroke.char('j'),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -841,7 +841,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -850,7 +850,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -883,7 +883,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -892,7 +892,7 @@ void main() {
           KeyStroke.char('k'),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -925,7 +925,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -936,7 +936,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -987,13 +987,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1022,13 +1022,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts results to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1050,7 +1050,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
     });
@@ -1060,7 +1060,7 @@ void main() {
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1086,13 +1086,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('enter selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1119,13 +1119,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('space selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.char(' ')];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1153,7 +1153,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1162,7 +1162,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1198,7 +1198,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1207,7 +1207,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1244,7 +1244,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1253,7 +1253,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1289,7 +1289,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1298,7 +1298,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1335,7 +1335,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1344,7 +1344,7 @@ void main() {
           KeyStroke.char('j'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1380,7 +1380,7 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
@@ -1389,7 +1389,7 @@ void main() {
           KeyStroke.char('k'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1426,13 +1426,13 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        KeyStrokeOverrides.runZoned(
+        StdinOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1464,7 +1464,140 @@ void main() {
             stdout: () => stdout,
             stdin: () => stdin,
           ),
-          readKeyStroke: () => keyStrokes.removeAt(0),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+    });
+
+    group('promptList', () {
+      test('returns empty list', () {
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = <String>[];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('returns list with 1 item ([dart])', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.control(ControlCharacter.ctrlJ)
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = <String>['dart'];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('returns list with 2 items ([dart, css])', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('ignores trailing delimter', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.char(','),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('backspace deletes delimeter', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('x'),
+          KeyStroke.control(ControlCharacter.delete),
+          KeyStroke.control(ControlCharacter.delete),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptList(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
     });

@@ -4,7 +4,7 @@ import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/key_stroke_overrides.dart';
+import 'package:mason_logger/src/stdin_overrides.dart';
 
 part 'progress.dart';
 
@@ -86,13 +86,12 @@ class Logger {
 
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
-  final KeyStrokeOverrides? _keyStrokeOverrides = KeyStrokeOverrides.current;
 
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
   KeyStroke Function() get _readKey {
-    return _keyStrokeOverrides?.readKeyStroke ?? readKeyStroke;
+    return StdinOverrides.current?.readKey ?? readKey;
   }
 
   /// Flushes internal message queue.
@@ -239,7 +238,7 @@ class Logger {
       rawString = rawString.substring(0, rawString.length - 2);
     }
 
-    final results = rawString.split(delimeter);
+    final results = rawString.isEmpty ? <String>[] : rawString.split(delimeter);
     const clearLine = '\u001b[2K\r';
     _stdout.write(
       '$clearLine$message ${styleDim.wrap(lightCyan.wrap('$results'))}\n',

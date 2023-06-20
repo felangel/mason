@@ -1,4 +1,5 @@
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mason_logger/src/io.dart';
 import 'package:meta/meta.dart';
 import 'package:test/test.dart';
 
@@ -80,6 +81,10 @@ void main() {
           });
         });
       }
+    });
+
+    group('KeyStroke', () {
+      group('readKey', () {});
     });
   });
 }
