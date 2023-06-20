@@ -1,7 +1,12 @@
+import 'dart:io';
+
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
 import 'package:meta/meta.dart';
+import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
+
+class _MockStdin extends Mock implements Stdin {}
 
 void main() {
   group('io', () {
@@ -84,7 +89,60 @@ void main() {
     });
 
     group('KeyStroke', () {
-      group('readKey', () {});
+      late Stdin stdin;
+
+      setUp(() {
+        stdin = _MockStdin();
+      });
+
+      group('readKey', () {
+        test('returns regular char', () {
+          IOOverrides.runZoned(
+            () {
+              when(() => stdin.readByteSync()).thenReturn('a'.codeUnits.first);
+              expect(
+                readKey(),
+                isA<KeyStroke>().having((s) => s.char, 'char', 'a'),
+              );
+            },
+            stdin: () => stdin,
+          );
+        });
+
+        test('returns backspace control character for 0x7f', () {
+          IOOverrides.runZoned(
+            () {
+              when(() => stdin.readByteSync()).thenReturn(0x7f);
+              expect(
+                readKey(),
+                isA<KeyStroke>().having(
+                  (s) => s.controlChar,
+                  'controlChar',
+                  ControlCharacter.backspace,
+                ),
+              );
+            },
+            stdin: () => stdin,
+          );
+        });
+
+        test('returns unknown control character for 0x1c', () {
+          IOOverrides.runZoned(
+            () {
+              when(() => stdin.readByteSync()).thenReturn(0x1c);
+              expect(
+                readKey(),
+                isA<KeyStroke>().having(
+                  (s) => s.controlChar,
+                  'controlChar',
+                  ControlCharacter.unknown,
+                ),
+              );
+            },
+            stdin: () => stdin,
+          );
+        });
+      });
     });
   });
 }

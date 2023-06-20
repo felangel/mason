@@ -688,9 +688,7 @@ KeyStroke readKey() {
               }
             }
           } else {
-            keyStroke = KeyStroke.control(
-              ControlCharacter.unknown,
-            );
+            keyStroke = KeyStroke.control(ControlCharacter.unknown);
           }
       }
     } else if (escapeSequence[0] == 'O') {
