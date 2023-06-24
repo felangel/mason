@@ -1469,7 +1469,7 @@ void main() {
       });
     });
 
-    group('promptList', () {
+    group('promptAny', () {
       test('returns empty list', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
         StdinOverrides.runZoned(
@@ -1477,7 +1477,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = <String>[];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1501,7 +1501,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = <String>['dart'];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1529,7 +1529,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1558,7 +1558,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1591,7 +1591,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1619,7 +1619,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
-              final actual = Logger().promptList(message, separator: ';');
+              final actual = Logger().promptAny(message, separator: ';');
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },
@@ -1651,7 +1651,7 @@ void main() {
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
-              final actual = Logger().promptList(message);
+              final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
             },

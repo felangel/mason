@@ -46,7 +46,7 @@ Future<void> main() async {
   );
   logger.info('You chose the following shapes: $shapes!');
 
-  final favoriteProgrammingLanguages = logger.promptList(
+  final favoriteProgrammingLanguages = logger.promptAny(
     'What are your favorite programming languages?',
   );
 

@@ -188,7 +188,7 @@ class Logger {
   }
 
   /// Prompts user for a free-form list of responses.
-  List<String> promptList(
+  List<String> promptAny(
     String? message, {
     String separator = ',',
   }) {
@@ -229,7 +229,7 @@ class Logger {
         _stdout.write(delimeter);
         rawString += delimeter;
       } else {
-        _stdout.write(styleUnderlined.wrap(key.char));
+        _stdout.write(key.char);
         rawString += key.char;
       }
     }
