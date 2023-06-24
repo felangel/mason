@@ -188,10 +188,7 @@ class Logger {
   }
 
   /// Prompts user for a free-form list of responses.
-  List<String> promptAny(
-    String? message, {
-    String separator = ',',
-  }) {
+  List<String> promptAny(String? message, {String separator = ','}) {
     _stdin
       ..echoMode = false
       ..lineMode = false;
