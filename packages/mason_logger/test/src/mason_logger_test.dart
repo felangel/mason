@@ -1575,7 +1575,7 @@ void main() {
           KeyStroke.char('a'),
           KeyStroke.char('r'),
           KeyStroke.char('t'),
-          KeyStroke.control(ControlCharacter.ctrlM),
+          KeyStroke.control(ControlCharacter.ctrlZ),
           KeyStroke.control(ControlCharacter.arrowLeft),
           KeyStroke.control(ControlCharacter.arrowLeft),
           KeyStroke.control(ControlCharacter.arrowRight),

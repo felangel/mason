@@ -200,12 +200,14 @@ class Logger {
 
     while (true) {
       final key = _readKey();
-      final isEnterKey = key.controlChar == ControlCharacter.ctrlJ;
+      final isEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+          key.controlChar == ControlCharacter.ctrlM;
       final isDeleteOrBackspaceKey =
           key.controlChar == ControlCharacter.delete ||
-              key.controlChar == ControlCharacter.backspace;
+              key.controlChar == ControlCharacter.backspace ||
+              key.controlChar == ControlCharacter.ctrlH;
 
-      if (isEnterKey) break;
+      if (isEnterOrReturnKey) break;
 
       if (isDeleteOrBackspaceKey) {
         if (rawString.isNotEmpty) {
@@ -242,8 +244,8 @@ class Logger {
     );
 
     _stdin
-      ..echoMode = true
-      ..lineMode = true;
+      ..lineMode = true
+      ..echoMode = true;
     return results;
   }
 
