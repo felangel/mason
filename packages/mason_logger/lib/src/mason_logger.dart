@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mason_logger/src/io.dart';
+import 'package:mason_logger/src/stdin_overrides.dart';
 
 part 'progress.dart';
 
@@ -85,17 +87,12 @@ class Logger {
   final _queue = <String?>[];
   final io.IOOverrides? _overrides = io.IOOverrides.current;
 
-  final _jKey = [106];
-  final _kKey = [107];
-  final _upKey = [27, 91, 65];
-  final _downKey = [27, 91, 66];
-  final _enterKey = [13];
-  final _returnKey = [10];
-  final _spaceKey = [32];
-
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
+  KeyStroke Function() get _readKey {
+    return StdinOverrides.current?.readKey ?? readKey;
+  }
 
   /// Flushes internal message queue.
   void flush([void Function(String?)? print]) {
@@ -190,6 +187,68 @@ class Logger {
     return response;
   }
 
+  /// Prompts user for a free-form list of responses.
+  List<String> promptAny(String? message, {String separator = ','}) {
+    _stdin
+      ..echoMode = false
+      ..lineMode = false;
+
+    final delimeter = '$separator ';
+    var rawString = '';
+
+    _stdout.write('$message ');
+
+    while (true) {
+      final key = _readKey();
+      final isEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+          key.controlChar == ControlCharacter.ctrlM;
+      final isDeleteOrBackspaceKey =
+          key.controlChar == ControlCharacter.delete ||
+              key.controlChar == ControlCharacter.backspace ||
+              key.controlChar == ControlCharacter.ctrlH;
+
+      if (isEnterOrReturnKey) break;
+
+      if (isDeleteOrBackspaceKey) {
+        if (rawString.isNotEmpty) {
+          if (rawString.endsWith(delimeter)) {
+            _stdout.write('\b\b\x1b[K');
+            rawString = rawString.substring(0, rawString.length - 2);
+          } else {
+            _stdout.write('\b\x1b[K');
+            rawString = rawString.substring(0, rawString.length - 1);
+          }
+        }
+        continue;
+      }
+
+      if (key.char.trim().isEmpty) continue;
+
+      if (key.char == separator) {
+        _stdout.write(delimeter);
+        rawString += delimeter;
+      } else {
+        _stdout.write(key.char);
+        rawString += key.char;
+      }
+    }
+
+    if (rawString.endsWith(delimeter)) {
+      rawString = rawString.substring(0, rawString.length - 2);
+    }
+
+    final results = rawString.isEmpty ? <String>[] : rawString.split(delimeter);
+    const clearLine = '\u001b[2K\r';
+    _stdout.write(
+      '$clearLine$message ${styleDim.wrap(lightCyan.wrap('$results'))}\n',
+    );
+
+    _stdin
+      ..lineMode = true
+      ..echoMode = true;
+    return results;
+  }
+
   /// Prompts user with a yes/no question.
   bool confirm(String? message, {bool defaultValue = false}) {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
@@ -256,19 +315,23 @@ class Logger {
 
     writeChoices();
 
-    final event = <int>[];
     T? result;
     while (result == null) {
-      final byte = _stdin.readByteSync();
-      if (event.length == 3) event.clear();
-      event.add(byte);
-      if (event.isOneOf([_upKey, _kKey])) {
-        event.clear();
+      final key = _readKey();
+      final isArrowUpOrKKey =
+          key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
+      final isArrowDownOrJKey =
+          key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
+      final isReturnOrEnterOrSpaceKey =
+          key.controlChar == ControlCharacter.ctrlJ ||
+              key.controlChar == ControlCharacter.ctrlM ||
+              key.char == ' ';
+
+      if (isArrowUpOrKKey) {
         index = (index - 1) % (choices.length);
-      } else if (event.isOneOf([_downKey, _jKey])) {
-        event.clear();
+      } else if (isArrowDownOrJKey) {
         index = (index + 1) % (choices.length);
-      } else if (event.isOneOf([_enterKey, _returnKey, _spaceKey])) {
+      } else if (isReturnOrEnterOrSpaceKey) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -349,24 +412,26 @@ class Logger {
 
     writeChoices();
 
-    final event = <int>[];
     List<T>? results;
     while (results == null) {
-      final byte = _stdin.readByteSync();
-      if (event.length == 3) event.clear();
-      event.add(byte);
-      if (event.isOneOf([_upKey, _kKey])) {
-        event.clear();
+      final key = _readKey();
+      final keyIsUpOrKKey =
+          key.controlChar == ControlCharacter.arrowUp || key.char == 'k';
+      final keyIsDownOrJKey =
+          key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
+      final keyIsSpaceKey = key.char == ' ';
+      final keyIsEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+          key.controlChar == ControlCharacter.ctrlM;
+
+      if (keyIsUpOrKKey) {
         index = (index - 1) % (choices.length);
-      } else if (event.isOneOf([_downKey, _jKey])) {
-        event.clear();
+      } else if (keyIsDownOrJKey) {
         index = (index + 1) % (choices.length);
-      } else if (event.isOneOf([_spaceKey])) {
-        event.clear();
+      } else if (keyIsSpaceKey) {
         selections.contains(index)
             ? selections.remove(index)
             : selections.add(index);
-      } else if (event.isOneOf([_enterKey, _returnKey])) {
+      } else if (keyIsEnterOrReturnKey) {
         _stdin
           ..lineMode = true
           ..echoMode = true;
@@ -450,9 +515,4 @@ extension on String {
         return null;
     }
   }
-}
-
-extension on Iterable<int> {
-  bool isOneOf(Iterable<Iterable<int>> keys) =>
-      keys.any((key) => key.every(contains));
 }
