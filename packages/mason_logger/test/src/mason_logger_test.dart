@@ -1,6 +1,8 @@
 import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mason_logger/src/io.dart';
+import 'package:mason_logger/src/stdin_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -597,429 +599,458 @@ void main() {
 
     group('.chooseAny', () {
       test(
-          'enter selects the nothing '
+          'enter/return selects the nothing '
           'when defaultValues is not specified.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, isEmpty);
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, isEmpty);
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
-      test('enter selects the default values when specified.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = ['b', 'c'];
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValues: ['b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+      test('enter/return selects the default values when specified.', () {
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['b', 'c'];
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValues: ['b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
-      test('space selected/deselects the values.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = ['b', 'c'];
-            final bytes = [32, 32, 27, 91, 66, 32, 27, 91, 66, 32, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+      test('space selects/deselects the values.', () {
+        final keyStrokes = [
+          KeyStroke.char(' '),
+          KeyStroke.char(' '),
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.char(' '),
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.char(' '),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['b', 'c'];
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('down arrow selects next index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            final bytes = [27, 91, 66, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(isEmpty));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(isEmpty));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('j selects next index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            final bytes = [106, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(isEmpty));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◯')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.char('j'),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(isEmpty));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('up arrow wraps to end', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            final bytes = [27, 91, 65, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, isEmpty);
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowUp),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, isEmpty);
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('k wraps to end', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            final bytes = [107, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, isEmpty);
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.char('k'),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, isEmpty);
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('down arrow wraps to beginning', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            final bytes = [27, 91, 66, 27, 91, 66, 27, 91, 66, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseAny(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, isEmpty);
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, isEmpty);
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts choices to a preferred display', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseAny<Map<String, String>>(
-              message,
-              choices: [
-                {'key': 'a'},
-                {'key': 'b'},
-                {'key': 'c'},
-              ],
-              display: (data) => 'Key: ${data['key']}',
-            );
-            expect(actual, isEmpty);
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(' ◯  ${lightCyan.wrap('Key: a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  Key: b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  Key: c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              final actual = Logger().chooseAny<Map<String, String>>(
+                message,
+                choices: [
+                  {'key': 'a'},
+                  {'key': 'b'},
+                  {'key': 'c'},
+                ],
+                display: (data) => 'Key: ${data['key']}',
+              );
+              expect(actual, isEmpty);
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(' ◯  Key: a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  Key: b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  Key: c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts results to a preferred display', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = ['a', 'c'];
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseAny<String>(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValues: ['a', 'c'],
-              display: (data) => 'Key: $data',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b8'),
-              () => stdout.write('\x1b[J'),
-              () => stdout.write('$message '),
-              () => stdout.writeln('[Key: a, Key: c]'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['a', 'c'];
+              final actual = Logger().chooseAny<String>(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValues: ['a', 'c'],
+                display: (data) => 'Key: $data',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b8'),
+                () => stdout.write('\x1b[J'),
+                () => stdout.write('$message '),
+                () => stdout.writeln('[Key: a, Key: c]'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
     });
@@ -1028,381 +1059,606 @@ void main() {
       test(
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'a';
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'a';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('enter selects the default value when specified.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'b';
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValue: 'b',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'b';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValue: 'b',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('space selects the default value when specified.', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'b';
-            when(() => stdin.readByteSync()).thenReturn(32);
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValue: 'b',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.char(' ')];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'b';
+              when(() => stdin.readByteSync()).thenReturn(32);
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValue: 'b',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('down arrow selects next index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'b';
-            final bytes = [27, 91, 66, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'b';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('up arrow selects previous index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'a';
-            final bytes = [27, 91, 65, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValue: 'b',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowUp),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'a';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValue: 'b',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('up arrow wraps to end', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'c';
-            final bytes = [27, 91, 65, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowUp),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'c';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('down arrow wraps to beginning', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'a';
-            final bytes = [27, 91, 66, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValue: 'c',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'a';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValue: 'c',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('j selects next index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'b';
-            final bytes = [106, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.char('j'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'b';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('k selects previous index', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = 'a';
-            final bytes = [107, 10];
-            when(() => stdin.readByteSync()).thenAnswer((_) {
-              return bytes.removeAt(0);
-            });
-            final actual = Logger().chooseOne(
-              message,
-              choices: ['a', 'b', 'c'],
-              defaultValue: 'b',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  a'),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout
-                  .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [
+          KeyStroke.char('k'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = 'a';
+              final actual = Logger().chooseOne(
+                message,
+                choices: ['a', 'b', 'c'],
+                defaultValue: 'b',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  a'),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout
+                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
 
       test('converts choices to a preferred display', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            const expected = {'key': 'a'};
-            when(() => stdin.readByteSync()).thenReturn(10);
-            final actual = Logger().chooseOne<Map<String, String>>(
-              message,
-              choices: [
-                {'key': 'a'},
-                {'key': 'b'},
-                {'key': 'c'},
-              ],
-              display: (data) => 'Key: ${data['key']}',
-            );
-            expect(actual, equals(expected));
-            verifyInOrder([
-              () => stdout.write('\x1b7'),
-              () => stdout.write('\x1b[?25l'),
-              () => stdout.writeln(message),
-              () => stdout.write(green.wrap('❯')),
-              () => stdout.write(
-                    ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
-                  ),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  Key: b'),
-              () => stdout.write(' '),
-              () => stdout.write(' ◯  Key: c'),
-            ]);
-          },
-          stdout: () => stdout,
-          stdin: () => stdin,
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = {'key': 'a'};
+              final actual = Logger().chooseOne<Map<String, String>>(
+                message,
+                choices: [
+                  {'key': 'a'},
+                  {'key': 'b'},
+                  {'key': 'c'},
+                ],
+                display: (data) => 'Key: ${data['key']}',
+              );
+              expect(actual, equals(expected));
+              verifyInOrder([
+                () => stdout.write('\x1b7'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+                () => stdout.write(green.wrap('❯')),
+                () => stdout.write(
+                      ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
+                    ),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  Key: b'),
+                () => stdout.write(' '),
+                () => stdout.write(' ◯  Key: c'),
+              ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+    });
+
+    group('promptAny', () {
+      test('returns empty list', () {
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = <String>[];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('returns list with 1 item ([dart])', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.control(ControlCharacter.ctrlJ)
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = <String>['dart'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('returns list with 2 items ([dart, css])', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('ignores trailing delimter', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.char(','),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('ignores other control characters', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.control(ControlCharacter.ctrlZ),
+          KeyStroke.control(ControlCharacter.arrowLeft),
+          KeyStroke.control(ControlCharacter.arrowLeft),
+          KeyStroke.control(ControlCharacter.arrowRight),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.char(','),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('custom separator (;)', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(';'),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message, separator: ';');
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('backspace deletes delimeter', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('x'),
+          KeyStroke.control(ControlCharacter.delete),
+          KeyStroke.control(ControlCharacter.delete),
+          KeyStroke.char(','),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
         );
       });
     });
