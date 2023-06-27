@@ -222,8 +222,6 @@ class Logger {
         continue;
       }
 
-      if (key.char.trim().isEmpty) continue;
-
       if (key.char == separator) {
         _stdout.write(delimeter);
         rawString += delimeter;

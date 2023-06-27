@@ -1630,6 +1630,34 @@ void main() {
         );
       });
 
+      test('custom separator (" ")', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(' '),
+          KeyStroke.char('c'),
+          KeyStroke.char('s'),
+          KeyStroke.char('s'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        StdinOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'css'];
+              final actual = Logger().promptAny(message, separator: ' ');
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
       test('backspace deletes delimeter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
