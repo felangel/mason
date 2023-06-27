@@ -57,6 +57,8 @@ bricks:
     path: ../../../../../bricks/documentation
   favorite_color:
     path: ../../../../../bricks/favorite_color
+  favorite_languages:
+    path: ../../../../../bricks/favorite_languages
   flavors:
     path: ../../../../../bricks/flavors
   greeting:
@@ -91,6 +93,9 @@ bricks:
       );
       final favoriteColorPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'favorite_color'),
+      );
+      final favoriteLanguagesPath = canonicalize(
+        path.join(Directory.current.path, bricksPath, 'favorite_languages'),
       );
       final flavorsPath = canonicalize(
         path.join(Directory.current.path, bricksPath, 'flavors'),
@@ -130,6 +135,7 @@ bricks:
             'bio': bioPath,
             'documentation': docPath,
             'favorite_color': favoriteColorPath,
+            'favorite_languages': favoriteLanguagesPath,
             'flavors': flavorsPath,
             'hello_world': helloWorldPath,
             'hooks': hooksPath,
@@ -186,20 +192,21 @@ bricks:
               '          [skip]                Always skip conflicting files.\n'
               '\n'
               'Available subcommands:\n'
-              '  app_icon         Create an app icon file from a URL\n'
-              '  bio              A Bio Template\n'
-              '  documentation    Create Documentation Markdown Files\n'
-              '  favorite_color   A new brick created with the Mason CLI.\n'
-              '  flavors          A new brick created with the Mason CLI.\n'
-              '  greeting         A Simple Greeting Template\n'
-              '  hello_world      A Simple Hello World Template\n'
-              '  hooks            A Hooks Example Template\n'
-              '  legacy           A Legacy Greeting Template\n'
-              '  plugin           An example plugin template\n'
-              '  random_color     A Random Color Generator\n'
-              '  simple           A Simple Static Template\n'
-              '  todos            A Todos Template\n'
-              '  widget           Create a Simple Flutter Widget\n'
+              '  app_icon             Create an app icon file from a URL\n'
+              '  bio                  A Bio Template\n'
+              '  documentation        Create Documentation Markdown Files\n'
+              '  favorite_color       A new brick created with the Mason CLI.\n'
+              '  favorite_languages   A new brick created with the Mason CLI.\n'
+              '  flavors              A new brick created with the Mason CLI.\n'
+              '  greeting             A Simple Greeting Template\n'
+              '  hello_world          A Simple Hello World Template\n'
+              '  hooks                A Hooks Example Template\n'
+              '  legacy               A Legacy Greeting Template\n'
+              '  plugin               An example plugin template\n'
+              '  random_color         A Random Color Generator\n'
+              '  simple               A Simple Static Template\n'
+              '  todos                A Todos Template\n'
+              '  widget               Create a Simple Flutter Widget\n'
               '\n'
               'Run "mason help" to see global options.'
         ];
@@ -634,6 +641,26 @@ bricks:
       );
       final expected = Directory(
         path.join(testFixturesPath(cwd, suffix: 'make'), 'favorite_color'),
+      );
+      expect(directoriesDeepEqual(actual, expected), isTrue);
+    });
+
+    test('generates favorite_languages', () async {
+      final testDir = Directory(
+        path.join(Directory.current.path, 'favorite_languages'),
+      )..createSync(recursive: true);
+      Directory.current = testDir.path;
+      when(
+        () => logger.promptAny(any()),
+      ).thenReturn(['dart', 'rust', 'c++']);
+      final result = await commandRunner.run(['make', 'favorite_languages']);
+      expect(result, equals(ExitCode.success.code));
+
+      final actual = Directory(
+        path.join(testFixturesPath(cwd, suffix: '.make'), 'favorite_languages'),
+      );
+      final expected = Directory(
+        path.join(testFixturesPath(cwd, suffix: 'make'), 'favorite_languages'),
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
     });
