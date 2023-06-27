@@ -100,7 +100,9 @@ class BrickYaml {
 
 /// The type of brick variable.
 enum BrickVariableType {
-  /// An array (e.g. ["one", "two", "three"])
+  /// An array (e.g. ["one", "two", "three"]).
+  /// Values must be present in the list of
+  /// available options.
   array,
 
   /// A number (e.g. 42)
@@ -115,6 +117,11 @@ enum BrickVariableType {
   /// An enumeration (e.g. ["red", "green", "blue"])
   @JsonValue('enum')
   enumeration,
+
+  /// A dynamic list of values. Unlike [BrickVariableType.array],
+  /// [BrickVariableType.list] supports a dynamic list
+  /// of values.
+  list,
 }
 
 /// {@template brick_variable_properties}
@@ -132,6 +139,7 @@ class BrickVariableProperties {
     this.defaultValues,
     this.prompt,
     this.values,
+    this.separator,
   });
 
   /// {@macro brick_variable_properties}
@@ -213,6 +221,21 @@ class BrickVariableProperties {
           values: values,
         );
 
+  /// {@macro brick_variable_properties}
+  ///
+  /// Creates an instance of a [BrickVariableProperties]
+  /// of type [BrickVariableType.list].
+  const BrickVariableProperties.list({
+    String? description,
+    String? prompt,
+    String? separator,
+  }) : this(
+          type: BrickVariableType.list,
+          description: description,
+          prompt: prompt,
+          separator: separator,
+        );
+
   /// Converts [Map] to [BrickYaml]
   factory BrickVariableProperties.fromJson(Map<dynamic, dynamic> json) =>
       _$BrickVariablePropertiesFromJson(json);
@@ -242,6 +265,10 @@ class BrickVariableProperties {
   /// * [BrickVariableType.array]
   /// * [BrickVariableType.enumeration]
   final List<String>? values;
+
+  /// An optional separator used when [type] is:
+  /// * [BrickVariableType.list]
+  final String? separator;
 }
 
 /// {@template vars_converter}
