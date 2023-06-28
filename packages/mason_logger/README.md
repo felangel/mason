@@ -55,6 +55,15 @@ Future<void> main() async {
   // Ask for user confirmation.
   final likesCats = logger.confirm('Do you like cats?', defaultValue: true);
 
+  // Prompt for any number of answers.
+  final programmingLanguages = logger.promptAny(
+    'What are your favorite programming languages?',
+  );
+
+  logger.info(
+    'You chose the following languages: $programmingLanguages',
+  );
+
   // Show a progress message while performing an asynchronous operation.
   final progress = logger.progress('Calculating');
   await Future<void>.delayed(const Duration(seconds: 1));
