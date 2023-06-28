@@ -1,3 +1,20 @@
+# 0.2.7
+
+- feat: add `promptAny` to `Logger`
+
+  ```dart
+  final logger = Logger();
+
+  // Prompt for a dynamic list of values.
+  final List<String> languages = logger.promptAny(
+    'What are your favorite programming languages?',
+  );
+
+  if (languages.contains('dart')) {
+    logger.info('Nice, I like dart too! 🎯');
+  }
+  ```
+
 # 0.2.6
 
 - fix: `chooseAny` renders selected results using `display` when specified
