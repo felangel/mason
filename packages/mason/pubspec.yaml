@@ -18,7 +18,7 @@ dependencies:
   crypto: ^3.0.1
   http: '>=0.13.3 <2.0.0'
   json_annotation: ^4.8.1
-  mason_logger: ^0.2.5
+  mason_logger: ^0.2.7
   meta: ^1.7.0
   mustache_template: ^2.0.0
   path: ^1.8.0
