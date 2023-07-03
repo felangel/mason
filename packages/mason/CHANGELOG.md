@@ -1,3 +1,15 @@
+# 0.1.0-dev.50
+
+- feat: support for type `list` in `brick.yaml` vars
+  ```yaml
+  vars:
+    languages:
+      type: list
+      description: Your favorite languages
+      prompt: What are your favorite languages?
+  ```
+- deps: allow latest version of `package:http`
+
 # 0.1.0-dev.49
 
 - feat: add `PascalDotCase` lambda and `String` extension
