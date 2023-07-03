@@ -80,7 +80,8 @@ BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
             'default',
             'defaults',
             'prompt',
-            'values'
+            'values',
+            'separator'
           ],
         );
         final val = BrickVariableProperties(
@@ -92,6 +93,7 @@ BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
           prompt: $checkedConvert('prompt', (v) => v as String?),
           values: $checkedConvert('values',
               (v) => (v as List<dynamic>?)?.map((e) => e as String).toList()),
+          separator: $checkedConvert('separator', (v) => v as String?),
         );
         return val;
       },
@@ -118,6 +120,7 @@ Map<String, dynamic> _$BrickVariablePropertiesToJson(
   writeNotNull('defaults', instance.defaultValues);
   writeNotNull('prompt', instance.prompt);
   writeNotNull('values', instance.values);
+  writeNotNull('separator', instance.separator);
   return val;
 }
 
@@ -127,6 +130,7 @@ const _$BrickVariableTypeEnumMap = {
   BrickVariableType.string: 'string',
   BrickVariableType.boolean: 'boolean',
   BrickVariableType.enumeration: 'enum',
+  BrickVariableType.list: 'list',
 };
 
 BrickEnvironment _$BrickEnvironmentFromJson(Map json) => $checkedCreate(

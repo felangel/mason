@@ -160,6 +160,12 @@ class _MakeCommand extends MasonCommand {
                   (properties.defaultValues as List?)?.cast<String>(),
             );
             break;
+          case BrickVariableType.list:
+            response = logger.promptAny(
+              prompt,
+              separator: properties.separator ?? ',',
+            );
+            break;
         }
         vars.addAll(<String, dynamic>{variable: response});
       }
@@ -255,6 +261,8 @@ extension on BrickVariableType {
         return 'boolean';
       case BrickVariableType.enumeration:
         return 'enum';
+      case BrickVariableType.list:
+        return 'list';
     }
   }
 }

@@ -78,6 +78,10 @@ void main() {
               prompt: 'What flavors do you want?',
               values: const ['dev', 'prod'],
             ),
+            'languages': BrickVariableProperties.list(
+              description: 'favorite programming languages',
+              prompt: 'What are your favorite programming languages?',
+            ),
           },
         );
         expect(BrickYaml.fromJson(instance.toJson()), equals(instance));
@@ -150,7 +154,11 @@ vars:
     prompt: What flavors do you want?
     values:
       - dev
-      - prod''';
+      - prod
+  languages:
+    type: list
+    description: favorite programming languages
+    prompt: What are your favorite programming languages?''';
 
         final brickYaml = checkedYamlDecode(
           content,
@@ -161,7 +169,14 @@ vars:
         expect(brickYaml.version, equals('1.0.0'));
         expect(
           brickYaml.vars.keys,
-          equals(['name', 'age', 'isDeveloper', 'favoriteColor', 'flavors']),
+          equals([
+            'name',
+            'age',
+            'isDeveloper',
+            'favoriteColor',
+            'flavors',
+            'languages',
+          ]),
         );
         expect(
           brickYaml.vars.values,
@@ -197,6 +212,11 @@ vars:
               defaultValues: ['dev'],
               prompt: 'What flavors do you want?',
               values: ['dev', 'prod'],
+            ),
+            equalsBrickVariableProperties(
+              type: BrickVariableType.list,
+              description: 'favorite programming languages',
+              prompt: 'What are your favorite programming languages?',
             ),
           ]),
         );
