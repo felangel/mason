@@ -49,7 +49,8 @@
             { "$ref": "#/$defs/varNumber" },
             { "$ref": "#/$defs/varBoolean" },
             { "$ref": "#/$defs/varEnum" },
-            { "$ref": "#/$defs/varArray" }
+            { "$ref": "#/$defs/varArray" },
+            { "$ref": "#/$defs/varList" }
           ]
         },
         "additionalProperties": false
@@ -206,6 +207,23 @@
       },
       "additionalProperties": false,
       "required": ["values"]
+    },
+    "varList": {
+      "type": "object",
+      "properties": {
+        "type": {
+          "type": "string",
+          "description": "A dynamic list (e.g. [])",
+          "anyOf": [{ "pattern": "list" }]
+        },
+        "description": {
+          "$ref": "#/$defs/varDescription"
+        },
+        "prompt": {
+          "$ref": "#/$defs/varPrompt"
+        }
+      },
+      "additionalProperties": false
     }
   }
 }

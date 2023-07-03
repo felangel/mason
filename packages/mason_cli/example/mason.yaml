@@ -13,6 +13,8 @@ bricks:
     path: ../../../bricks/hooks
   legacy:
     path: ../../../bricks/legacy
+  favorite_languages:
+    path: ../../../bricks/favorite_languages
   plugin:
     path: ../../../bricks/plugin
   random_color:
