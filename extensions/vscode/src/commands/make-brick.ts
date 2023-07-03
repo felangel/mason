@@ -141,7 +141,7 @@ const getBricksJson = async ({
     return undefined;
   }
   const bricksJson = JSON.parse(
-    readFileSync(bricksJsonPath, { encoding: "utf-8" }),
+    readFileSync(bricksJsonPath, { encoding: "utf-8" })
   );
   return bricksJson;
 };
@@ -175,7 +175,7 @@ const promptForValue = async (args: any): Promise<string | undefined> => {
 
 const promptForPrimitive = async (
   title: string,
-  _default: string,
+  _default: string
 ): Promise<string | undefined> => {
   const result = await vscode.window.showInputBox({
     placeHolder: _default,
@@ -192,7 +192,7 @@ const promptForPrimitive = async (
 
 const promptForBoolean = async (
   title: string,
-  _default: boolean,
+  _default: boolean
 ): Promise<string | undefined> => {
   const items = [_default.toString(), (!_default).toString()];
   return vscode.window.showQuickPick(items, {
@@ -204,7 +204,7 @@ const promptForBoolean = async (
 const promptForEnum = async (
   title: string,
   _default: string,
-  items: string[],
+  items: string[]
 ): Promise<string | undefined> => {
   if (_.isNil(_default) && !_.isEmpty(items)) {
     _default = items[0];
@@ -215,14 +215,14 @@ const promptForEnum = async (
     {
       canPickMany: false,
       placeHolder: title,
-    },
+    }
   );
 };
 
 const promptForArray = async (
   title: string,
   _default: string[],
-  items: string[],
+  items: string[]
 ): Promise<string | undefined> => {
   const options: vscode.QuickPickItem[] = items.map((item) => ({
     label: item,
@@ -238,7 +238,7 @@ const promptForArray = async (
 
 const promptForList = async (
   title: string,
-  separator?: string,
+  separator?: string
 ): Promise<string | undefined> => {
   const delimeter = separator ?? ",";
   const input = await vscode.window.showInputBox({
