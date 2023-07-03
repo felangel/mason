@@ -1,3 +1,8 @@
+# 0.1.11
+
+- feat: support `list` variable type in `brick.yaml`
+- deps: various dependency updates
+
 # 0.1.10
 
 - feat: support mason new brick
