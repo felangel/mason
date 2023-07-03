@@ -51,7 +51,7 @@ export const makeLocalBrick = async (uri: Uri) => {
 
   const name: string = brickYaml.name;
 
-  let vars: string[] = [];
+  const vars: string[] = [];
   for (let key in brickYaml.vars) {
     const value = await promptForValue(brickYaml.vars[key]);
     if (_.isNil(value)) {
@@ -159,6 +159,9 @@ const promptForValue = async (args: any): Promise<string | undefined> => {
   if (args.type === "array") {
     return promptForArray(args.prompt, args.defaults, args.values);
   }
+  if (args.type === "list") {
+    return promptForList(args.prompt, args.separator);
+  }
   window.showInformationMessage(`${args.type} type is not supported.`);
   if (args.default) {
     return args.default.toString();
@@ -174,7 +177,7 @@ const promptForPrimitive = async (
   title: string,
   _default: string
 ): Promise<string | undefined> => {
-  let result = await vscode.window.showInputBox({
+  const result = await vscode.window.showInputBox({
     placeHolder: _default,
     prompt: title,
   });
@@ -231,6 +234,20 @@ const promptForArray = async (
   });
   const selections = results?.map((r) => r.label);
   return JSON.stringify(JSON.stringify(selections));
+};
+
+const promptForList = async (
+  title: string,
+  separator?: string
+): Promise<string | undefined> => {
+  const delimeter = separator ?? ",";
+  const input = await vscode.window.showInputBox({
+    prompt: title,
+    placeHolder: `Enter a list separated by "${delimeter}"`,
+  });
+  const results = input?.split(delimeter);
+  const selection = results?.map((r) => r.trimStart());
+  return JSON.stringify(JSON.stringify(selection));
 };
 
 function _rootDir(): string {
