@@ -1,3 +1,14 @@
+# 0.1.0-dev.51
+
+- feat: support for type `list` in `brick.yaml` vars
+  ```yaml
+  vars:
+    languages:
+      type: list
+      description: Your favorite languages
+      prompt: What are your favorite languages?
+  ```
+
 # 0.1.0-dev.50
 
 - feat: standardize stdout across commands
