@@ -28,11 +28,11 @@ export const masonRemove = async ({
         });
         vscode.window.setStatusBarMessage(
           `✓ mason remove${global ? " -g " : " "}${brick}`,
-          statusBarTimeout
+          statusBarTimeout,
         );
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }
-    }
+    },
   );
 };

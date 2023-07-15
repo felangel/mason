@@ -14,7 +14,7 @@ export const addLocalBrick = async () => {
     await vscode.workspace.fs.stat(vscode.Uri.file(masonYamlPath));
   } catch (_) {
     vscode.window.showErrorMessage(
-      "No mason.yaml was found in the current workspace."
+      "No mason.yaml was found in the current workspace.",
     );
     return;
   }
