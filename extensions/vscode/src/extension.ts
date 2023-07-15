@@ -22,11 +22,11 @@ export async function activate(context: vscode.ExtensionContext) {
     vscode.commands.registerCommand("mason.make-global-brick", makeGlobalBrick),
     vscode.commands.registerCommand(
       "mason.remove-local-brick",
-      removeLocalBrick
+      removeLocalBrick,
     ),
     vscode.commands.registerCommand(
       "mason.remove-global-brick",
-      removeGlobalBrick
-    )
+      removeGlobalBrick,
+    ),
   );
 }

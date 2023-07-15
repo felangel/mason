@@ -34,14 +34,14 @@ const showMissingInstallationWarning = () => {
   vscode.window
     .showWarningMessage(
       "No mason installation was found.",
-      "Open installation instructions"
+      "Open installation instructions",
     )
     .then((_) => {
       if (_) {
         vscode.env.openExternal(
           vscode.Uri.parse(
-            "https://github.com/felangel/mason/tree/master/packages/mason_cli#installation"
-          )
+            "https://github.com/felangel/mason/tree/master/packages/mason_cli#installation",
+          ),
         );
       }
     });

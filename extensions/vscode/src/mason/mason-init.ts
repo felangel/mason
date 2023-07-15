@@ -16,6 +16,6 @@ export const masonInit = async ({ cwd }: { cwd: string }): Promise<void> => {
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }
-    }
+    },
   );
 };

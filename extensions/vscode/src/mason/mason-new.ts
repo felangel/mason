@@ -22,11 +22,11 @@ export const masonNew = async ({
         });
         vscode.window.setStatusBarMessage(
           `✓ mason new ${brick} ${hooks ? "--hooks" : ""}`,
-          statusBarTimeout
+          statusBarTimeout,
         );
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }
-    }
+    },
   );
 };
