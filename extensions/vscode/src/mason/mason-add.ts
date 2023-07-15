@@ -22,11 +22,11 @@ export const masonAdd = async ({
         });
         vscode.window.setStatusBarMessage(
           `✓ mason add${global ? " -g " : " "}${brick}`,
-          statusBarTimeout
+          statusBarTimeout,
         );
       } catch (err) {
         vscode.window.showErrorMessage(`${err}`);
       }
-    }
+    },
   );
 };

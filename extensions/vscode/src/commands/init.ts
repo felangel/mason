@@ -13,7 +13,7 @@ export const init = async () => {
     const masonYamlPath = path.join(cwd, "mason.yaml");
     await vscode.workspace.fs.stat(vscode.Uri.file(masonYamlPath));
     vscode.window.showErrorMessage(
-      "A mason.yaml already exists in the current workspace."
+      "A mason.yaml already exists in the current workspace.",
     );
     return;
   } catch (_) {}
