@@ -1,3 +1,8 @@
+# 0.2.8
+
+- fix: `confirm` gracefully handles `utf8` decode errors
+- docs: add topics to `pubspec.yaml`
+
 # 0.2.7
 
 - feat: add `promptAny` to `Logger`
