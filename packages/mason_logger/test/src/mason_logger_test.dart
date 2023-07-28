@@ -561,6 +561,26 @@ void main() {
           stdin: () => stdin,
         );
       });
+
+      test('returns default when a utf8 decoding error occurs', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
+            when(
+              () => stdin.readLineSync(),
+            ).thenThrow(const FormatException('Missing extension byte'));
+            final actual = Logger().confirm(message);
+            expect(actual, isFalse);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
     });
 
     group('.progress', () {
