@@ -252,7 +252,14 @@ class Logger {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
-    final input = _stdin.readLineSync()?.trim();
+    String? input;
+    try {
+      input = _stdin.readLineSync()?.trim();
+    } on FormatException catch (_) {
+      // FormatExceptions can occur due to utf8 decoding errors
+      // so we treat them as the user pressing enter (e.g. use `defaultValue`).
+      _stdout.writeln();
+    }
     final response = input == null || input.isEmpty
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
