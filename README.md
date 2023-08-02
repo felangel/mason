@@ -6,6 +6,7 @@
 <a href="https://github.com/felangel/mason/actions"><img src="https://github.com/felangel/mason/workflows/mason/badge.svg" alt="mason"></a>
 <a href="https://github.com/felangel/mason/actions"><img src="https://raw.githubusercontent.com/felangel/mason/master/packages/mason/coverage_badge.svg" alt="coverage"></a>
 <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/license-MIT-purple.svg" alt="License: MIT"></a>
+<a href="https://github.com/felangel/mason"><img src="https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge" alt="Powered by Mason"></a>
 </p>
 
 ---
@@ -54,3 +55,12 @@ View the full documentation [here](https://docs.brickhub.dev).
 | [![Meet Mason: Intro to Templating and Custom Code Generation](https://img.youtube.com/vi/LXhgiF5HiQg/0.jpg)](https://youtu.be/LXhgiF5HiQg) | [![Mason Video Tutorial](https://img.youtube.com/vi/G4PTjA6tpTU/0.jpg)](https://www.youtube.com/watch?v=G4PTjA6tpTU) |
 
 [mason_demo]: https://raw.githubusercontent.com/felangel/mason/master/assets/mason_demo.gif
+
+## Badge
+
+Add a markdown badge to indicate your project is powered by `mason` →
+[![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
+
+```md
+[![Powered by Mason](https://img.shields.io/endpoint?url=https%3A%2F%2Ftinyurl.com%2Fmason-badge)](https://github.com/felangel/mason)
+```
