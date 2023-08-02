@@ -12,6 +12,5 @@ environment:
 
 dev_dependencies:
   meta: ^1.7.0
-  mocktail: ^0.3.0
+  mocktail: ^1.0.0
   test: ^1.19.0
-  very_good_analysis: ^5.0.0
