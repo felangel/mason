@@ -122,7 +122,7 @@
     "@typescript-eslint/parser": "^6.4.0",
     "eslint": "^8.47.0",
     "glob": "^10.3.3",
-    "prettier": "^3.0.1",
+    "prettier": "^3.0.2",
     "ts-loader": "^9.4.4",
     "typescript": "^5.2.2",
     "webpack": "^5.88.2",
