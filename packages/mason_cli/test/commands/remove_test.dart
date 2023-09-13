@@ -98,7 +98,7 @@ void main() {
             '--git-path',
             'bricks/widget',
             '--git-ref',
-            '997bc878c93534fad17d965be7cafe948a1dbb53'
+            '997bc878c93534fad17d965be7cafe948a1dbb53',
           ],
         );
         expect(addResult, equals(ExitCode.success.code));
@@ -139,7 +139,7 @@ void main() {
             '--git-path',
             'bricks/widget',
             '--git-ref',
-            '997bc878c93534fad17d965be7cafe948a1dbb53'
+            '997bc878c93534fad17d965be7cafe948a1dbb53',
           ],
         );
         expect(addResult, equals(ExitCode.success.code));

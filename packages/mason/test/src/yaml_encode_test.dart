@@ -36,7 +36,7 @@ void main() {
 
       test('handles {string:map} correctly', () {
         const input = <String, dynamic>{
-          'key': {'foo': 'bar'}
+          'key': {'foo': 'bar'},
         };
         const expected = '''
 key:
@@ -56,15 +56,15 @@ key:
               'description':
                   'JSON Array of todos ([{"todo":"Walk Dog","done":false}])',
               'default': '[{"todo":"Walk Dog","done":false}]',
-              'prompt': 'What is the list of todos?'
+              'prompt': 'What is the list of todos?',
             },
             'developers': <String, dynamic>{
               'type': 'string',
               'description': 'JSON Array of developers ([{"name": "Dash"}])',
               'default': '[{"name": "Dash"}]',
-              'prompt': 'What is the list of developers?'
-            }
-          }
+              'prompt': 'What is the list of developers?',
+            },
+          },
         };
         const expected = r'''
 name: todos
@@ -88,7 +88,7 @@ vars:
 
       test('handles {string:list} correctly', () {
         const input = <String, dynamic>{
-          'key': ['a', 1, false]
+          'key': ['a', 1, false],
         };
         const expected = '''
 key:
@@ -100,7 +100,7 @@ key:
 
       test('handles {string:list} correctly (multiline)', () {
         const input = <String, dynamic>{
-          'key': ['a', 1, false, 'abc\ndef']
+          'key': ['a', 1, false, 'abc\ndef'],
         };
         const expected = '''
 key:
