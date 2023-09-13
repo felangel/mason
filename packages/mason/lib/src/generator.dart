@@ -472,7 +472,7 @@ class TemplateFile {
         [
           ...parameters.entries
               .where((entry) => entry.value is List)
-              .map((entry) => entry.value as List)
+              .map((entry) => entry.value as List),
         ],
       ).generate();
       for (final permutation in permutations) {

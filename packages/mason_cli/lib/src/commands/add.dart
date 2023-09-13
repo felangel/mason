@@ -137,7 +137,7 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
         MasonLockJson(
           bricks: {
             ...masonLockJson.bricks,
-            brick.name!: cachedBrick.brick.location
+            brick.name!: cachedBrick.brick.location,
           },
         ),
       ),

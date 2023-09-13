@@ -430,7 +430,7 @@ void main() {
         const expected = 'Greeting: $values!';
         expect(
           input.render(<String, dynamic>{
-            'colors': ['red', 'green', 'blue']
+            'colors': ['red', 'green', 'blue'],
           }),
           equals(expected),
         );
@@ -445,8 +445,8 @@ void main() {
             'colors': [
               {'name': 'red'},
               {'name': 'green'},
-              {'name': 'blue'}
-            ]
+              {'name': 'blue'},
+            ],
           }),
           equals(expected),
         );

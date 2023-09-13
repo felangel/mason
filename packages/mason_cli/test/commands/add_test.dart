@@ -425,7 +425,7 @@ void main() {
               '--git-url',
               url,
               '--git-path',
-              'bricks/widget'
+              'bricks/widget',
             ],
           );
           expect(result, equals(ExitCode.success.code));

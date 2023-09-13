@@ -97,13 +97,13 @@ void main() {
             'todos': [
               {'todo': 'Eat', 'done': true},
               {'todo': 'Code', 'done': true},
-              {'todo': 'Sleep', 'done': false}
+              {'todo': 'Sleep', 'done': false},
             ],
             'developers': [
               {'name': 'Alex'},
               {'name': 'Sam'},
-              {'name': 'Jen'}
-            ]
+              {'name': 'Jen'},
+            ],
           },
         );
 
@@ -124,7 +124,7 @@ void main() {
         final files = await generator.generate(
           DirectoryGeneratorTarget(tempDir),
           vars: <String, dynamic>{
-            'values': ['development', 'staging', 'production']
+            'values': ['development', 'staging', 'production'],
           },
         );
 
