@@ -12,6 +12,8 @@ analyzer:
     missing_required_param: error
     missing_return: error
     record_literal_one_positional_no_trailing_comma: error
+    collection_methods_unrelated_type: warning
+    unrelated_type_equality_checks: warning
 
 linter:
   rules:
@@ -81,7 +83,6 @@ linter:
     - implicit_call_tearoffs
     - implicit_reopen
     - invalid_case_patterns
-    - iterable_contains_unrelated_type
     - join_return_with_assignment
     - leading_newlines_in_multiline_strings
     - library_annotations
@@ -89,7 +90,6 @@ linter:
     - library_prefixes
     - library_private_types_in_public_api
     - lines_longer_than_80_chars
-    - list_remove_unrelated_type
     - literal_only_boolean_expressions
     - missing_whitespace_between_adjacent_strings
     - no_adjacent_strings_in_list

@@ -115,7 +115,7 @@ class _BrickGenerator extends MasonGenerator {
                 p.join(brickName, BrickYaml.hooks, '.gitignore'),
                 _hooksGitignoreContent,
               ),
-            ]
+            ],
           ],
         );
 

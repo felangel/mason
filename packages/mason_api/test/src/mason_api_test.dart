@@ -249,7 +249,7 @@ void main() {
               'access_token': 'malformed',
               'refresh_token': 'malformed',
               'expires_in': '3600',
-              'token_type': 'Bearer'
+              'token_type': 'Bearer',
             }),
             HttpStatus.ok,
           ),
@@ -278,7 +278,7 @@ void main() {
                   '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
               'refresh_token': '__refresh_token__',
               'expires_in': '3600',
-              'token_type': 'Bearer'
+              'token_type': 'Bearer',
             }),
             HttpStatus.ok,
           ),
@@ -306,7 +306,7 @@ void main() {
               'access_token': token,
               'refresh_token': refreshToken,
               'expires_in': '42',
-              'token_type': tokenType
+              'token_type': tokenType,
             }),
             HttpStatus.ok,
           ),
@@ -498,7 +498,7 @@ void main() {
                 'access_token': 'malformed',
                 'refresh_token': 'malformed',
                 'expires_in': '3600',
-                'token_type': 'Bearer'
+                'token_type': 'Bearer',
               }),
               HttpStatus.ok,
             ),
@@ -530,7 +530,7 @@ void main() {
                     '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
                 'refresh_token': '__refresh_token__',
                 'expires_in': '3600',
-                'token_type': 'Bearer'
+                'token_type': 'Bearer',
               }),
               HttpStatus.ok,
             ),
@@ -563,7 +563,7 @@ void main() {
                 'access_token': token,
                 'refresh_token': refreshToken,
                 'expires_in': '42',
-                'token_type': tokenType
+                'token_type': tokenType,
               }),
               HttpStatus.ok,
             ),
