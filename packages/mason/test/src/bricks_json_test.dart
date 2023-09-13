@@ -729,7 +729,7 @@ environment:
         )..createSync(recursive: true);
         BricksJson.testEnvironment = {
           'APPDATA': '',
-          'LOCALAPPDATA': directory.path
+          'LOCALAPPDATA': directory.path,
         };
         BricksJson.testIsWindows = true;
         expect(BricksJson.rootDir.path, equals(appDataCacheDirectory.path));

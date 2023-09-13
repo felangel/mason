@@ -1514,7 +1514,7 @@ void main() {
           KeyStroke.char('a'),
           KeyStroke.char('r'),
           KeyStroke.char('t'),
-          KeyStroke.control(ControlCharacter.ctrlJ)
+          KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         StdinOverrides.runZoned(
           () => IOOverrides.runZoned(

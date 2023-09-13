@@ -380,7 +380,7 @@ const List<AnsiCode> foregroundColors = [
   lightBlue,
   lightMagenta,
   lightCyan,
-  white
+  white,
 ];
 
 /// All of the [AnsiCode] values that represent [AnsiCodeType.background].
@@ -401,7 +401,7 @@ const List<AnsiCode> backgroundColors = [
   backgroundLightBlue,
   backgroundLightMagenta,
   backgroundLightCyan,
-  backgroundWhite
+  backgroundWhite,
 ];
 
 /// Non-printable characters that can be entered from the keyboard.

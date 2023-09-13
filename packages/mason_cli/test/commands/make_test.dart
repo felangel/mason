@@ -530,7 +530,7 @@ bricks:
         'make',
         'app_icon',
         '--url',
-        'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg'
+        'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg',
       ]);
       expect(result, equals(ExitCode.success.code));
 
@@ -608,7 +608,7 @@ bricks:
         '--description',
         'test-description',
         '--author',
-        'test-author'
+        'test-author',
       ]);
       expect(result, equals(ExitCode.success.code));
 
@@ -684,7 +684,7 @@ bricks:
             'bricks',
             'enum_no_choices',
           ),
-        )
+        ),
       ]);
 
       final result = await MasonCommandRunner(
@@ -743,7 +743,7 @@ bricks:
             'bricks',
             'array_no_choices',
           ),
-        )
+        ),
       ]);
 
       final result = await MasonCommandRunner(
@@ -1039,7 +1039,7 @@ bricks:
           '--name',
           'test-name',
           '-o',
-          path.join('output_dir', 'dir')
+          path.join('output_dir', 'dir'),
         ],
       );
       expect(result, equals(ExitCode.success.code));
@@ -1215,7 +1215,7 @@ bricks:
         'test-name',
         '--on-conflict',
         'overwrite',
-        '--set-exit-if-changed'
+        '--set-exit-if-changed',
       ]);
 
       expect(result, equals(ExitCode.success.code));
@@ -1263,7 +1263,7 @@ bricks:
         'test-name1',
         '--on-conflict',
         'overwrite',
-        '--set-exit-if-changed'
+        '--set-exit-if-changed',
       ]);
 
       expect(result, equals(ExitCode.software.code));
@@ -1311,7 +1311,7 @@ bricks:
         'test-name1',
         '--on-conflict',
         'skip',
-        '--set-exit-if-changed'
+        '--set-exit-if-changed',
       ]);
 
       expect(result, equals(ExitCode.success.code));
@@ -1359,7 +1359,7 @@ bricks:
         'test-name1',
         '--on-conflict',
         'append',
-        '--set-exit-if-changed'
+        '--set-exit-if-changed',
       ]);
 
       expect(result, equals(ExitCode.software.code));
@@ -1394,7 +1394,7 @@ bricks:
           'false',
           '--android',
           'true',
-          '--set-exit-if-changed'
+          '--set-exit-if-changed',
         ],
       );
       expect(result, equals(ExitCode.software.code));

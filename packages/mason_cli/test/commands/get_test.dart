@@ -161,8 +161,8 @@ bricks:
                 'git': {
                   'url': 'https://github.com/felangel/mason',
                   'path': 'bricks/hooks',
-                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53'
-                }
+                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53',
+                },
               },
               'simple': {'path': simplePath},
               'todos': {'path': todosPath},
@@ -170,10 +170,10 @@ bricks:
                 'git': {
                   'url': 'https://github.com/felangel/mason',
                   'path': 'bricks/widget',
-                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53'
-                }
-              }
-            }
+                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53',
+                },
+              },
+            },
           }),
         ),
       );

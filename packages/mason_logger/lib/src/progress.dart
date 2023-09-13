@@ -29,7 +29,7 @@ class ProgressAnimation {
     '⠦',
     '⠧',
     '⠇',
-    '⠏'
+    '⠏',
   ];
 
   /// The list of animation frames.
