@@ -3,8 +3,9 @@ import 'dart:convert';
 import 'dart:io' as io;
 
 import 'package:mason_logger/mason_logger.dart';
+import 'package:mason_logger/src/ffi/terminal.dart';
 import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/stdin_overrides.dart';
+import 'package:mason_logger/src/terminal_overrides.dart';
 
 part 'progress.dart';
 
@@ -90,8 +91,15 @@ class Logger {
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
+  final _terminal = TerminalOverrides.current?.createTerminal() ?? Terminal();
+
   KeyStroke Function() get _readKey {
-    return StdinOverrides.current?.readKey ?? readKey;
+    return () {
+      _terminal.enableRawMode();
+      final key = TerminalOverrides.current?.readKey() ?? readKey();
+      _terminal.disableRawMode();
+      return key;
+    };
   }
 
   /// Flushes internal message queue.
