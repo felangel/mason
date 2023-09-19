@@ -113,7 +113,7 @@
   },
   "devDependencies": {
     "@types/glob": "^8.1.0",
-    "@types/lodash": "^4.14.197",
+    "@types/lodash": "^4.14.198",
     "@types/mocha": "^10.0.1",
     "@types/node": "20.x",
     "@types/vscode": "^1.75.0",
