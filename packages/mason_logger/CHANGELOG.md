@@ -1,3 +1,10 @@
+# 0.2.9
+
+- fix: arrow keys on windows ([#816](https://github.com/felangel/mason/issues/816))
+- chore: improve lint rules
+- chore: `dart fix --apply`
+- chore(deps): upgrade dependencies
+
 # 0.2.8
 
 - fix: `confirm` gracefully handles `utf8` decode errors
