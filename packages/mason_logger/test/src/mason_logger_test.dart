@@ -2,7 +2,7 @@ import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
-import 'package:mason_logger/src/stdin_overrides.dart';
+import 'package:mason_logger/src/terminal_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
@@ -621,8 +621,8 @@ void main() {
       test(
           'enter/return selects the nothing '
           'when defaultValues is not specified.', () {
-        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        StdinOverrides.runZoned(
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -651,8 +651,8 @@ void main() {
       });
 
       test('enter/return selects the default values when specified.', () {
-        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        StdinOverrides.runZoned(
+        final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -692,9 +692,9 @@ void main() {
           KeyStroke.char(' '),
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.char(' '),
-          KeyStroke.control(ControlCharacter.ctrlJ),
+          KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -786,7 +786,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -828,7 +828,7 @@ void main() {
           KeyStroke.char('j'),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -870,7 +870,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -912,7 +912,7 @@ void main() {
           KeyStroke.char('k'),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -956,7 +956,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1013,7 +1013,7 @@ void main() {
 
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1048,7 +1048,7 @@ void main() {
 
       test('converts results to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1080,7 +1080,7 @@ void main() {
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1112,7 +1112,7 @@ void main() {
 
       test('enter selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1145,7 +1145,7 @@ void main() {
 
       test('space selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.char(' ')];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1182,7 +1182,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1227,7 +1227,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1273,7 +1273,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowUp),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1318,7 +1318,7 @@ void main() {
           KeyStroke.control(ControlCharacter.arrowDown),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1364,7 +1364,7 @@ void main() {
           KeyStroke.char('j'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1409,7 +1409,7 @@ void main() {
           KeyStroke.char('k'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1452,7 +1452,7 @@ void main() {
 
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1492,7 +1492,7 @@ void main() {
     group('promptAny', () {
       test('returns empty list', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1516,7 +1516,7 @@ void main() {
           KeyStroke.char('t'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1544,7 +1544,7 @@ void main() {
           KeyStroke.char('s'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1573,7 +1573,7 @@ void main() {
           KeyStroke.char(','),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1606,7 +1606,7 @@ void main() {
           KeyStroke.char(','),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1632,9 +1632,9 @@ void main() {
           KeyStroke.char('c'),
           KeyStroke.char('s'),
           KeyStroke.char('s'),
-          KeyStroke.control(ControlCharacter.ctrlJ),
+          KeyStroke.control(ControlCharacter.ctrlM),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1662,7 +1662,7 @@ void main() {
           KeyStroke.char('s'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
@@ -1694,7 +1694,7 @@ void main() {
           KeyStroke.char('s'),
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
-        StdinOverrides.runZoned(
+        TerminalOverrides.runZoned(
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
