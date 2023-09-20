@@ -58,7 +58,7 @@ class MasonGenerator extends Generator {
 
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
-  static Future<MasonGenerator> fromBundle(MasonBundle bundle) async {
+  static Future<MasonBrickGenerator> fromBundle(MasonBundle bundle) async {
     final bytes = await Isolate.run(
       () => utf8.encode(json.encode(bundle.toJson())),
     );
@@ -67,19 +67,37 @@ class MasonGenerator extends Generator {
       p.join(BricksJson.bundled.path, '${bundle.name}_${bundle.version}_$hash'),
     );
     if (!target.existsSync()) unpackBundle(bundle, target);
-    return MasonGenerator._fromBrick(target.path);
+    return MasonBrickGenerator._fromBrick(target.path);
   }
 
   /// Factory which creates a [MasonGenerator] based on
   /// a [GitPath] for a remote [BrickYaml] file.
-  static Future<MasonGenerator> fromBrick(Brick brick) async {
+  static Future<MasonBrickGenerator> fromBrick(Brick brick) async {
     final path = brick.location.path != null
         ? brick.location.path!
         : (await BricksJson.temp().add(brick)).path;
-    return MasonGenerator._fromBrick(path);
+    return MasonBrickGenerator._fromBrick(path);
   }
 
-  static Future<MasonGenerator> _fromBrick(String path) async {
+  /// Optional list of variables which will be used to populate
+  /// the corresponding mustache variables within the template.
+  final List<String> vars;
+}
+
+class MasonBrickGenerator extends MasonGenerator {
+  MasonBrickGenerator(
+    this.brickYaml, {
+    super.files,
+    super.hooks,
+    super.vars,
+  }) : super(
+          brickYaml.name,
+          brickYaml.description,
+        );
+
+  final BrickYaml brickYaml;
+
+  static Future<MasonBrickGenerator> _fromBrick(String path) async {
     final file = File(p.join(path, BrickYaml.file));
     final brickYaml = checkedYamlDecode(
       file.readAsStringSync(),
@@ -108,18 +126,13 @@ class MasonGenerator extends Generator {
           })
         : <Future<TemplateFile?>>[];
 
-    return MasonGenerator(
-      brickYaml.name,
-      brickYaml.description,
+    return MasonBrickGenerator(
+      brickYaml,
       vars: brickYaml.vars.keys.toList(),
       files: await Future.wait(brickFiles),
       hooks: await GeneratorHooks.fromBrickYaml(brickYaml),
     );
   }
-
-  /// Optional list of variables which will be used to populate
-  /// the corresponding mustache variables within the template.
-  final List<String> vars;
 }
 
 /// The status of a generated file.
@@ -541,6 +554,7 @@ class FileContents {
 
 class _Permutations<T> {
   _Permutations(this.elements);
+
   final List<List<T>> elements;
 
   List<List<T>> generate() {
