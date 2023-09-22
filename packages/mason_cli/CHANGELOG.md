@@ -1,3 +1,11 @@
+# 0.1.0-dev.52
+
+- upgrade to `mason 0.1.0-dev.51` and `mason_logger v0.2.9`
+  - fix: arrow keys on windows ([#816](https://github.com/felangel/mason/issues/816))
+- chore: improve lint rules
+- chore: `dart fix --apply`
+- chore(deps): upgrade dependencies
+
 # 0.1.0-dev.51
 
 - feat: support for type `list` in `brick.yaml` vars
