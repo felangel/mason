@@ -91,6 +91,7 @@ class Logger {
   io.Stdout get _stdout => _overrides?.stdout ?? io.stdout;
   io.Stdin get _stdin => _overrides?.stdin ?? io.stdin;
   io.Stdout get _stderr => _overrides?.stderr ?? io.stderr;
+  Never _exit(int code) => (TerminalOverrides.current?.exit ?? io.exit)(code);
   final _terminal = TerminalOverrides.current?.createTerminal() ?? Terminal();
 
   KeyStroke Function() get _readKey {
@@ -98,6 +99,7 @@ class Logger {
       _terminal.enableRawMode();
       final key = TerminalOverrides.current?.readKey() ?? readKey();
       _terminal.disableRawMode();
+      if (key.controlChar == ControlCharacter.ctrlC) _exit(130);
       return key;
     };
   }
