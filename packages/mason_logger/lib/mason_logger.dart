@@ -3,6 +3,7 @@
 /// Get started at [https://github.com/felangel/mason](https://github.com/felangel/mason) 🧱
 library mason_logger;
 
+export 'src/ansi.dart';
 export 'src/io.dart' hide ControlCharacter, KeyStroke, readKey;
 export 'src/level.dart';
 export 'src/link.dart';
