@@ -409,6 +409,11 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
 
 /// A target for a [Generator].
 /// This class knows how to create files given a path and contents.
+///
+/// See also:
+///
+/// * [DirectoryGeneratorTarget], a [GeneratorTarget] based on a provided
+/// [Directory].
 // ignore: one_member_abstracts
 abstract class GeneratorTarget {
   /// Create a file at the given path with the given contents.
