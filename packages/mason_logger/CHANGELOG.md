@@ -1,3 +1,7 @@
+# 0.2.10
+
+- fix: exit on Ctrl+C ([#1090](https://github.com/felangel/mason/issues/1090))
+
 # 0.2.9
 
 - fix: arrow keys on windows ([#816](https://github.com/felangel/mason/issues/816))
