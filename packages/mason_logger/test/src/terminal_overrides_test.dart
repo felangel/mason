@@ -138,6 +138,83 @@ void main() {
           createTerminal: () => rootTerminal,
         );
       });
+
+      test('uses default exit when not specified', () {
+        TerminalOverrides.runZoned(() {
+          final overrides = TerminalOverrides.current;
+          expect(overrides!.exit, isNotNull);
+        });
+      });
+
+      test('uses custom exit when specified', () {
+        final exitCalls = <int>[];
+        try {
+          TerminalOverrides.runZoned(
+            () {
+              final overrides = TerminalOverrides.current;
+              overrides!.exit(0);
+            },
+            exit: (code) {
+              exitCalls.add(code);
+              throw Exception('exit');
+            },
+          );
+        } catch (_) {
+          expect(exitCalls, equals([0]));
+        }
+      });
+
+      test(
+          'uses current exit when not specified '
+          'and zone already contains a exit', () {
+        final exitCalls = <int>[];
+        TerminalOverrides.runZoned(
+          () {
+            try {
+              TerminalOverrides.runZoned(() {
+                final overrides = TerminalOverrides.current;
+                overrides!.exit(0);
+              });
+            } catch (_) {
+              expect(exitCalls, equals([0]));
+            }
+          },
+          exit: (code) {
+            exitCalls.add(code);
+            throw Exception('exit');
+          },
+        );
+      });
+
+      test(
+          'uses nested exit when specified '
+          'and zone already contains a exit', () {
+        final rootExitCalls = <int>[];
+        TerminalOverrides.runZoned(
+          () {
+            final nestedExitCalls = <int>[];
+            try {
+              TerminalOverrides.runZoned(
+                () {
+                  final overrides = TerminalOverrides.current;
+                  overrides!.exit(0);
+                },
+                exit: (code) {
+                  nestedExitCalls.add(code);
+                  throw Exception('exit');
+                },
+              );
+            } catch (_) {
+              expect(nestedExitCalls, equals([0]));
+              expect(rootExitCalls, isEmpty);
+            }
+          },
+          exit: (code) {
+            rootExitCalls.add(code);
+            throw Exception('exit');
+          },
+        );
+      });
     });
   });
 }
