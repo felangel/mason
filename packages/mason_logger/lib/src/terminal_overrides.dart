@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io' as dart_io;
 import 'package:mason_logger/src/ffi/terminal.dart';
 import 'package:mason_logger/src/io.dart' as io;
 
@@ -28,8 +29,9 @@ abstract class TerminalOverrides {
     R Function() body, {
     io.KeyStroke Function()? readKey,
     Terminal Function()? createTerminal,
+    Never Function(int code)? exit,
   }) {
-    final overrides = _StdinOverridesScope(readKey, createTerminal);
+    final overrides = _TerminalOverridesScope(readKey, createTerminal, exit);
     return _asyncRunZoned(body, zoneValues: {_token: overrides});
   }
 
@@ -38,14 +40,18 @@ abstract class TerminalOverrides {
 
   /// The function used to create a [Terminal] instance.
   Terminal Function() get createTerminal => Terminal.new;
+
+  /// Exit the process with the provided [code].
+  Never exit(int code) => dart_io.exit(code); // coverage:ignore-line
 }
 
-class _StdinOverridesScope extends TerminalOverrides {
-  _StdinOverridesScope(this._readKey, this._createTerminal);
+class _TerminalOverridesScope extends TerminalOverrides {
+  _TerminalOverridesScope(this._readKey, this._createTerminal, this._exit);
 
   final TerminalOverrides? _previous = TerminalOverrides.current;
   final io.KeyStroke Function()? _readKey;
   final Terminal Function()? _createTerminal;
+  final Never Function(int code)? _exit;
 
   @override
   io.KeyStroke Function() get readKey {
@@ -56,4 +62,7 @@ class _StdinOverridesScope extends TerminalOverrides {
   Terminal Function() get createTerminal {
     return _createTerminal ?? _previous?.createTerminal ?? super.createTerminal;
   }
+
+  @override
+  Never exit(int code) => (_exit ?? _previous?.exit ?? super.exit)(code);
 }

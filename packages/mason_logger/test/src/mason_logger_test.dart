@@ -618,6 +618,28 @@ void main() {
     });
 
     group('.chooseAny', () {
+      test('exits when control+c is pressed', () {
+        final exitCalls = <int>[];
+        try {
+          TerminalOverrides.runZoned(
+            () => IOOverrides.runZoned(
+              () =>
+                  Logger().chooseAny('test message', choices: ['a', 'b', 'c']),
+              stdout: () => stdout,
+              stdin: () => stdin,
+            ),
+            readKey: () => KeyStroke.control(ControlCharacter.ctrlC),
+            exit: (code) {
+              exitCalls.add(code);
+              throw Exception('exit');
+            },
+          );
+          fail('should have called exit');
+        } catch (_) {
+          expect(exitCalls, equals([130]));
+        }
+      });
+
       test(
           'enter/return selects the nothing '
           'when defaultValues is not specified.', () {
@@ -1076,6 +1098,28 @@ void main() {
     });
 
     group('.chooseOne', () {
+      test('exits when control+c is pressed', () {
+        final exitCalls = <int>[];
+        try {
+          TerminalOverrides.runZoned(
+            () => IOOverrides.runZoned(
+              () =>
+                  Logger().chooseOne('test message', choices: ['a', 'b', 'c']),
+              stdout: () => stdout,
+              stdin: () => stdin,
+            ),
+            readKey: () => KeyStroke.control(ControlCharacter.ctrlC),
+            exit: (code) {
+              exitCalls.add(code);
+              throw Exception('exit');
+            },
+          );
+          fail('should have called exit');
+        } catch (_) {
+          expect(exitCalls, equals([130]));
+        }
+      });
+
       test(
           'enter selects the initial value '
           'when defaultValue is not specified.', () {
