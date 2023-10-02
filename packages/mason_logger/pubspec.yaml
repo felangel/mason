@@ -12,6 +12,7 @@ environment:
 
 dependencies:
   ffi: ^2.1.0
+  io: ^1.0.4
   win32: ^5.0.7
 
 dev_dependencies:
