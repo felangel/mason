@@ -1422,5 +1422,31 @@ bricks:
       expect(directoriesDeepEqual(actual, expected), isTrue);
       verifyNever(() => logger.flush(any()));
     });
+
+    group('watch', () {
+      const watchArgument = '--watch';
+
+      group('throws a usage exception', () {
+        test('when watching on a non local brick', () {});
+
+        test('when brick has no path', () {});
+      });
+
+      test(
+        'makes changes when any file within the brick directory changes',
+        () {},
+      );
+
+      test(
+        'does not make changes when a file outside the brick changes',
+        () {},
+      );
+
+      group('logger', () {
+        test('informs when started watching', () {});
+
+        test('informs when stopped watching', () {});
+      });
+    });
   });
 }
