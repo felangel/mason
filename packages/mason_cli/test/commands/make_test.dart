@@ -47,8 +47,8 @@ void main() {
     setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
 
-      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final bricksNames = {
+      final localBricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+      final localBricksNames = {
         'app_icon',
         'bio',
         'documentation',
@@ -66,8 +66,9 @@ void main() {
         'widget',
       };
       final brickNameToPathMap = {
-        for (final brickName in bricksNames)
-          brickName: path.join(Directory.current.path, bricksPath, brickName),
+        for (final brickName in localBricksNames)
+          brickName:
+              path.join(Directory.current.path, localBricksPath, brickName),
       };
 
       final masonYamlPath = path.join(Directory.current.path, 'mason.yaml');
