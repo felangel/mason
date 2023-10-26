@@ -5,19 +5,40 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
+import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:watcher/watcher.dart';
+
+/// A type definition for [didKillCommandOverride].
+@visibleForTesting
+typedef DidKillCommand = Future<void> Function();
+
+/// A function to be overridden by tests to simulate a kill command.
+///
+/// See also:
+///
+/// * [_didKillCommand], which is the default implementation.
+// TODO(alestiago): Evaluate alternatives.
+@visibleForTesting
+DidKillCommand? didKillCommandOverride;
 
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.
 /// {@endtemplate}
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
-  MakeCommand({Logger? logger}) : super(logger: logger) {
+  MakeCommand({
+    Logger? logger,
+  }) : super(logger: logger) {
     argParser.addOptions();
     try {
       for (final brick in bricks) {
-        addSubcommand(_MakeCommand(brick, logger: logger));
+        addSubcommand(
+          _MakeCommand(
+            brick,
+            logger: logger,
+          ),
+        );
       }
     } catch (e) {
       _exception = e;
@@ -44,7 +65,10 @@ class MakeCommand extends MasonCommand {
 }
 
 class _MakeCommand extends MasonCommand {
-  _MakeCommand(this._brick, {super.logger}) {
+  _MakeCommand(
+    this._brick, {
+    super.logger,
+  }) {
     argParser
       ..addOptions()
       ..addSeparator('${'-' * 79}\n');
@@ -281,7 +305,7 @@ class _MakeCommand extends MasonCommand {
     });
 
     // TODO(alestiago): Consider adding prompt to confirm exit.
-    await _killSignal(ProcessSignal.sigint);
+    await (didKillCommandOverride?.call() ?? _didKillCommand());
     await watchSubscription.cancel();
     _isWatching = false;
 
@@ -408,9 +432,11 @@ extension on Logger {
   }
 }
 
-/// Starts listening for [signal] and completes the returned [Future] when
-/// it has been received.
-Future<void> _killSignal(ProcessSignal signal) async {
+/// Completes when a kill command is received.
+///
+/// A kill command is a command that is sent to a process to terminate it.
+Future<void> _didKillCommand() async {
+  const signal = ProcessSignal.sigint;
   final terminationCompleter = Completer<void>();
 
   final signalStream = signal.watch();

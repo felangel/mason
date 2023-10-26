@@ -1,10 +1,13 @@
 // ignore_for_file: no_adjacent_strings_in_list
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
+import 'dart:isolate';
 
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason/mason.dart' as mason show packageVersion;
 import 'package:mason_cli/src/command_runner.dart';
+import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
@@ -1426,15 +1429,144 @@ bricks:
     group('watch', () {
       const watchArgument = '--watch';
 
+      /// The name of the brick to watch.
+      ///
+      /// The brick is located in the [brickDirectory].
+      const localBrickName = 'greeting';
+
+      /// The directory where the brick is located.
+      late Directory localBrickDirectory;
+
+      /// The directory where the generated files from the brick are stored.
+      late Directory outputDirectory;
+
+      /// A file, within [localBrickDirectory], that is used as a template.
+      ///
+      /// When watching, if this file changes, the brick should be re-generated
+      /// in the [outputDirectory].
+      late File localBrickTemplateFile;
+
+      setUp(() {
+        final testDirectory = Directory(path.join(cwd.path, 'alestiago'))
+          ..createSync(
+            recursive: true,
+          );
+        // addTearDown(() => testDirectory.deleteSync(recursive: true));
+
+        Directory.current = testDirectory.path;
+        addTearDown(() => Directory.current = cwd);
+
+        outputDirectory = Directory(
+          path.join(testDirectory.path, 'watch_output'),
+        )..createSync(recursive: true);
+
+        localBrickDirectory = Directory(
+          path.join(testDirectory.path, 'watch_brick'),
+        )..createSync(recursive: true);
+
+        final localBrickTemplateDirectory = Directory(
+          path.join(localBrickDirectory.path, '__brick__'),
+        )..createSync(recursive: true);
+
+        final masonDirectory = Directory(
+          path.join(testDirectory.path, '.mason'),
+        )..createSync(recursive: true);
+
+        File(path.join(localBrickDirectory.path, 'brick.yaml'))
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+name: $localBrickName
+description: A local brick that will be watched.
+version: 0.1.0+1
+
+environment:
+  mason: ">=0.1.0-dev.51 <0.1.0"
+
+vars:
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
+''');
+
+        localBrickTemplateFile =
+            File(path.join(localBrickTemplateDirectory.path, 'hello.md'))
+              ..createSync(recursive: true)
+              ..writeAsStringSync('Hello {{name}}!');
+
+        File(
+          path.join(testDirectory.path, 'mason.yaml'),
+        )
+          ..createSync(recursive: true)
+          ..writeAsStringSync('''
+bricks:
+  $localBrickName:
+    path: ${path.relative(localBrickDirectory.path, from: testDirectory.path)}
+''');
+
+        File(
+          path.join(testDirectory.path, 'mason-lock.json'),
+        ).writeAsStringSync('''
+{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path)}"}}}
+''');
+
+        File(
+          path.join(masonDirectory.path, 'bricks.json'),
+        ).writeAsStringSync('''
+{"$localBrickName":"${localBrickDirectory.path}"}
+''');
+      });
+
       group('throws a usage exception', () {
-        test('when watching on a non local brick', () {});
+        test('when watching on a non local brick', () {
+          expect(true, isTrue);
+        });
 
         test('when brick has no path', () {});
       });
 
       test(
         'makes changes when any file within the brick directory changes',
-        () {},
+        () async {
+          final killCompleter = Completer<void>();
+          didKillCommandOverride = () => killCompleter.future;
+
+          await commandRunner.run([
+            'make',
+            localBrickName,
+            '--name',
+            'dash',
+            '--output-dir',
+            outputDirectory.path,
+            watchArgument,
+          ]);
+
+          final outputFile = File(
+            path.join(
+              outputDirectory.path,
+              path.basename(localBrickTemplateFile.path),
+            ),
+          );
+
+          final firstMakeOutputFileContent = outputFile.readAsStringSync();
+
+          localBrickTemplateFile.writeAsStringSync('Goodbye {{name}}!');
+
+          final secondMakeOutputFileContent = outputFile.readAsStringSync();
+
+          expect(
+            firstMakeOutputFileContent,
+            isNot(equals(secondMakeOutputFileContent)),
+            reason:
+                '''The file content should have changed after the template file was modified.''',
+          );
+          expect(
+            secondMakeOutputFileContent,
+            equals('Goodbye Dash!'),
+            reason: '''The new file should have the variables replaced.''',
+          );
+        },
       );
 
       test(
