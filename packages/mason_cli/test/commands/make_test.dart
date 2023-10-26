@@ -44,110 +44,57 @@ void main() {
       );
     });
 
+    String toBrickPath(String brickName) {
+      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+      return path.join(Directory.current.path, bricksPath, brickName);
+    }
+
     setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
-      File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
-        '''
+
+      final brickNames = {
+        'app_icon',
+        'bio',
+        'documentation',
+        'favorite_color',
+        'favorite_languages',
+        'flavors',
+        'greeting',
+        'legacy',
+        'hello_world',
+        'hooks',
+        'plugin',
+        'random_color',
+        'simple',
+        'todos',
+        'widget',
+      };
+      final brickNameToPathMap = {
+        for (final brickName in brickNames) brickName: toBrickPath(brickName),
+      };
+
+      final masonYamlPath = path.join(Directory.current.path, 'mason.yaml');
+      final masonYamlContent = '''
 bricks:
-  app_icon:
-    path: ../../../../../bricks/app_icon
-  bio:
-    path: ../../../../../bricks/bio
-  documentation:
-    path: ../../../../../bricks/documentation
-  favorite_color:
-    path: ../../../../../bricks/favorite_color
-  favorite_languages:
-    path: ../../../../../bricks/favorite_languages
-  flavors:
-    path: ../../../../../bricks/flavors
-  greeting:
-    path: ../../../../../bricks/greeting
-  legacy:
-    path: ../../../../../bricks/legacy
-  hello_world:
-    path: ../../../../../bricks/hello_world
-  hooks:
-    path: ../../../../../bricks/hooks
-  plugin:
-    path: ../../../../../bricks/plugin
-  random_color:
-    path: ../../../../../bricks/random_color
-  simple:
-    path: ../../../../../bricks/simple
-  todos:
-    path: ../../../../../bricks/todos
-  widget:
-    path: ../../../../../bricks/widget
-''',
-      );
-      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final appIconPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'app_icon'),
-      );
-      final bioPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'bio'),
-      );
-      final docPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'documentation'),
-      );
-      final favoriteColorPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'favorite_color'),
-      );
-      final favoriteLanguagesPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'favorite_languages'),
-      );
-      final flavorsPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'flavors'),
-      );
-      final greetingPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'greeting'),
-      );
-      final legacyPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'legacy'),
-      );
-      final helloWorldPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'hello_world'),
-      );
-      final hooksPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'hooks'),
-      );
-      final pluginPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'plugin'),
-      );
-      final randomColorPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'random_color'),
-      );
-      final simplePath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'simple'),
-      );
-      final todosPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'todos'),
-      );
-      final widgetPath = canonicalize(
-        path.join(Directory.current.path, bricksPath, 'widget'),
-      );
-      File(path.join(Directory.current.path, '.mason', 'bricks.json'))
+${brickNameToPathMap.entries.map((brickEntry) => '  ${brickEntry.key}:\n    ${brickEntry.value}').join('\n')}
+''';
+      final masonYaml = File(masonYamlPath)
         ..createSync(recursive: true)
-        ..writeAsStringSync(
-          json.encode({
-            'app_icon': appIconPath,
-            'bio': bioPath,
-            'documentation': docPath,
-            'favorite_color': favoriteColorPath,
-            'favorite_languages': favoriteLanguagesPath,
-            'flavors': flavorsPath,
-            'hello_world': helloWorldPath,
-            'hooks': hooksPath,
-            'greeting': greetingPath,
-            'legacy': legacyPath,
-            'plugin': pluginPath,
-            'random_color': randomColorPath,
-            'simple': simplePath,
-            'todos': todosPath,
-            'widget': widgetPath,
-          }),
-        );
+        ..writeAsStringSync(masonYamlContent);
+      addTearDown(() {
+        if (masonYaml.existsSync()) masonYaml.deleteSync(recursive: true);
+      });
+
+      final bricksJsonPath =
+          path.join(Directory.current.path, '.mason', 'bricks.json');
+      final bricksJsonContent = json.encode(brickNameToPathMap);
+      final bricksYaml = File(bricksJsonPath)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(bricksJsonContent);
+      addTearDown(() {
+        if (bricksYaml.existsSync()) bricksYaml.deleteSync(recursive: true);
+      });
+
       printLogs = [];
       logger = _MockLogger();
       pubUpdater = _MockPubUpdater();
@@ -1407,6 +1354,7 @@ bricks:
       final testDir = Directory(
         path.join(Directory.current.path, 'hello_world_quiet'),
       )..createSync(recursive: true);
+
       Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['make', 'hello_world', '--name', 'dash', '--quiet'],
