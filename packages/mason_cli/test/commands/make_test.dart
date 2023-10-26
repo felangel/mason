@@ -1354,7 +1354,6 @@ bricks:
       final testDir = Directory(
         path.join(Directory.current.path, 'hello_world_quiet'),
       )..createSync(recursive: true);
-
       Directory.current = testDir.path;
       final result = await commandRunner.run(
         ['make', 'hello_world', '--name', 'dash', '--quiet'],
