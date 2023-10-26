@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -5,6 +6,7 @@ import 'package:args/args.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
+import 'package:watcher/watcher.dart';
 
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.
@@ -59,6 +61,13 @@ class _MakeCommand extends MasonCommand {
 
   final BrickYaml _brick;
 
+  /// Wether or not command is already watching for changes.
+  ///
+  /// See also:
+  ///
+  /// * [_watch], which starts watching for changes.
+  bool _isWatching = false;
+
   @override
   String get description => _brick.description;
 
@@ -85,6 +94,17 @@ class _MakeCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final quietMode = results['quiet'] as bool;
+
+    final watch = results['watch'] as bool;
+    if (watch) {
+      if (!localBricks.contains(_brick)) {
+        usageException('Can only watch local bricks.');
+      }
+      if (_brick.path == null) {
+        usageException('Cannot watch bricks without a path.');
+      }
+    }
+
     final path = File(_brick.path!).parent.path;
     final generator = await MasonGenerator.fromBrick(Brick.path(path));
     final vars = <String, dynamic>{};
@@ -212,6 +232,10 @@ class _MakeCommand extends MasonCommand {
         if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
 
+      if (watch && !_isWatching) {
+        await _watch();
+      }
+
       return ExitCode.success.code;
     } catch (_) {
       generateProgress.fail();
@@ -231,6 +255,39 @@ class _MakeCommand extends MasonCommand {
     } catch (_) {
       return value;
     }
+  }
+
+  /// Starts watching for changes.
+  ///
+  /// Should only be called when the flag `--watch` is specified.
+  ///
+  /// Watching is only supported for local bricks.
+  Future<void> _watch() async {
+    assert(localBricks.contains(_brick), 'Can only watch local bricks.');
+    assert(_brick.path != null, 'Cannot watch bricks without a path.');
+
+    _isWatching = true;
+
+    final brickDirectoryPath = p.dirname(_brick.path!);
+
+    final boldBrickName = styleBold.wrap(_brick.name);
+    logger.info(
+      '👀 Watching for $boldBrickName changes in $brickDirectoryPath',
+    );
+    final directoryWatcher = DirectoryWatcher(brickDirectoryPath);
+
+    final watchSubscription = directoryWatcher.events.listen((event) async {
+      await run();
+    });
+
+    // TODO(alestiago): Consider adding prompt to confirm exit.
+    await _killSignal(ProcessSignal.sigint);
+    await watchSubscription.cancel();
+    _isWatching = false;
+
+    logger.info(
+      '\n👀 Stopped watching for $boldBrickName changes in $brickDirectoryPath',
+    );
   }
 }
 
@@ -319,6 +376,11 @@ extension on ArgParser {
       },
       help: 'File conflict resolution strategy.',
     );
+    addFlag(
+      'watch',
+      help: 'Watch for changes.',
+      negatable: false,
+    );
   }
 }
 
@@ -344,4 +406,20 @@ extension on Logger {
         ? err('${lightRed.wrap('✗')} $fileCount file changed')
         : err('${lightRed.wrap('✗')} $fileCount files changed');
   }
+}
+
+/// Starts listening for [signal] and completes the returned [Future] when
+/// it has been received.
+Future<void> _killSignal(ProcessSignal signal) async {
+  final terminationCompleter = Completer<void>();
+
+  final signalStream = signal.watch();
+
+  final subscription = signalStream.listen((signal) async {
+    terminationCompleter.complete();
+  });
+
+  return terminationCompleter.future.then((value) {
+    subscription.cancel();
+  });
 }
