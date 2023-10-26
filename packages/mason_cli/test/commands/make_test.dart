@@ -44,15 +44,11 @@ void main() {
       );
     });
 
-    String toBrickPath(String brickName) {
-      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      return path.join(Directory.current.path, bricksPath, brickName);
-    }
-
     setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
 
-      final brickNames = {
+      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+      final bricksNames = {
         'app_icon',
         'bio',
         'documentation',
@@ -70,7 +66,8 @@ void main() {
         'widget',
       };
       final brickNameToPathMap = {
-        for (final brickName in brickNames) brickName: toBrickPath(brickName),
+        for (final brickName in bricksNames)
+          brickName: path.join(Directory.current.path, bricksPath, brickName),
       };
 
       final masonYamlPath = path.join(Directory.current.path, 'mason.yaml');
