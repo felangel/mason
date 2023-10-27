@@ -1658,6 +1658,66 @@ bricks:
           ).called(1);
         });
 
+        test('informs when remaking', () async {
+          final killCompleter = Completer<void>();
+          didKillCommandOverride = () => killCompleter.future;
+
+          final outputFile = File(
+            path.join(
+              outputDirectory.path,
+              path.basename(localBrickTemplateFile.path),
+            ),
+          );
+
+          final outputFileWatcher = FileWatcher(outputFile.path);
+
+          final firstMakeCompleter = Completer<void>();
+          final secondMakeCompleter = Completer<void>();
+          final outputFileWatcherSubscription = outputFileWatcher.events.listen(
+            (event) {
+              if (!firstMakeCompleter.isCompleted) {
+                firstMakeCompleter.complete();
+              } else if (!secondMakeCompleter.isCompleted) {
+                secondMakeCompleter.complete();
+              }
+            },
+          );
+          addTearDown(() async => outputFileWatcherSubscription.cancel());
+
+          final run = commandRunner.run([
+            'make',
+            localBrickName,
+            '--name',
+            'Dash',
+            '--output-dir',
+            path.relative(outputDirectory.path, from: Directory.current.path),
+            '--on-conflict',
+            'overwrite',
+            watchArgument,
+          ]);
+
+          await firstMakeCompleter.future;
+          await Future<void>.delayed(pollingDelay);
+
+          localBrickTemplateFile.writeAsStringSync('Goodbye {{name}}!');
+
+          await secondMakeCompleter.future;
+
+          killCompleter.complete();
+          await run;
+
+          final boldBrickName = styleBold.wrap(localBrickName);
+          verify(
+            () => logger.info(
+              any(
+                that: contains(
+                  '\n👀 Detected changes, remaking $boldBrickName brick',
+                ),
+              ),
+            ),
+          ).called(1);
+        });
+
         test('informs when stopped watching', () async {
           final killCompleter = Completer<void>();
           didKillCommandOverride = () => killCompleter.future;
