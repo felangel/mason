@@ -27,7 +27,7 @@ DidKillCommand? didKillCommandOverride;
 ///
 /// See also:
 ///
-/// * [FileWatcher], which is the default implementation.
+/// * [PollingDirectoryWatcher], periodically polls a directory for changes.
 @visibleForTesting
 const pollingDelay = Duration(seconds: 1);
 
@@ -325,6 +325,9 @@ class _MakeCommand extends MasonCommand {
 
     final watchSubscription = directoryWatcher.events.listen(
       (event) async {
+        logger.info(
+          '\n👀 Detected changes, remaking $boldBrickName brick',
+        );
         // TODO(alestiago): Consider using onError and onData instead.
         await run();
       },
@@ -335,6 +338,7 @@ class _MakeCommand extends MasonCommand {
     await watchSubscription.cancel();
     _isWatching = false;
 
+    // TODO(alestiago): Avoid terminal showing ^C when exiting.
     logger.info(
       '\n👀 Stopped watching for $boldBrickName changes in $brickDirectoryPath',
     );
