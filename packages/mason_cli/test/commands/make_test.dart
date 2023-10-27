@@ -2,7 +2,6 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
-import 'dart:isolate';
 
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason/mason.dart' as mason show packageVersion;
@@ -13,6 +12,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
+import 'package:watcher/watcher.dart';
 
 import '../helpers/helpers.dart';
 
@@ -1432,7 +1432,7 @@ bricks:
       /// The name of the brick to watch.
       ///
       /// The brick is located in the [brickDirectory].
-      const localBrickName = 'greeting';
+      const localBrickName = 'watch_brick';
 
       /// The directory where the brick is located.
       late Directory localBrickDirectory;
@@ -1451,7 +1451,7 @@ bricks:
           ..createSync(
             recursive: true,
           );
-        // addTearDown(() => testDirectory.deleteSync(recursive: true));
+        addTearDown(() => testDirectory.deleteSync(recursive: true));
 
         Directory.current = testDirectory.path;
         addTearDown(() => Directory.current = cwd);
@@ -1516,6 +1516,11 @@ bricks:
         ).writeAsStringSync('''
 {"$localBrickName":"${localBrickDirectory.path}"}
 ''');
+
+        commandRunner = MasonCommandRunner(
+          logger: logger,
+          pubUpdater: pubUpdater,
+        );
       });
 
       group('throws a usage exception', () {
@@ -1532,16 +1537,6 @@ bricks:
           final killCompleter = Completer<void>();
           didKillCommandOverride = () => killCompleter.future;
 
-          await commandRunner.run([
-            'make',
-            localBrickName,
-            '--name',
-            'dash',
-            '--output-dir',
-            outputDirectory.path,
-            watchArgument,
-          ]);
-
           final outputFile = File(
             path.join(
               outputDirectory.path,
@@ -1549,22 +1544,58 @@ bricks:
             ),
           );
 
+          final outputFileWatcher = FileWatcher(outputFile.path);
+
+          final firstMakeCompleter = Completer<void>();
+          final secondMakeCompleter = Completer<void>();
+          final outputFileWatcherSubscription = outputFileWatcher.events.listen(
+            (event) {
+              if (!firstMakeCompleter.isCompleted) {
+                firstMakeCompleter.complete();
+              } else if (!secondMakeCompleter.isCompleted) {
+                secondMakeCompleter.complete();
+              }
+            },
+          );
+          addTearDown(() async => outputFileWatcherSubscription.cancel());
+
+          final run = commandRunner.run([
+            'make',
+            localBrickName,
+            '--name',
+            'Dash',
+            '--output-dir',
+            path.relative(outputDirectory.path, from: Directory.current.path),
+            '--on-conflict',
+            'overwrite',
+            watchArgument,
+          ]);
+
+          await firstMakeCompleter.future;
+          await Future<void>.delayed(pollingDelay);
+
           final firstMakeOutputFileContent = outputFile.readAsStringSync();
 
           localBrickTemplateFile.writeAsStringSync('Goodbye {{name}}!');
 
+          await secondMakeCompleter.future;
+
           final secondMakeOutputFileContent = outputFile.readAsStringSync();
+
+          killCompleter.complete();
+          expect(await run, ExitCode.success.code);
 
           expect(
             firstMakeOutputFileContent,
-            isNot(equals(secondMakeOutputFileContent)),
+            equals('Hello Dash!'),
             reason:
-                '''The file content should have changed after the template file was modified.''',
+                '''The first made file should have the variables replaced.''',
           );
           expect(
             secondMakeOutputFileContent,
             equals('Goodbye Dash!'),
-            reason: '''The new file should have the variables replaced.''',
+            reason:
+                '''The second made file should have the variables replaced.''',
           );
         },
       );

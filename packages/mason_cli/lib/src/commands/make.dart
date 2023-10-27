@@ -22,6 +22,15 @@ typedef DidKillCommand = Future<void> Function();
 @visibleForTesting
 DidKillCommand? didKillCommandOverride;
 
+/// Specifies the amount of time the watcher will pause between successive polls
+/// of the directory contents.
+///
+/// See also:
+///
+/// * [FileWatcher], which is the default implementation.
+@visibleForTesting
+const pollingDelay = Duration(seconds: 1);
+
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.
 /// {@endtemplate}
@@ -298,11 +307,18 @@ class _MakeCommand extends MasonCommand {
     logger.info(
       '👀 Watching for $boldBrickName changes in $brickDirectoryPath',
     );
-    final directoryWatcher = DirectoryWatcher(brickDirectoryPath);
 
-    final watchSubscription = directoryWatcher.events.listen((event) async {
-      await run();
-    });
+    final directoryWatcher = DirectoryWatcher(
+      brickDirectoryPath,
+      pollingDelay: pollingDelay,
+    );
+
+    final watchSubscription = directoryWatcher.events.listen(
+      (event) async {
+        // TODO(alestiago): Consider using onError and onData instead.
+        await run();
+      },
+    );
 
     // TODO(alestiago): Consider adding prompt to confirm exit.
     await (didKillCommandOverride?.call() ?? _didKillCommand());
@@ -436,6 +452,7 @@ extension on Logger {
 ///
 /// A kill command is a command that is sent to a process to terminate it.
 Future<void> _didKillCommand() async {
+  // TODO(alestiago): Consider if this works on all popular OSs.
   const signal = ProcessSignal.sigint;
   final terminationCompleter = Completer<void>();
 
