@@ -1434,6 +1434,9 @@ bricks:
       /// The brick is located in the [brickDirectory].
       const localBrickName = 'watch_brick';
 
+      /// The parent directory of [localBrickDirectory] and [outputDirectory].
+      late Directory testDirectory;
+
       /// The directory where the brick is located.
       late Directory localBrickDirectory;
 
@@ -1447,11 +1450,10 @@ bricks:
       late File localBrickTemplateFile;
 
       setUp(() {
-        final testDirectory = Directory(path.join(cwd.path, 'alestiago'))
+        testDirectory = Directory(path.join(cwd.path, 'alestiago'))
           ..createSync(
             recursive: true,
           );
-        addTearDown(() => testDirectory.deleteSync(recursive: true));
 
         Directory.current = testDirectory.path;
         addTearDown(() => Directory.current = cwd);
@@ -1521,6 +1523,12 @@ bricks:
           logger: logger,
           pubUpdater: pubUpdater,
         );
+      });
+
+      tearDown(() {
+        if (testDirectory.existsSync()) {
+          testDirectory.deleteSync(recursive: true);
+        }
       });
 
       group('throws a usage exception', () {
