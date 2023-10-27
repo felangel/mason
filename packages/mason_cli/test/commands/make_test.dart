@@ -1610,13 +1610,81 @@ bricks:
 
       test(
         'does not make changes when a file outside the brick changes',
-        () {},
+        () async {},
       );
 
       group('logger', () {
-        test('informs when started watching', () {});
+        test('informs when started watching', () async {
+          final killCompleter = Completer<void>();
+          didKillCommandOverride = () => killCompleter.future;
 
-        test('informs when stopped watching', () {});
+          final run = commandRunner.run([
+            'make',
+            localBrickName,
+            '--name',
+            'Dash',
+            '--output-dir',
+            path.relative(outputDirectory.path, from: Directory.current.path),
+            '--on-conflict',
+            'overwrite',
+            watchArgument,
+          ]);
+          final kill =
+              Future<void>.delayed(Duration.zero, killCompleter.complete);
+
+          await Future.wait([
+            run,
+            kill,
+          ]);
+
+          final boldBrickName = styleBold.wrap(localBrickName);
+          final brickDirectoryPath = localBrickDirectory.path;
+          verify(
+            () => logger.info(
+              any(
+                that: contains(
+                  '''👀 Watching for $boldBrickName changes in $brickDirectoryPath''',
+                ),
+              ),
+            ),
+          ).called(1);
+        });
+
+        test('informs when stopped watching', () async {
+          final killCompleter = Completer<void>();
+          didKillCommandOverride = () => killCompleter.future;
+
+          final run = commandRunner.run([
+            'make',
+            localBrickName,
+            '--name',
+            'Dash',
+            '--output-dir',
+            path.relative(outputDirectory.path, from: Directory.current.path),
+            '--on-conflict',
+            'overwrite',
+            watchArgument,
+          ]);
+          final kill =
+              Future<void>.delayed(Duration.zero, killCompleter.complete);
+
+          await Future.wait([
+            run,
+            kill,
+          ]);
+
+          final boldBrickName = styleBold.wrap(localBrickName);
+          final brickDirectoryPath = localBrickDirectory.path;
+          verify(
+            () => logger.info(
+              any(
+                that: contains(
+                  '''\n👀 Stopped watching for $boldBrickName changes in $brickDirectoryPath''',
+                ),
+              ),
+            ),
+          ).called(1);
+        });
       });
     });
   });
