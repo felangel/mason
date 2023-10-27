@@ -265,7 +265,7 @@ class _MakeCommand extends MasonCommand {
         if (filesChanged.isNotEmpty) return ExitCode.software.code;
       }
 
-      if (watch && !_isWatching) {
+      if (watch) {
         await _watch();
       }
 
@@ -294,11 +294,21 @@ class _MakeCommand extends MasonCommand {
   ///
   /// Should only be called when the flag `--watch` is specified.
   ///
-  /// Watching is only supported for local bricks.
+  /// When watching any changes done within the brick's directory will trigger
+  /// a new make command [run] (with the same arguments as the previous one).
+  ///
+  /// This method does nothing when:
+  /// - The brick is not local.
+  /// - The brick does not have a path.
+  /// - The command is already watching for changes.
+  ///
+  /// See also:
+  ///
+  /// * [DirectoryWatcher], watcher used to trigger new makes.
   Future<void> _watch() async {
-    assert(localBricks.contains(_brick), 'Can only watch local bricks.');
-    assert(_brick.path != null, 'Cannot watch bricks without a path.');
-
+    if (!localBricks.contains(_brick) || _brick.path == null || _isWatching) {
+      return;
+    }
     _isWatching = true;
 
     final brickDirectoryPath = p.dirname(_brick.path!);
