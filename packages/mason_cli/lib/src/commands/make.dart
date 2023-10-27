@@ -294,8 +294,8 @@ class _MakeCommand extends MasonCommand {
   ///
   /// Should only be called when the flag `--watch` is specified.
   ///
-  /// When watching any changes done within the brick's directory will trigger
-  /// a new make command [run] (with the same arguments as the previous one).
+  /// When watching, any changes done within the brick's directory will trigger
+  /// a new make command [run] (with the same arguments as the first [run]).
   ///
   /// This method does nothing when:
   /// - The brick is not local.
