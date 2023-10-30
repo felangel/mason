@@ -40,9 +40,7 @@ class MakeCommand extends MasonCommand {
     argParser.addOptions();
     try {
       for (final brick in bricks) {
-        addSubcommand(
-          _MakeCommand(brick, logger: logger),
-        );
+        addSubcommand(_MakeCommand(brick, logger: logger));
       }
     } catch (e) {
       _exception = e;
