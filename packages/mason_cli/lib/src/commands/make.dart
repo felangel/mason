@@ -283,7 +283,7 @@ class _MakeCommand extends MasonCommand {
   /// a new make command [run] (with the same arguments as the first [run]).
   ///
   /// This method does nothing when:
-  /// - The brick does not have a path.
+  /// - The [_brick] does not have a path.
   /// - The command is already watching for changes.
   ///
   /// See also:
