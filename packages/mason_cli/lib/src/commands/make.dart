@@ -129,13 +129,8 @@ class _MakeCommand extends MasonCommand {
     final quietMode = results['quiet'] as bool;
 
     final watch = results['watch'] as bool;
-    if (watch) {
-      if (!localBricks.contains(_brick)) {
-        usageException('Can only watch local bricks.');
-      }
-      if (_brick.path == null) {
-        usageException('Cannot watch bricks without a path.');
-      }
+    if (watch && _brick.path == null) {
+      usageException('Cannot watch a brick without a path.');
     }
 
     final path = File(_brick.path!).parent.path;

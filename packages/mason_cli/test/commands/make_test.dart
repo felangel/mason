@@ -1518,7 +1518,7 @@ bricks:
         File(
           path.join(testDirectory.path, 'mason-lock.json'),
         ).writeAsStringSync('''
-{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path)}"}}}
+{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path)}"}}
 ''');
 
         File(
@@ -1537,14 +1537,6 @@ bricks:
         if (testDirectory.existsSync()) {
           testDirectory.deleteSync(recursive: true);
         }
-      });
-
-      group('throws a usage exception', () {
-        test('when watching on a non local brick', () {
-          expect(true, isTrue);
-        });
-
-        test('when brick has no path', () {});
       });
 
       test(
@@ -1614,11 +1606,6 @@ bricks:
                 '''The second made file should have the variables replaced.''',
           );
         },
-      );
-
-      test(
-        'does not make changes when a file outside the brick changes',
-        () async {},
       );
 
       group('logger', () {
