@@ -293,7 +293,6 @@ class _MakeCommand extends MasonCommand {
   /// a new make command [run] (with the same arguments as the first [run]).
   ///
   /// This method does nothing when:
-  /// - The brick is not local.
   /// - The brick does not have a path.
   /// - The command is already watching for changes.
   ///
@@ -301,7 +300,7 @@ class _MakeCommand extends MasonCommand {
   ///
   /// * [DirectoryWatcher], watcher used to trigger new makes.
   Future<void> _watch() async {
-    if (!localBricks.contains(_brick) || _brick.path == null || _isWatching) {
+    if (_brick.path == null || _isWatching) {
       return;
     }
     _isWatching = true;
