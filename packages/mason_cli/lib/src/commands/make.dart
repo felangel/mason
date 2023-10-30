@@ -43,10 +43,7 @@ class MakeCommand extends MasonCommand {
     try {
       for (final brick in bricks) {
         addSubcommand(
-          _MakeCommand(
-            brick,
-            logger: logger,
-          ),
+          _MakeCommand(brick, logger: logger),
         );
       }
     } catch (e) {
