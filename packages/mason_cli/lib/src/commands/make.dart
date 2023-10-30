@@ -36,9 +36,7 @@ const pollingDelay = Duration(seconds: 1);
 /// {@endtemplate}
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
-  MakeCommand({
-    Logger? logger,
-  }) : super(logger: logger) {
+  MakeCommand({Logger? logger}) : super(logger: logger) {
     argParser.addOptions();
     try {
       for (final brick in bricks) {
