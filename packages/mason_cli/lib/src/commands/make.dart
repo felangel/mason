@@ -84,7 +84,7 @@ class _MakeCommand extends MasonCommand {
 
   final BrickYaml _brick;
 
-  /// Wether or not command is already watching for changes.
+  /// Whether or not command is already watching for changes.
   ///
   /// See also:
   ///
