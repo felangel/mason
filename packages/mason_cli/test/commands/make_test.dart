@@ -46,9 +46,7 @@ void main() {
 
     setUp(() {
       setUpTestingEnvironment(cwd, suffix: '.make');
-
-      final localBricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
-      final localBricksNames = {
+      const bricks = {
         'app_icon',
         'bio',
         'documentation',
@@ -65,33 +63,24 @@ void main() {
         'todos',
         'widget',
       };
-      final brickNameToPathMap = {
-        for (final brickName in localBricksNames)
-          brickName:
-              path.join(Directory.current.path, localBricksPath, brickName),
-      };
-
-      final masonYamlPath = path.join(Directory.current.path, 'mason.yaml');
-      final masonYamlContent = '''
-bricks:
-${brickNameToPathMap.entries.map((brickEntry) => '  ${brickEntry.key}:\n    ${brickEntry.value}').join('\n')}
-''';
-      final masonYaml = File(masonYamlPath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync(masonYamlContent);
-      addTearDown(() {
-        if (masonYaml.existsSync()) masonYaml.deleteSync(recursive: true);
+      final bricksPath = path.join('..', '..', '..', '..', '..', 'bricks');
+      final masonYamlBuffer = StringBuffer('bricks:\n');
+      for (final brick in bricks) {
+        masonYamlBuffer.writeln('  $brick: ${path.join(bricksPath, brick)}');
+      }
+      File(
+        path.join(Directory.current.path, 'mason.yaml'),
+      ).writeAsStringSync('$masonYamlBuffer');
+      final bricksJsonContent = json.encode({
+        for (final brick in bricks)
+          brick: canonicalize(
+            path.join(Directory.current.path, bricksPath, brick),
+          ),
       });
-
-      final bricksJsonPath =
-          path.join(Directory.current.path, '.mason', 'bricks.json');
-      final bricksJsonContent = json.encode(brickNameToPathMap);
-      final bricksYaml = File(bricksJsonPath)
-        ..createSync(recursive: true)
-        ..writeAsStringSync(bricksJsonContent);
-      addTearDown(() {
-        if (bricksYaml.existsSync()) bricksYaml.deleteSync(recursive: true);
-      });
+      final bricksJson =
+          File(path.join(Directory.current.path, '.mason', 'bricks.json'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync(bricksJsonContent);
 
       printLogs = [];
       logger = _MockLogger();
@@ -109,6 +98,10 @@ ${brickNameToPathMap.entries.map((brickEntry) => '  ${brickEntry.key}:\n    ${br
         logger: logger,
         pubUpdater: pubUpdater,
       );
+
+      addTearDown(() {
+        if (bricksJson.existsSync()) bricksJson.deleteSync(recursive: true);
+      });
     });
 
     tearDown(() {
