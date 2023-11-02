@@ -119,9 +119,13 @@ class _MakeCommand extends MasonCommand {
     final quietMode = results['quiet'] as bool;
 
     final watch = results['watch'] as bool;
+
+    // coverage:ignore-start
+    // TODO(alestiago): Investigate when can the path of a BrickYaml be null.
     if (watch && _brick.path == null) {
       usageException('Cannot watch a brick without a path.');
     }
+    // coverage:ignore-end
 
     final path = File(_brick.path!).parent.path;
     final generator = await MasonGenerator.fromBrick(Brick.path(path));
@@ -312,17 +316,14 @@ class _MakeCommand extends MasonCommand {
         logger.info(
           '\n👀 Detected changes, remaking $boldBrickName brick',
         );
-        // TODO(alestiago): Consider using onError and onData instead.
         await run();
       },
     );
 
-    // TODO(alestiago): Consider adding prompt to confirm exit.
     await (didKillCommandOverride?.call() ?? _didKillCommand());
     await watchSubscription.cancel();
     _isWatching = false;
 
-    // TODO(alestiago): Avoid terminal showing ^C when exiting.
     logger.info(
       '\n👀 Stopped watching for $boldBrickName changes in $brickDirectoryPath',
     );
@@ -450,7 +451,6 @@ extension on Logger {
 ///
 /// A kill command is a command that is sent to a process to terminate it.
 Future<void> _didKillCommand() async {
-  // TODO(alestiago): Consider if this works on all popular OSs.
   const signal = ProcessSignal.sigint;
   final terminationCompleter = Completer<void>();
 
