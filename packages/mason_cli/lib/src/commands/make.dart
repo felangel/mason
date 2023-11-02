@@ -9,13 +9,12 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:watcher/watcher.dart';
 
-/// Overrides the [ProcessSignal] that will be listened to for the termination
+/// Overrides the [ProcessSignal] that will be listened to for the interruption
 /// of the command.
 ///
 /// See also:
 ///
-/// * [_didKillCommand], listens to a [ProcessSignal] for the termination of the
-///  command.
+/// * [_didInterruptCommand], listens to a [ProcessSignal] for an interruption.
 @visibleForTesting
 ProcessSignal? processSignalOverride;
 
@@ -315,7 +314,7 @@ class _MakeCommand extends MasonCommand {
       },
     );
 
-    await _didKillCommand();
+    await _didInterruptCommand();
     await watchSubscription.cancel();
     _isWatching = false;
 
@@ -442,10 +441,10 @@ extension on Logger {
   }
 }
 
-/// Completes when a kill command is received.
+/// Completes when a command is interrupted.
 ///
-/// A kill command is a command that is sent to a process to terminate it.
-Future<void> _didKillCommand() async {
+/// Usually, a command is interrupted when the user presses `ctrl+c`.
+Future<void> _didInterruptCommand() async {
   final signal = processSignalOverride ?? ProcessSignal.sigint;
   final terminationCompleter = Completer<void>();
 
