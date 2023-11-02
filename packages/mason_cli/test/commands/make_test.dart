@@ -22,6 +22,8 @@ class _MockPubUpdater extends Mock implements PubUpdater {}
 
 class _MockProgress extends Mock implements Progress {}
 
+class _MockProcessSignal extends Mock implements ProcessSignal {}
+
 void main() {
   final cwd = Directory.current;
 
@@ -29,6 +31,7 @@ void main() {
     late Logger logger;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
+    late ProcessSignal processSignal;
 
     setUpAll(() async {
       registerFallbackValue(Object());
@@ -45,6 +48,9 @@ void main() {
       await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
         ['cache', 'clear'],
       );
+
+      processSignal = _MockProcessSignal();
+      processSignalOverride = processSignal;
     });
 
     setUp(() {
@@ -1480,8 +1486,11 @@ bricks:
       test(
         'makes changes when any file within the brick directory changes',
         () async {
-          final killCompleter = Completer<void>();
-          didKillCommandOverride = () => killCompleter.future;
+          final processSignalStreamController =
+              StreamController<ProcessSignal>();
+          addTearDown(processSignalStreamController.close);
+          when(() => processSignal.watch())
+              .thenAnswer((_) => processSignalStreamController.stream);
 
           final outputFile = File(
             path.join(
@@ -1528,7 +1537,7 @@ bricks:
 
           final secondMakeOutputFileContent = outputFile.readAsStringSync();
 
-          killCompleter.complete();
+          processSignalStreamController.add(ProcessSignal.sigint);
           expect(await run, ExitCode.success.code);
 
           expect(
@@ -1548,8 +1557,11 @@ bricks:
 
       group('logger', () {
         test('informs when started watching', () async {
-          final killCompleter = Completer<void>();
-          didKillCommandOverride = () => killCompleter.future;
+          final processSignalStreamController =
+              StreamController<ProcessSignal>();
+          addTearDown(processSignalStreamController.close);
+          when(() => processSignal.watch())
+              .thenAnswer((_) => processSignalStreamController.stream);
 
           final run = commandRunner.run([
             'make',
@@ -1562,8 +1574,10 @@ bricks:
             'overwrite',
             watchArgument,
           ]);
-          final kill =
-              Future<void>.delayed(Duration.zero, killCompleter.complete);
+          final kill = Future<void>.delayed(
+            Duration.zero,
+            () => processSignalStreamController.add(ProcessSignal.sigint),
+          );
 
           await Future.wait([
             run,
@@ -1584,8 +1598,11 @@ bricks:
         });
 
         test('informs when remaking', () async {
-          final killCompleter = Completer<void>();
-          didKillCommandOverride = () => killCompleter.future;
+          final processSignalStreamController =
+              StreamController<ProcessSignal>();
+          addTearDown(processSignalStreamController.close);
+          when(() => processSignal.watch())
+              .thenAnswer((_) => processSignalStreamController.stream);
 
           final outputFile = File(
             path.join(
@@ -1628,7 +1645,7 @@ bricks:
 
           await secondMakeCompleter.future;
 
-          killCompleter.complete();
+          processSignalStreamController.add(ProcessSignal.sigint);
           await run;
 
           final boldBrickName = styleBold.wrap(localBrickName);
@@ -1644,8 +1661,11 @@ bricks:
         });
 
         test('informs when stopped watching', () async {
-          final killCompleter = Completer<void>();
-          didKillCommandOverride = () => killCompleter.future;
+          final processSignalStreamController =
+              StreamController<ProcessSignal>();
+          addTearDown(processSignalStreamController.close);
+          when(() => processSignal.watch())
+              .thenAnswer((_) => processSignalStreamController.stream);
 
           final run = commandRunner.run([
             'make',
@@ -1658,8 +1678,10 @@ bricks:
             'overwrite',
             watchArgument,
           ]);
-          final kill =
-              Future<void>.delayed(Duration.zero, killCompleter.complete);
+          final kill = Future<void>.delayed(
+            Duration.zero,
+            () => processSignalStreamController.add(ProcessSignal.sigint),
+          );
 
           await Future.wait([
             run,

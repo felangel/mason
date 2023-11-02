@@ -9,18 +9,15 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:watcher/watcher.dart';
 
-/// A type definition for [didKillCommandOverride].
-@visibleForTesting
-typedef DidKillCommand = Future<void> Function();
-
-/// A function to be overridden by tests to simulate a kill command.
+/// Overrides the [ProcessSignal] that will be listened to for the termination
+/// of the command.
 ///
 /// See also:
 ///
-/// * [_didKillCommand], which is the default implementation.
-// TODO(alestiago): Evaluate alternatives.
+/// * [_didKillCommand], listens to a [ProcessSignal] for the termination of the
+///  command.
 @visibleForTesting
-DidKillCommand? didKillCommandOverride;
+ProcessSignal? processSignalOverride;
 
 /// Specifies the amount of time the watcher will pause between successive polls
 /// of the directory contents.
@@ -120,12 +117,10 @@ class _MakeCommand extends MasonCommand {
 
     final watch = results['watch'] as bool;
 
-    // coverage:ignore-start
     // TODO(alestiago): Investigate when can the path of a BrickYaml be null.
-    if (watch && _brick.path == null) {
-      usageException('Cannot watch a brick without a path.');
-    }
-    // coverage:ignore-end
+    // if (watch && _brick.path == null) {
+    //   usageException('Cannot watch a brick without a path.');
+    // }
 
     final path = File(_brick.path!).parent.path;
     final generator = await MasonGenerator.fromBrick(Brick.path(path));
@@ -320,7 +315,7 @@ class _MakeCommand extends MasonCommand {
       },
     );
 
-    await (didKillCommandOverride?.call() ?? _didKillCommand());
+    await _didKillCommand();
     await watchSubscription.cancel();
     _isWatching = false;
 
@@ -451,7 +446,7 @@ extension on Logger {
 ///
 /// A kill command is a command that is sent to a process to terminate it.
 Future<void> _didKillCommand() async {
-  const signal = ProcessSignal.sigint;
+  final signal = processSignalOverride ?? ProcessSignal.sigint;
   final terminationCompleter = Completer<void>();
 
   final signalStream = signal.watch();
