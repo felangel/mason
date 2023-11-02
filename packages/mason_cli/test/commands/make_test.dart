@@ -1402,10 +1402,7 @@ bricks:
       late File localBrickTemplateFile;
 
       setUp(() {
-        testDirectory = Directory(path.join(cwd.path, 'alestiago'))
-          ..createSync(
-            recursive: true,
-          );
+        testDirectory = Directory.systemTemp.createTempSync();
 
         Directory.current = testDirectory.path;
         addTearDown(() => Directory.current = cwd);
