@@ -294,8 +294,8 @@ class _MakeCommand extends MasonCommand {
     _isWatching = true;
 
     final brickDirectoryPath = p.dirname(_brick.path!);
-
     final boldBrickName = styleBold.wrap(_brick.name);
+
     logger.info(
       '👀 Watching for $boldBrickName changes in $brickDirectoryPath',
     );
