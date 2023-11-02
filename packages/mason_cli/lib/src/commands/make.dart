@@ -116,11 +116,6 @@ class _MakeCommand extends MasonCommand {
 
     final watch = results['watch'] as bool;
 
-    // TODO(alestiago): Investigate when can the path of a BrickYaml be null.
-    // if (watch && _brick.path == null) {
-    //   usageException('Cannot watch a brick without a path.');
-    // }
-
     final path = File(_brick.path!).parent.path;
     final generator = await MasonGenerator.fromBrick(Brick.path(path));
     final vars = <String, dynamic>{};
