@@ -48,9 +48,6 @@ void main() {
       await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
         ['cache', 'clear'],
       );
-
-      processSignal = _MockProcessSignal();
-      processSignalOverride = processSignal;
     });
 
     setUp(() {
@@ -111,10 +108,14 @@ void main() {
       addTearDown(() {
         if (bricksJson.existsSync()) bricksJson.deleteSync(recursive: true);
       });
+
+      processSignal = _MockProcessSignal();
+      processSignalOverride = processSignal;
     });
 
     tearDown(() {
       Directory.current = cwd;
+      processSignalOverride = null;
     });
 
     test(
@@ -1453,19 +1454,19 @@ vars:
           ..writeAsStringSync('''
 bricks:
   $localBrickName:
-    path: ${path.relative(localBrickDirectory.path, from: testDirectory.path)}
+    path: ${path.relative(localBrickDirectory.path, from: testDirectory.path).replaceAll(r'\', r'\\')}
 ''');
 
         File(
           path.join(testDirectory.path, 'mason-lock.json'),
         ).writeAsStringSync('''
-{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path)}"}}
+{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path).replaceAll(r'\', r'\\')}"}}
 ''');
 
         File(
           path.join(masonDirectory.path, 'bricks.json'),
         ).writeAsStringSync('''
-{"$localBrickName":"${localBrickDirectory.path}"}
+{"$localBrickName":"${localBrickDirectory.path.replaceAll(r'\', r'\\')}"}
 ''');
 
         commandRunner = MasonCommandRunner(
@@ -1496,11 +1497,11 @@ bricks:
             ),
           );
 
-          final outputFileWatcher = FileWatcher(outputFile.path);
+          final outputWatcher = PollingDirectoryWatcher(outputDirectory.path);
 
           final firstMakeCompleter = Completer<void>();
           final secondMakeCompleter = Completer<void>();
-          final outputFileWatcherSubscription = outputFileWatcher.events.listen(
+          final outputWatcherSubscription = outputWatcher.events.listen(
             (event) {
               if (!firstMakeCompleter.isCompleted) {
                 firstMakeCompleter.complete();
@@ -1509,7 +1510,7 @@ bricks:
               }
             },
           );
-          addTearDown(() async => outputFileWatcherSubscription.cancel());
+          addTearDown(() async => outputWatcherSubscription.cancel());
 
           final run = commandRunner.run([
             'make',
@@ -1601,18 +1602,11 @@ bricks:
           when(() => processSignal.watch())
               .thenAnswer((_) => processSignalStreamController.stream);
 
-          final outputFile = File(
-            path.join(
-              outputDirectory.path,
-              path.basename(localBrickTemplateFile.path),
-            ),
-          );
-
-          final outputFileWatcher = FileWatcher(outputFile.path);
+          final outputWatcher = PollingDirectoryWatcher(outputDirectory.path);
 
           final firstMakeCompleter = Completer<void>();
           final secondMakeCompleter = Completer<void>();
-          final outputFileWatcherSubscription = outputFileWatcher.events.listen(
+          final outputWatcherSubscription = outputWatcher.events.listen(
             (event) {
               if (!firstMakeCompleter.isCompleted) {
                 firstMakeCompleter.complete();
@@ -1621,7 +1615,7 @@ bricks:
               }
             },
           );
-          addTearDown(() async => outputFileWatcherSubscription.cancel());
+          addTearDown(() async => outputWatcherSubscription.cancel());
 
           final run = commandRunner.run([
             'make',
