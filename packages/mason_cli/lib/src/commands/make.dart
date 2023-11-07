@@ -113,7 +113,6 @@ class _MakeCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final quietMode = results['quiet'] as bool;
-
     final watch = results['watch'] as bool;
 
     final path = File(_brick.path!).parent.path;
