@@ -3,8 +3,10 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason/mason.dart' as mason show packageVersion;
+import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
@@ -12,9 +14,10 @@ import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
 import 'package:pub_updater/pub_updater.dart';
 import 'package:test/test.dart';
-import 'package:watcher/watcher.dart';
 
 import '../helpers/helpers.dart';
+
+class _MockArgResults extends Mock implements ArgResults {}
 
 class _MockLogger extends Mock implements Logger {}
 
@@ -31,7 +34,7 @@ void main() {
     late Logger logger;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
-    late ProcessSignal processSignal;
+    late ProcessSignal sigint;
 
     setUpAll(() async {
       registerFallbackValue(Object());
@@ -109,13 +112,11 @@ void main() {
         if (bricksJson.existsSync()) bricksJson.deleteSync(recursive: true);
       });
 
-      processSignal = _MockProcessSignal();
-      processSignalOverride = processSignal;
+      sigint = _MockProcessSignal();
     });
 
     tearDown(() {
       Directory.current = cwd;
-      processSignalOverride = null;
     });
 
     test(
@@ -1379,55 +1380,35 @@ bricks:
       verifyNever(() => logger.flush(any()));
     });
 
-    group('watch', () {
-      const watchArgument = '--watch';
+    test('generates brick and watches for changes (--watch)', () async {
+      const watchBrick = 'watch_brick';
+      final tempDirectory = Directory.systemTemp.createTempSync();
 
-      /// The name of the brick to watch.
-      ///
-      /// The brick is located in the [brickDirectory].
-      const localBrickName = 'watch_brick';
+      Directory.current = tempDirectory.path;
 
-      /// The parent directory of [localBrickDirectory] and [outputDirectory].
-      late Directory testDirectory;
+      addTearDown(() {
+        Directory.current = cwd;
+        if (tempDirectory.existsSync()) {
+          tempDirectory.deleteSync(recursive: true);
+        }
+      });
 
-      /// The directory where the brick is located.
-      late Directory localBrickDirectory;
+      final outputDirectory = Directory(
+        path.join(tempDirectory.path, 'watch_output'),
+      )..createSync(recursive: true);
 
-      /// The directory where the generated files from the brick are stored.
-      late Directory outputDirectory;
+      final watchBrickDirectory = Directory(
+        path.join(tempDirectory.path, watchBrick),
+      )..createSync(recursive: true);
 
-      /// A file, within [localBrickDirectory], that is used as a template.
-      ///
-      /// When watching, if this file changes, the brick should be re-generated
-      /// in the [outputDirectory].
-      late File localBrickTemplateFile;
+      final localBrickTemplateDirectory = Directory(
+        path.join(watchBrickDirectory.path, '__brick__'),
+      )..createSync(recursive: true);
 
-      setUp(() {
-        testDirectory = Directory.systemTemp.createTempSync();
-
-        Directory.current = testDirectory.path;
-        addTearDown(() => Directory.current = cwd);
-
-        outputDirectory = Directory(
-          path.join(testDirectory.path, 'watch_output'),
-        )..createSync(recursive: true);
-
-        localBrickDirectory = Directory(
-          path.join(testDirectory.path, 'watch_brick'),
-        )..createSync(recursive: true);
-
-        final localBrickTemplateDirectory = Directory(
-          path.join(localBrickDirectory.path, '__brick__'),
-        )..createSync(recursive: true);
-
-        final masonDirectory = Directory(
-          path.join(testDirectory.path, '.mason'),
-        )..createSync(recursive: true);
-
-        File(path.join(localBrickDirectory.path, 'brick.yaml'))
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-name: $localBrickName
+      File(path.join(watchBrickDirectory.path, 'brick.yaml'))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: $watchBrick
 description: A local brick that will be watched.
 version: 0.1.0+1
 
@@ -1442,256 +1423,84 @@ vars:
     prompt: What is your name?
 ''');
 
-        localBrickTemplateFile =
-            File(path.join(localBrickTemplateDirectory.path, 'hello.md'))
-              ..createSync(recursive: true)
-              ..writeAsStringSync('Hello {{name}}!');
+      final templateFile =
+          File(path.join(localBrickTemplateDirectory.path, 'hello.md'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('Hello {{name}}!');
 
-        File(
-          path.join(testDirectory.path, 'mason.yaml'),
-        )
-          ..createSync(recursive: true)
-          ..writeAsStringSync('''
-bricks:
-  $localBrickName:
-    path: ${path.relative(localBrickDirectory.path, from: testDirectory.path).replaceAll(r'\', r'\\')}
-''');
+      File(path.join(tempDirectory.path, MasonYaml.file))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('bricks:');
 
-        File(
-          path.join(testDirectory.path, 'mason-lock.json'),
-        ).writeAsStringSync('''
-{"bricks":{"$localBrickName":{"path":"${path.relative(localBrickDirectory.path, from: testDirectory.path).replaceAll(r'\', r'\\')}"}}
-''');
-
-        File(
-          path.join(masonDirectory.path, 'bricks.json'),
-        ).writeAsStringSync('''
-{"$localBrickName":"${localBrickDirectory.path.replaceAll(r'\', r'\\')}"}
-''');
-
-        commandRunner = MasonCommandRunner(
-          logger: logger,
-          pubUpdater: pubUpdater,
-        );
-      });
-
-      tearDown(() {
-        if (testDirectory.existsSync()) {
-          testDirectory.deleteSync(recursive: true);
-        }
-      });
-
-      test(
-        'makes changes when any file within the brick directory changes',
-        () async {
-          final processSignalStreamController =
-              StreamController<ProcessSignal>();
-          addTearDown(processSignalStreamController.close);
-          when(() => processSignal.watch())
-              .thenAnswer((_) => processSignalStreamController.stream);
-
-          final outputFile = File(
-            path.join(
-              outputDirectory.path,
-              path.basename(localBrickTemplateFile.path),
-            ),
-          );
-
-          final outputWatcher = PollingDirectoryWatcher(outputDirectory.path);
-
-          final firstMakeCompleter = Completer<void>();
-          final secondMakeCompleter = Completer<void>();
-          final outputWatcherSubscription = outputWatcher.events.listen(
-            (event) {
-              if (!firstMakeCompleter.isCompleted) {
-                firstMakeCompleter.complete();
-              } else if (!secondMakeCompleter.isCompleted) {
-                secondMakeCompleter.complete();
-              }
-            },
-          );
-          addTearDown(() async => outputWatcherSubscription.cancel());
-
-          final run = commandRunner.run([
-            'make',
-            localBrickName,
-            '--name',
-            'Dash',
-            '--output-dir',
-            path.relative(outputDirectory.path, from: Directory.current.path),
-            '--on-conflict',
-            'overwrite',
-            watchArgument,
-          ]);
-
-          await firstMakeCompleter.future;
-          await Future<void>.delayed(pollingDelay);
-
-          final firstMakeOutputFileContent = outputFile.readAsStringSync();
-
-          localBrickTemplateFile.writeAsStringSync('Goodbye {{name}}!');
-
-          await secondMakeCompleter.future;
-
-          final secondMakeOutputFileContent = outputFile.readAsStringSync();
-
-          processSignalStreamController.add(ProcessSignal.sigint);
-          expect(await run, ExitCode.success.code);
-
-          expect(
-            firstMakeOutputFileContent,
-            equals('Hello Dash!'),
-            reason:
-                '''The first made file should have the variables replaced.''',
-          );
-          expect(
-            secondMakeOutputFileContent,
-            equals('Goodbye Dash!'),
-            reason:
-                '''The second made file should have the variables replaced.''',
-          );
-        },
+      await commandRunner.run(
+        ['add', watchBrick, '--path', watchBrickDirectory.path],
       );
 
-      group('logger', () {
-        test('informs when started watching', () async {
-          final processSignalStreamController =
-              StreamController<ProcessSignal>();
-          addTearDown(processSignalStreamController.close);
-          when(() => processSignal.watch())
-              .thenAnswer((_) => processSignalStreamController.stream);
+      final argResults = _MockArgResults();
+      when(() => argResults.rest).thenReturn([watchBrick]);
+      when(() => argResults['name']).thenReturn('Dash');
+      when(() => argResults['output-dir']).thenReturn(outputDirectory.path);
+      when(() => argResults['on-conflict']).thenReturn('overwrite');
+      when(() => argResults['set-exit-if-changed']).thenReturn(false);
+      when(() => argResults['no-hooks']).thenReturn(false);
+      when(() => argResults['quiet']).thenReturn(false);
+      when(() => argResults['watch']).thenReturn(true);
 
-          final run = commandRunner.run([
-            'make',
-            localBrickName,
-            '--name',
-            'Dash',
-            '--output-dir',
-            path.relative(outputDirectory.path, from: Directory.current.path),
-            '--on-conflict',
-            'overwrite',
-            watchArgument,
-          ]);
-          final kill = Future<void>.delayed(
-            Duration.zero,
-            () => processSignalStreamController.add(ProcessSignal.sigint),
-          );
+      final command = MakeCommand(logger: logger, sigint: sigint);
+      final sigintController = StreamController<ProcessSignal>();
 
-          await Future.wait([
-            run,
-            kill,
-          ]);
+      addTearDown(sigintController.close);
 
-          final boldBrickName = styleBold.wrap(localBrickName);
-          final brickDirectoryPath = localBrickDirectory.path;
-          verify(
-            () => logger.info(
-              any(
-                that: contains(
-                  '''👀 Watching for $boldBrickName changes in $brickDirectoryPath''',
-                ),
-              ),
+      when(
+        () => sigint.watch(),
+      ).thenAnswer((_) => sigintController.stream);
+
+      final outputFile = File(
+        path.join(outputDirectory.path, path.basename(templateFile.path)),
+      );
+      final brickDirectoryPath = path.relative(watchBrickDirectory.path);
+
+      final make = command.subcommands['watch_brick']! as MasonCommand
+        ..testArgResults = argResults;
+
+      final run = make.run();
+
+      await untilCalled(
+        () => logger.info(
+          any(
+            that: contains(
+              'Watching for changes in $brickDirectoryPath...',
             ),
-          ).called(1);
-        });
+          ),
+        ),
+      );
 
-        test('informs when remaking', () async {
-          final processSignalStreamController =
-              StreamController<ProcessSignal>();
-          addTearDown(processSignalStreamController.close);
-          when(() => processSignal.watch())
-              .thenAnswer((_) => processSignalStreamController.stream);
+      await Future<void>.delayed(const Duration(seconds: 1));
 
-          final outputWatcher = PollingDirectoryWatcher(outputDirectory.path);
+      expect(outputFile.readAsStringSync(), equals('Hello Dash!'));
 
-          final firstMakeCompleter = Completer<void>();
-          final secondMakeCompleter = Completer<void>();
-          final outputWatcherSubscription = outputWatcher.events.listen(
-            (event) {
-              if (!firstMakeCompleter.isCompleted) {
-                firstMakeCompleter.complete();
-              } else if (!secondMakeCompleter.isCompleted) {
-                secondMakeCompleter.complete();
-              }
-            },
-          );
-          addTearDown(() async => outputWatcherSubscription.cancel());
+      templateFile.writeAsStringSync('Goodbye {{name}}!');
 
-          final run = commandRunner.run([
-            'make',
-            localBrickName,
-            '--name',
-            'Dash',
-            '--output-dir',
-            path.relative(outputDirectory.path, from: Directory.current.path),
-            '--on-conflict',
-            'overwrite',
-            watchArgument,
-          ]);
-
-          await firstMakeCompleter.future;
-          await Future<void>.delayed(pollingDelay);
-
-          localBrickTemplateFile.writeAsStringSync('Goodbye {{name}}!');
-
-          await secondMakeCompleter.future;
-
-          processSignalStreamController.add(ProcessSignal.sigint);
-          await run;
-
-          final boldBrickName = styleBold.wrap(localBrickName);
-          verify(
-            () => logger.info(
-              any(
-                that: contains(
-                  '\n👀 Detected changes, remaking $boldBrickName brick',
-                ),
-              ),
+      await untilCalled(
+        () => logger.info(
+          any(
+            that: contains(
+              'Changes detected. Making ${styleBold.wrap(watchBrick)}...',
             ),
-          ).called(1);
-        });
+          ),
+        ),
+      );
 
-        test('informs when stopped watching', () async {
-          final processSignalStreamController =
-              StreamController<ProcessSignal>();
-          addTearDown(processSignalStreamController.close);
-          when(() => processSignal.watch())
-              .thenAnswer((_) => processSignalStreamController.stream);
+      await Future<void>.delayed(const Duration(seconds: 1));
 
-          final run = commandRunner.run([
-            'make',
-            localBrickName,
-            '--name',
-            'Dash',
-            '--output-dir',
-            path.relative(outputDirectory.path, from: Directory.current.path),
-            '--on-conflict',
-            'overwrite',
-            watchArgument,
-          ]);
-          final kill = Future<void>.delayed(
-            Duration.zero,
-            () => processSignalStreamController.add(ProcessSignal.sigint),
-          );
+      expect(outputFile.readAsStringSync(), equals('Goodbye Dash!'));
 
-          await Future.wait([
-            run,
-            kill,
-          ]);
+      sigintController.add(ProcessSignal.sigint);
 
-          final boldBrickName = styleBold.wrap(localBrickName);
-          final brickDirectoryPath = localBrickDirectory.path;
-          verify(
-            () => logger.info(
-              any(
-                that: contains(
-                  '''\n👀 Stopped watching for $boldBrickName changes in $brickDirectoryPath''',
-                ),
-              ),
-            ),
-          ).called(1);
-        });
-      });
+      await expectLater(
+        run,
+        completion(equals(ProcessSignal.sigint.signalNumber)),
+      );
     });
   });
 }
