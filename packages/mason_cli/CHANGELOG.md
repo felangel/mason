@@ -1,3 +1,7 @@
+# 0.1.0-dev.53
+
+- feat: add `--watch` to `mason make` ([#1131](https://github.com/felangel/mason/issues/1131))
+
 # 0.1.0-dev.52
 
 - upgrade to `mason 0.1.0-dev.51` and `mason_logger v0.2.9`
