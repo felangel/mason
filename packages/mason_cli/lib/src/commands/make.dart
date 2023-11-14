@@ -336,6 +336,11 @@ extension on ArgParser {
       help: 'Return exit code 70 if there are files modified.',
       negatable: false,
     );
+    addFlag(
+      'watch',
+      help: 'Watch the ${BrickYaml.dir} directory for changes.',
+      negatable: false,
+    );
     addOption(
       'config-path',
       abbr: 'c',
@@ -358,11 +363,6 @@ extension on ArgParser {
         'skip': 'Always skip conflicting files.',
       },
       help: 'File conflict resolution strategy.',
-    );
-    addFlag(
-      'watch',
-      help: 'Watch for changes.',
-      negatable: false,
     );
   }
 }
