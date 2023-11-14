@@ -1404,18 +1404,15 @@ bricks:
       )..createSync(recursive: true);
 
       final localBrickTemplateDirectory = Directory(
-        path.join(watchBrickDirectory.path, '__brick__'),
+        path.join(watchBrickDirectory.path, BrickYaml.dir),
       )..createSync(recursive: true);
 
-      File(path.join(watchBrickDirectory.path, 'brick.yaml'))
+      File(path.join(watchBrickDirectory.path, BrickYaml.file))
         ..createSync(recursive: true)
         ..writeAsStringSync('''
 name: $watchBrick
 description: A local brick that will be watched.
 version: 0.1.0+1
-
-environment:
-  mason: ">=0.1.0-dev.51 <0.1.0"
 
 vars:
   name:
@@ -1461,7 +1458,7 @@ vars:
         path.join(outputDirectory.path, path.basename(helloTemplate.path)),
       );
 
-      final make = command.subcommands['watch_brick']! as MasonCommand
+      final make = command.subcommands[watchBrick]! as MasonCommand
         ..testArgResults = argResults;
 
       final run = make.run();
