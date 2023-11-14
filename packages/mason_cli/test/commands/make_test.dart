@@ -1,10 +1,14 @@
 // ignore_for_file: no_adjacent_strings_in_list
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
+import 'package:args/args.dart';
 import 'package:mason/mason.dart' hide packageVersion;
 import 'package:mason/mason.dart' as mason show packageVersion;
+import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
+import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as path;
@@ -13,19 +17,25 @@ import 'package:test/test.dart';
 
 import '../helpers/helpers.dart';
 
+class _MockArgResults extends Mock implements ArgResults {}
+
 class _MockLogger extends Mock implements Logger {}
 
 class _MockPubUpdater extends Mock implements PubUpdater {}
 
 class _MockProgress extends Mock implements Progress {}
 
+class _MockProcessSignal extends Mock implements ProcessSignal {}
+
 void main() {
   final cwd = Directory.current;
 
   group('mason make', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
+    late ProcessSignal sigint;
 
     setUpAll(() async {
       registerFallbackValue(Object());
@@ -84,12 +94,13 @@ void main() {
 
       printLogs = [];
       logger = _MockLogger();
+      progress = _MockProgress();
       pubUpdater = _MockPubUpdater();
 
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -102,6 +113,8 @@ void main() {
       addTearDown(() {
         if (bricksJson.existsSync()) bricksJson.deleteSync(recursive: true);
       });
+
+      sigint = _MockProcessSignal();
     });
 
     tearDown(() {
@@ -119,6 +132,7 @@ void main() {
               '-q, --quiet                     Run with reduced verbosity.\n'
               '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
+              '''    --watch                     Watch the __brick__ directory for changes.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -165,6 +179,7 @@ void main() {
               '-q, --quiet                     Run with reduced verbosity.\n'
               '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
+              '''    --watch                     Watch the __brick__ directory for changes.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -199,6 +214,7 @@ void main() {
               '-q, --quiet                     Run with reduced verbosity.\n'
               '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
+              '''    --watch                     Watch the __brick__ directory for changes.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -232,6 +248,7 @@ void main() {
               '-q, --quiet                     Run with reduced verbosity.\n'
               '    --no-hooks                  Skips running hooks.\n'
               '''    --set-exit-if-changed       Return exit code 70 if there are files modified.\n'''
+              '''    --watch                     Watch the __brick__ directory for changes.\n'''
               '''-c, --config-path               Path to config json file containing variables.\n'''
               '''-o, --output-dir                Directory where to output the generated code.\n'''
               '                                (defaults to ".")\n'
@@ -1359,6 +1376,140 @@ bricks:
       );
       expect(directoriesDeepEqual(actual, expected), isTrue);
       verifyNever(() => logger.flush(any()));
+    });
+
+    test('generates brick and watches for changes (--watch)', () async {
+      const watchBrick = 'watch_brick';
+      final tempDirectory = Directory.systemTemp.createTempSync();
+
+      Directory.current = tempDirectory.path;
+
+      addTearDown(() {
+        Directory.current = cwd;
+        if (tempDirectory.existsSync()) {
+          tempDirectory.deleteSync(recursive: true);
+        }
+      });
+
+      final outputDirectory = Directory(
+        path.join(tempDirectory.path, 'watch_output'),
+      )..createSync(recursive: true);
+
+      final watchBrickDirectory = Directory(
+        path.join(tempDirectory.path, watchBrick),
+      )..createSync(recursive: true);
+
+      final localBrickTemplateDirectory = Directory(
+        path.join(watchBrickDirectory.path, BrickYaml.dir),
+      )..createSync(recursive: true);
+
+      File(path.join(watchBrickDirectory.path, BrickYaml.file))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('''
+name: $watchBrick
+description: A local brick that will be watched.
+version: 0.1.0+1
+
+vars:
+  name:
+    type: string
+    description: Your name
+    default: Dash
+    prompt: What is your name?
+''');
+
+      final helloTemplate =
+          File(path.join(localBrickTemplateDirectory.path, 'hello.md'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('Hello {{name}}!');
+
+      File(path.join(tempDirectory.path, MasonYaml.file))
+        ..createSync(recursive: true)
+        ..writeAsStringSync('bricks:');
+
+      await commandRunner.run(
+        ['add', watchBrick, '--path', watchBrickDirectory.path],
+      );
+
+      final argResults = _MockArgResults();
+      when(() => argResults.rest).thenReturn([watchBrick]);
+      when(() => argResults['name']).thenReturn('Dash');
+      when(() => argResults['output-dir']).thenReturn(outputDirectory.path);
+      when(() => argResults['on-conflict']).thenReturn('overwrite');
+      when(() => argResults['set-exit-if-changed']).thenReturn(false);
+      when(() => argResults['no-hooks']).thenReturn(false);
+      when(() => argResults['quiet']).thenReturn(false);
+      when(() => argResults['watch']).thenReturn(true);
+
+      final command = MakeCommand(logger: logger, sigint: sigint);
+      final sigintController = StreamController<ProcessSignal>();
+
+      addTearDown(sigintController.close);
+
+      when(
+        () => sigint.watch(),
+      ).thenAnswer((_) => sigintController.stream);
+
+      final helloOutput = File(
+        path.join(outputDirectory.path, path.basename(helloTemplate.path)),
+      );
+
+      final make = command.subcommands[watchBrick]! as MasonCommand
+        ..testArgResults = argResults;
+
+      final run = make.run();
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
+      );
+
+      reset(progress);
+
+      expect(helloOutput.readAsStringSync(), equals('Hello Dash!'));
+
+      await Future<void>.delayed(const Duration(seconds: 1));
+
+      helloTemplate.writeAsStringSync('Hello {{name}}!!!');
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
+      );
+
+      reset(progress);
+
+      expect(helloOutput.readAsStringSync(), equals('Hello Dash!!!'));
+
+      final byeTemplate =
+          File(path.join(localBrickTemplateDirectory.path, 'bye.md'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('Bye {{name}}!');
+
+      final byeOutput = File(
+        path.join(outputDirectory.path, path.basename(byeTemplate.path)),
+      );
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 2 files.'))),
+      );
+
+      reset(progress);
+
+      expect(byeOutput.readAsStringSync(), equals('Bye Dash!'));
+
+      byeTemplate.deleteSync(recursive: true);
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
+      );
+
+      expect(byeOutput.existsSync(), isFalse);
+
+      sigintController.add(ProcessSignal.sigint);
+
+      await expectLater(
+        run,
+        completion(equals(ProcessSignal.sigint.signalNumber)),
+      );
     });
   });
 }
