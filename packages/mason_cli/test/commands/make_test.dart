@@ -32,6 +32,7 @@ void main() {
 
   group('mason make', () {
     late Logger logger;
+    late Progress progress;
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
     late ProcessSignal sigint;
@@ -93,12 +94,13 @@ void main() {
 
       printLogs = [];
       logger = _MockLogger();
+      progress = _MockProgress();
       pubUpdater = _MockPubUpdater();
 
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn('');
-      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.progress(any())).thenReturn(progress);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -1423,7 +1425,7 @@ vars:
     prompt: What is your name?
 ''');
 
-      final templateFile =
+      final helloTemplate =
           File(path.join(localBrickTemplateDirectory.path, 'hello.md'))
             ..createSync(recursive: true)
             ..writeAsStringSync('Hello {{name}}!');
@@ -1455,10 +1457,9 @@ vars:
         () => sigint.watch(),
       ).thenAnswer((_) => sigintController.stream);
 
-      final outputFile = File(
-        path.join(outputDirectory.path, path.basename(templateFile.path)),
+      final helloOutput = File(
+        path.join(outputDirectory.path, path.basename(helloTemplate.path)),
       );
-      final brickDirectoryPath = path.relative(watchBrickDirectory.path);
 
       final make = command.subcommands['watch_brick']! as MasonCommand
         ..testArgResults = argResults;
@@ -1466,34 +1467,49 @@ vars:
       final run = make.run();
 
       await untilCalled(
-        () => logger.info(
-          any(
-            that: contains(
-              'Watching for changes in $brickDirectoryPath...',
-            ),
-          ),
-        ),
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
       );
+
+      reset(progress);
+
+      expect(helloOutput.readAsStringSync(), equals('Hello Dash!'));
 
       await Future<void>.delayed(const Duration(seconds: 1));
 
-      expect(outputFile.readAsStringSync(), equals('Hello Dash!'));
-
-      templateFile.writeAsStringSync('Goodbye {{name}}!');
+      helloTemplate.writeAsStringSync('Hello {{name}}!!!');
 
       await untilCalled(
-        () => logger.info(
-          any(
-            that: contains(
-              'Changes detected. Making ${styleBold.wrap(watchBrick)}...',
-            ),
-          ),
-        ),
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
       );
 
-      await Future<void>.delayed(const Duration(seconds: 1));
+      reset(progress);
 
-      expect(outputFile.readAsStringSync(), equals('Goodbye Dash!'));
+      expect(helloOutput.readAsStringSync(), equals('Hello Dash!!!'));
+
+      final byeTemplate =
+          File(path.join(localBrickTemplateDirectory.path, 'bye.md'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync('Bye {{name}}!');
+
+      final byeOutput = File(
+        path.join(outputDirectory.path, path.basename(byeTemplate.path)),
+      );
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 2 files.'))),
+      );
+
+      reset(progress);
+
+      expect(byeOutput.readAsStringSync(), equals('Bye Dash!'));
+
+      byeTemplate.deleteSync(recursive: true);
+
+      await untilCalled(
+        () => progress.complete(any(that: contains('Generated 1 file.'))),
+      );
+
+      expect(byeOutput.existsSync(), isFalse);
 
       sigintController.add(ProcessSignal.sigint);
 

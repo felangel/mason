@@ -95,7 +95,7 @@ class _MakeCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final quietMode = results['quiet'] as bool;
-    final watch = results['watch'] as bool && _brick.path != null;
+    final watch = results['watch'] as bool;
 
     Future<int> _make() async {
       final path = File(_brick.path!).parent.path;
@@ -237,14 +237,20 @@ class _MakeCommand extends MasonCommand {
     await _make();
 
     final brickDirectoryPath = p.dirname(_brick.path!);
-    final boldBrickName = styleBold.wrap(_brick.name);
-
-    logger.info('Watching for changes in ${p.relative(brickDirectoryPath)}...');
-
     final watcher = DirectoryWatcher(brickDirectoryPath);
     final watchSubscription = watcher.events.listen(
-      (_) {
-        logger.info('Changes detected. Making $boldBrickName...');
+      (event) {
+        if (event.type == ChangeType.REMOVE) {
+          File(
+            p.join(
+              outputDir,
+              p.relative(
+                event.path,
+                from: p.join(brickDirectoryPath, BrickYaml.dir),
+              ),
+            ),
+          ).deleteSync(recursive: true);
+        }
         _make();
       },
     );
