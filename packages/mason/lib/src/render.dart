@@ -155,7 +155,7 @@ extension on String {
   }
 }
 
-/// {template resolve_partial}
+/// {@template resolve_partial}
 /// A resolver function which given a partial name.
 /// attempts to return a new [Template].
 /// {@endtemplate}
