@@ -79,7 +79,7 @@ void main() {
       });
 
       test(
-          '''does not throw HookMissingRunException when contains a valid long run method''',
+          '''does not throw HookMissingRunException when it contains a valid long run method''',
           () async {
         final brick = Brick.path(
           path.join('test', 'fixtures', 'long_run'),
