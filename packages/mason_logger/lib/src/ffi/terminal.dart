@@ -7,7 +7,7 @@ import 'package:mason_logger/src/ffi/windows_terminal.dart';
 
 /// {@template terminal}
 /// Interface for the underlying native terminal.
-/// {@endterminal}
+/// {@endtemplate}
 abstract class Terminal {
   /// {@macro terminal}
   factory Terminal() => Platform.isWindows ? WindowsTerminal() : UnixTerminal();

@@ -5,17 +5,24 @@ import 'package:args/args.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
+import 'package:watcher/watcher.dart';
 
 /// {@template make_command}
 /// `mason make` command which generates code based on a brick template.
 /// {@endtemplate}
 class MakeCommand extends MasonCommand {
   /// {@macro make_command}
-  MakeCommand({Logger? logger}) : super(logger: logger) {
+  MakeCommand({Logger? logger, ProcessSignal? sigint}) : super(logger: logger) {
     argParser.addOptions();
     try {
       for (final brick in bricks) {
-        addSubcommand(_MakeCommand(brick, logger: logger));
+        addSubcommand(
+          _MakeCommand(
+            brick,
+            sigint: sigint ?? ProcessSignal.sigint,
+            logger: logger,
+          ),
+        );
       }
     } catch (e) {
       _exception = e;
@@ -42,7 +49,8 @@ class MakeCommand extends MasonCommand {
 }
 
 class _MakeCommand extends MasonCommand {
-  _MakeCommand(this._brick, {super.logger}) {
+  _MakeCommand(this._brick, {required ProcessSignal sigint, super.logger})
+      : _sigint = sigint {
     argParser
       ..addOptions()
       ..addSeparator('${'-' * 79}\n');
@@ -58,6 +66,7 @@ class _MakeCommand extends MasonCommand {
   }
 
   final BrickYaml _brick;
+  final ProcessSignal _sigint;
 
   @override
   String get description => _brick.description;
@@ -85,138 +94,169 @@ class _MakeCommand extends MasonCommand {
     final target = DirectoryGeneratorTarget(Directory(outputDir));
     final disableHooks = results['no-hooks'] as bool;
     final quietMode = results['quiet'] as bool;
-    final path = File(_brick.path!).parent.path;
-    final generator = await MasonGenerator.fromBrick(Brick.path(path));
-    final vars = <String, dynamic>{};
+    final watch = results['watch'] as bool;
 
-    try {
-      vars.addAll(await _decodeFile(configPath));
-    } on FormatException catch (error) {
-      logger.err('${error}in $configPath');
-      return ExitCode.usage.code;
-    } catch (error) {
-      logger.err('$error');
-      return ExitCode.usage.code;
-    }
+    Future<int> _make() async {
+      final path = File(_brick.path!).parent.path;
+      final generator = await MasonGenerator.fromBrick(Brick.path(path));
+      final vars = <String, dynamic>{};
 
-    for (final entry in _brick.vars.entries) {
-      final variable = entry.key;
-      final properties = entry.value;
-      if (vars.containsKey(variable)) continue;
-      final arg = results[variable] as String?;
-      if (arg != null) {
-        vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
-      } else {
-        final prompt =
-            '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
-        late final dynamic response;
-        switch (properties.type) {
-          case BrickVariableType.string:
-            response = _maybeDecode(
-              logger.prompt(prompt, defaultValue: properties.defaultValue),
-            );
-            break;
-          case BrickVariableType.number:
-            response = logger.prompt(
-              prompt,
-              defaultValue: properties.defaultValue,
-            );
-            if (num.tryParse(response as String) == null) {
-              throw FormatException(
-                'Invalid $variable.\n"$response" is not a number.',
+      try {
+        vars.addAll(await _decodeFile(configPath));
+      } on FormatException catch (error) {
+        logger.err('${error}in $configPath');
+        return ExitCode.usage.code;
+      } catch (error) {
+        logger.err('$error');
+        return ExitCode.usage.code;
+      }
+
+      for (final entry in _brick.vars.entries) {
+        final variable = entry.key;
+        final properties = entry.value;
+        if (vars.containsKey(variable)) continue;
+        final arg = results[variable] as String?;
+        if (arg != null) {
+          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
+        } else {
+          final prompt =
+              '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
+          late final dynamic response;
+          switch (properties.type) {
+            case BrickVariableType.string:
+              response = _maybeDecode(
+                logger.prompt(prompt, defaultValue: properties.defaultValue),
               );
-            }
-            break;
-          case BrickVariableType.boolean:
-            response = logger.confirm(
-              prompt,
-              defaultValue: properties.defaultValue as bool? ?? false,
-            );
-            break;
-          case BrickVariableType.enumeration:
-            final choices = properties.values;
-            if (choices == null || choices.isEmpty) {
-              throw FormatException(
-                'Invalid $variable.\n"Enums must have at least one value.',
+              break;
+            case BrickVariableType.number:
+              response = logger.prompt(
+                prompt,
+                defaultValue: properties.defaultValue,
               );
-            }
-            response = logger.chooseOne(
-              prompt,
-              choices: choices,
-              defaultValue: properties.defaultValue?.toString(),
-            );
-            break;
-          case BrickVariableType.array:
-            final choices = properties.values;
-            if (choices == null || choices.isEmpty) {
-              throw FormatException(
-                'Invalid $variable.\n"Arrays must have at least one value.',
+              if (num.tryParse(response as String) == null) {
+                throw FormatException(
+                  'Invalid $variable.\n"$response" is not a number.',
+                );
+              }
+              break;
+            case BrickVariableType.boolean:
+              response = logger.confirm(
+                prompt,
+                defaultValue: properties.defaultValue as bool? ?? false,
               );
-            }
-            response = logger.chooseAny(
-              prompt,
-              choices: choices,
-              defaultValues:
-                  (properties.defaultValues as List?)?.cast<String>(),
-            );
-            break;
-          case BrickVariableType.list:
-            response = logger.promptAny(
-              prompt,
-              separator: properties.separator ?? ',',
-            );
-            break;
+              break;
+            case BrickVariableType.enumeration:
+              final choices = properties.values;
+              if (choices == null || choices.isEmpty) {
+                throw FormatException(
+                  'Invalid $variable.\n"Enums must have at least one value.',
+                );
+              }
+              response = logger.chooseOne(
+                prompt,
+                choices: choices,
+                defaultValue: properties.defaultValue?.toString(),
+              );
+              break;
+            case BrickVariableType.array:
+              final choices = properties.values;
+              if (choices == null || choices.isEmpty) {
+                throw FormatException(
+                  'Invalid $variable.\n"Arrays must have at least one value.',
+                );
+              }
+              response = logger.chooseAny(
+                prompt,
+                choices: choices,
+                defaultValues:
+                    (properties.defaultValues as List?)?.cast<String>(),
+              );
+              break;
+            case BrickVariableType.list:
+              response = logger.promptAny(
+                prompt,
+                separator: properties.separator ?? ',',
+              );
+              break;
+          }
+          vars.addAll(<String, dynamic>{variable: response});
         }
-        vars.addAll(<String, dynamic>{variable: response});
       }
-    }
 
-    Map<String, dynamic>? updatedVars;
-
-    if (!disableHooks) {
-      await generator.hooks.preGen(
-        vars: vars,
-        workingDirectory: outputDir,
-        onVarsChanged: (vars) => updatedVars = vars,
-        logger: logger,
-      );
-    }
-
-    final generateProgress = logger.progress('Making ${generator.id}');
-    try {
-      final files = await generator.generate(
-        target,
-        vars: updatedVars ?? vars,
-        fileConflictResolution: fileConflictResolution,
-        logger: logger,
-      );
-      generateProgress.complete(
-        'Generated ${files.length} ${files.length == 1 ? 'file' : 'files'}.',
-      );
-
-      if (!quietMode) {
-        logger.flush((message) => logger.info(darkGray.wrap(message)));
-      }
+      Map<String, dynamic>? updatedVars;
 
       if (!disableHooks) {
-        await generator.hooks.postGen(
-          vars: updatedVars ?? vars,
+        await generator.hooks.preGen(
+          vars: vars,
           workingDirectory: outputDir,
+          onVarsChanged: (vars) => updatedVars = vars,
           logger: logger,
         );
       }
 
-      if (setExitIfChanged) {
-        final filesChanged = files.where((file) => file.hasChanged);
-        logger.logFilesChanged(filesChanged.length);
-        if (filesChanged.isNotEmpty) return ExitCode.software.code;
-      }
+      final generateProgress = logger.progress('Making ${generator.id}');
+      try {
+        final files = await generator.generate(
+          target,
+          vars: updatedVars ?? vars,
+          fileConflictResolution: fileConflictResolution,
+          logger: logger,
+        );
+        generateProgress.complete(
+          'Generated ${files.length} ${files.length == 1 ? 'file' : 'files'}.',
+        );
 
-      return ExitCode.success.code;
-    } catch (_) {
-      generateProgress.fail();
-      rethrow;
+        if (!quietMode) {
+          logger.flush((message) => logger.info(darkGray.wrap(message)));
+        }
+
+        if (!disableHooks) {
+          await generator.hooks.postGen(
+            vars: updatedVars ?? vars,
+            workingDirectory: outputDir,
+            logger: logger,
+          );
+        }
+
+        if (setExitIfChanged) {
+          final filesChanged = files.where((file) => file.hasChanged);
+          logger.logFilesChanged(filesChanged.length);
+          if (filesChanged.isNotEmpty) return ExitCode.software.code;
+        }
+
+        return ExitCode.success.code;
+      } catch (_) {
+        generateProgress.fail();
+        rethrow;
+      }
     }
+
+    if (!watch) return _make();
+
+    await _make();
+
+    final brickDirectoryPath = p.dirname(_brick.path!);
+    final watcher = DirectoryWatcher(brickDirectoryPath);
+    final watchSubscription = watcher.events.listen(
+      (event) {
+        if (event.type == ChangeType.REMOVE) {
+          File(
+            p.join(
+              outputDir,
+              p.relative(
+                event.path,
+                from: p.join(brickDirectoryPath, BrickYaml.dir),
+              ),
+            ),
+          ).deleteSync(recursive: true);
+        }
+        _make();
+      },
+    );
+
+    final signal = await _sigint.watch().first;
+    await watchSubscription.cancel();
+    return signal.signalNumber;
   }
 
   Future<Map<String, dynamic>> _decodeFile(String? path) async {
@@ -294,6 +334,11 @@ extension on ArgParser {
     addFlag(
       'set-exit-if-changed',
       help: 'Return exit code 70 if there are files modified.',
+      negatable: false,
+    );
+    addFlag(
+      'watch',
+      help: 'Watch the ${BrickYaml.dir} directory for changes.',
       negatable: false,
     );
     addOption(
