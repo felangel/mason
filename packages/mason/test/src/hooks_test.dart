@@ -86,10 +86,7 @@ void main() {
         );
         final generator = await MasonGenerator.fromBrick(brick);
 
-        await expectLater(
-          () async => generator.hooks.preGen(),
-          returnsNormally,
-        );
+        await expectLater(generator.hooks.preGen, returnsNormally);
       });
 
       test(
