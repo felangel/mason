@@ -438,7 +438,7 @@ abstract class HookContext {
 }
 
 final _runRegExp = RegExp(
-  r'((void||Future<void>)\srun\((\s.*)?HookContext)',
+  r'((void||Future<void>)\srun\((\s*)?HookContext)',
   multiLine: true,
 );
 
