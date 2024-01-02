@@ -79,6 +79,20 @@ void main() {
       });
 
       test(
+          'does not throw HookMissingRunException '
+          'when it contains a valid long run method', () async {
+        final brick = Brick.path(
+          path.join('test', 'fixtures', 'long_run'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+
+        await expectLater(
+          () async => generator.hooks.preGen(),
+          returnsNormally,
+        );
+      });
+
+      test(
           'throws HookMissingRunException '
           'when hook does not contain a valid run method', () async {
         final brick = Brick.path(
