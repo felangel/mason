@@ -1,3 +1,12 @@
+# 0.1.0-dev.11
+
+- chore: run `dart fix --apply`
+- chore: use more strict analysis options
+- deps: upgrade to `mocktail ^1.0.0`
+- deps: allow latest `pkg:http`
+- chore: remove redundant parameter in default hosted uri
+- deps: bump `cli_util` from `0.3.5` to `0.4.0`
+
 # 0.1.0-dev.10
 
 - deps: upgrade to `Dart >=2.19` and `very_good_analysis ^4.0.0`
