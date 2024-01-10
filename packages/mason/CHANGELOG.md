@@ -1,6 +1,12 @@
+# 0.1.0-dev.52
+
+- fix: update hook `run` to support long Dart formats ([#1164](https://github.com/felangel/mason/issues/1164))
+- docs: include reference to `DirectoryGeneratorTarget` ([#1098](https://github.com/felangel/mason/issues/1098))
+- chore: fix malformed doc template
+
 # 0.1.0-dev.51
 
-- upgrade to `mason_logger v0.2.9`
+- deps: upgrade to `mason_logger v0.2.9`
   - fix: arrow keys on windows ([#816](https://github.com/felangel/mason/issues/816))
 - chore: improve lint rules
 - chore: `dart fix --apply`
