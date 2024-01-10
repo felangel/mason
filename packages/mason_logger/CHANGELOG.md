@@ -1,3 +1,8 @@
+# 0.2.11
+
+- chore: fix missing closing doc template 
+- chore: use `pkg:io` ([#1099](https://github.com/felangel/mason/issues/1099))
+
 # 0.2.10
 
 - fix: exit on Ctrl+C ([#1090](https://github.com/felangel/mason/issues/1090))
