@@ -135,10 +135,22 @@ class BundleCommand extends MasonCommand {
         break;
     }
 
-    String? previousContent;
+    MasonBundle? previousBundle;
     if (setExitIfChanged && bundleGenerator._bundleFile.existsSync()) {
-      previousContent = await bundleGenerator._bundleFile.readAsString();
+      switch (bundleType) {
+        case BundleType.dart:
+          previousBundle = await MasonBundle.fromDartBundle(
+            await bundleGenerator._bundleFile.readAsString(),
+          );
+          break;
+        case BundleType.universal:
+          previousBundle = await MasonBundle.fromUniversalBundle(
+            await bundleGenerator._bundleFile.readAsBytes(),
+          );
+          break;
+      }
     }
+
     try {
       await bundleGenerator.generate();
       bundleProgress.complete('Generated 1 file.');
@@ -154,7 +166,9 @@ class BundleCommand extends MasonCommand {
     }
 
     if (setExitIfChanged) {
-      final newContent = await bundleGenerator._bundleFile.readAsString();
+      final previousContent = jsonEncode(previousBundle?.toJson() ?? {});
+      final newContent = jsonEncode(bundle.toJson());
+
       if (previousContent != newContent) {
         logger.err('${lightRed.wrap('✗')} 1 file changed');
         return ExitCode.software.code;
