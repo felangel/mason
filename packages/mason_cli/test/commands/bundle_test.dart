@@ -496,7 +496,6 @@ void main() {
           setUp(() {
             final testDir = Directory(path.join(Directory.current.path, 'dart'))
               ..createSync(recursive: true);
-            addTearDown(() => testDir.deleteSync(recursive: true));
             Directory.current = testDir.path;
 
             brickPath = path.join(
@@ -551,7 +550,6 @@ void main() {
             final testDir = Directory(
               path.join(Directory.current.path, 'universal'),
             )..createSync(recursive: true);
-            addTearDown(() => testDir.deleteSync(recursive: true));
             Directory.current = testDir.path;
 
             brickPath = path.join(
