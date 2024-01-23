@@ -114,16 +114,18 @@ class BundleCommand extends MasonCommand {
     final bundleProgress = logger.progress('Bundling ${bundle.name}');
 
     try {
-      late final String bundlePath;
+      late final GeneratedFile generatedFile;
       switch (bundleType) {
         case BundleType.dart:
-          bundlePath = await _generateDartBundle(bundle, outputDir);
+          generatedFile = await _generateDartBundle(bundle, outputDir);
           break;
         case BundleType.universal:
-          bundlePath = await _generateUniversalBundle(bundle, outputDir);
+          generatedFile = await _generateUniversalBundle(bundle, outputDir);
           break;
       }
       bundleProgress.complete('Generated 1 file.');
+
+      final bundlePath = canonicalize(generatedFile.path);
       logger.info(darkGray.wrap('  $bundlePath'));
     } catch (_) {
       bundleProgress.fail();
@@ -136,28 +138,6 @@ class BundleCommand extends MasonCommand {
   }
 }
 
-Future<String> _generateDartBundle(
-  MasonBundle bundle,
-  String outputDir,
-) async {
-  final file = File(path.join(outputDir, '${bundle.name}_bundle.dart'));
-  await file.create(recursive: true);
-  await file.writeAsString(
-    "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: type=lint, implicit_dynamic_list_literal, implicit_dynamic_map_literal, inference_failure_on_collection_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});",
-  );
-  return canonicalize(file.path);
-}
-
-Future<String> _generateUniversalBundle(
-  MasonBundle bundle,
-  String outputDir,
-) async {
-  final file = File(path.join(outputDir, '${bundle.name}.bundle'));
-  await file.create(recursive: true);
-  await file.writeAsBytes(await bundle.toUniversalBundle());
-  return canonicalize(file.path);
-}
-
 extension on String {
   BundleType toBundleType() {
     switch (this) {
@@ -168,4 +148,55 @@ extension on String {
         return BundleType.universal;
     }
   }
+}
+
+Future<GeneratedFile> _generateDartBundle(
+  MasonBundle bundle,
+  String outputDir,
+) async {
+  final file = File(path.join(outputDir, '${bundle.name}_bundle.dart'));
+
+  late GeneratedFile generatedFile;
+  if (!file.existsSync()) {
+    generatedFile = GeneratedFile.created(path: file.path);
+    await file.create(recursive: true);
+  }
+
+  final content = await file.readAsString();
+  final newContent =
+      "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: type=lint, implicit_dynamic_list_literal, implicit_dynamic_map_literal, inference_failure_on_collection_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(bundle.toJson())});";
+
+  if (content != newContent) {
+    await file.writeAsString(newContent);
+    generatedFile = GeneratedFile.overwritten(path: file.path);
+  } else {
+    generatedFile = GeneratedFile.identical(path: file.path);
+  }
+
+  return generatedFile;
+}
+
+Future<GeneratedFile> _generateUniversalBundle(
+  MasonBundle bundle,
+  String outputDir,
+) async {
+  final file = File(path.join(outputDir, '${bundle.name}_bundle.dart'));
+
+  late GeneratedFile generatedFile;
+  if (!file.existsSync()) {
+    generatedFile = GeneratedFile.created(path: file.path);
+    await file.create(recursive: true);
+  }
+
+  final bytes = await file.readAsBytes();
+  final newBytes = await bundle.toUniversalBundle();
+
+  if (bytes != newBytes) {
+    await file.writeAsBytes(newBytes);
+    generatedFile = GeneratedFile.overwritten(path: file.path);
+  } else {
+    generatedFile = GeneratedFile.identical(path: file.path);
+  }
+
+  return generatedFile;
 }
