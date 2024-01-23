@@ -6,7 +6,6 @@ import 'package:mason/mason.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
-/// {@template brick_ignore}
 /// A file that defines what brick files or directories should be ignored during
 /// bundling.
 ///
@@ -36,7 +35,6 @@ import 'package:path/path.dart' as path;
 /// See also:
 ///
 /// * [createBundle], which creates a [MasonBundle] from a brick directory.
-/// {@endtemplate}
 @internal
 class BrickIgnore {
   BrickIgnore._({
