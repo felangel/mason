@@ -22,6 +22,7 @@ void main() {
 
   group(
     'mason bundle',
+    timeout: const Timeout.factor(2),
     () {
       late Logger logger;
       late Progress progress;
@@ -487,7 +488,121 @@ void main() {
           verifyNever(() => logger.progress(any()));
         });
       });
+
+      group('set-exit-if-changed', () {
+        group('with Dart bundle', () {
+          late String brickPath;
+
+          setUp(() {
+            final testDir = Directory(path.join(Directory.current.path, 'dart'))
+              ..createSync(recursive: true);
+            addTearDown(() => testDir.deleteSync(recursive: true));
+            Directory.current = testDir.path;
+
+            brickPath = path.join(
+              '..',
+              '..',
+              '..',
+              '..',
+              '..',
+              '..',
+              'bricks',
+              'greeting',
+            );
+          });
+
+          test(
+            'exits with code 70 when created',
+            () async {
+              final result = await commandRunner.run(
+                ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+              );
+
+              expect(
+                result,
+                equals(ExitCode.software.code),
+                reason:
+                    '''Since the bundle did not exist previously, it reports the change''',
+              );
+            },
+          );
+
+          test('exits successfully when unchanged', () async {
+            // Generate once, so that the bundle exists.
+            await commandRunner.run(['bundle', '-t', 'dart', brickPath]);
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+            );
+
+            expect(
+              result,
+              equals(ExitCode.success.code),
+              reason:
+                  '''The bundle has not changed, so it should not report an error''',
+            );
+          });
+        });
+
+        group('with Universal bundle', () {
+          late String brickPath;
+
+          setUp(() {
+            final testDir = Directory(
+              path.join(Directory.current.path, 'universal'),
+            )..createSync(recursive: true);
+            addTearDown(() => testDir.deleteSync(recursive: true));
+            Directory.current = testDir.path;
+
+            brickPath = path.join(
+              '..',
+              '..',
+              '..',
+              '..',
+              '..',
+              '..',
+              'bricks',
+              'greeting',
+            );
+          });
+
+          test(
+            'exits with code 70 when created',
+            () async {
+              final result = await commandRunner.run(
+                ['bundle', brickPath, '--set-exit-if-changed'],
+              );
+
+              expect(
+                result,
+                equals(ExitCode.software.code),
+                reason:
+                    '''Since the bundle did not exist previously, it reports the change''',
+              );
+            },
+          );
+
+          test('exits successfully when unchanged', () async {
+            // Generate once, so that the bundle exists.
+            final result1 = await commandRunner.run(['bundle', brickPath]);
+            expect(result1, equals(ExitCode.success.code));
+
+            final result = await commandRunner.run(
+              [
+                'bundle',
+                brickPath,
+              ],
+            );
+
+            expect(
+              result,
+              equals(ExitCode.success.code),
+              reason:
+                  '''The bundle has not changed, so it should not report an error''',
+            );
+          });
+        });
+      });
     },
-    timeout: const Timeout.factor(2),
   );
 }
