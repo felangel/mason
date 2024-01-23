@@ -492,11 +492,16 @@ void main() {
       group('set-exit-if-changed', () {
         setUp(() {
           final tempTestDirectory = Directory.current.createTempSync();
-          Directory.current = tempTestDirectory.path;
           addTearDown(() {
             if (tempTestDirectory.existsSync()) {
               tempTestDirectory.deleteSync(recursive: true);
             }
+          });
+
+          final currentDirectory = Directory.current;
+          Directory.current = tempTestDirectory.path;
+          addTearDown(() {
+            Directory.current = currentDirectory;
           });
         });
 
