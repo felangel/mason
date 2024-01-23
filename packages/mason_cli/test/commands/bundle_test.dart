@@ -490,14 +490,20 @@ void main() {
       });
 
       group('set-exit-if-changed', () {
+        setUp(() {
+          final tempTestDirectory = Directory.current.createTempSync();
+          Directory.current = tempTestDirectory.path;
+          addTearDown(() {
+            if (tempTestDirectory.existsSync()) {
+              tempTestDirectory.deleteSync(recursive: true);
+            }
+          });
+        });
+
         group('with Dart bundle', () {
           late String brickPath;
 
           setUp(() {
-            final testDir = Directory(path.join(Directory.current.path, 'dart'))
-              ..createSync(recursive: true);
-            Directory.current = testDir.path;
-
             brickPath = path.join(
               '..',
               '..',
@@ -547,11 +553,6 @@ void main() {
           late String brickPath;
 
           setUp(() {
-            final testDir = Directory(
-              path.join(Directory.current.path, 'universal'),
-            )..createSync(recursive: true);
-            Directory.current = testDir.path;
-
             brickPath = path.join(
               '..',
               '..',
