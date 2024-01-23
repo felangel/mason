@@ -68,8 +68,8 @@ class BrickIgnore {
   /// The absolute path to the ignore file.
   final String _path;
 
-  /// The absolute absolute path to the directory where all brick templated
-  /// files are located.
+  /// The absolute path to the directory where all brick templated files are
+  /// located.
   ///
   /// See also:
   ///
