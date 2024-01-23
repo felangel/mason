@@ -136,10 +136,8 @@ class BundleCommand extends MasonCommand {
     }
 
     String? previousContent;
-    if (setExitIfChanged) {
-      final bundleFile = bundleGenerator._bundleFile;
-      previousContent =
-          bundleFile.existsSync() ? await bundleFile.readAsString() : '';
+    if (setExitIfChanged && bundleGenerator._bundleFile.existsSync()) {
+      previousContent = await bundleGenerator._bundleFile.readAsString();
     }
     try {
       await bundleGenerator.generate();
