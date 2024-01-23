@@ -59,8 +59,7 @@ class BrickIgnore {
     );
   }
 
-  /// The name of the file to be created at the root of the brick.
-  /// `brick.yaml`
+  /// The name of the file to be used as the ignore file.
   static const file = '.brickignore';
 
   final UnmodifiableListView<Glob> _globs;
