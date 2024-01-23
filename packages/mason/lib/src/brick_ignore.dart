@@ -7,10 +7,10 @@ import 'package:meta/meta.dart';
 import 'package:path/path.dart' as path;
 
 /// {@template brick_ignore}
-/// A file that is created at the root of the brick to ignore files
-/// and directories during bundling.
+/// A file that defines what brick files or directories should be ignored during
+/// bundling.
 ///
-/// Only those directories under `__brick__` can be ignored.
+/// Only those directories and files under `__brick__` can be ignored.
 ///
 /// For example, given the following brick directory:
 ///
