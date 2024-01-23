@@ -588,14 +588,10 @@ void main() {
 
           test('exits successfully when unchanged', () async {
             // Generate once, so that the bundle exists.
-            final result1 = await commandRunner.run(['bundle', brickPath]);
-            expect(result1, equals(ExitCode.success.code));
+            await commandRunner.run(['bundle', brickPath]);
 
             final result = await commandRunner.run(
-              [
-                'bundle',
-                brickPath,
-              ],
+              ['bundle', brickPath, '--set-exit-if-changed'],
             );
 
             expect(
