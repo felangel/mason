@@ -98,12 +98,13 @@ void main() {
         final notIgnoredFilePath = path.join(
           brickIgnoreFile.parent.path,
           '__brick__',
-          'main.dart',
+          'goodbye.dart',
         );
         expect(
           brickIgnore.isIgnored(notIgnoredFilePath),
           isFalse,
-          reason: '`main.dart` is under `__brick__` and there are no ignores',
+          reason:
+              '`goodbye.dart` is under `__brick__` and there are no ignores',
         );
       });
     });
