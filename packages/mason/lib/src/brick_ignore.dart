@@ -48,9 +48,9 @@ class BrickIgnore {
   /// Creates a [BrickIgnore] from a [File].
   factory BrickIgnore.fromFile(File file) {
     final lines = file.readAsLinesSync();
-    final globs = lines.where((line) => !line.startsWith('#')).map(
-          (line) => Glob(line.trim()),
-        );
+    final globs = lines
+        .where((line) => !line.startsWith(_commentCharacter))
+        .map((line) => Glob(line.trim()));
 
     final brickDirectoryPath = path.join(file.parent.path, BrickYaml.dir);
 
@@ -63,6 +63,17 @@ class BrickIgnore {
 
   /// The name of the file to be used as the ignore file.
   static const file = '.brickignore';
+
+  /// The character that indicates a comment in the ignore file.
+  ///
+  /// If the line starts with this character, the line is considered a comment
+  /// and is ignored.
+  ///
+  /// For example:
+  /// ```txt
+  /// # This is a comment
+  /// ```
+  static const _commentCharacter = '#';
 
   final UnmodifiableListView<Glob> _globs;
 
