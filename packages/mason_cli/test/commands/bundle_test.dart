@@ -490,116 +490,108 @@ void main() {
       });
 
       group('set-exit-if-changed', () {
-        setUp(() {
-          final tempTestDirectory = Directory.current.createTempSync();
-          addTearDown(() {
-            if (tempTestDirectory.existsSync()) {
-              tempTestDirectory.deleteSync(recursive: true);
-            }
-          });
+        final brickPath = path.join(
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          'bricks',
+          'greeting',
+        );
 
-          final currentDirectory = Directory.current;
-          Directory.current = tempTestDirectory.path;
+        setUp(() {
+          final tempTestDir = Directory.current.createTempSync();
+          Directory.current = tempTestDir.path;
+
           addTearDown(() {
-            Directory.current = currentDirectory;
+            if (tempTestDir.existsSync()) {
+              tempTestDir.deleteSync(recursive: true);
+            }
           });
         });
 
-        group('with Dart bundle', () {
-          late String brickPath;
+        group('with dart bundle', () {
+          final bundleFile = File('greeting_bundle.dart');
 
-          setUp(() {
-            brickPath = path.join(
-              '..',
-              '..',
-              '..',
-              '..',
-              '..',
-              '..',
-              'bricks',
-              'greeting',
+          test('exits with code 70 when bundle was newly created', () async {
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
             );
+
+            expect(result, equals(ExitCode.software.code));
           });
 
-          test(
-            'exits with code 70 when created',
-            () async {
-              final result = await commandRunner.run(
-                ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
-              );
+          test('exits with code 70 when bundle was modified', () async {
+            await commandRunner.run(['bundle', '-t', 'dart', brickPath]);
 
-              expect(
-                result,
-                equals(ExitCode.software.code),
-                reason:
-                    '''Since the bundle did not exist previously, it reports the change''',
-              );
-            },
-          );
+            final originalContents = bundleFile.readAsStringSync();
 
-          test('exits successfully when unchanged', () async {
-            // Generate once, so that the bundle exists.
+            bundleFile.writeAsStringSync(
+              originalContents.replaceAll('greeting', 'modified_greeting'),
+            );
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+            expect(bundleFile.readAsStringSync(), equals(originalContents));
+          });
+
+          test('exits with code 0 when bundle was not changed', () async {
             await commandRunner.run(['bundle', '-t', 'dart', brickPath]);
 
             final result = await commandRunner.run(
               ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
             );
 
-            expect(
-              result,
-              equals(ExitCode.success.code),
-              reason:
-                  '''The bundle has not changed, so it should not report an error''',
-            );
+            expect(result, equals(ExitCode.success.code));
           });
         });
 
-        group('with Universal bundle', () {
-          late String brickPath;
+        group('with universal bundle', () {
+          final bundleFile = File('greeting.bundle');
 
-          setUp(() {
-            brickPath = path.join(
-              '..',
-              '..',
-              '..',
-              '..',
-              '..',
-              '..',
-              'bricks',
-              'greeting',
+          test('exits with code 70 when bundle was newly created', () async {
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '--set-exit-if-changed'],
             );
+
+            expect(result, equals(ExitCode.software.code));
           });
 
-          test(
-            'exits with code 70 when created',
-            () async {
-              final result = await commandRunner.run(
-                ['bundle', brickPath, '--set-exit-if-changed'],
-              );
+          test('exits with code 70 when bundle was modified', () async {
+            await commandRunner.run(['bundle', brickPath]);
 
-              expect(
-                result,
-                equals(ExitCode.software.code),
-                reason:
-                    '''Since the bundle did not exist previously, it reports the change''',
-              );
-            },
-          );
+            final originalBytes = bundleFile.readAsBytesSync();
 
-          test('exits successfully when unchanged', () async {
-            // Generate once, so that the bundle exists.
+            final bundle = await MasonBundle.fromUniversalBundle(originalBytes);
+            final bundleJson = jsonEncode(bundle.toJson())
+                .replaceAll('greeting', 'modified_greeting');
+            final modifiedBundle = MasonBundle.fromJson(
+              jsonDecode(bundleJson) as Map<String, dynamic>,
+            );
+            final modifiedBytes = await modifiedBundle.toUniversalBundle();
+            bundleFile.writeAsBytesSync(modifiedBytes);
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+            expect(bundleFile.readAsBytesSync(), equals(originalBytes));
+          });
+
+          test('exits with code 0 when bundle was not changed', () async {
             await commandRunner.run(['bundle', brickPath]);
 
             final result = await commandRunner.run(
               ['bundle', brickPath, '--set-exit-if-changed'],
             );
 
-            expect(
-              result,
-              equals(ExitCode.success.code),
-              reason:
-                  '''The bundle has not changed, so it should not report an error''',
-            );
+            expect(result, equals(ExitCode.success.code));
           });
         });
       });
