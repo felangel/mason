@@ -487,6 +487,113 @@ void main() {
           verifyNever(() => logger.progress(any()));
         });
       });
+
+      group('set-exit-if-changed', () {
+        final brickPath = path.join(
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          '..',
+          'bricks',
+          'greeting',
+        );
+
+        setUp(() {
+          final tempTestDir = Directory.current.createTempSync();
+          Directory.current = tempTestDir.path;
+
+          addTearDown(() {
+            try {
+              tempTestDir.deleteSync(recursive: true);
+            } catch (_) {}
+          });
+        });
+
+        group('with dart bundle', () {
+          final bundleFile = File('greeting_bundle.dart');
+
+          test('exits with code 70 when bundle was newly created', () async {
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+          });
+
+          test('exits with code 70 when bundle was modified', () async {
+            await commandRunner.run(['bundle', '-t', 'dart', brickPath]);
+
+            final originalContents = bundleFile.readAsStringSync();
+
+            bundleFile.writeAsStringSync(
+              originalContents.replaceAll('greeting', 'modified_greeting'),
+            );
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+            expect(bundleFile.readAsStringSync(), equals(originalContents));
+          });
+
+          test('exits with code 0 when bundle was not changed', () async {
+            await commandRunner.run(['bundle', '-t', 'dart', brickPath]);
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '-t', 'dart', '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.success.code));
+          });
+        });
+
+        group('with universal bundle', () {
+          final bundleFile = File('greeting.bundle');
+
+          test('exits with code 70 when bundle was newly created', () async {
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+          });
+
+          test('exits with code 70 when bundle was modified', () async {
+            await commandRunner.run(['bundle', brickPath]);
+
+            final originalBytes = bundleFile.readAsBytesSync();
+
+            final bundle = await MasonBundle.fromUniversalBundle(originalBytes);
+            final bundleJson = jsonEncode(bundle.toJson())
+                .replaceAll('greeting', 'modified_greeting');
+            final modifiedBundle = MasonBundle.fromJson(
+              jsonDecode(bundleJson) as Map<String, dynamic>,
+            );
+            final modifiedBytes = await modifiedBundle.toUniversalBundle();
+            bundleFile.writeAsBytesSync(modifiedBytes);
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.software.code));
+            expect(bundleFile.readAsBytesSync(), equals(originalBytes));
+          });
+
+          test('exits with code 0 when bundle was not changed', () async {
+            await commandRunner.run(['bundle', brickPath]);
+
+            final result = await commandRunner.run(
+              ['bundle', brickPath, '--set-exit-if-changed'],
+            );
+
+            expect(result, equals(ExitCode.success.code));
+          });
+        });
+      });
     },
     timeout: const Timeout.factor(2),
   );
