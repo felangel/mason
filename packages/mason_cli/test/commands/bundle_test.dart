@@ -22,7 +22,6 @@ void main() {
 
   group(
     'mason bundle',
-    timeout: const Timeout.factor(2),
     () {
       late Logger logger;
       late Progress progress;
@@ -596,5 +595,6 @@ void main() {
         });
       });
     },
+    timeout: const Timeout.factor(2),
   );
 }
