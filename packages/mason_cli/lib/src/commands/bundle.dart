@@ -192,9 +192,8 @@ extension on String {
 }
 
 /// {@template brick_bundle_generator}
-/// Interface that defines a bundle generator.
-///
-/// A bundle generator is responsible for generating a bundle for a brick.
+/// A bundle generator is responsible for generating a
+/// brick bundle for a given [MasonBundle].
 ///
 /// See also:
 ///
