@@ -136,16 +136,16 @@ class BundleCommand extends MasonCommand {
     }
 
     MasonBundle? previousBundle;
-    if (setExitIfChanged && bundleGenerator._bundleFile.existsSync()) {
+    if (setExitIfChanged && bundleGenerator.bundleFile.existsSync()) {
       switch (bundleType) {
         case BundleType.dart:
           previousBundle = await MasonBundle.fromDartBundle(
-            await bundleGenerator._bundleFile.readAsString(),
+            await bundleGenerator.bundleFile.readAsString(),
           );
           break;
         case BundleType.universal:
           previousBundle = await MasonBundle.fromUniversalBundle(
-            await bundleGenerator._bundleFile.readAsBytes(),
+            await bundleGenerator.bundleFile.readAsBytes(),
           );
           break;
       }
@@ -154,10 +154,9 @@ class BundleCommand extends MasonCommand {
     try {
       await bundleGenerator.generate();
       bundleProgress.complete('Generated 1 file.');
+      final bundlePath = canonicalize(bundleGenerator.bundleFile.path);
 
-      final canonicalBundlePath =
-          canonicalize(bundleGenerator._bundleFile.path);
-      logger.info(darkGray.wrap('  $canonicalBundlePath'));
+      logger.info(darkGray.wrap('  $bundlePath'));
     } catch (_) {
       bundleProgress.fail();
       rethrow;
@@ -207,15 +206,17 @@ extension on String {
 abstract class _BrickBundleGenerator {
   /// {@macro brick_bundle_generator}
   const _BrickBundleGenerator({
-    required File bundleFile,
+    required this.bundleFile,
     required MasonBundle bundle,
-  })  : _bundleFile = bundleFile,
-        _bundle = bundle;
+  }) : _bundle = bundle;
 
+  /// The respective [MasonBundle] for which a brick bundle will be generated.
   final MasonBundle _bundle;
 
-  final File _bundleFile;
+  /// The file that we will be writing the brick bundle to.
+  final File bundleFile;
 
+  /// Generates the brick bundle file for the given [MasonBundle].
   Future<void> generate();
 }
 
@@ -235,8 +236,8 @@ class _BrickDartBundleGenerator extends _BrickBundleGenerator {
 
   @override
   Future<void> generate() async {
-    await _bundleFile.create(recursive: true);
-    await _bundleFile.writeAsString(
+    await bundleFile.create(recursive: true);
+    await bundleFile.writeAsString(
       "// GENERATED CODE - DO NOT MODIFY BY HAND\n// ignore_for_file: type=lint, implicit_dynamic_list_literal, implicit_dynamic_map_literal, inference_failure_on_collection_literal\n\nimport 'package:mason/mason.dart';\n\nfinal ${_bundle.name.camelCase}Bundle = MasonBundle.fromJson(<String, dynamic>${json.encode(_bundle.toJson())});",
     );
   }
@@ -258,7 +259,7 @@ class _BrickUniversalBundleGenerator extends _BrickBundleGenerator {
 
   @override
   Future<void> generate() async {
-    await _bundleFile.create(recursive: true);
-    await _bundleFile.writeAsBytes(await _bundle.toUniversalBundle());
+    await bundleFile.create(recursive: true);
+    await bundleFile.writeAsBytes(await _bundle.toUniversalBundle());
   }
 }
