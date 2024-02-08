@@ -25,12 +25,16 @@ import 'package:path/path.dart' as path;
 /// And the following `.brickignore` file content:
 ///
 /// ```txt
+/// # Ignore all markdown files
 /// **.md
 /// ```
 ///
 /// The `HELLO.md` file will be ignored during bundling, but `goodbye.dart` will
 /// not be ignored. Those other files not under `__brick__` are not bundled,
 /// hence they can not be ignored.
+///
+/// Note that the ignore file supports comments, which are lines that start
+/// with a `#` character.
 ///
 /// See also:
 ///
