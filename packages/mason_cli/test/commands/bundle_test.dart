@@ -505,9 +505,9 @@ void main() {
           Directory.current = tempTestDir.path;
 
           addTearDown(() {
-            if (tempTestDir.existsSync()) {
+            try {
               tempTestDir.deleteSync(recursive: true);
-            }
+            } catch (_) {}
           });
         });
 
