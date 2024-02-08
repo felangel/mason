@@ -75,6 +75,36 @@ void main() {
           reason: '`HELLO.md` is under `__brick__` and there are no ignores',
         );
       });
+
+      test('returns as expected when the file has comments', () {
+        brickIgnoreFile.writeAsStringSync('''
+# Some comment
+**.md
+''');
+        final brickIgnore = BrickIgnore.fromFile(brickIgnoreFile);
+
+        final ignoredFilePath = path.join(
+          brickIgnoreFile.parent.path,
+          '__brick__',
+          'HELLO.md',
+        );
+        expect(
+          brickIgnore.isIgnored(ignoredFilePath),
+          isTrue,
+          reason: '`HELLO.md` is under `__brick__` and is ignored by `**.md`',
+        );
+
+        final notIgnoredFilePath = path.join(
+          brickIgnoreFile.parent.path,
+          '__brick__',
+          'main.dart',
+        );
+        expect(
+          brickIgnore.isIgnored(notIgnoredFilePath),
+          isFalse,
+          reason: '`main.dart` is under `__brick__` and there are no ignores',
+        );
+      });
     });
   });
 }

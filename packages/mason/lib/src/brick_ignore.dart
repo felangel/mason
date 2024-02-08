@@ -48,7 +48,9 @@ class BrickIgnore {
   /// Creates a [BrickIgnore] from a [File].
   factory BrickIgnore.fromFile(File file) {
     final lines = file.readAsLinesSync();
-    final globs = lines.map(Glob.new);
+    final globs = lines.where((line) => !line.startsWith('#')).map(
+          (line) => Glob(line.trim()),
+        );
 
     final brickDirectoryPath = path.join(file.parent.path, BrickYaml.dir);
 
