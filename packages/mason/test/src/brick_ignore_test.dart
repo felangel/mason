@@ -80,6 +80,7 @@ void main() {
         brickIgnoreFile.writeAsStringSync('''
 # Some comment
 **.md
+# **.dart
 ''');
         final brickIgnore = BrickIgnore.fromFile(brickIgnoreFile);
 
