@@ -4,23 +4,47 @@ updates:
     directory: "/"
     schedule:
       interval: "daily"
+    groups:
+      github_actions:
+        patterns:
+          - "*"
   - package-ecosystem: "pub"
     directory: "/packages/mason_cli"
     schedule:
       interval: "daily"
+    groups:
+      mason_cli:
+        patterns:
+          - "*"
   - package-ecosystem: "pub"
     directory: "/packages/mason_logger"
     schedule:
       interval: "daily"
+    groups:
+      mason_logger:
+        patterns:
+          - "*"
   - package-ecosystem: "pub"
     directory: "/packages/mason"
     schedule:
       interval: "daily"
+    groups:
+      mason:
+        patterns:
+          - "*"
   - package-ecosystem: "pub"
     directory: "/packages/mason_api"
     schedule:
       interval: "daily"
+    groups:
+      mason_api:
+        patterns:
+          - "*"
   - package-ecosystem: "npm"
     directory: "/extensions/vscode"
     schedule:
       interval: "daily"
+    groups:
+      vscode:
+        patterns:
+          - "*"
