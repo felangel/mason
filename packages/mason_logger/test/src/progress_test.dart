@@ -55,6 +55,33 @@ void main() {
       );
     });
 
+    test(
+        'writes static message when stdioType is not terminal w/custom trailing',
+        () async {
+      const progressOptions = ProgressOptions(trailing: '!!!');
+      when(() => stdout.hasTerminal).thenReturn(false);
+      await _runZoned(
+        () async {
+          const message = 'test message';
+          final done = Logger(progressOptions: progressOptions).progress(
+            message,
+          );
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          done.complete();
+          verifyInOrder([
+            () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
+            () {
+              stdout.write(
+                '''\u001b[2K\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     test('writes custom progress animation to stdout', () async {
       await _runZoned(
         () async {
@@ -119,6 +146,47 @@ void main() {
             () {
               stdout.write(
                 '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.3s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        stdin: () => stdin,
+      );
+    });
+
+    test('writes custom progress animation to stdout w/custom trailing',
+        () async {
+      await _runZoned(
+        () async {
+          const time = '(0.Xs)';
+          const message = 'test message';
+          const progressOptions = ProgressOptions(
+            animation: ProgressAnimation(frames: ['+', 'x', '*']),
+            trailing: '!!!',
+          );
+          final done = Logger().progress(message, options: progressOptions);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          done.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message!!! ${darkGray.wrap('(0.1s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}x')} $message!!! ${darkGray.wrap('(0.2s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}*')} $message!!! ${darkGray.wrap('(0.3s)')}''',
               );
             },
             () {

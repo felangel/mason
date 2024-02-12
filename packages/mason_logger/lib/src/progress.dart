@@ -5,10 +5,17 @@ part of 'mason_logger.dart';
 /// {@endtemplate}
 class ProgressOptions {
   /// {@macro progress_options}
-  const ProgressOptions({this.animation = const ProgressAnimation()});
+  const ProgressOptions({
+    this.animation = const ProgressAnimation(),
+    this.trailing = '...',
+  });
 
   /// The progress animation configuration.
   final ProgressAnimation animation;
+
+  /// The trailing string following progress messages.
+  /// Defaults to "..."
+  final String trailing;
 }
 
 /// {@template progress_animation}
@@ -58,7 +65,7 @@ class Progress {
       final frames = _options.animation.frames;
       final char = frames.isEmpty ? '' : frames.first;
       final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
-      _write('$prefix$_message...');
+      _write('$prefix$_message${_options.trailing}');
       return;
     }
 
@@ -130,7 +137,7 @@ class Progress {
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
 
-    _write('$_clearLine$prefix$_message... $_time');
+    _write('$_clearLine$prefix$_message${_options.trailing} $_time');
   }
 
   void _write(String object) {
