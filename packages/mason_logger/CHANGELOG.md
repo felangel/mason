@@ -1,6 +1,10 @@
+# 0.2.12
+
+- feat: add `trailing` to `ProgressOptions` ([#1247](https://github.com/felangel/mason/issues/1247))
+
 # 0.2.11
 
-- chore: fix missing closing doc template 
+- chore: fix missing closing doc template
 - chore: use `pkg:io` ([#1099](https://github.com/felangel/mason/issues/1099))
 
 # 0.2.10
