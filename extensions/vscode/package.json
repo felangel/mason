@@ -118,9 +118,9 @@
     "@types/node": "20.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
-    "@typescript-eslint/eslint-plugin": "^7.0.2",
-    "@typescript-eslint/parser": "^7.0.2",
-    "eslint": "^8.56.0",
+    "@typescript-eslint/eslint-plugin": "^7.1.0",
+    "@typescript-eslint/parser": "^7.1.0",
+    "eslint": "^8.57.0",
     "glob": "^10.3.10",
     "prettier": "^3.2.5",
     "ts-loader": "^9.5.1",
@@ -130,6 +130,6 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "yaml": "^2.3.4"
+    "yaml": "^2.4.0"
   }
 }
