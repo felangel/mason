@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { isNil } from "lodash";
 import * as vscode from "vscode";
 import { masonExec, statusBarTimeout } from ".";
 
@@ -18,7 +18,7 @@ export const masonRemove = async ({
     },
     async (__) => {
       const document = vscode.window.activeTextEditor?.document;
-      if (_.isNil(document)) {
+      if (isNil(document)) {
         return;
       }
 
