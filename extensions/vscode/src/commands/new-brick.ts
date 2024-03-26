@@ -1,20 +1,20 @@
 import { lstatSync } from "fs";
-import * as _ from "lodash";
+import { get, isNil } from "lodash";
 import * as vscode from "vscode";
 import { masonNew } from "../mason";
 import { promptForTargetDirectory } from "../utils";
 
 export const newBrick = async (uri: vscode.Uri) => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (_.isNil(cwd)) {
+  if (isNil(cwd)) {
     return;
   }
 
   let targetDirectory;
 
-  if (_.isNil(_.get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
+  if (isNil(get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
     targetDirectory = await promptForTargetDirectory();
-    if (_.isNil(targetDirectory)) {
+    if (isNil(targetDirectory)) {
       vscode.window.showErrorMessage("Please select a valid directory");
       return;
     }
@@ -23,7 +23,7 @@ export const newBrick = async (uri: vscode.Uri) => {
   }
 
   const brick = await promptForBrickName();
-  if (_.isNil(brick)) {
+  if (isNil(brick)) {
     return;
   }
 

@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { isEmpty, isNil } from "lodash";
 import * as vscode from "vscode";
 
 export async function promptForTargetDirectory(): Promise<string | undefined> {
@@ -9,7 +9,7 @@ export async function promptForTargetDirectory(): Promise<string | undefined> {
   };
 
   return vscode.window.showOpenDialog(options).then((uri) => {
-    if (_.isNil(uri) || _.isEmpty(uri)) {
+    if (isNil(uri) || isEmpty(uri)) {
       return undefined;
     }
     return uri[0].fsPath;

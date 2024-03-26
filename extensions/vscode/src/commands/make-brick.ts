@@ -1,4 +1,4 @@
-import * as _ from "lodash";
+import { get, isEmpty, isNil } from "lodash";
 import { existsSync, lstatSync, readFileSync } from "fs";
 import * as path from "path";
 import * as vscode from "vscode";
@@ -10,15 +10,15 @@ import { promptForTargetDirectory } from "../utils";
 export const makeLocalBrick = async (uri: Uri) => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
-  if (_.isNil(cwd)) {
+  if (isNil(cwd)) {
     return;
   }
 
   let targetDirectory;
 
-  if (_.isNil(_.get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
+  if (isNil(get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
     targetDirectory = await promptForTargetDirectory();
-    if (_.isNil(targetDirectory)) {
+    if (isNil(targetDirectory)) {
       window.showErrorMessage("Please select a valid directory");
       return;
     }
@@ -28,7 +28,7 @@ export const makeLocalBrick = async (uri: Uri) => {
 
   const bricksJson = await getBricksJson({ cwd });
 
-  if (_.isNil(bricksJson)) {
+  if (isNil(bricksJson)) {
     window.showErrorMessage("No bricks found in the workspace");
     return;
   }
@@ -36,7 +36,7 @@ export const makeLocalBrick = async (uri: Uri) => {
   const bricks = Object.keys(bricksJson);
   const brickName = await promptForBrickName({ bricks });
 
-  if (_.isNil(brickName)) {
+  if (isNil(brickName)) {
     window.showErrorMessage("No brick selected");
     return;
   }
@@ -44,7 +44,7 @@ export const makeLocalBrick = async (uri: Uri) => {
   const brickPath = bricksJson[brickName];
   const brickYaml = await getBrickYaml({ brickPath });
 
-  if (_.isNil(brickYaml)) {
+  if (isNil(brickYaml)) {
     window.showErrorMessage("Could not read brick.yaml");
     return;
   }
@@ -54,7 +54,7 @@ export const makeLocalBrick = async (uri: Uri) => {
   const vars: string[] = [];
   for (let key in brickYaml.vars) {
     const value = await promptForValue(brickYaml.vars[key]);
-    if (_.isNil(value)) {
+    if (isNil(value)) {
       return;
     }
     vars.push(`--${key} ${value.toString()}`);
@@ -67,15 +67,15 @@ export const makeLocalBrick = async (uri: Uri) => {
 export const makeGlobalBrick = async (uri: Uri) => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
 
-  if (_.isNil(cwd)) {
+  if (isNil(cwd)) {
     return;
   }
 
   let targetDirectory;
 
-  if (_.isNil(_.get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
+  if (isNil(get(uri, "fsPath")) || !lstatSync(uri.fsPath).isDirectory()) {
     targetDirectory = await promptForTargetDirectory();
-    if (_.isNil(targetDirectory)) {
+    if (isNil(targetDirectory)) {
       window.showErrorMessage("Please select a valid directory");
       return;
     }
@@ -87,7 +87,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
   const globalDir = path.join(rootDir, "global");
   const bricksJson = await getBricksJson({ cwd: globalDir });
 
-  if (_.isNil(bricksJson)) {
+  if (isNil(bricksJson)) {
     window.showErrorMessage("No global bricks found");
     return;
   }
@@ -95,7 +95,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
   const bricks = Object.keys(bricksJson);
   const brickName = await promptForBrickName({ bricks });
 
-  if (_.isNil(brickName)) {
+  if (isNil(brickName)) {
     window.showErrorMessage("No brick selected");
     return;
   }
@@ -103,7 +103,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
   const brickPath = bricksJson[brickName];
   const brickYaml = await getBrickYaml({ brickPath });
 
-  if (_.isNil(brickYaml)) {
+  if (isNil(brickYaml)) {
     window.showErrorMessage("Could not read brick.yaml");
     return;
   }
@@ -113,7 +113,7 @@ export const makeGlobalBrick = async (uri: Uri) => {
   let vars: string[] = [];
   for (let key in brickYaml.vars) {
     const value = await promptForValue(brickYaml.vars[key]);
-    if (_.isNil(value)) {
+    if (isNil(value)) {
       return;
     }
     vars.push(`--${key} ${value.toString()}`);
@@ -206,7 +206,7 @@ const promptForEnum = async (
   _default: string,
   items: string[],
 ): Promise<string | undefined> => {
-  if (_.isNil(_default) && !_.isEmpty(items)) {
+  if (isNil(_default) && !isEmpty(items)) {
     _default = items[0];
   }
 
@@ -252,7 +252,7 @@ const promptForList = async (
 
 function _rootDir(): string {
   const masonCache = env["MASON_CACHE"];
-  if (!_.isNil(masonCache)) {
+  if (!isNil(masonCache)) {
     return masonCache;
   }
   const isWindows = platform === "win32";
