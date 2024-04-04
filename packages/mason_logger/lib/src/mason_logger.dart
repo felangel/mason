@@ -512,10 +512,20 @@ class Logger {
   }
 
   void _ensureTerminalAttached() {
-    if (!_stdout.hasTerminal) {
-      throw StateError('No terminal attached to stdout.');
-    }
+    if (!_stdout.hasTerminal) throw NoTerminalAttachedError();
   }
+}
+
+/// {@template no_terminal_attached_error}
+/// A [StateError] thrown when input is requested in
+/// an environment where no terminal is attached.
+/// {@endtemplate}
+class NoTerminalAttachedError extends StateError {
+  /// {@macro no_terminal_attached_error}
+  NoTerminalAttachedError() : super('''
+No terminal attached to stdout.
+Ensure a terminal is attached via "stdout.hasTerminal" before requesting input.
+''');
 }
 
 extension on bool {

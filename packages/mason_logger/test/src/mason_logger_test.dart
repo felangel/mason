@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
+import 'package:mason_logger/src/mason_logger.dart';
 import 'package:mason_logger/src/terminal_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -342,7 +343,7 @@ void main() {
     });
 
     group('.prompt', () {
-      test('throws StateError when no terminal is attached', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
           () {
@@ -350,13 +351,7 @@ void main() {
             const prompt = '$message ';
             expect(
               () => Logger().prompt(message),
-              throwsA(
-                isA<StateError>().having(
-                  (e) => e.message,
-                  'message',
-                  'No terminal attached to stdout.',
-                ),
-              ),
+              throwsA(isA<NoTerminalAttachedError>()),
             );
             verify(() => stdout.write(prompt)).called(1);
           },
@@ -472,7 +467,7 @@ void main() {
     });
 
     group('.confirm', () {
-      test('throws StateError when no terminal is attached', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
           () {
@@ -480,13 +475,7 @@ void main() {
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
             expect(
               () => Logger().confirm(message),
-              throwsA(
-                isA<StateError>().having(
-                  (e) => e.message,
-                  'message',
-                  'No terminal attached to stdout.',
-                ),
-              ),
+              throwsA(isA<NoTerminalAttachedError>()),
             );
             verify(() => stdout.write(prompt)).called(1);
           },
@@ -665,7 +654,7 @@ void main() {
     });
 
     group('.chooseAny', () {
-      test('throws StateError when no terminal is attached', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
           () {
@@ -674,13 +663,7 @@ void main() {
                 'test message',
                 choices: ['a', 'b', 'c'],
               ),
-              throwsA(
-                isA<StateError>().having(
-                  (e) => e.message,
-                  'message',
-                  'No terminal attached to stdout.',
-                ),
-              ),
+              throwsA(isA<NoTerminalAttachedError>()),
             );
           },
           stdout: () => stdout,
@@ -1168,7 +1151,7 @@ void main() {
     });
 
     group('.chooseOne', () {
-      test('throws StateError when no terminal is attached', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
           () {
@@ -1177,13 +1160,7 @@ void main() {
                 'test message',
                 choices: ['a', 'b', 'c'],
               ),
-              throwsA(
-                isA<StateError>().having(
-                  (e) => e.message,
-                  'message',
-                  'No terminal attached to stdout.',
-                ),
-              ),
+              throwsA(isA<NoTerminalAttachedError>()),
             );
           },
           stdout: () => stdout,
@@ -1627,20 +1604,14 @@ void main() {
     });
 
     group('promptAny', () {
-      test('throws StateError when no terminal is attached', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
           () {
             const message = 'test message';
             expect(
               () => Logger().promptAny(message),
-              throwsA(
-                isA<StateError>().having(
-                  (e) => e.message,
-                  'message',
-                  'No terminal attached to stdout.',
-                ),
-              ),
+              throwsA(isA<NoTerminalAttachedError>()),
             );
             verify(() => stdout.write('$message ')).called(1);
           },
