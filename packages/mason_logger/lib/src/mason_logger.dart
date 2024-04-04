@@ -96,6 +96,7 @@ class Logger {
 
   KeyStroke Function() get _readKey {
     return () {
+      _ensureTerminalAttached();
       _terminal.enableRawMode();
       final key = TerminalOverrides.current?.readKey() ?? readKey();
       _terminal.disableRawMode();
@@ -184,8 +185,7 @@ class Logger {
         hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
-    final input =
-        hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
+    final input = hidden ? _readLineHiddenSync() : _readLineSync();
     final response =
         input == null || input.isEmpty ? resolvedDefaultValue : input;
     final lines = resolvedMessage.split('\n').length - 1;
@@ -264,7 +264,7 @@ class Logger {
     _stdout.write(resolvedMessage);
     String? input;
     try {
-      input = _stdin.readLineSync()?.trim();
+      input = _readLineSync();
     } on FormatException catch (_) {
       // FormatExceptions can occur due to utf8 decoding errors
       // so we treat them as the user pressing enter (e.g. use `defaultValue`).
@@ -478,7 +478,13 @@ class Logger {
     return results;
   }
 
+  String? _readLineSync() {
+    _ensureTerminalAttached();
+    return _stdin.readLineSync()?.trim();
+  }
+
   String _readLineHiddenSync() {
+    _ensureTerminalAttached();
     const lineFeed = 10;
     const carriageReturn = 13;
     const delete = 127;
@@ -503,6 +509,12 @@ class Logger {
     }
     _stdout.writeln();
     return utf8.decode(value);
+  }
+
+  void _ensureTerminalAttached() {
+    if (!_stdout.hasTerminal) {
+      throw StateError('No terminal attached to stdout.');
+    }
   }
 }
 
