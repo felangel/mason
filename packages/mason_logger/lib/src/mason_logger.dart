@@ -178,6 +178,9 @@ class Logger {
   /// Prompts user and returns response.
   /// Provide a default value via [defaultValue].
   /// Set [hidden] to `true` if you want to hide user input for sensitive info.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
@@ -198,6 +201,9 @@ class Logger {
   }
 
   /// Prompts user for a free-form list of responses.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   List<String> promptAny(String? message, {String separator = ','}) {
     _stdin
       ..echoMode = false
@@ -258,6 +264,9 @@ class Logger {
   }
 
   /// Prompts user with a yes/no question.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   bool confirm(String? message, {bool defaultValue = false}) {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
     final resolvedMessage = '$message$suffix ';
@@ -287,6 +296,9 @@ class Logger {
   ///
   /// An optional [defaultValue] can be specified.
   /// The [defaultValue] must be one of the provided [choices].
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   T chooseOne<T extends Object?>(
     String? message, {
     required List<T> choices,
@@ -380,6 +392,9 @@ class Logger {
   ///
   /// An optional list of [defaultValues] can be specified.
   /// The [defaultValues] must be one of the provided [choices].
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   List<T> chooseAny<T extends Object?>(
     String? message, {
     required List<T> choices,
