@@ -1,3 +1,8 @@
+# 0.2.15
+
+- refactor: upgrade `pkg:win32` to `^0.5.4` ([#1300](https://github.com/felangel/mason/issues/1300))
+  - bumps the Dart SDK minimum version up to `3.3.0`
+
 # 0.2.14
 
 - fix: `The getter 'STD_HANDLE' isn't defined for the class 'WindowsTerminal' ([#1298](https://github.com/felangel/mason/issues/1298))
