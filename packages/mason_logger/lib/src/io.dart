@@ -215,22 +215,16 @@ KeyStroke readKey() {
       switch (escapeSequence[1]) {
         case 'A':
           keyStroke = KeyStroke.control(ControlCharacter.arrowUp);
-          break;
         case 'B':
           keyStroke = KeyStroke.control(ControlCharacter.arrowDown);
-          break;
         case 'C':
           keyStroke = KeyStroke.control(ControlCharacter.arrowRight);
-          break;
         case 'D':
           keyStroke = KeyStroke.control(ControlCharacter.arrowLeft);
-          break;
         case 'H':
           keyStroke = KeyStroke.control(ControlCharacter.home);
-          break;
         case 'F':
           keyStroke = KeyStroke.control(ControlCharacter.end);
-          break;
         default:
           if (escapeSequence[1].codeUnits[0] > '0'.codeUnits[0] &&
               escapeSequence[1].codeUnits[0] < '9'.codeUnits[0]) {
@@ -248,37 +242,30 @@ KeyStroke readKey() {
                   keyStroke = KeyStroke.control(
                     ControlCharacter.home,
                   );
-                  break;
                 case '3':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.delete,
                   );
-                  break;
                 case '4':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.end,
                   );
-                  break;
                 case '5':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.pageUp,
                   );
-                  break;
                 case '6':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.pageDown,
                   );
-                  break;
                 case '7':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.home,
                   );
-                  break;
                 case '8':
                   keyStroke = KeyStroke.control(
                     ControlCharacter.end,
                   );
-                  break;
                 default:
                   keyStroke = KeyStroke.control(
                     ControlCharacter.unknown,
@@ -300,22 +287,16 @@ KeyStroke readKey() {
       switch (escapeSequence[1]) {
         case 'H':
           keyStroke = KeyStroke.control(ControlCharacter.home);
-          break;
         case 'F':
           keyStroke = KeyStroke.control(ControlCharacter.end);
-          break;
         case 'P':
           keyStroke = KeyStroke.control(ControlCharacter.F1);
-          break;
         case 'Q':
           keyStroke = KeyStroke.control(ControlCharacter.F2);
-          break;
         case 'R':
           keyStroke = KeyStroke.control(ControlCharacter.F3);
-          break;
         case 'S':
           keyStroke = KeyStroke.control(ControlCharacter.F4);
-          break;
         default:
       }
     } else if (escapeSequence[0] == 'b') {
