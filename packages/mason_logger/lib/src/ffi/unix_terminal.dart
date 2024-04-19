@@ -92,7 +92,7 @@ const _STDIN_FILENO = 0;
 // The number of elements in the control chars array.
 const _NCSS = 20;
 
-class TermIOS extends Struct {
+final class TermIOS extends Struct {
   @tcflag_t()
   external int c_iflag; // input flags
   @tcflag_t()
