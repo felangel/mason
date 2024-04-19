@@ -1,3 +1,7 @@
+# 0.2.14
+
+- fix: `The getter 'STD_HANDLE' isn't defined for the class 'WindowsTerminal' ([#1298](https://github.com/felangel/mason/issues/1298))
+
 # 0.2.13
 
 - fix: throw `StateError` when prompting with no terminal attached ([#1285](https://github.com/felangel/mason/issues/1285))
