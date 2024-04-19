@@ -1,3 +1,8 @@
+# 0.2.13
+
+- fix: throw `StateError` when prompting with no terminal attached ([#1285](https://github.com/felangel/mason/issues/1285))
+- refactor: remove deprecated methods in `WindowsTerminal` ([#1286](https://github.com/felangel/mason/issues/1286))
+
 # 0.2.12
 
 - feat: add `trailing` to `ProgressOptions` ([#1247](https://github.com/felangel/mason/issues/1247))
