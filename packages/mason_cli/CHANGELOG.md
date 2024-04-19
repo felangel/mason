@@ -1,3 +1,8 @@
+# 0.1.0-dev.54
+
+- feat: add `--set-exit-if-changed` to `mason bundle` ([#1229](https://github.com/felangel/mason/issues/1229))
+- chore(deps): upgrade dependencies
+
 # 0.1.0-dev.53
 
 - feat: add `--watch` to `mason make` ([#1131](https://github.com/felangel/mason/issues/1131))
