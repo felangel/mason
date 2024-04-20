@@ -9,7 +9,7 @@ documentation: https://github.com/felangel/mason/tree/master/packages/mason_cli#
 topics: [mason, template, generator]
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   archive: ^3.1.11
@@ -17,9 +17,9 @@ dependencies:
   collection: ^1.15.0
   convert: ^3.1.0
   crypto: ^3.0.1
-  http: '>=0.13.3 <2.0.0'
+  http: ^1.0.0
   json_annotation: ^4.8.1
-  mason_logger: ^0.2.11
+  mason_logger: ^0.2.15
   meta: ^1.7.0
   mustache_template: ^2.0.0
   path: ^1.8.0
