@@ -1,3 +1,8 @@
+# 0.1.0-dev.53
+
+- chore(deps): upgrade `pkg:mason_logger` to `^0.2.15` ([#1302](https://github.com/felangel/mason/issues/1302))
+  - bumps the Dart SDK minimum version up to `3.3.0`
+
 # 0.1.0-dev.52
 
 - fix: update hook `run` to support long Dart formats ([#1164](https://github.com/felangel/mason/issues/1164))
