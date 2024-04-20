@@ -56,10 +56,8 @@ class UnbundleCommand extends MasonCommand {
       switch (bundleType) {
         case BundleType.dart:
           bundle = await _parseDartBundle(file);
-          break;
         case BundleType.universal:
           bundle = await _parseUniversalBundle(file);
-          break;
       }
       unpackBundle(bundle, Directory(outputDir));
       progress.complete('Generated 1 brick.');

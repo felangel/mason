@@ -126,13 +126,11 @@ class BundleCommand extends MasonCommand {
           outputDirectoryPath: outputDir,
           bundle: bundle,
         );
-        break;
       case BundleType.universal:
         bundleGenerator = _BrickUniversalBundleGenerator(
           outputDirectoryPath: outputDir,
           bundle: bundle,
         );
-        break;
     }
 
     MasonBundle? previousBundle;
@@ -142,12 +140,10 @@ class BundleCommand extends MasonCommand {
           previousBundle = await MasonBundle.fromDartBundle(
             await bundleGenerator.bundleFile.readAsString(),
           );
-          break;
         case BundleType.universal:
           previousBundle = await MasonBundle.fromUniversalBundle(
             await bundleGenerator.bundleFile.readAsBytes(),
           );
-          break;
       }
     }
 
