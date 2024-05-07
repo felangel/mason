@@ -34,7 +34,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.1.4
+      - uses: actions/checkout@v4.1.5
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -64,7 +64,7 @@ jobs:
         os: [macos-latest, windows-2019, ubuntu-latest]
 
     steps:
-      - uses: actions/checkout@v4.1.4
+      - uses: actions/checkout@v4.1.5
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -88,7 +88,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.1.4
+      - uses: actions/checkout@v4.1.5
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
