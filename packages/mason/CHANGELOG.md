@@ -1,3 +1,7 @@
+# 0.1.0-dev.54
+
+- fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
+
 # 0.1.0-dev.53
 
 - chore(deps): upgrade `pkg:mason_logger` to `^0.2.15` ([#1302](https://github.com/felangel/mason/issues/1302))
