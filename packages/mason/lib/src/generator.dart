@@ -15,7 +15,13 @@ import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
-const bool _isAotCompiled = bool.fromEnvironment('dart.vm.product');
+const bool _isProductMode = bool.fromEnvironment('dart.vm.product');
+const _hookIsolateName = '__mason_hook__';
+bool get _isHookIsolate => Isolate.current.debugName == _hookIsolateName;
+bool get _useAot {
+  if (_isHookIsolate) return false;
+  return _isProductMode;
+}
 
 final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
@@ -641,7 +647,7 @@ extension on HookFile {
   }
 
   File module(String checksum) {
-    const extension = _isAotCompiled ? 'aot' : 'dill';
+    final extension = _useAot ? 'aot' : 'dill';
     return File(
       p.join(
         buildDirectory.path,
