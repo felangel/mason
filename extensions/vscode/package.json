@@ -120,7 +120,7 @@
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^7.11.0",
     "@typescript-eslint/parser": "^7.11.0",
-    "eslint": "^9.3.0",
+    "eslint": "^8.57.0",
     "glob": "^10.4.1",
     "prettier": "^3.2.5",
     "ts-loader": "^9.5.1",
