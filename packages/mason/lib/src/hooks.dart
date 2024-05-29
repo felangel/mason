@@ -251,11 +251,10 @@ class GeneratorHooks {
     final uri = await _getHookUri(hook, checksum);
 
     if (uri == null) throw HookMissingRunException(hook.path);
-    final mode = _useAot ? 'aot-snapshot' : 'kernel';
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', mode, uri.toFilePath()],
+      ['compile', 'kernel', uri.toFilePath()],
       runInShell: true,
     );
 
@@ -314,7 +313,6 @@ class GeneratorHooks {
         [json.encode(vars)],
         messagePort.sendPort,
         paused: true,
-        debugName: _hookIsolateName,
       );
     }
 
