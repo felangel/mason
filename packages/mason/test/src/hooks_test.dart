@@ -23,6 +23,24 @@ void main() {
         expect(generator.hooks.preGen(), completes);
       });
 
+      test('supports aot runtime', () async {
+        final tempDir = Directory.systemTemp.createTempSync();
+        final aotEntryPoint = path.join(tempDir.path, 'main-aot');
+        final compileResult = await Process.run(
+          'dart',
+          [
+            'compile',
+            'exe',
+            '-o',
+            aotEntryPoint,
+            path.join('test', 'fixtures', 'programmatic_usage', 'main.dart'),
+          ],
+        );
+        expect(compileResult.exitCode, equals(ExitCode.success.code));
+        final runResult = await Process.run(aotEntryPoint, []);
+        expect(runResult.exitCode, equals(ExitCode.success.code));
+      });
+
       test(
           'throws HookDependencyInstallFailure '
           'when pubspec is malformed', () async {
