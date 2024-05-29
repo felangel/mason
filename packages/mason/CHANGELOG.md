@@ -1,3 +1,7 @@
+# 0.1.0-dev.55
+
+- fix: nested hooks execution ([#1334](https://github.com/felangel/mason/issues/1334))
+
 # 0.1.0-dev.54
 
 - fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
