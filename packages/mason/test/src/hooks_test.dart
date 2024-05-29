@@ -41,6 +41,14 @@ void main() {
         expect(runResult.exitCode, equals(ExitCode.success.code));
       });
 
+      test('supports jit runtime', () async {
+        final result = await Process.run(
+          'dart',
+          [path.join('test', 'fixtures', 'programmatic_usage', 'main.dart')],
+        );
+        expect(result.exitCode, equals(ExitCode.success.code));
+      });
+
       test(
           'throws HookDependencyInstallFailure '
           'when pubspec is malformed', () async {
