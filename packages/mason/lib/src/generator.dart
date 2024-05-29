@@ -15,6 +15,8 @@ import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
+const bool _isAotCompiled = bool.fromEnvironment('dart.vm.product');
+
 final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
@@ -639,10 +641,11 @@ extension on HookFile {
   }
 
   File module(String checksum) {
+    const extension = _isAotCompiled ? 'aot' : 'dill';
     return File(
       p.join(
         buildDirectory.path,
-        '${p.basenameWithoutExtension(path)}_$checksum.dill',
+        '${p.basenameWithoutExtension(path)}_$checksum.$extension',
       ),
     );
   }
