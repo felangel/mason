@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:checked_yaml/checked_yaml.dart';
+import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
 import 'package:mason/src/git.dart';
@@ -209,9 +210,7 @@ class BricksJson {
 
       if (!brickYaml.existsSync()) {
         if (directory.existsSync()) directory.deleteSync(recursive: true);
-        final url = gitPath.path.isNotEmpty
-            ? '${gitPath.url}/${gitPath.path}'
-            : gitPath.url;
+        final url = gitPath.path.isNotEmpty ? '${gitPath.url}/${gitPath.path}' : gitPath.url;
         throw BrickNotFoundException(url);
       }
 
@@ -234,8 +233,7 @@ class BricksJson {
       if (directory.existsSync()) {
         final brickYaml = _getBrickYaml(directory);
         final name = brick.name ?? brickYaml.name;
-        final localPath =
-            _cache[name] ?? canonicalize(p.join(directory.path, gitPath.path));
+        final localPath = _cache[name] ?? canonicalize(p.join(directory.path, gitPath.path));
 
         if (_cache[name] == null) _cache[name] = localPath;
 
@@ -307,8 +305,7 @@ class BricksJson {
       p.join(rootDir.path, 'hosted', hostedUri.authority, dirName),
     );
     final directoryExists = directory.existsSync();
-    final directoryIsNotEmpty =
-        directoryExists && directory.listSync(recursive: true).isNotEmpty;
+    final directoryIsNotEmpty = directoryExists && directory.listSync(recursive: true).isNotEmpty;
 
     /// Use cached version if exists.
     if (directoryExists && directoryIsNotEmpty) {
@@ -385,10 +382,7 @@ class BricksJson {
     late final List<Version> versions;
     try {
       final _versions = body['versions'] as List;
-      versions = _versions
-          .map((dynamic v) => Version.parse((v as Map)['version'] as String))
-          .toList()
-        ..sort(Version.antiprioritize);
+      versions = _versions.map((dynamic v) => Version.parse((v as Map)['version'] as String)).toList()..sort(Version.antiprioritize);
     } catch (_) {
       throw BrickResolveVersionException(
         'Unable to parse available versions for brick "${brick.name}".',
@@ -455,6 +449,17 @@ String _encodedGitDir(GitPath git, String commitHash) {
   final name = p.basenameWithoutExtension(git.url);
   final path = git.url.replaceAll(r'\', '/');
   final url = base64.encode(utf8.encode(path));
+
+  var output = '${name}_${url}_$commitHash';
+
+  if (output.length > 255) {
+    final maxLength = 255 - commitHash.length - 1;
+    final hash = sha256.convert(utf8.encode(output)).toString();
+    final remainder = maxLength - hash.length - 1;
+    final truncatedNameUrl = '${name}_$url'.substring(0, remainder);
+    output = '${truncatedNameUrl}_$hash';
+  }
+
   return '${name}_${url}_$commitHash';
 }
 
