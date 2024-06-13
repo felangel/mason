@@ -15,7 +15,10 @@ import 'package:pool/pool.dart';
 
 part 'hooks.dart';
 
-const bool _isAotCompiled = bool.fromEnvironment('dart.vm.product');
+// This is intentionally a getter instead of a constant since nested hook
+// execution depends on being able to detect the runtime dynamically.
+// ignore: prefer_const_constructors
+bool get _isAotCompiled => bool.fromEnvironment('dart.vm.product');
 
 final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
@@ -641,7 +644,7 @@ extension on HookFile {
   }
 
   File module(String checksum) {
-    const extension = _isAotCompiled ? 'aot' : 'dill';
+    final extension = _isAotCompiled ? 'aot' : 'dill';
     return File(
       p.join(
         buildDirectory.path,

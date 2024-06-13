@@ -23,61 +23,83 @@ void main() {
         expect(generator.hooks.preGen(), completes);
       });
 
-      test('supports aot runtime', () async {
-        final tempDir = Directory.systemTemp.createTempSync();
-        final aotEntryPoint = path.join(tempDir.path, 'main-aot');
-        final compileResult = await Process.run(
-          'dart',
-          [
-            'compile',
-            'exe',
-            '-o',
-            aotEntryPoint,
-            path.join('test', 'fixtures', 'programmatic_usage', 'main.dart'),
-          ],
+      group('supports programmatic usage', () {
+        final program = path.join(
+          'test',
+          'fixtures',
+          'programmatic_usage',
+          'main.dart',
         );
-        expect(compileResult.exitCode, equals(ExitCode.success.code));
-        final runResult = await Process.run(aotEntryPoint, []);
-        expect(runResult.exitCode, equals(ExitCode.success.code));
-      });
 
-      test('supports jit runtime', () async {
-        final result = await Process.run(
-          'dart',
-          [path.join('test', 'fixtures', 'programmatic_usage', 'main.dart')],
-        );
-        expect(result.exitCode, equals(ExitCode.success.code));
-      });
+        late Directory tempDir;
 
-      test(
-        'supports aot runtime',
-        () async {
-          final tempDir = Directory.systemTemp.createTempSync();
-          final aotEntryPoint = path.join(tempDir.path, 'main-aot');
+        setUp(() {
+          tempDir = Directory.systemTemp.createTempSync();
+        });
+
+        void expectBrickOutputIsCorrect() {
+          final preGenOutput = File(path.join(tempDir.path, '.pre_gen.txt'));
+          expect(preGenOutput.existsSync(), isTrue);
+          expect(preGenOutput.readAsStringSync(), equals('pre_gen: dash'));
+          final postGenOutput = File(path.join(tempDir.path, '.post_gen.txt'));
+          expect(postGenOutput.existsSync(), isTrue);
+          expect(postGenOutput.readAsStringSync(), equals('post_gen: dash'));
+          final brickOutput = File(path.join(tempDir.path, 'hooks.md'));
+          expect(brickOutput.existsSync(), isTrue);
+          expect(brickOutput.readAsStringSync(), equals('Hi dash!'));
+        }
+
+        test('dart run', () async {
+          final result = await Process.run('dart', [program, tempDir.path]);
+          expect(result.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+
+        test('jit-snapshot', () async {
+          final jitEntryPoint = path.join(tempDir.path, 'main.jit');
           final compileResult = await Process.run(
             'dart',
             [
               'compile',
-              'exe',
+              'jit-snapshot',
               '-o',
-              aotEntryPoint,
-              path.join('test', 'fixtures', 'programmatic_usage', 'main.dart'),
+              jitEntryPoint,
+              program,
+              tempDir.path,
             ],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
-          final runResult = await Process.run(aotEntryPoint, []);
+          final runResult = await Process.run('dart', [jitEntryPoint]);
           expect(runResult.exitCode, equals(ExitCode.success.code));
-        },
-        // https://github.com/felangel/mason/issues/1329
-        skip: true,
-      );
+          expectBrickOutputIsCorrect();
+        });
 
-      test('supports jit runtime', () async {
-        final result = await Process.run(
-          'dart',
-          [path.join('test', 'fixtures', 'programmatic_usage', 'main.dart')],
-        );
-        expect(result.exitCode, equals(ExitCode.success.code));
+        test('aot-snapshot', () async {
+          final aotEntryPoint = path.join(tempDir.path, 'main.aot');
+          final compileResult = await Process.run(
+            'dart',
+            ['compile', 'aot-snapshot', '-o', aotEntryPoint, program],
+          );
+          expect(compileResult.exitCode, equals(ExitCode.success.code));
+          final runResult = await Process.run(
+            'dartaotruntime',
+            [aotEntryPoint, tempDir.path],
+          );
+          expect(runResult.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+
+        test('exe', () async {
+          final aotEntryPoint = path.join(tempDir.path, 'main-aot');
+          final compileResult = await Process.run(
+            'dart',
+            ['compile', 'exe', '-o', aotEntryPoint, program],
+          );
+          expect(compileResult.exitCode, equals(ExitCode.success.code));
+          final runResult = await Process.run(aotEntryPoint, [tempDir.path]);
+          expect(runResult.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
       });
 
       test(
