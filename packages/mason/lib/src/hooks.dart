@@ -251,10 +251,12 @@ class GeneratorHooks {
     final uri = await _getHookUri(hook, checksum);
 
     if (uri == null) throw HookMissingRunException(hook.path);
+
+    const mode = _isAotCompiled ? 'aot-snapshot' : 'kernel';
     final progress = logger?.progress('Compiling ${p.basename(hook.path)}');
     final result = await Process.run(
       'dart',
-      ['compile', 'kernel', uri.toFilePath()],
+      ['compile', mode, uri.toFilePath()],
       runInShell: true,
     );
 
