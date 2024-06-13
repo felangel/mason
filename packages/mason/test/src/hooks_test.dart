@@ -55,7 +55,10 @@ void main() {
         }
 
         test('dart run', () async {
-          final result = await Process.run('dart', [program, tempDir.path]);
+          final result = await Process.run(
+            'dart',
+            [program, tempDir.path, name],
+          );
           expect(result.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
         });
@@ -71,6 +74,7 @@ void main() {
               entrypoint,
               program,
               tempDir.path,
+              name,
             ],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
@@ -88,7 +92,7 @@ void main() {
           expect(compileResult.exitCode, equals(ExitCode.success.code));
           final runResult = await Process.run(
             'dartaotruntime',
-            [entrypoint, tempDir.path],
+            [entrypoint, tempDir.path, name],
           );
           expect(runResult.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
@@ -101,7 +105,7 @@ void main() {
             ['compile', 'exe', '-o', entrypoint, program],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
-          final runResult = await Process.run(entrypoint, [tempDir.path]);
+          final runResult = await Process.run(entrypoint, [tempDir.path, name]);
           expect(runResult.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
         });
