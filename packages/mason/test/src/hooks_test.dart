@@ -24,6 +24,7 @@ void main() {
       });
 
       group('supports programmatic usage', () {
+        const name = 'dash';
         final program = path.join(
           'test',
           'fixtures',
@@ -37,16 +38,20 @@ void main() {
           tempDir = Directory.systemTemp.createTempSync();
         });
 
+        tearDown(() {
+          tempDir.delete(recursive: true).ignore();
+        });
+
         void expectBrickOutputIsCorrect() {
           final preGenOutput = File(path.join(tempDir.path, '.pre_gen.txt'));
           expect(preGenOutput.existsSync(), isTrue);
-          expect(preGenOutput.readAsStringSync(), equals('pre_gen: dash'));
+          expect(preGenOutput.readAsStringSync(), equals('pre_gen: $name'));
           final postGenOutput = File(path.join(tempDir.path, '.post_gen.txt'));
           expect(postGenOutput.existsSync(), isTrue);
-          expect(postGenOutput.readAsStringSync(), equals('post_gen: dash'));
+          expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
           final brickOutput = File(path.join(tempDir.path, 'hooks.md'));
           expect(brickOutput.existsSync(), isTrue);
-          expect(brickOutput.readAsStringSync(), equals('Hi dash!'));
+          expect(brickOutput.readAsStringSync(), equals('Hi $name!'));
         }
 
         test('dart run', () async {
@@ -56,47 +61,47 @@ void main() {
         });
 
         test('jit-snapshot', () async {
-          final jitEntryPoint = path.join(tempDir.path, 'main.jit');
+          final entrypoint = path.join(tempDir.path, 'main.jit');
           final compileResult = await Process.run(
             'dart',
             [
               'compile',
               'jit-snapshot',
               '-o',
-              jitEntryPoint,
+              entrypoint,
               program,
               tempDir.path,
             ],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
-          final runResult = await Process.run('dart', [jitEntryPoint]);
+          final runResult = await Process.run('dart', [entrypoint]);
           expect(runResult.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
         });
 
         test('aot-snapshot', () async {
-          final aotEntryPoint = path.join(tempDir.path, 'main.aot');
+          final entrypoint = path.join(tempDir.path, 'main.aot');
           final compileResult = await Process.run(
             'dart',
-            ['compile', 'aot-snapshot', '-o', aotEntryPoint, program],
+            ['compile', 'aot-snapshot', '-o', entrypoint, program],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
           final runResult = await Process.run(
             'dartaotruntime',
-            [aotEntryPoint, tempDir.path],
+            [entrypoint, tempDir.path],
           );
           expect(runResult.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
         });
 
         test('exe', () async {
-          final aotEntryPoint = path.join(tempDir.path, 'main-aot');
+          final entrypoint = path.join(tempDir.path, 'main-aot');
           final compileResult = await Process.run(
             'dart',
-            ['compile', 'exe', '-o', aotEntryPoint, program],
+            ['compile', 'exe', '-o', entrypoint, program],
           );
           expect(compileResult.exitCode, equals(ExitCode.success.code));
-          final runResult = await Process.run(aotEntryPoint, [tempDir.path]);
+          final runResult = await Process.run(entrypoint, [tempDir.path]);
           expect(runResult.exitCode, equals(ExitCode.success.code));
           expectBrickOutputIsCorrect();
         });
