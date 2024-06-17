@@ -121,8 +121,15 @@ extension on String {
         _builtInLambdas.keys.map(RegExp.escape).join('|');
     final lambdaPattern =
         RegExp('{?{{ *([^{}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
-
+    final endPattern = RegExp(r'\{\{(~\s?).*\}\}', dotAll: true);
     var currentIteration = this;
+    if (endPattern.hasMatch(currentIteration)) {
+      currentIteration = currentIteration.replaceAllMapped(endPattern, (match) {
+        final expression = match.group(0)!;
+        final end = match.group(1)!;
+        return expression.replaceAll(end, '/');
+      });
+    }
 
     // Continue substituting until no match is found to account for chained
     // lambdas
