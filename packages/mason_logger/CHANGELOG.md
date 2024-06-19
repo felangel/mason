@@ -1,6 +1,24 @@
+# 0.2.15
+
+- refactor: upgrade `pkg:win32` to `^0.5.4` ([#1300](https://github.com/felangel/mason/issues/1300))
+  - bumps the Dart SDK minimum version up to `3.3.0`
+
+# 0.2.14
+
+- fix: `The getter 'STD_HANDLE' isn't defined for the class 'WindowsTerminal' ([#1298](https://github.com/felangel/mason/issues/1298))
+
+# 0.2.13
+
+- fix: throw `StateError` when prompting with no terminal attached ([#1285](https://github.com/felangel/mason/issues/1285))
+- refactor: remove deprecated methods in `WindowsTerminal` ([#1286](https://github.com/felangel/mason/issues/1286))
+
+# 0.2.12
+
+- feat: add `trailing` to `ProgressOptions` ([#1247](https://github.com/felangel/mason/issues/1247))
+
 # 0.2.11
 
-- chore: fix missing closing doc template 
+- chore: fix missing closing doc template
 - chore: use `pkg:io` ([#1099](https://github.com/felangel/mason/issues/1099))
 
 # 0.2.10

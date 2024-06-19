@@ -1,3 +1,8 @@
+# 0.1.12
+
+- refactor: various eslint fixes
+- deps: various dependency updates
+
 # 0.1.11
 
 - feat: support `list` variable type in `brick.yaml`

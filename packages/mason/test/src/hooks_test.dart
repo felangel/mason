@@ -23,6 +23,94 @@ void main() {
         expect(generator.hooks.preGen(), completes);
       });
 
+      group('supports programmatic usage', () {
+        const name = 'dash';
+        final program = path.join(
+          'test',
+          'fixtures',
+          'programmatic_usage',
+          'main.dart',
+        );
+
+        late Directory tempDir;
+
+        setUp(() {
+          tempDir = Directory.systemTemp.createTempSync();
+        });
+
+        tearDown(() {
+          tempDir.delete(recursive: true).ignore();
+        });
+
+        void expectBrickOutputIsCorrect() {
+          final preGenOutput = File(path.join(tempDir.path, '.pre_gen.txt'));
+          expect(preGenOutput.existsSync(), isTrue);
+          expect(preGenOutput.readAsStringSync(), equals('pre_gen: $name'));
+          final postGenOutput = File(path.join(tempDir.path, '.post_gen.txt'));
+          expect(postGenOutput.existsSync(), isTrue);
+          expect(postGenOutput.readAsStringSync(), equals('post_gen: $name'));
+          final brickOutput = File(path.join(tempDir.path, 'hooks.md'));
+          expect(brickOutput.existsSync(), isTrue);
+          expect(brickOutput.readAsStringSync(), equals('Hi $name!'));
+        }
+
+        test('dart run', () async {
+          final result = await Process.run(
+            'dart',
+            [program, tempDir.path, name],
+          );
+          expect(result.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+
+        test('jit-snapshot', () async {
+          final entrypoint = path.join(tempDir.path, 'main.jit');
+          final compileResult = await Process.run(
+            'dart',
+            [
+              'compile',
+              'jit-snapshot',
+              '-o',
+              entrypoint,
+              program,
+              tempDir.path,
+              name,
+            ],
+          );
+          expect(compileResult.exitCode, equals(ExitCode.success.code));
+          final runResult = await Process.run('dart', [entrypoint]);
+          expect(runResult.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+
+        test('aot-snapshot', () async {
+          final entrypoint = path.join(tempDir.path, 'main.aot');
+          final compileResult = await Process.run(
+            'dart',
+            ['compile', 'aot-snapshot', '-o', entrypoint, program],
+          );
+          expect(compileResult.exitCode, equals(ExitCode.success.code));
+          final runResult = await Process.run(
+            'dartaotruntime',
+            [entrypoint, tempDir.path, name],
+          );
+          expect(runResult.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+
+        test('exe', () async {
+          final entrypoint = path.join(tempDir.path, 'main-aot');
+          final compileResult = await Process.run(
+            'dart',
+            ['compile', 'exe', '-o', entrypoint, program],
+          );
+          expect(compileResult.exitCode, equals(ExitCode.success.code));
+          final runResult = await Process.run(entrypoint, [tempDir.path, name]);
+          expect(runResult.exitCode, equals(ExitCode.success.code));
+          expectBrickOutputIsCorrect();
+        });
+      });
+
       test(
           'throws HookDependencyInstallFailure '
           'when pubspec is malformed', () async {

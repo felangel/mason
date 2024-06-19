@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies
@@ -58,7 +58,7 @@ jobs:
           dart test --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
 
       - name: Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v2
+        uses: VeryGoodOpenSource/very_good_coverage@v3
         with:
           path: packages/mason_logger/coverage/lcov.info
 
@@ -70,7 +70,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4.1.1
+      - uses: actions/checkout@v4.1.7
       - uses: dart-lang/setup-dart@v1
 
       - name: Install Dependencies

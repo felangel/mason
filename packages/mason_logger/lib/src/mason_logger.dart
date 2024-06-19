@@ -96,6 +96,7 @@ class Logger {
 
   KeyStroke Function() get _readKey {
     return () {
+      _ensureTerminalAttached();
       _terminal.enableRawMode();
       final key = TerminalOverrides.current?.readKey() ?? readKey();
       _terminal.disableRawMode();
@@ -177,6 +178,9 @@ class Logger {
   /// Prompts user and returns response.
   /// Provide a default value via [defaultValue].
   /// Set [hidden] to `true` if you want to hide user input for sensitive info.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
@@ -184,8 +188,7 @@ class Logger {
         hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
-    final input =
-        hidden ? _readLineHiddenSync() : _stdin.readLineSync()?.trim();
+    final input = hidden ? _readLineHiddenSync() : _readLineSync();
     final response =
         input == null || input.isEmpty ? resolvedDefaultValue : input;
     final lines = resolvedMessage.split('\n').length - 1;
@@ -198,6 +201,9 @@ class Logger {
   }
 
   /// Prompts user for a free-form list of responses.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   List<String> promptAny(String? message, {String separator = ','}) {
     _stdin
       ..echoMode = false
@@ -258,13 +264,16 @@ class Logger {
   }
 
   /// Prompts user with a yes/no question.
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   bool confirm(String? message, {bool defaultValue = false}) {
     final suffix = ' ${darkGray.wrap('(${defaultValue.toYesNo()})')}';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
     String? input;
     try {
-      input = _stdin.readLineSync()?.trim();
+      input = _readLineSync();
     } on FormatException catch (_) {
       // FormatExceptions can occur due to utf8 decoding errors
       // so we treat them as the user pressing enter (e.g. use `defaultValue`).
@@ -287,6 +296,9 @@ class Logger {
   ///
   /// An optional [defaultValue] can be specified.
   /// The [defaultValue] must be one of the provided [choices].
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   T chooseOne<T extends Object?>(
     String? message, {
     required List<T> choices,
@@ -380,6 +392,9 @@ class Logger {
   ///
   /// An optional list of [defaultValues] can be specified.
   /// The [defaultValues] must be one of the provided [choices].
+  ///
+  /// This method requires a terminal to be attached to stdout.
+  /// See https://api.dart.dev/stable/dart-io/Stdout/hasTerminal.html.
   List<T> chooseAny<T extends Object?>(
     String? message, {
     required List<T> choices,
@@ -478,7 +493,13 @@ class Logger {
     return results;
   }
 
+  String? _readLineSync() {
+    _ensureTerminalAttached();
+    return _stdin.readLineSync()?.trim();
+  }
+
   String _readLineHiddenSync() {
+    _ensureTerminalAttached();
     const lineFeed = 10;
     const carriageReturn = 13;
     const delete = 127;
@@ -504,6 +525,22 @@ class Logger {
     _stdout.writeln();
     return utf8.decode(value);
   }
+
+  void _ensureTerminalAttached() {
+    if (!_stdout.hasTerminal) throw NoTerminalAttachedError();
+  }
+}
+
+/// {@template no_terminal_attached_error}
+/// A [StateError] thrown when input is requested in
+/// an environment where no terminal is attached.
+/// {@endtemplate}
+class NoTerminalAttachedError extends StateError {
+  /// {@macro no_terminal_attached_error}
+  NoTerminalAttachedError() : super('''
+No terminal attached to stdout.
+Ensure a terminal is attached via "stdout.hasTerminal" before requesting input.
+''');
 }
 
 extension on bool {

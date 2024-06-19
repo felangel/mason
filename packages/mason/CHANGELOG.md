@@ -1,3 +1,26 @@
+# 0.1.0-dev.57
+
+- fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
+- fix: nested hooks execution ([#1348](https://github.com/felangel/mason/issues/1348))
+
+# 0.1.0-dev.56
+
+- revert: fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
+  - fix was incomplete and resulted in hook execution to break in JIT mode in some situations
+
+# 0.1.0-dev.55
+
+- fix: nested hooks execution ([#1334](https://github.com/felangel/mason/issues/1334))
+
+# 0.1.0-dev.54
+
+- fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
+
+# 0.1.0-dev.53
+
+- chore(deps): upgrade `pkg:mason_logger` to `^0.2.15` ([#1302](https://github.com/felangel/mason/issues/1302))
+  - bumps the Dart SDK minimum version up to `3.3.0`
+
 # 0.1.0-dev.52
 
 - fix: update hook `run` to support long Dart formats ([#1164](https://github.com/felangel/mason/issues/1164))

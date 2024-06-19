@@ -1,11 +1,11 @@
-import * as _ from "lodash";
+import { isNil } from "lodash";
 import * as vscode from "vscode";
 import * as path from "path";
 import { masonInit } from "../mason";
 
 export const init = async () => {
   const cwd = vscode.workspace.workspaceFolders?.[0].uri.fsPath;
-  if (_.isNil(cwd)) {
+  if (isNil(cwd)) {
     return;
   }
 

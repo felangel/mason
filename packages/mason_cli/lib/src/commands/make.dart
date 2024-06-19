@@ -127,7 +127,6 @@ class _MakeCommand extends MasonCommand {
               response = _maybeDecode(
                 logger.prompt(prompt, defaultValue: properties.defaultValue),
               );
-              break;
             case BrickVariableType.number:
               response = logger.prompt(
                 prompt,
@@ -138,13 +137,11 @@ class _MakeCommand extends MasonCommand {
                   'Invalid $variable.\n"$response" is not a number.',
                 );
               }
-              break;
             case BrickVariableType.boolean:
               response = logger.confirm(
                 prompt,
                 defaultValue: properties.defaultValue as bool? ?? false,
               );
-              break;
             case BrickVariableType.enumeration:
               final choices = properties.values;
               if (choices == null || choices.isEmpty) {
@@ -157,7 +154,6 @@ class _MakeCommand extends MasonCommand {
                 choices: choices,
                 defaultValue: properties.defaultValue?.toString(),
               );
-              break;
             case BrickVariableType.array:
               final choices = properties.values;
               if (choices == null || choices.isEmpty) {
@@ -171,13 +167,11 @@ class _MakeCommand extends MasonCommand {
                 defaultValues:
                     (properties.defaultValues as List?)?.cast<String>(),
               );
-              break;
             case BrickVariableType.list:
               response = logger.promptAny(
                 prompt,
                 separator: properties.separator ?? ',',
               );
-              break;
           }
           vars.addAll(<String, dynamic>{variable: response});
         }

@@ -11,8 +11,6 @@ class _MockLogger extends Mock implements Logger {}
 
 class _MockPubUpdater extends Mock implements PubUpdater {}
 
-class _MockProcessResult extends Mock implements ProcessResult {}
-
 class _MockProgress extends Mock implements Progress {}
 
 void main() {
@@ -21,13 +19,11 @@ void main() {
   group('mason update', () {
     late Logger logger;
     late PubUpdater pubUpdater;
-    late ProcessResult processResult;
     late MasonCommandRunner commandRunner;
 
     setUp(() {
       logger = _MockLogger();
       pubUpdater = _MockPubUpdater();
-      processResult = _MockProcessResult();
 
       when(() => logger.progress(any())).thenReturn(_MockProgress());
       when(
@@ -38,8 +34,9 @@ void main() {
           packageName: packageName,
           versionConstraint: latestVersion,
         ),
-      ).thenAnswer((_) async => processResult);
-      when(() => processResult.exitCode).thenReturn(ExitCode.success.code);
+      ).thenAnswer(
+        (_) async => ProcessResult(0, ExitCode.success.code, '', ''),
+      );
 
       commandRunner = MasonCommandRunner(
         logger: logger,
@@ -87,8 +84,6 @@ void main() {
 
     test('handles pub update process errors', () async {
       const error = 'Oops...something went wrong!';
-      when(() => processResult.exitCode).thenReturn(1);
-      when<dynamic>(() => processResult.stderr).thenReturn(error);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => latestVersion);
@@ -97,7 +92,9 @@ void main() {
           packageName: any(named: 'packageName'),
           versionConstraint: any(named: 'versionConstraint'),
         ),
-      ).thenAnswer((_) async => processResult);
+      ).thenAnswer(
+        (_) async => ProcessResult(0, ExitCode.software.code, '', error),
+      );
 
       final result = await commandRunner.run(['update']);
       expect(result, equals(ExitCode.software.code));

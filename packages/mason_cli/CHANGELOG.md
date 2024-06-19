@@ -1,3 +1,14 @@
+# 0.1.0-dev.55
+
+- deps: upgrade to `mason 0.1.0-dev.53` and `mason_logger v0.2.15`
+  - bump minimum Dart SDK to 3.3.0
+- deps: upgrade to `cli_completion 0.5.0`
+
+# 0.1.0-dev.54
+
+- feat: add `--set-exit-if-changed` to `mason bundle` ([#1229](https://github.com/felangel/mason/issues/1229))
+- chore(deps): upgrade dependencies
+
 # 0.1.0-dev.53
 
 - feat: add `--watch` to `mason make` ([#1131](https://github.com/felangel/mason/issues/1131))

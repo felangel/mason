@@ -1,6 +1,6 @@
 name: mason_logger
 description: A reusable Dart logger used by the Mason CLI (package:mason_cli).
-version: 0.2.11
+version: 0.2.15
 homepage: https://github.com/felangel/mason
 repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
@@ -8,12 +8,12 @@ documentation: https://github.com/felangel/mason/tree/master/packages/mason_logg
 topics: [cli, logger, mason]
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
+  sdk: ">=3.3.0 <4.0.0"
 
 dependencies:
   ffi: ^2.1.0
   io: ^1.0.4
-  win32: ^5.0.7
+  win32: ^5.4.0
 
 dev_dependencies:
   meta: ^1.7.0

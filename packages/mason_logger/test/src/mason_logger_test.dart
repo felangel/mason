@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/io.dart';
+import 'package:mason_logger/src/mason_logger.dart';
 import 'package:mason_logger/src/terminal_overrides.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
@@ -22,6 +23,7 @@ void main() {
       stderr = _MockStdout();
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+      when(() => stdout.hasTerminal).thenReturn(true);
     });
 
     group('theme', () {
@@ -341,6 +343,23 @@ void main() {
     });
 
     group('.prompt', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
+        when(() => stdout.hasTerminal).thenReturn(false);
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            const prompt = '$message ';
+            expect(
+              () => Logger().prompt(message),
+              throwsA(isA<NoTerminalAttachedError>()),
+            );
+            verify(() => stdout.write(prompt)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('writes line to stdout and reads line from stdin', () {
         IOOverrides.runZoned(
           () {
@@ -448,6 +467,23 @@ void main() {
     });
 
     group('.confirm', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
+        when(() => stdout.hasTerminal).thenReturn(false);
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
+            expect(
+              () => Logger().confirm(message),
+              throwsA(isA<NoTerminalAttachedError>()),
+            );
+            verify(() => stdout.write(prompt)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('writes line to stdout and reads line from stdin (default no)', () {
         IOOverrides.runZoned(
           () {
@@ -618,6 +654,23 @@ void main() {
     });
 
     group('.chooseAny', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
+        when(() => stdout.hasTerminal).thenReturn(false);
+        IOOverrides.runZoned(
+          () {
+            expect(
+              () => Logger().chooseAny(
+                'test message',
+                choices: ['a', 'b', 'c'],
+              ),
+              throwsA(isA<NoTerminalAttachedError>()),
+            );
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('exits when control+c is pressed', () {
         final exitCalls = <int>[];
         try {
@@ -1098,6 +1151,23 @@ void main() {
     });
 
     group('.chooseOne', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
+        when(() => stdout.hasTerminal).thenReturn(false);
+        IOOverrides.runZoned(
+          () {
+            expect(
+              () => Logger().chooseOne(
+                'test message',
+                choices: ['a', 'b', 'c'],
+              ),
+              throwsA(isA<NoTerminalAttachedError>()),
+            );
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('exits when control+c is pressed', () {
         final exitCalls = <int>[];
         try {
@@ -1534,6 +1604,22 @@ void main() {
     });
 
     group('promptAny', () {
+      test('throws NoTerminalAttachedError when no terminal is attached', () {
+        when(() => stdout.hasTerminal).thenReturn(false);
+        IOOverrides.runZoned(
+          () {
+            const message = 'test message';
+            expect(
+              () => Logger().promptAny(message),
+              throwsA(isA<NoTerminalAttachedError>()),
+            );
+            verify(() => stdout.write('$message ')).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('returns empty list', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
         TerminalOverrides.runZoned(
