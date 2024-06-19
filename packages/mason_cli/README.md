@@ -298,6 +298,9 @@ It is possible to have templates nested within other templates. For example, giv
 
 The `{{~ header.md }}` and `{{~ footer.md }}` are partials (partial brick templates). Partials will not be generated but can be included as part of an existing template.
 
+❗ **Note: Partials must always be directly under the `__brick__` directory. Non-top-level partials are [yet to be
+supported](https://github.com/felangel/mason/issues/378).**
+
 For example given the contents of `{{~ header.md }}` and `{{~ footer.md }}` respectively
 
 ```md
