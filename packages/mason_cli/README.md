@@ -301,7 +301,6 @@ The `{{~ header.md }}` and `{{~ footer.md }}` are partials (partial brick templa
 ❗ **Note: Partials must always be directly under the `__brick__` directory. Non-top-level partials are [yet to be
 supported](https://github.com/felangel/mason/issues/378).**
 
-
 For example given the contents of `{{~ header.md }}` and `{{~ footer.md }}` respectively
 
 ```md
