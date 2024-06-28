@@ -9,6 +9,7 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
+import 'package:mason/src/render.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
@@ -223,7 +224,8 @@ abstract class Generator implements Comparable<Generator> {
     final overwriteRule = fileConflictResolution?.toOverwriteRule();
     final generatedFiles = <GeneratedFile>[];
     await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
-      final fileMatch = _fileRegExp.firstMatch(file.path);
+      final fileMatch =
+          _fileRegExp.firstMatch(file.path.closingBracketPolyfill());
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
         if (resultFile.path.isEmpty) return;
@@ -454,7 +456,7 @@ class TemplateFile {
     Map<String, dynamic> parameters,
     Map<String, List<int>> partials,
   ) {
-    var filePath = path.replaceAll(r'\', '/');
+    var filePath = path.closingBracketPolyfill().replaceAll(r'\', '/');
     if (_loopRegExp().hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
 

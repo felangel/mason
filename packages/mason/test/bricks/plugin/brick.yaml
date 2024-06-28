@@ -1,5 +1,5 @@
-name: plugin_new
-description: An example new plugin template
+name: plugin
+description: An example plugin template
 version: 0.1.0+1
 vars:
   android:

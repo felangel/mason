@@ -114,6 +114,36 @@ void main() {
         );
       });
 
+      test('constructs an instance (modern todos)', () async {
+        final brick = Brick.path(
+          path.join('test', 'bricks', 'todos'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+        final tempDir = Directory.systemTemp.createTempSync();
+
+        final files = await generator.generate(
+          DirectoryGeneratorTarget(tempDir),
+          vars: <String, dynamic>{
+            'todos': [
+              {'todo': 'Eat', 'done': true},
+              {'todo': 'Code', 'done': true},
+              {'todo': 'Sleep', 'done': false},
+            ],
+            'developers': [
+              {'name': 'Alex'},
+              {'name': 'Sam'},
+              {'name': 'Jen'},
+            ],
+          },
+        );
+
+        expect(files.length, equals(13));
+        expect(
+          files.every((f) => f.status == GeneratedFileStatus.created),
+          isTrue,
+        );
+      });
+
       test('constructs an instance (loops)', () async {
         final brick = Brick.path(
           path.join('test', 'bricks', 'loop'),

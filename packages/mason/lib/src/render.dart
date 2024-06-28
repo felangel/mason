@@ -115,21 +115,30 @@ extension RenderTemplate on String {
   }
 }
 
+extension ClosingBracketX on String {
+  String closingBracketPolyfill() {
+    final endPattern = RegExp(r'\{\{(;).*\}\}', dotAll: true, multiLine: true);
+    var currentIteration = this;
+    if (endPattern.hasMatch(currentIteration)) {
+      currentIteration.replaceAllMapped(endPattern, (match) {
+        final expression = match.group(0)!;
+        final end = match.group(1)!;
+        assert(end == ';', 'match should be ";"');
+        print('replacing $expression with ${expression.replaceAll(end, '/')}');
+        return currentIteration = expression.replaceAll(end, '/');
+      });
+    }
+    return currentIteration;
+  }
+}
+
 extension on String {
   String transpiled() {
     final builtInLambdaNamesEscaped =
         _builtInLambdas.keys.map(RegExp.escape).join('|');
     final lambdaPattern =
         RegExp('{?{{ *([^{}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
-    final endPattern = RegExp(r'\{\{(~\s?).*\}\}', dotAll: true);
-    var currentIteration = this;
-    if (endPattern.hasMatch(currentIteration)) {
-      currentIteration = currentIteration.replaceAllMapped(endPattern, (match) {
-        final expression = match.group(0)!;
-        final end = match.group(1)!;
-        return expression.replaceAll(end, '/');
-      });
-    }
+    var currentIteration = closingBracketPolyfill();
 
     // Continue substituting until no match is found to account for chained
     // lambdas
