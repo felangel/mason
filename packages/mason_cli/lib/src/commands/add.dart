@@ -65,6 +65,19 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
     }
 
     final progress = logger.progress('Installing ${brick.name}');
+
+    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
+    if (masonYaml.bricks.keys.contains(brick.name)) {
+      final confirmation = logger.confirm(
+        'Existing ${brick.name} found, you want to overwrite it?',
+        defaultValue: true,
+      );
+      if (!confirmation) {
+        progress.fail('Aborted by the user');
+        return ExitCode.cantCreate.code;
+      }
+    }
+
     final cachedBrick = await _addBrick(brick, global: isGlobal);
     final file = File(p.join(cachedBrick.path, BrickYaml.file));
     final generator = await MasonGenerator.fromBrick(
@@ -84,7 +97,6 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
 
-    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
     final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
     final location = brick.location.version != null
         ? BrickLocation(version: '^${brickYaml.version}')
