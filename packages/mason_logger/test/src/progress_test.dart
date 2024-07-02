@@ -15,6 +15,7 @@ void main() {
       stdout = _MockStdout();
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(80);
     });
 
     test('writes ms when elapsed time is less than 0.1s', () async {
@@ -45,7 +46,7 @@ void main() {
             () => stdout.write('${lightGreen.wrap('⠋')} $message...'),
             () {
               stdout.write(
-                '''\u001b[2K\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
               );
             },
           ]);
@@ -72,7 +73,7 @@ void main() {
             () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
             () {
               stdout.write(
-                '''\u001b[2K\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
               );
             },
           ]);

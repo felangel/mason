@@ -72,6 +72,8 @@ class Progress {
     _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
   }
 
+  static const _padding = 15;
+
   final ProgressOptions _options;
 
   final io.Stdout _stdout;
@@ -95,7 +97,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
+      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _formattedMessage} $_time\n''',
     );
     _timer?.cancel();
   }
@@ -108,7 +110,9 @@ class Progress {
   /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
-    _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
+    _write(
+      '$_clearLine${red.wrap('✗')} ${update ?? _formattedMessage} $_time\n',
+    );
     _stopwatch.stop();
   }
 
@@ -126,9 +130,26 @@ class Progress {
     _stopwatch.stop();
   }
 
+  int get _terminalColumns {
+    return _stdout.hasTerminal
+        ? _stdout.terminalColumns
+        : double.maxFinite.toInt();
+  }
+
+  String get _formattedMessage {
+    return _message.formatted(
+      _terminalColumns - _padding,
+      _options.trailing,
+    );
+  }
+
   String get _clearLine {
-    return '\u001b[2K' // clear current line
-        '\r'; // bring cursor to the start of the current line
+    if (_stdout.hasTerminal) {
+      return '\x1b[?7l' // disable wrapping
+          '\u001b[2K' // clear current line
+          '\r'; // bring cursor to the start of the current line
+    }
+    return '\r';
   }
 
   void _onTick(Timer? _) {
@@ -136,8 +157,7 @@ class Progress {
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
-
-    _write('$_clearLine$prefix$_message${_options.trailing} $_time');
+    _write('$_clearLine$prefix$_formattedMessage $_time');
   }
 
   void _write(String object) {
@@ -152,5 +172,12 @@ class Progress {
     final formattedTime =
         displayInMilliseconds ? '${time}ms' : '${time.toStringAsFixed(1)}s';
     return '${darkGray.wrap('($formattedTime)')}';
+  }
+}
+
+extension on String {
+  String formatted(int max, String trailing) {
+    if (length > max) return '${substring(0, max)}$trailing';
+    return this;
   }
 }
