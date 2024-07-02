@@ -65,12 +65,10 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
     }
 
     final progress = logger.progress('Installing ${brick.name}');
-
     final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
     if (masonYaml.bricks.keys.contains(brick.name)) {
       final confirmation = logger.confirm(
-        'Existing ${brick.name} found, you want to overwrite it?',
-        defaultValue: true,
+        'Existing ${brick.name} found, Do you want to overwrite it?',
       );
       if (!confirmation) {
         progress.fail('Aborted by the user');

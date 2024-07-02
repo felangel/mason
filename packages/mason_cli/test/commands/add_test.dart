@@ -513,6 +513,45 @@ void main() {
           ).called(1);
         });
       });
+
+      group('Overwrite installed bricks', () {
+        test('User overwrite the existing brick', () async {
+          when(
+            () => logger.confirm(any()),
+          ).thenReturn(true);
+          final instllationResult = await commandRunner.run(
+            [
+              'add',
+              '-g',
+              'easy_deps',
+            ],
+          );
+          verify(() => logger.progress(any())).called(1);
+          verify(() => logger.confirm(any())).called(1);
+          expect(
+            instllationResult,
+            equals(ExitCode.success.code),
+          );
+        });
+        test("User don't overwrite the existing brick", () async {
+          when(
+            () => logger.confirm(any()),
+          ).thenReturn(false);
+          final instllationResult = await commandRunner.run(
+            [
+              'add',
+              '-g',
+              'easy_deps',
+            ],
+          );
+          verify(() => logger.progress(any())).called(1);
+          verify(() => logger.confirm(any())).called(1);
+          expect(
+            instllationResult,
+            equals(ExitCode.cantCreate.code),
+          );
+        });
+      });
     });
   });
 }
