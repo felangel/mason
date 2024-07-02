@@ -24,6 +24,7 @@ void main() {
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(80);
     });
 
     group('theme', () {
