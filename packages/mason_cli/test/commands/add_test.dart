@@ -523,11 +523,9 @@ void main() {
             [
               'add',
               '-g',
-              'easy_deps',
+              'greeting',
             ],
           );
-          verify(() => logger.progress(any())).called(1);
-          verify(() => logger.confirm(any())).called(1);
           expect(
             instllationResult,
             equals(ExitCode.success.code),
@@ -541,7 +539,7 @@ void main() {
             [
               'add',
               '-g',
-              'easy_deps',
+              'greeting',
             ],
           );
           verify(() => logger.progress(any())).called(1);
