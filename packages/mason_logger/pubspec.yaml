@@ -6,6 +6,7 @@ repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
 documentation: https://github.com/felangel/mason/tree/master/packages/mason_logger#readme
 topics: [cli, logger, mason]
+funding: [https://github.com/sponsors/felangel]
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
