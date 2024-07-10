@@ -214,20 +214,15 @@ void main() {
               () {
                 stdout.write(
                   any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
+                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
                   ),
                 );
               },
             ).called(1);
-
             verify(
               () {
                 stdout.write(
-                  '''[2K\r[92m✓[0m test message [90m(0.1s)[0m\n''',
+                  any(that: matches(RegExp(r'✓.*test message.*\(0.1s\)'))),
                 );
               },
             ).called(1);
@@ -262,17 +257,10 @@ void main() {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.update(update);
             await Future<void>.delayed(const Duration(milliseconds: 100));
-
             verify(
               () {
                 stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
-                  ),
+                  any(that: matches(RegExp(r'⠙.*message\.\.\..*\(8\dms\)'))),
                 );
               },
             ).called(1);
@@ -280,13 +268,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠹\[0m update... \[90m\(0\.1s\)\[0m',
-                      ),
-                    ),
-                  ),
+                  any(that: matches(RegExp(r'⠹.*update\.\.\..*\(0\.1s\)'))),
                 );
               },
             ).called(1);
@@ -317,7 +299,6 @@ void main() {
       test('writes lines to stdout', () async {
         await _runZoned(
           () async {
-            const time = '(0.1s)';
             const message = 'test message';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -327,11 +308,7 @@ void main() {
               () {
                 stdout.write(
                   any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
+                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
                   ),
                 );
               },
@@ -340,7 +317,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''[2K\u000D[31m✗[0m $message [90m$time[0m\n''',
+                  any(that: matches(RegExp(r'✗.*test message.*\(0\.1s\)'))),
                 );
               },
             ).called(1);

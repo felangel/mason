@@ -97,7 +97,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _formattedMessage} $_time\n''',
+      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _clampedMessage} $_time\n''',
     );
     _timer?.cancel();
   }
@@ -111,7 +111,7 @@ class Progress {
   void fail([String? update]) {
     _timer?.cancel();
     _write(
-      '$_clearLine${red.wrap('✗')} ${update ?? _formattedMessage} $_time\n',
+      '$_clearLine${red.wrap('✗')} ${update ?? _clampedMessage} $_time\n',
     );
     _stopwatch.stop();
   }
@@ -136,11 +136,8 @@ class Progress {
         : double.maxFinite.toInt();
   }
 
-  String get _formattedMessage {
-    return _message.formatted(
-      _terminalColumns - _padding,
-      _options.trailing,
-    );
+  String get _clampedMessage {
+    return _message.clamped(_terminalColumns - _padding);
   }
 
   String get _clearLine {
@@ -157,7 +154,7 @@ class Progress {
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
-    _write('$_clearLine$prefix$_formattedMessage $_time');
+    _write('$_clearLine$prefix$_clampedMessage${_options.trailing} $_time');
   }
 
   void _write(String object) {
@@ -176,8 +173,8 @@ class Progress {
 }
 
 extension on String {
-  String formatted(int max, String trailing) {
-    if (length > max) return '${substring(0, max)}$trailing';
+  String clamped(int max) {
+    if (length > max) return substring(0, max);
     return this;
   }
 }
