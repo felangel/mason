@@ -49,7 +49,7 @@ jobs:
               echo "PASSED"
           else
               echo "FAILED"
-              diff -uw $expected $actual
+              cmp -l $expected $actual
               exit 1
           fi
 
