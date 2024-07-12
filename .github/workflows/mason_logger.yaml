@@ -49,11 +49,7 @@ jobs:
               echo "PASSED"
           else
               echo "FAILED"
-              echo "Expected"
-              cat test/fixtures/ci.txt
-              echo "---"
-              echo "Actual"
-              cat ci.txt
+              diff -u $expected $actual
               exit 1
           fi
 
