@@ -49,7 +49,6 @@ jobs:
               echo "PASSED"
           else
               echo "FAILED"
-              diff -u --ignore-space-change --strip-trailing-cr --ignore-blank-lines "$actual" "$expected"
               exit 1
           fi
 
