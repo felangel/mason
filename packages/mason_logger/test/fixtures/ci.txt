@@ -1,4 +1,1 @@
-⠋ Calculating...
-⠙ This is taking longer than expected... (1.0s)
-⠹ Almost done... (2.0s)
-✓ Done (3.0s)
+⠋ Calculating...⠙ This is taking longer than expected... (1.0s)⠹ Almost done... (2.0s)✓ Done (3.0s)
