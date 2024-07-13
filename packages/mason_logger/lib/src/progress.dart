@@ -73,6 +73,8 @@ class Progress {
   }
 
   static const _padding = 15;
+  static const _disableLineWrap = '\x1b[?7l';
+  static const _enableLineWrap = '\x1b[?7h';
 
   final ProgressOptions _options;
 
@@ -97,7 +99,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _clampedMessage} $_time\n''',
+      '''$_enableWrap$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer?.cancel();
   }
@@ -111,7 +113,7 @@ class Progress {
   void fail([String? update]) {
     _timer?.cancel();
     _write(
-      '$_clearLine${red.wrap('✗')} ${update ?? _clampedMessage} $_time\n',
+      '$_enableWrap$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n',
     );
     _stopwatch.stop();
   }
@@ -137,16 +139,30 @@ class Progress {
   }
 
   String get _clampedMessage {
-    return _message.clamped(_terminalColumns - _padding);
+    final width = max(_terminalColumns - _padding, _padding);
+    return _message.clamped(width);
   }
 
   String get _clearLine {
     if (_stdout.hasTerminal) {
-      return '\x1b[?7l' // disable wrapping
-          '\u001b[2K' // clear current line
+      return '\u001b[2K' // clear current line
           '\r'; // bring cursor to the start of the current line
     }
     return '\r';
+  }
+
+  String get _disableWrap {
+    if (_stdout.hasTerminal) {
+      return _disableLineWrap;
+    }
+    return '';
+  }
+
+  String get _enableWrap {
+    if (_stdout.hasTerminal) {
+      return _enableLineWrap;
+    }
+    return '';
   }
 
   void _onTick(Timer? _) {
@@ -154,7 +170,9 @@ class Progress {
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
-    _write('$_clearLine$prefix$_clampedMessage${_options.trailing} $_time');
+    _write(
+      '''$_disableWrap$_clearLine$prefix$_clampedMessage${_options.trailing} $_time''',
+    );
   }
 
   void _write(String object) {

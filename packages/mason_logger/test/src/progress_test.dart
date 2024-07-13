@@ -34,6 +34,49 @@ void main() {
       );
     });
 
+    test('truncates message when length exceeds terminal columns', () async {
+      await _runZoned(
+        () async {
+          const message = 'this is a very long message that will be truncated.';
+          when(() => stdout.terminalColumns).thenReturn(36);
+          final progress = Logger().progress(message);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          progress.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(r'this is a very long m\.\.\..*\(0.2s\)'),
+                  ),
+                ),
+              );
+            },
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(r'this is a very long m\.\.\..*\(0.3s\)'),
+                  ),
+                ),
+              );
+            },
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(r'this is a very long message that will be truncated\..*\(0.4s\)'),
+                  ),
+                ),
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     test('writes static message when stdioType is not terminal', () async {
       when(() => stdout.hasTerminal).thenReturn(false);
       await _runZoned(
