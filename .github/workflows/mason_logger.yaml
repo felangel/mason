@@ -69,7 +69,7 @@ jobs:
           dart test/ci.dart >> ci.txt
           actual="ci.txt"
           expected="test/fixtures/ci.txt"
-          if diff -u --ignore-space-change --strip-trailing-cr --ignore-blank-lines "$actual" "$expected"; then
+          if cmp -s "$actual" "$expected"; then
               echo "PASSED"
           else
               echo "FAILED"
