@@ -7,6 +7,7 @@ repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
 documentation: https://docs.brickhub.dev
 topics: [mason, cli, template, generator]
+funding: [https://github.com/sponsors/felangel]
 
 environment:
   sdk: ">=3.3.0 <4.0.0"
