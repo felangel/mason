@@ -52,6 +52,12 @@ jobs:
               exit 1
           fi
 
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ci.txt
+          path: ci.txt
+
       - name: Run Tests
         run: |
           dart pub global activate coverage 1.2.0
