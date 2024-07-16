@@ -65,12 +65,38 @@ void main() {
               stdout.write(
                 any(
                   that: matches(
-                    RegExp(r'this is a very long message that will be truncated\..*\(0.4s\)'),
+                    RegExp(
+                        r'this is a very long message that will be truncated\..*\(0.4s\)'),
                   ),
                 ),
               );
             },
           ]);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
+    test('writes full message when stdout does not have a terminal', () async {
+      await _runZoned(
+        () async {
+          const message = 'this is a very long message that will be truncated.';
+          when(() => stdout.hasTerminal).thenReturn(false);
+          final progress = Logger().progress(message);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          progress.complete();
+          verify(() {
+            stdout.write(
+              any(
+                that: matches(
+                  RegExp(
+                    r'this is a very long message that will be truncated\..*\(0.4s\)',
+                  ),
+                ),
+              ),
+            );
+          }).called(1);
         },
         stdout: () => stdout,
         zoneValues: {AnsiCode: true},

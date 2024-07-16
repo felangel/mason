@@ -132,14 +132,8 @@ class Progress {
     _stopwatch.stop();
   }
 
-  int get _terminalColumns {
-    return _stdout.hasTerminal
-        ? _stdout.terminalColumns
-        : double.maxFinite.toInt();
-  }
-
   String get _clampedMessage {
-    final width = max(_terminalColumns - _padding, _padding);
+    final width = max(_stdout.terminalColumns - _padding, _padding);
     return _message.clamped(width);
   }
 
