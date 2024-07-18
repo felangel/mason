@@ -122,7 +122,7 @@ class Progress {
   void update(String update) {
     if (_timer != null) _write(_clearLine);
     _message = update;
-    _onTick(_timer);
+    if (_stdout.hasTerminal) _onTick(_timer);
   }
 
   /// Cancel the progress and remove the written line.
