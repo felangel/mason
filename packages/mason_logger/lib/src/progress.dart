@@ -139,7 +139,8 @@ class Progress {
 
   String get _clampedMessage {
     final width = max(_terminalColumns - _padding, _padding);
-    return _message.clamped(width);
+    if (_message.length > width) return _message.substring(0, width);
+    return _message;
   }
 
   String get _clearLine {
@@ -186,12 +187,5 @@ class Progress {
     final formattedTime =
         displayInMilliseconds ? '${time}ms' : '${time.toStringAsFixed(1)}s';
     return '${darkGray.wrap('($formattedTime)')}';
-  }
-}
-
-extension on String {
-  String clamped(int max) {
-    if (length > max) return substring(0, max);
-    return this;
   }
 }
