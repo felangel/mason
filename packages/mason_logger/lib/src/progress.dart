@@ -122,7 +122,7 @@ class Progress {
   void update(String update) {
     if (_timer != null) _write(_clearLine);
     _message = update;
-    if (_stdout.hasTerminal) _onTick(_timer);
+    _onTick(_timer);
   }
 
   /// Cancel the progress and remove the written line.
@@ -132,8 +132,13 @@ class Progress {
     _stopwatch.stop();
   }
 
+  int get _terminalColumns {
+    if (!_stdout.hasTerminal) return 80;
+    return _stdout.terminalColumns;
+  }
+
   String get _clampedMessage {
-    final width = max(_stdout.terminalColumns - _padding, _padding);
+    final width = max(_terminalColumns - _padding, _padding);
     return _message.clamped(width);
   }
 
