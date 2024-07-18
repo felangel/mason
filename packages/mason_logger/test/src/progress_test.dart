@@ -66,7 +66,8 @@ void main() {
                 any(
                   that: matches(
                     RegExp(
-                        r'this is a very long message that will be truncated\..*\(0.4s\)'),
+                      r'this is a very long message that will be truncated\..*\(0.4s\)',
+                    ),
                   ),
                 ),
               );
