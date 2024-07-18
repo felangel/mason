@@ -72,6 +72,10 @@ class Progress {
     _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
   }
 
+  static const _padding = 15;
+  static const _disableLineWrap = '\x1b[?7l';
+  static const _enableLineWrap = '\x1b[?7h';
+
   final ProgressOptions _options;
 
   final io.Stdout _stdout;
@@ -95,7 +99,7 @@ class Progress {
   void complete([String? update]) {
     _stopwatch.stop();
     _write(
-      '''$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
+      '''$_enableWrap$_clearLine${lightGreen.wrap('✓')} ${update ?? _message} $_time\n''',
     );
     _timer?.cancel();
   }
@@ -108,7 +112,9 @@ class Progress {
   /// * [cancel], to cancel the progress entirely and remove the written line.
   void fail([String? update]) {
     _timer?.cancel();
-    _write('$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n');
+    _write(
+      '$_enableWrap$_clearLine${red.wrap('✗')} ${update ?? _message} $_time\n',
+    );
     _stopwatch.stop();
   }
 
@@ -126,9 +132,31 @@ class Progress {
     _stopwatch.stop();
   }
 
+  int get _terminalColumns {
+    if (!_stdout.hasTerminal) return 80;
+    return _stdout.terminalColumns;
+  }
+
+  String get _clampedMessage {
+    final width = max(_terminalColumns - _padding, _padding);
+    if (_message.length > width) return _message.substring(0, width);
+    return _message;
+  }
+
   String get _clearLine {
+    if (!_stdout.hasTerminal) return '\r';
     return '\u001b[2K' // clear current line
         '\r'; // bring cursor to the start of the current line
+  }
+
+  String get _disableWrap {
+    if (!_stdout.hasTerminal) return '';
+    return _disableLineWrap;
+  }
+
+  String get _enableWrap {
+    if (!_stdout.hasTerminal) return '';
+    return _enableLineWrap;
   }
 
   void _onTick(Timer? _) {
@@ -136,8 +164,9 @@ class Progress {
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
-
-    _write('$_clearLine$prefix$_message${_options.trailing} $_time');
+    _write(
+      '''$_disableWrap$_clearLine$prefix$_clampedMessage${_options.trailing} $_time''',
+    );
   }
 
   void _write(String object) {

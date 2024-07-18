@@ -40,6 +40,30 @@ jobs:
       - name: Analyze
         run: dart analyze --fatal-infos --fatal-warnings .
 
+      - name: Run Tests
+        run: |
+          dart pub global activate coverage 1.2.0
+          dart test --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
+
+      - name: Check Code Coverage
+        uses: VeryGoodOpenSource/very_good_coverage@v3
+        with:
+          path: packages/mason_logger/coverage/lcov.info
+
+  e2e:
+    defaults:
+      run:
+        working-directory: packages/mason_logger
+
+    runs-on: macos-latest
+
+    steps:
+      - uses: actions/checkout@v4.1.7
+      - uses: dart-lang/setup-dart@v1
+
+      - name: Install Dependencies
+        run: dart pub get
+
       - name: Verify CI Behavior
         run: |
           dart test/ci.dart >> ci.txt
@@ -51,16 +75,6 @@ jobs:
               echo "FAILED"
               exit 1
           fi
-
-      - name: Run Tests
-        run: |
-          dart pub global activate coverage 1.2.0
-          dart test --coverage=coverage && dart pub global run coverage:format_coverage --lcov --in=coverage --out=coverage/lcov.info --packages=.dart_tool/package_config.json --report-on=lib --check-ignore
-
-      - name: Check Code Coverage
-        uses: VeryGoodOpenSource/very_good_coverage@v3
-        with:
-          path: packages/mason_logger/coverage/lcov.info
 
   pana:
     defaults:
