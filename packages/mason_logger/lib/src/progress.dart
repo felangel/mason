@@ -144,25 +144,19 @@ class Progress {
   }
 
   String get _clearLine {
-    if (_stdout.hasTerminal) {
-      return '\u001b[2K' // clear current line
-          '\r'; // bring cursor to the start of the current line
-    }
-    return '\r';
+    if (!_stdout.hasTerminal) return '\r';
+    return '\u001b[2K' // clear current line
+        '\r'; // bring cursor to the start of the current line
   }
 
   String get _disableWrap {
-    if (_stdout.hasTerminal) {
-      return _disableLineWrap;
-    }
-    return '';
+    if (!_stdout.hasTerminal) return '';
+    return _disableLineWrap;
   }
 
   String get _enableWrap {
-    if (_stdout.hasTerminal) {
-      return _enableLineWrap;
-    }
-    return '';
+    if (!_stdout.hasTerminal) return '';
+    return _enableLineWrap;
   }
 
   void _onTick(Timer? _) {
