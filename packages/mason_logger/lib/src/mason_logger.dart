@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:math';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/ffi/terminal.dart';
