@@ -239,7 +239,7 @@
 
 # 0.1.0-dev.16
 
-- fix: lamdba shorthand syntax interop
+- fix: lambda shorthand syntax interop
 
 # 0.1.0-dev.15
 
@@ -699,7 +699,7 @@ vars:
 - feat: add `lowerCase` and `upperCase` lambdas
 - fix: support non utf8 encoded files
 - fix: switch templating engine to be lenient by default
-- refactor: avoid templating content with no delimeters
+- refactor: avoid templating content with no delimiters
 
 # 0.0.1-dev.17
 

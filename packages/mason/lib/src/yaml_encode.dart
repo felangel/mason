@@ -1,4 +1,4 @@
-/// Yaml Utiilities
+/// Yaml Utilities
 class Yaml {
   /// Encodes a [Map<String, dynamic>] as `yaml` similar to `json.encode`.
   static String encode(Map<dynamic, dynamic> json, [int nestingLevel = 0]) {

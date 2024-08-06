@@ -5,6 +5,7 @@ import 'package:mason/mason.dart';
 
 final hooksBundle = MasonBundle.fromJson(<String, dynamic>{
   "files": [
+    // cspell:disable-next-line
     {"path": "hooks.md", "data": "SGkge3tuYW1lfX0h", "type": "text"}
   ],
   "hooks": [

@@ -5,6 +5,7 @@ import 'package:mason/mason.dart';
 
 final legacyGreetingBundle = MasonBundle.fromJson(<String, dynamic>{
   "files": [
+    // cspell:disable-next-line
     {"path": "GREETINGS.md", "data": "SGkge3tuYW1lfX0h", "type": "text"}
   ],
   "name": "greeting",
