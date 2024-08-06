@@ -2,7 +2,7 @@ import 'package:mason_api/src/jwt_decode.dart';
 import 'package:test/test.dart';
 
 void main() {
-  const token =
+  const token = // cspell:disable-next-line
       '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZW1haWwuY29tIn0.pD47BhF3MBLyIpfsgWCzP9twzC1HJxGukpcR36DqT6yfiOMHTLcjDbCjRLAnklWEHiT0BQTKTfhs8IousU90Fm5bVKObudfKu8pP5iZZ6Ls4ohDjTrXky9j3eZpZjwv8CnttBVgRfMJG-7YASTFRYFcOLUpnb4Zm5R6QdoCDUYg''';
   group('Jwt', () {
     group('decodeClaims', () {

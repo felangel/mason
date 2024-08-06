@@ -1691,7 +1691,7 @@ void main() {
         );
       });
 
-      test('ignores trailing delimter', () {
+      test('ignores trailing delimiter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
           KeyStroke.char('a'),
@@ -1809,7 +1809,7 @@ void main() {
         );
       });
 
-      test('backspace deletes delimeter', () {
+      test('backspace deletes delimiter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
           KeyStroke.char('a'),

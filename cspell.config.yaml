@@ -1,0 +1,44 @@
+$schema: https://raw.githubusercontent.com/streetsidesoftware/cspell/main/cspell.schema.json
+version: "0.2"
+ignorePaths:
+- "*_bundle.dart"
+words:
+  - APPDATA
+  - LOCALAPPDATA
+  - mocktail
+  - buildroot
+  - endtemplate
+  - writeln
+  - recase
+  - ints
+  - combinators
+  - tearoffs
+  - pubspec
+  - unawaited
+  - interps
+  - livestream
+  - angelov
+  - podfile
+  - PANA
+  - recompile
+  - dartaotruntime
+  - unbundle
+  - xlink
+  - struct
+  - brickhub
+  - felangel
+  - Verdana
+  - vscodeignore
+  - nosources
+  - recompiles
+  - unbundling
+  - sublist
+  - Flutterly
+  - antiprioritize # This might be an api mistake?
+  - Yyna
+  - dylib
+  - libc
+  - calloc
+  - nullptr
+  - xmit
+  - keypress

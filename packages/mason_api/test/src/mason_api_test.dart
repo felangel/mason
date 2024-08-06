@@ -11,12 +11,12 @@ import 'package:test/test.dart';
 
 class _MockHttpClient extends Mock implements http.Client {}
 
-const token =
+const token = // cspell:disable-next-line
     '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJlbWFpbCI6InRlc3RAZW1haWwuY29tIiwiZW1haWxfdmVyaWZpZWQiOmZhbHNlfQ.SaCs1BJ2Oib4TkUeR6p1uh_XnWjJnJpm-dZkL8Whsc_g-NrDKeHhkuVa8fNIbfLtdVeXjVSSi_ZjQDAJho039HSrrdhQAgrRY04cJ6IZCF1HKvJeWDcIihPdl2Zl_V5u9xBxU3ImfGpJ-0O0vCpKHIuDwZsmfN3h_CkDv3SK7lA''';
 const authority = 'registry.brickhub.dev';
 const credentialsFileName = 'mason-credentials.json';
 const email = 'test@email.com';
-const password = 'T0pS3cret!';
+const password = 'T0pS3cret!'; // cspell:disable-line
 
 class TestMasonApiException extends MasonApiException {
   const TestMasonApiException({required super.message, super.details});
@@ -274,7 +274,7 @@ void main() {
         ).thenAnswer(
           (_) async => http.Response(
             json.encode({
-              'access_token':
+              'access_token': // cspell:disable-next-line
                   '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
               'refresh_token': '__refresh_token__',
               'expires_in': '3600',
@@ -526,7 +526,7 @@ void main() {
           ).thenAnswer(
             (_) async => http.Response(
               json.encode({
-                'access_token':
+                'access_token': // cspell:disable-next-line
                     '''eyJhbGciOiJSUzI1NiIsImN0eSI6IkpXVCJ9.eyJmb28iOiJiYXIifQ.LaR0JfOiDrS1AuABC38kzxpSjRLJ_OtfOkZ8hL6I1GPya-cJYwsmqhi5eMBwEbpYHcJhguG5l56XM6dW8xjdK7JbUN6_53gHBosSnL-Ccf29oW71Ado9sxO17YFQyihyMofJ_v78BPVy2H5O10hNjRn_M0JnnAe0Fvd2VrInlIE''',
                 'refresh_token': '__refresh_token__',
                 'expires_in': '3600',
