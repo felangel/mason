@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' as io;
+import 'dart:math';
 
 import 'package:mason_logger/mason_logger.dart';
 import 'package:mason_logger/src/ffi/terminal.dart';
@@ -209,7 +210,7 @@ class Logger {
       ..echoMode = false
       ..lineMode = false;
 
-    final delimeter = '$separator ';
+    final delimiter = '$separator ';
     var rawString = '';
 
     _stdout.write('$message ');
@@ -227,7 +228,7 @@ class Logger {
 
       if (isDeleteOrBackspaceKey) {
         if (rawString.isNotEmpty) {
-          if (rawString.endsWith(delimeter)) {
+          if (rawString.endsWith(delimiter)) {
             _stdout.write('\b\b\x1b[K');
             rawString = rawString.substring(0, rawString.length - 2);
           } else {
@@ -239,19 +240,19 @@ class Logger {
       }
 
       if (key.char == separator) {
-        _stdout.write(delimeter);
-        rawString += delimeter;
+        _stdout.write(delimiter);
+        rawString += delimiter;
       } else {
         _stdout.write(key.char);
         rawString += key.char;
       }
     }
 
-    if (rawString.endsWith(delimeter)) {
+    if (rawString.endsWith(delimiter)) {
       rawString = rawString.substring(0, rawString.length - 2);
     }
 
-    final results = rawString.isEmpty ? <String>[] : rawString.split(delimeter);
+    final results = rawString.isEmpty ? <String>[] : rawString.split(delimiter);
     const clearLine = '\u001b[2K\r';
     _stdout.write(
       '$clearLine$message ${styleDim.wrap(lightCyan.wrap('$results'))}\n',

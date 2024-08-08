@@ -23,7 +23,7 @@ bool get _isAotCompiled => bool.fromEnvironment('dart.vm.product');
 final _descriptorPool = Pool(32);
 final _partialRegExp = RegExp(r'\{\{~\s(.+)\s\}\}');
 final _fileRegExp = RegExp(r'{{%\s?([a-zA-Z]+)\s?%}}');
-final _delimeterRegExp = RegExp('{{([^;,=]*?)}}');
+final _delimiterRegExp = RegExp('{{([^;,=]*?)}}');
 final _loopKeyRegExp = RegExp('{{#(.*?)}}');
 final _loopValueReplaceRegExp = RegExp('({{{.*?}}})');
 final _lambdas = RegExp(
@@ -512,7 +512,7 @@ class TemplateFile {
   ) {
     try {
       final decoded = utf8.decode(content);
-      if (!decoded.contains(_delimeterRegExp)) return content;
+      if (!decoded.contains(_delimiterRegExp)) return content;
       final rendered = decoded.render(vars, partials);
       return utf8.encode(rendered);
     } on Exception {

@@ -53,7 +53,7 @@ void main() {
 
     test('exits with code 70 when MasonApiLoginFailure occurs', () async {
       const email = 'test@email.com';
-      const password = 'T0pS3cret!';
+      const password = 'T0pS3cret!'; // cspell:disable-line
       const message = 'oops something went wrong!';
       when(
         () => logger.prompt('email:', defaultValue: any(named: 'defaultValue')),
@@ -86,7 +86,7 @@ void main() {
 
     test('exits with code 0 when logged in successfully', () async {
       const email = 'test@email.com';
-      const password = 'T0pS3cret!';
+      const password = 'T0pS3cret!'; // cspell:disable-line
       final user = _MockUser();
       when(() => user.email).thenReturn(email);
       when(

@@ -11,7 +11,7 @@ A Dart API client used by [package:mason_cli](https://github.com/felangel/mason)
 import 'package:mason_api/mason_api.dart';
 
 const email = 'my@email.com';
-const password = 't0pS3cret!';
+const password = 'top-secret!';
 
 Future<void> main() async {
   final masonApi = MasonApi();

@@ -240,12 +240,12 @@ const promptForList = async (
   title: string,
   separator?: string,
 ): Promise<string | undefined> => {
-  const delimeter = separator ?? ",";
+  const delimiter = separator ?? ",";
   const input = await vscode.window.showInputBox({
     prompt: title,
-    placeHolder: `Enter a list separated by "${delimeter}"`,
+    placeHolder: `Enter a list separated by "${delimiter}"`,
   });
-  const results = input?.split(delimeter);
+  const results = input?.split(delimiter);
   const selection = results?.map((r) => r.trimStart());
   return JSON.stringify(JSON.stringify(selection));
 };

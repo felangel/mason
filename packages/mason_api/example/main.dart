@@ -1,7 +1,7 @@
 import 'package:mason_api/mason_api.dart';
 
 const email = 'my@email.com';
-const password = 't0pS3cret!';
+const password = 't0pS3cret!'; // cspell:disable-line
 
 Future<void> main() async {
   final masonApi = MasonApi();

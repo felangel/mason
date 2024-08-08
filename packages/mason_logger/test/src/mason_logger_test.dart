@@ -24,6 +24,7 @@ void main() {
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(80);
     });
 
     group('theme', () {
@@ -1690,7 +1691,7 @@ void main() {
         );
       });
 
-      test('ignores trailing delimter', () {
+      test('ignores trailing delimiter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
           KeyStroke.char('a'),
@@ -1808,7 +1809,7 @@ void main() {
         );
       });
 
-      test('backspace deletes delimeter', () {
+      test('backspace deletes delimiter', () {
         final keyStrokes = [
           KeyStroke.char('d'),
           KeyStroke.char('a'),

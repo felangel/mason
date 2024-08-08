@@ -1,6 +1,10 @@
 // coverage:ignore-file
 // ignore_for_file: public_member_api_docs, constant_identifier_names, camel_case_types, non_constant_identifier_names, lines_longer_than_80_chars
 
+// cspell:words tcgetattr BRKINT ICRNL INPCK ISTRIP IXON lflag CSIZE
+// cspell:words fildes termios ospeed ispeed tcflag ncss vtime vmin cflag
+// cspell:words icanon isig iexten tcsanow tcsetattr FILENO iflag oflag OPOST
+
 import 'dart:ffi';
 import 'dart:io';
 

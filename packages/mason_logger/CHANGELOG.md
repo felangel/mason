@@ -1,3 +1,8 @@
+# 0.2.16
+
+- fix: `Logger.progress` spams terminal on overflow
+- chore: add `funding` to `pubspec.yaml`
+
 # 0.2.15
 
 - refactor: upgrade `pkg:win32` to `^0.5.4` ([#1300](https://github.com/felangel/mason/issues/1300))

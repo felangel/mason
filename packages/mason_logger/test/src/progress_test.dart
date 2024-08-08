@@ -15,6 +15,7 @@ void main() {
       stdout = _MockStdout();
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
+      when(() => stdout.terminalColumns).thenReturn(80);
     });
 
     test('writes ms when elapsed time is less than 0.1s', () async {
@@ -33,6 +34,76 @@ void main() {
       );
     });
 
+    test('truncates message when length exceeds terminal columns', () async {
+      await _runZoned(
+        () async {
+          const message = 'this is a very long message that will be truncated.';
+          when(() => stdout.terminalColumns).thenReturn(36);
+          final progress = Logger().progress(message);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          progress.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(r'this is a very long m\.\.\..*\(0.2s\)'),
+                  ),
+                ),
+              );
+            },
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(r'this is a very long m\.\.\..*\(0.3s\)'),
+                  ),
+                ),
+              );
+            },
+            () {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(
+                      r'this is a very long message that will be truncated\..*\(0.4s\)',
+                    ),
+                  ),
+                ),
+              );
+            },
+          ]);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
+    test('writes full message when stdout does not have a terminal', () async {
+      await _runZoned(
+        () async {
+          const message = 'this is a very long message that will be truncated.';
+          when(() => stdout.hasTerminal).thenReturn(false);
+          final progress = Logger().progress(message);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          progress.complete();
+          verify(() {
+            stdout.write(
+              any(
+                that: matches(
+                  RegExp(
+                    r'this is a very long message that will be truncated\..*\(0.4s\)',
+                  ),
+                ),
+              ),
+            );
+          }).called(1);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     test('writes static message when stdioType is not terminal', () async {
       when(() => stdout.hasTerminal).thenReturn(false);
       await _runZoned(
@@ -45,7 +116,7 @@ void main() {
             () => stdout.write('${lightGreen.wrap('⠋')} $message...'),
             () {
               stdout.write(
-                '''\u001b[2K\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
               );
             },
           ]);
@@ -72,7 +143,7 @@ void main() {
             () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
             () {
               stdout.write(
-                '''\u001b[2K\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
               );
             },
           ]);
@@ -213,20 +284,15 @@ void main() {
               () {
                 stdout.write(
                   any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
+                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
                   ),
                 );
               },
             ).called(1);
-
             verify(
               () {
                 stdout.write(
-                  '''[2K\r[92m✓[0m test message [90m(0.1s)[0m\n''',
+                  any(that: matches(RegExp(r'✓.*test message.*\(0.1s\)'))),
                 );
               },
             ).called(1);
@@ -261,17 +327,10 @@ void main() {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.update(update);
             await Future<void>.delayed(const Duration(milliseconds: 100));
-
             verify(
               () {
                 stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
-                  ),
+                  any(that: matches(RegExp(r'⠙.*message\.\.\..*\(8\dms\)'))),
                 );
               },
             ).called(1);
@@ -279,13 +338,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠹\[0m update... \[90m\(0\.1s\)\[0m',
-                      ),
-                    ),
-                  ),
+                  any(that: matches(RegExp(r'⠹.*update\.\.\..*\(0\.1s\)'))),
                 );
               },
             ).called(1);
@@ -316,7 +369,6 @@ void main() {
       test('writes lines to stdout', () async {
         await _runZoned(
           () async {
-            const time = '(0.1s)';
             const message = 'test message';
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
@@ -326,11 +378,7 @@ void main() {
               () {
                 stdout.write(
                   any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
-                      ),
-                    ),
+                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
                   ),
                 );
               },
@@ -339,7 +387,7 @@ void main() {
             verify(
               () {
                 stdout.write(
-                  '''[2K\u000D[31m✗[0m $message [90m$time[0m\n''',
+                  any(that: matches(RegExp(r'✗.*test message.*\(0\.1s\)'))),
                 );
               },
             ).called(1);

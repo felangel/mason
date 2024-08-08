@@ -71,7 +71,7 @@ enum ControlCharacter {
   /// Neg acknowledge
   ctrlU,
 
-  /// Syncronous idel
+  /// Synchronous idle
   ctrlV,
 
   /// End of xmit block
@@ -83,7 +83,7 @@ enum ControlCharacter {
   /// End of medium
   ctrlY,
 
-  /// Substitue (suspend)
+  /// Substitute (suspend)
   ctrlZ,
 
   /// Left arrow
