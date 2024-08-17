@@ -1,3 +1,9 @@
+# 0.3.0
+
+- feat: add `interval` to `ProgressAnimation` ([#1391](https://github.com/felangel/mason/issues/1391))
+- deps: tighten dependency constraints ([#1395](https://github.com/felangel/mason/issues/1395))
+  - bumps the Dart SDK minimum version up to `3.5.0`
+
 # 0.2.16
 
 - fix: `Logger.progress` spams terminal on overflow
