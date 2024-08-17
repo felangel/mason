@@ -192,6 +192,37 @@ void main() {
       );
     });
 
+    test('writes custom progress interval to stdout', () async {
+      await _runZoned(
+        () async {
+          const time = '(0.Xs)';
+          const message = 'test message';
+          const progressOptions = ProgressOptions(
+            animation: ProgressAnimation(interval: Duration(milliseconds: 400)),
+          );
+          final done = Logger().progress(message, options: progressOptions);
+          await Future<void>.delayed(const Duration(milliseconds: 400));
+          done.complete();
+          verifyInOrder([
+            () {
+              stdout.write(
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠋')} $message... ${darkGray.wrap('(0.1s)')}''',
+              );
+            },
+            () {
+              stdout.write(
+                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+              );
+            },
+          ]);
+          verifyNever(() => stdout.write(any(that: contains('0.2s'))));
+          verifyNever(() => stdout.write(any(that: contains('0.3s'))));
+        },
+        stdout: () => stdout,
+        stdin: () => stdin,
+      );
+    });
+
     test('supports empty list of animation frames', () async {
       await _runZoned(
         () async {

@@ -24,7 +24,12 @@ class ProgressOptions {
 /// {@endtemplate}
 class ProgressAnimation {
   /// {@macro progress_animation}
-  const ProgressAnimation({this.frames = _defaultFrames});
+  const ProgressAnimation({
+    this.frames = _defaultFrames,
+    this.interval = _defaultInterval,
+  });
+
+  static const _defaultInterval = Duration(milliseconds: 80);
 
   static const _defaultFrames = [
     '⠋',
@@ -41,6 +46,11 @@ class ProgressAnimation {
 
   /// The list of animation frames.
   final List<String> frames;
+
+  /// The interval at which new frames are produced.
+  /// In other words, the amount of time spent showing a single frame.
+  /// Defaults to 80ms per frame.
+  final Duration interval;
 }
 
 /// {@template progress}
@@ -69,7 +79,7 @@ class Progress {
       return;
     }
 
-    _timer = Timer.periodic(const Duration(milliseconds: 80), _onTick);
+    _timer = Timer.periodic(options.animation.interval, _onTick);
   }
 
   static const _padding = 15;
