@@ -167,7 +167,7 @@ void main() {
           verifyInOrder([
             () {
               stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠋')} $message... ${darkGray.wrap('(0.1s)')}''',
+                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message... ${darkGray.wrap('(0.1s)')}''',
               );
             },
             () {
