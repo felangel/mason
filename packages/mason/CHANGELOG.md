@@ -1,3 +1,9 @@
+# 0.1.0-dev.58
+
+- deps: tighten dependency constraints ([#1401](https://github.com/felangel/mason/issues/1401))
+  - bumps the Dart SDK minimum version up to `3.5.0`
+- chore: add `funding` to `pubspec.yaml` ([#1371](https://github.com/felangel/mason/issues/1371))
+
 # 0.1.0-dev.57
 
 - fix: compile hooks to AOT when using AOT runtime ([#1331](https://github.com/felangel/mason/issues/1331))
