@@ -1,3 +1,8 @@
+# 0.1.0-dev.12
+
+- deps: tighten dependency constraints ([#1400](https://github.com/felangel/mason/issues/1400))
+  - bumps the Dart SDK minimum version up to `3.5.0`
+
 # 0.1.0-dev.11
 
 - chore: run `dart fix --apply`
