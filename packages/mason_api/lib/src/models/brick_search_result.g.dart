@@ -20,7 +20,7 @@ BrickSearchResult _$BrickSearchResultFromJson(Map<String, dynamic> json) =>
           version: $checkedConvert('version', (v) => v as String),
           createdAt:
               $checkedConvert('created_at', (v) => DateTime.parse(v as String)),
-          downloads: $checkedConvert('downloads', (v) => v as int),
+          downloads: $checkedConvert('downloads', (v) => (v as num).toInt()),
         );
         return val;
       },

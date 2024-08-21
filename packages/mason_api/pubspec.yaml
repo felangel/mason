@@ -9,18 +9,18 @@ topics: [mason, template, generator]
 funding: [https://github.com/sponsors/felangel]
 
 environment:
-  sdk: ">=2.19.0 <4.0.0"
+  sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
-  cli_util: ^0.4.0
-  http: '>=0.13.3 <2.0.0'
-  json_annotation: ^4.4.0
-  meta: ^1.7.0
-  path: ^1.8.1
-  platform: ^3.1.0
+  cli_util: ^0.4.1
+  http: ^1.2.2
+  json_annotation: ^4.9.0
+  meta: ^1.15.0
+  path: ^1.9.0
+  platform: ^3.1.5
 
 dev_dependencies:
-  build_runner: ^2.0.0
-  json_serializable: ^6.1.4
-  mocktail: ^1.0.0
-  test: ^1.19.0
+  build_runner: ^2.4.12
+  json_serializable: ^6.8.0
+  mocktail: ^1.0.4
+  test: ^1.25.8
