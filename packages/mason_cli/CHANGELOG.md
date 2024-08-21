@@ -1,3 +1,10 @@
+# 0.1.0-dev.56
+
+- deps: tighten dependency constraints ([#1403](https://github.com/felangel/mason/issues/1403))
+  - bumps the Dart SDK minimum version up to `3.5.0`
+- chore: add `funding` to `pubspec.yaml` ([#1371](https://github.com/felangel/mason/issues/1371))
+- docs: document non top level partials ([#1355](https://github.com/felangel/mason/issues/1355))
+
 # 0.1.0-dev.55
 
 - deps: upgrade to `mason 0.1.0-dev.53` and `mason_logger v0.2.15`
