@@ -112,6 +112,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
+    "@stylistic/eslint-plugin": "^2.6.4",
     "@types/glob": "^8.1.0",
     "@types/lodash": "^4.17.7",
     "@types/mocha": "^10.0.7",
