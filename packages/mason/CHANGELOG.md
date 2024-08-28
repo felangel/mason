@@ -1,3 +1,7 @@
+# 0.1.0-dev.59
+
+- deps: loosen `pkg:collection` constraint for Flutter compat ([#1411](https://github.com/felangel/mason/issues/1411))
+
 # 0.1.0-dev.58
 
 - deps: tighten dependency constraints ([#1401](https://github.com/felangel/mason/issues/1401))
