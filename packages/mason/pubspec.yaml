@@ -9,6 +9,14 @@ documentation: https://github.com/felangel/mason/tree/master/packages/mason_cli#
 topics: [mason, template, generator]
 funding: [https://github.com/sponsors/felangel]
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
