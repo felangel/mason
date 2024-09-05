@@ -8,6 +8,14 @@ documentation: https://github.com/felangel/mason/tree/master/packages/mason_logg
 topics: [cli, logger, mason]
 funding: [https://github.com/sponsors/felangel]
 
+platforms:
+  android:
+  ios:
+  linux:
+  macos:
+  web:
+  windows:
+
 environment:
   sdk: ">=3.5.0 <4.0.0"
 
