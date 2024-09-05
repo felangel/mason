@@ -1,3 +1,7 @@
+# 0.1.0-dev.60
+
+- chore: add `platforms` to `pubspec.yaml` ([#1420](https://github.com/felangel/mason/issues/1420))
+
 # 0.1.0-dev.59
 
 - deps: loosen `pkg:collection` constraint for Flutter compat ([#1411](https://github.com/felangel/mason/issues/1411))
