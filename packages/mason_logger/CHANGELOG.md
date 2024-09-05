@@ -1,3 +1,7 @@
+# 0.3.1
+
+- chore: add `platforms` to `pubspec.yaml` ([#1420](https://github.com/felangel/mason/issues/1420))
+
 # 0.3.0
 
 - feat: add `interval` to `ProgressAnimation` ([#1391](https://github.com/felangel/mason/issues/1391))
