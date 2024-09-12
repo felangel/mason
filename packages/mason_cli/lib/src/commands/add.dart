@@ -63,6 +63,36 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       final version = results.rest.length == 2 ? results.rest.last : 'any';
       brick = Brick(name: name, location: BrickLocation(version: version));
     }
+    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
+    final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
+    final bricksJson = isGlobal ? globalBricksJson : localBricksJson;
+    final masonLockJson = isGlobal ? globalMasonLockJson : localMasonLockJson;
+    final masonLockJsonFile =
+        isGlobal ? globalMasonLockJsonFile : localMasonLockJsonFile;
+    if (bricksJson == null) throw const MasonYamlNotFoundException();
+    final cachedPath = bricksJson.getPath(brick);
+    if (cachedPath != null) {
+      logger.info(
+        '''${red.wrap(styleBold.wrap('conflict'))} ${darkGray.wrap(cachedPath)}''',
+      );
+      final confirm = logger.confirm(
+        lightYellow.wrap('Overwrite ${brick.name}?'),
+      );
+      if (!confirm) return ExitCode.success.code;
+
+      bricksJson.remove(brick);
+      await bricksJson.flush();
+
+      final bricks = Map.of(masonYaml.bricks)
+        ..removeWhere((key, value) => key == brick.name);
+      masonYamlFile.writeAsStringSync(Yaml.encode(MasonYaml(bricks).toJson()));
+
+      final lockedBricks = {...masonLockJson.bricks}
+        ..removeWhere((key, value) => key == brick.name);
+      await masonLockJsonFile.writeAsString(
+        json.encode(MasonLockJson(bricks: lockedBricks).toJson()),
+      );
+    }
 
     final progress = logger.progress('Installing ${brick.name}');
     final cachedBrick = await _addBrick(brick, global: isGlobal);
@@ -84,8 +114,6 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
       (m) => BrickYaml.fromJson(m!),
     ).copyWith(path: file.path);
 
-    final masonYaml = isGlobal ? globalMasonYaml : localMasonYaml;
-    final masonYamlFile = isGlobal ? globalMasonYamlFile : localMasonYamlFile;
     final location = brick.location.version != null
         ? BrickLocation(version: '^${brickYaml.version}')
         : brick.location.path != null
@@ -99,11 +127,9 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
     final bricks = Map.of(masonYaml.bricks)..addAll({name: location});
     progress.update('Adding ${brickYaml.name}');
     try {
-      if (!masonYaml.bricks.containsKey(name)) {
-        await masonYamlFile.writeAsString(
-          Yaml.encode(MasonYaml(bricks).toJson()),
-        );
-      }
+      await masonYamlFile.writeAsString(
+        Yaml.encode(MasonYaml(bricks).toJson()),
+      );
       progress.complete('Added ${brickYaml.name}');
     } catch (_) {
       progress.fail();
@@ -115,11 +141,7 @@ class AddCommand extends MasonCommand with InstallBrickMixin {
   /// Installs a specific brick and returns the [CachedBrick] reference.
   Future<CachedBrick> _addBrick(Brick brick, {bool global = false}) async {
     final bricksJson = global ? globalBricksJson : localBricksJson;
-    if (bricksJson == null) {
-      usageException(
-        'Mason has not been initialized.\nDid you forget to run mason init?',
-      );
-    }
+    if (bricksJson == null) throw const MasonYamlNotFoundException();
 
     final masonLockJsonFile =
         global ? globalMasonLockJsonFile : localMasonLockJsonFile;
