@@ -5,7 +5,7 @@ version: 0.1.0-dev.60
 homepage: https://github.com/felangel/mason
 repository: https://github.com/felangel/mason
 issue_tracker: https://github.com/felangel/mason/issues
-documentation: https://github.com/felangel/mason/tree/master/packages/mason_cli#readme
+documentation: https://docs.brickhub.dev
 topics: [mason, template, generator]
 funding: [https://github.com/sponsors/felangel]
 
