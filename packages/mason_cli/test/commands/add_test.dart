@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason_cli/src/command.dart';
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -29,6 +30,7 @@ void main() {
       pubUpdater = _MockPubUpdater();
 
       when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(() => logger.confirm(any())).thenReturn(true);
       when(
         () => pubUpdater.getLatestVersion(any()),
       ).thenAnswer((_) async => packageVersion);
@@ -53,9 +55,7 @@ void main() {
       final result = await commandRunner.run(['add', 'example', '--path', '.']);
       expect(result, equals(ExitCode.usage.code));
       verify(
-        () => logger.err(
-          'Mason has not been initialized.\nDid you forget to run mason init?',
-        ),
+        () => logger.err(const MasonYamlNotFoundException().message),
       ).called(1);
     });
 
@@ -91,6 +91,21 @@ void main() {
       );
       expect(result, equals(ExitCode.usage.code));
       verify(progress.fail).called(1);
+    });
+
+    test('aborts when brick already exists', () async {
+      await commandRunner.run(['cache', 'clear']);
+      var result = await commandRunner.run(['add', 'greeting']);
+      expect(result, equals(ExitCode.success.code));
+      verifyNever(
+        () => logger.confirm(lightYellow.wrap('Overwrite greeting?')),
+      );
+      when(() => logger.confirm(any())).thenReturn(false);
+      result = await commandRunner.run(['add', 'greeting']);
+      expect(result, equals(ExitCode.success.code));
+      verify(
+        () => logger.confirm(lightYellow.wrap('Overwrite greeting?')),
+      ).called(1);
     });
 
     group('local', () {
