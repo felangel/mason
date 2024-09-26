@@ -1,3 +1,7 @@
+# 0.1.0-dev.57
+
+- feat: `mason add` prompt to overwrite on conflict ([#1435](https://github.com/felangel/mason/issues/1435))
+
 # 0.1.0-dev.56
 
 - deps: tighten dependency constraints ([#1403](https://github.com/felangel/mason/issues/1403))
