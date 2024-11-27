@@ -250,7 +250,7 @@ version: 0.1.0+1
 # 以下定义了当前 brick 的环境。
 # 它包括 brick 所需的 mason 版本。
 environment:
-  mason: ">=0.1.0-dev <0.1.0"
+  mason: ^0.1.0
 
 # 变量指定了 Brick 依赖的动态值。
 # 对于给定的 Brick，可以指定零个或多个变量。
