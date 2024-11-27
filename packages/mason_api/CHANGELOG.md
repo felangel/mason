@@ -1,3 +1,7 @@
+# 0.1.0
+
+- chore: bump to stable v0.1.0 🎉
+
 # 0.1.0-dev.12
 
 - deps: tighten dependency constraints ([#1400](https://github.com/felangel/mason/issues/1400))
