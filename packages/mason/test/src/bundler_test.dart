@@ -240,7 +240,7 @@ void main() {
             'description: An example brick.\n'
             'version: 0.1.0+1\n'
             'environment:\n'
-            '  mason: ">=0.1.0-dev <0.1.0"\n'
+            '  mason: ^$packageVersion\n'
             'repository: "https://github.com/felangel/mason/tree/master/bricks/hello"\n'
             'vars:\n'
             '  name:\n'

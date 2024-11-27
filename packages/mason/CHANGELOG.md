@@ -1,3 +1,7 @@
+# 0.1.0
+
+- chore: bump to stable v0.1.0 🎉
+
 # 0.1.0-dev.60
 
 - chore: add `platforms` to `pubspec.yaml` ([#1420](https://github.com/felangel/mason/issues/1420))

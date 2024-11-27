@@ -1,7 +1,7 @@
 name: hooks_hooks
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ^3.5.4
 
 dependencies:
   mason:
