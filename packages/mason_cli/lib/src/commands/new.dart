@@ -135,7 +135,7 @@ version: 0.1.0+1
 # The following defines the environment for the current brick.
 # It includes the version of mason that the brick requires.
 environment:
-  mason: ">=$packageVersion <0.1.0"
+  mason: ^$packageVersion
 
 # Variables specify dynamic values that your brick depends on.
 # Zero or more variables can be specified for a given brick.
@@ -199,10 +199,10 @@ TODO: Add your license here.
 name: ${name}_hooks
 
 environment:
-  sdk: ">=2.12.0 <3.0.0"
+  sdk: ^3.5.4
 
 dependencies:
-  mason: ">=$packageVersion <0.1.0"
+  mason: ^$packageVersion
 ''';
 
   static const _hooksGitignoreContent = '''
