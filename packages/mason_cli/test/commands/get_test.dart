@@ -27,6 +27,23 @@ void main() {
     late PubUpdater pubUpdater;
     late MasonCommandRunner commandRunner;
 
+    setUpAll(() async {
+      registerFallbackValue(Object());
+      logger = _MockLogger();
+      pubUpdater = _MockPubUpdater();
+
+      when(
+        () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
+      ).thenReturn('');
+      when(() => logger.progress(any())).thenReturn(_MockProgress());
+      when(
+        () => pubUpdater.getLatestVersion(any()),
+      ).thenAnswer((_) async => packageVersion);
+      await MasonCommandRunner(logger: logger, pubUpdater: pubUpdater).run(
+        ['cache', 'clear'],
+      );
+    });
+
     setUp(() {
       logger = _MockLogger();
       pubUpdater = _MockPubUpdater();
@@ -55,7 +72,7 @@ bricks:
     git:
       url: https://github.com/felangel/mason
       path: bricks/hooks
-      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
+      ref: c744e19c23243453f568b539bb122767e6542929
   simple:
     path: ../../../../../bricks/simple
   todos:
@@ -64,7 +81,7 @@ bricks:
     git:
       url: https://github.com/felangel/mason
       path: bricks/widget
-      ref: 997bc878c93534fad17d965be7cafe948a1dbb53
+      ref: c744e19c23243453f568b539bb122767e6542929
 ''',
       );
     });
@@ -114,7 +131,7 @@ bricks:
         path.join(
           BricksJson.rootDir.path,
           'git',
-          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_c744e19c23243453f568b539bb122767e6542929''',
           'bricks',
           'hooks',
         ),
@@ -129,7 +146,7 @@ bricks:
         path.join(
           BricksJson.rootDir.path,
           'git',
-          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_997bc878c93534fad17d965be7cafe948a1dbb53''',
+          '''mason_aHR0cHM6Ly9naXRodWIuY29tL2ZlbGFuZ2VsL21hc29u_c744e19c23243453f568b539bb122767e6542929''',
           'bricks',
           'widget',
         ),
@@ -161,7 +178,7 @@ bricks:
                 'git': {
                   'url': 'https://github.com/felangel/mason',
                   'path': 'bricks/hooks',
-                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53',
+                  'ref': 'c744e19c23243453f568b539bb122767e6542929',
                 },
               },
               'simple': {'path': simplePath},
@@ -170,7 +187,7 @@ bricks:
                 'git': {
                   'url': 'https://github.com/felangel/mason',
                   'path': 'bricks/widget',
-                  'ref': '997bc878c93534fad17d965be7cafe948a1dbb53',
+                  'ref': 'c744e19c23243453f568b539bb122767e6542929',
                 },
               },
             },
@@ -217,7 +234,7 @@ bricks:
       File(path.join(Directory.current.path, 'mason.yaml')).writeAsStringSync(
         '''
 bricks:
-  hello: ^0.1.0-dev
+  greeting: ^0.1.0-dev
   widget:
     git:
       url: https://github.com/felangel/mason

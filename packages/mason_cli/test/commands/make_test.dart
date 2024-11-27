@@ -326,7 +326,7 @@ void main() {
       final brickYaml = File(path.join('example', 'brick.yaml'));
       brickYaml.writeAsStringSync(
         brickYaml.readAsStringSync().replaceFirst(
-              'mason: ">=${mason.packageVersion} <0.1.0"',
+              'mason: ^${mason.packageVersion}',
               'mason: ">=99.99.99 <100.0.0"',
             ),
       );
