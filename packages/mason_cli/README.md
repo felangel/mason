@@ -111,7 +111,7 @@ Running `mason init` generates a `mason.yaml` so that you can get started immedi
 bricks:
   # Bricks can be imported via version constraint from a registry.
   # Uncomment the following line to import the "hello" brick from BrickHub.
-  # hello: 0.1.0+1
+  # hello: 0.1.0+2
   # Bricks can also be imported via remote git url.
   # Uncomment the following lines to import the "widget" brick from git.
   # widget:
