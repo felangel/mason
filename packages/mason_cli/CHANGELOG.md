@@ -1,3 +1,7 @@
+# 0.1.1
+
+- fix: `mason init` uses `hello 0.1.0+2` for `mason v0.1.0` compatibility
+
 # 0.1.0
 
 - chore: bump to stable v0.1.0 🎉
