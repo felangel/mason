@@ -1,3 +1,12 @@
+# 0.1.2
+
+- feat: improve the output of `mason --version` ([#1482](https://github.com/felangel/mason/issues/1482))
+  ```sh
+  $ mason --version
+  mason_cli 0.1.1 • command-line interface
+  mason 0.1.0 • core templating engine
+  ```
+
 # 0.1.1
 
 - fix: `mason init` uses `hello 0.1.0+2` for `mason v0.1.0` compatibility
