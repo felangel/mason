@@ -1,6 +1,7 @@
 // ignore_for_file: no_adjacent_strings_in_list
 import 'package:args/command_runner.dart';
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason/mason.dart' as mason;
 import 'package:mason_cli/src/command_runner.dart';
 import 'package:mason_cli/src/version.dart';
 import 'package:mocktail/mocktail.dart';
@@ -173,10 +174,16 @@ void main() {
       });
 
       group('--version', () {
-        test('outputs current version', () async {
+        test('outputs current versions', () async {
           final result = await commandRunner.run(['--version']);
           expect(result, equals(ExitCode.success.code));
-          verify(() => logger.info(packageVersion)).called(1);
+          verify(
+            () => logger.info(
+              '''
+mason_cli $packageVersion • command-line interface
+mason ${mason.packageVersion} • core templating engine''',
+            ),
+          ).called(1);
         });
       });
     });

@@ -4,6 +4,7 @@ import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:cli_completion/cli_completion.dart';
 import 'package:mason/mason.dart' hide packageVersion;
+import 'package:mason/mason.dart' as mason;
 import 'package:mason_api/mason_api.dart';
 import 'package:mason_cli/src/commands/commands.dart';
 import 'package:mason_cli/src/version.dart';
@@ -88,7 +89,9 @@ class MasonCommandRunner extends CompletionCommandRunner<int> {
 
     int? exitCode = ExitCode.unavailable.code;
     if (topLevelResults['version'] == true) {
-      _logger.info(packageVersion);
+      _logger.info('''
+mason_cli $packageVersion • command-line interface
+mason ${mason.packageVersion} • core templating engine''');
       exitCode = ExitCode.success.code;
     } else {
       exitCode = await super.runCommand(topLevelResults);
