@@ -452,7 +452,7 @@ bricks:
 
     test('exits with code 70 when exception occurs while generating', () async {
       const url =
-          'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
+          'https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png';
       when(
         () => logger.prompt(any(), defaultValue: any(named: 'defaultValue')),
       ).thenReturn(url);
@@ -485,7 +485,7 @@ bricks:
         'make',
         'app_icon',
         '--url',
-        'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg',
+        'https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png',
       ]);
       expect(result, equals(ExitCode.success.code));
 
@@ -500,7 +500,7 @@ bricks:
 
     test('generates app_icon (from prompt)', () async {
       const url =
-          'https://cdn.dribbble.com/users/163325/screenshots/6214023/app_icon.jpg';
+          'https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png';
       when(() => logger.prompt(any())).thenReturn(url);
       final testDir = Directory(
         path.join(Directory.current.path, 'app_icon'),

@@ -8,7 +8,7 @@ part 'mason_lock_json.g.dart';
 /// {@endtemplate}
 @JsonSerializable()
 class MasonLockJson {
-  /// {@macro mason_lock}
+  /// {@macro mason_lock_json}
   const MasonLockJson({Map<String, BrickLocation>? bricks})
       : bricks = bricks ?? const <String, BrickLocation>{};
 

@@ -100,21 +100,21 @@ class BrickYaml {
 
 /// The type of brick variable.
 enum BrickVariableType {
-  /// An array (e.g. ["one", "two", "three"]).
+  /// An array (e.g. `["one", "two", "three"]`).
   /// Values must be present in the list of
   /// available options.
   array,
 
-  /// A number (e.g. 42)
+  /// A number (e.g. `42`)
   number,
 
-  /// A string (e.g. "Dash")
+  /// A string (e.g. `"Dash"`)
   string,
 
-  /// A boolean (e.g. true/false)
+  /// A boolean (e.g. `true`/`false`)
   boolean,
 
-  /// An enumeration (e.g. ["red", "green", "blue"])
+  /// An enumeration (e.g. `["red", "green", "blue"]`)
   @JsonValue('enum')
   enumeration,
 
