@@ -1,1 +1,1 @@
-⠋ Calculating...⠙ This is taking longer than expected... (1.0s)⠹ Almost done... (2.0s)✓ Done (3.0s)Learn more at [GitHub](https://github.com/felangel/mason)
+⠋ Calculating...⠙ This is taking longer than expected... (1.0s)⠹ Almost done... (2.0s)✓ Done (3.0s)
