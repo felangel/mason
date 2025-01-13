@@ -73,6 +73,7 @@ jobs:
               echo "PASSED"
           else
               echo "FAILED"
+              diff "$actual" "$expected"
               exit 1
           fi
 
