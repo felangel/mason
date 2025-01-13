@@ -73,7 +73,12 @@ jobs:
               echo "PASSED"
           else
               echo "FAILED"
-              diff "$actual" "$expected"
+              # Print the actual
+              echo "Actual:"
+              cat "$actual"
+              # Print the expected
+              echo "Expected:"
+              cat "$expected"
               exit 1
           fi
 
