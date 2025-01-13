@@ -1,3 +1,7 @@
+# 0.3.2
+
+- fix: `link` should depend on ansi escape support ([#1505](https://github.com/felangel/mason/pull/1505))
+
 # 0.3.1
 
 - chore: add `platforms` to `pubspec.yaml` ([#1420](https://github.com/felangel/mason/issues/1420))
