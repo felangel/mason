@@ -9,4 +9,11 @@ Future<void> main() async {
   progress.update('Almost done');
   await Future<void>.delayed(const Duration(seconds: 1));
   progress.complete('Done');
+
+  final masonGitHub = link(
+    uri: Uri.parse('https://github.com/felangel/mason'),
+    message: 'GitHub',
+  );
+
+  logger.info('Learn more at $masonGitHub');
 }
