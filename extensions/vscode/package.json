@@ -112,7 +112,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^2.11.0",
+    "@stylistic/eslint-plugin": "^4.1.0",
     "@types/glob": "^8.1.0",
     "@types/lodash": "^4.17.15",
     "@types/mocha": "^10.0.10",
@@ -121,7 +121,7 @@
     "@types/yaml": "^1.9.7",
     "@typescript-eslint/eslint-plugin": "^8.25.0",
     "@typescript-eslint/parser": "^8.25.0",
-    "eslint": "^8.57.1",
+    "eslint": "^9.21.0",
     "glob": "^11.0.1",
     "prettier": "^3.5.2",
     "ts-loader": "^9.5.2",
