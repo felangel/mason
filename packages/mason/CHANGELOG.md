@@ -1,3 +1,7 @@
+# 0.1.1
+
+- chore(deps): upgrade `pkg:archive` to `^4.0.0` ([#1532](https://github.com/felangel/mason/issues/1532))
+
 # 0.1.0
 
 - chore: bump to stable v0.1.0 🎉

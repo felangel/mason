@@ -3,6 +3,7 @@ analyzer:
   exclude:
     - "test/.test_coverage.dart"
     - "test/fixtures/**"
+    - "test/bricks/**"
     - "**/*.g.dart"
     - "**/version.dart"
 linter:
