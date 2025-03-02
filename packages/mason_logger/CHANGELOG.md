@@ -1,3 +1,7 @@
+# 0.3.3
+
+- deps: upgrade `pkg:win32` to `^5.11.0` ([#1537](https://github.com/felangel/mason/pull/1537))
+
 # 0.3.2
 
 - fix: `link` should depend on ansi escape support ([#1505](https://github.com/felangel/mason/pull/1505))
