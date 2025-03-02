@@ -27,7 +27,7 @@ class Credentials {
     );
   }
 
-  /// Converts a [Map] to [Credentials].
+  /// Converts a [Map] to an instance of [Credentials].
   factory Credentials.fromJson(Map<String, dynamic> json) =>
       _$CredentialsFromJson(json);
 
@@ -43,6 +43,6 @@ class Credentials {
   /// The token type (usually 'Bearer').
   final String tokenType;
 
-  /// Converts a [Credentials] to a [Map].
+  /// Converts an instance of [Credentials] to a [Map].
   Map<String, dynamic> toJson() => _$CredentialsToJson(this);
 }
