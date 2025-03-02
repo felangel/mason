@@ -43,6 +43,6 @@ class Credentials {
   /// The token type (usually 'Bearer').
   final String tokenType;
 
-  /// Converts a [Credentials] to Map<String, dynamic>.
+  /// Converts a [Credentials] to a [Map].
   Map<String, dynamic> toJson() => _$CredentialsToJson(this);
 }
