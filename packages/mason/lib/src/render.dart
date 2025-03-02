@@ -77,19 +77,19 @@ const _builtInVars = <String, dynamic>{
 /// Given a `String` with mustache templates, and a [Map] of String key /
 /// value pairs, substitute all instances of `{{key}}` for `value`.
 ///
-/// ```
+/// ```text
 /// Hello {{name}}!
 /// ```
 ///
 /// and
 ///
-/// ```
+/// ```text
 /// {'name': 'Bob'}
 /// ```
 ///
 /// becomes:
 ///
-/// ```
+/// ```text
 /// Hello Bob!
 /// ```
 /// {@endtemplate}
