@@ -17,7 +17,7 @@ part 'hooks.dart';
 
 // This is intentionally a getter instead of a constant since nested hook
 // execution depends on being able to detect the runtime dynamically.
-// ignore: prefer_const_constructors
+// ignore: prefer_const_constructors, do_not_use_environment
 bool get _isAotCompiled => bool.fromEnvironment('dart.vm.product');
 
 final _descriptorPool = Pool(32);

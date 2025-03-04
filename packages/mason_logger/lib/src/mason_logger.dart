@@ -546,7 +546,7 @@ Ensure a terminal is attached via "stdout.hasTerminal" before requesting input.
 
 extension on bool {
   String toYesNo() {
-    return this == true ? 'Y/n' : 'y/N';
+    return this ? 'Y/n' : 'y/N';
   }
 }
 
