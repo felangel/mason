@@ -1,3 +1,7 @@
+# 0.1.1
+
+- chore: fix `unintended_html_in_doc_comment` lint
+
 # 0.1.0
 
 - chore: bump to stable v0.1.0 🎉
