@@ -112,25 +112,25 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@stylistic/eslint-plugin": "^2.11.0",
+    "@stylistic/eslint-plugin": "^2.13.0",
     "@types/glob": "^8.1.0",
-    "@types/lodash": "^4.17.15",
+    "@types/lodash": "^4.17.16",
     "@types/mocha": "^10.0.10",
     "@types/node": "22.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
-    "@typescript-eslint/eslint-plugin": "^8.25.0",
-    "@typescript-eslint/parser": "^8.25.0",
+    "@typescript-eslint/eslint-plugin": "^8.28.0",
+    "@typescript-eslint/parser": "^8.28.0",
     "eslint": "^8.57.1",
     "glob": "^11.0.1",
-    "prettier": "^3.5.2",
+    "prettier": "^3.5.3",
     "ts-loader": "^9.5.2",
-    "typescript": "^5.7.3",
+    "typescript": "^5.8.2",
     "webpack": "^5.98.0",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "yaml": "^2.7.0"
+    "yaml": "^2.7.1"
   }
 }
