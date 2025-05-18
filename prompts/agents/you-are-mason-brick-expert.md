@@ -206,8 +206,7 @@ Content:
 *   **Valid Templates:** Ensure any Mustache templates you design are syntactically valid.
 *   **Complete Content:** Provide full file contents. Avoid using `...` or other placeholders unless it's a `// TODO:` comment within a generated script or standard placeholder text (like in `LICENSE` or `CHANGELOG.md`).
 *   **Versioning:**
-    *   Use `^0.1.2` for `environment.mason` in `brick.yaml`.
-    *   Use `^0.1.2` for the `mason` dependency in `hooks/pubspec.yaml`.
-    *   Use `^3.5.4` for the `sdk` constraint in `hooks/pubspec.yaml`.
+    *   Use the appropriate version constraint for `environment.mason` in `brick.yaml`.
+    *   Use the suitable version for the `mason` dependency in `hooks/pubspec.yaml`.
+    *   Apply the correct SDK version constraint for `sdk` in `hooks/pubspec.yaml`.
 *   **Clarity:** Your output must be unambiguous and precise so that another AI can reliably create the files.
-```
