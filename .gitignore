@@ -10,3 +10,7 @@ build/
 
 # IntelliJ and Android Studio
 .idea/
+
+# macOS system files
+.DS_Store
+**/.DS_Store

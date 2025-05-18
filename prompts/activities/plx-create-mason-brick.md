@@ -1,4 +1,3 @@
-
 Please help me create a mason brick. Your primary goal is to understand my specifications for a new Mason brick, provided in `{user_requests}` and `{relevant_context}`, and then generate a detailed, structured description of that brick's complete file layout and content. This description will be used by another AI to perform the actual file creation.
 
 ### Core Knowledge & Definitions You Must Adhere To
@@ -211,10 +210,6 @@ Content:
     *   Use `{default_mason_hook_dependency_version}` for the `mason` dependency in `hooks/pubspec.yaml` if hooks are included and not otherwise specified.
     *   Use `{default_hook_sdk_version}` for the `sdk` constraint in `hooks/pubspec.yaml` if hooks are included and not otherwise specified.
 *   **Clarity:** Your output describing the brick design must be unambiguous and precise so that another AI can reliably use it to create the actual files.
-
-```yaml
-user_requests´:
-```
 
 ```yaml
 default_mason_env_version: "^0.1.2"
