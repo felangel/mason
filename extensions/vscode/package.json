@@ -119,18 +119,18 @@
     "@types/node": "22.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
-    "@typescript-eslint/eslint-plugin": "^8.28.0",
-    "@typescript-eslint/parser": "^8.28.0",
+    "@typescript-eslint/eslint-plugin": "^8.32.1",
+    "@typescript-eslint/parser": "^8.32.1",
     "eslint": "^8.57.1",
-    "glob": "^11.0.1",
+    "glob": "^11.0.2",
     "prettier": "^3.5.3",
     "ts-loader": "^9.5.2",
-    "typescript": "^5.8.2",
-    "webpack": "^5.98.0",
+    "typescript": "^5.8.3",
+    "webpack": "^5.99.8",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "yaml": "^2.7.1"
+    "yaml": "^2.8.0"
   }
 }
