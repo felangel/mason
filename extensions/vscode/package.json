@@ -110,7 +110,7 @@
     "format:check": "prettier --check ."
   },
   "devDependencies": {
-    "@types/glob": "^8.1.0",
+    "@types/glob": "^9.0.0",
     "@types/lodash": "^4.17.20",
     "@types/mocha": "^10.0.10",
     "@types/node": "24.x",
@@ -120,7 +120,7 @@
     "prettier": "^3.6.2",
     "ts-loader": "^9.5.2",
     "typescript": "^5.8.3",
-    "webpack": "^5.100.0",
+    "webpack": "^5.100.2",
     "webpack-cli": "^6.0.1"
   },
   "dependencies": {
