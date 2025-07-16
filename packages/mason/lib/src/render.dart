@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:typed_data';
 
 import 'package:mason/mason.dart';
 import 'package:mustache_template/mustache_template.dart';
@@ -97,7 +98,7 @@ extension RenderTemplate on String {
   /// {@macro render_template}
   String render(
     Map<String, dynamic> vars, [
-    Map<String, List<int>>? partials = const {},
+    Map<String, Uint8List>? partials = const {},
   ]) {
     final template = Template(
       _sanitizeInput(transpiled()),
@@ -159,7 +160,7 @@ extension on String {
 /// A resolver function which given a partial name.
 /// attempts to return a new [Template].
 /// {@endtemplate}
-extension ResolvePartial on Map<String, List<int>> {
+extension ResolvePartial on Map<String, Uint8List> {
   /// {@macro resolve_partial}
   Template? resolve(String name) {
     final content = this['{{~ $name }}'];

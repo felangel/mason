@@ -97,7 +97,7 @@ class GeneratorHooks {
   static Future<GeneratorHooks> fromBrickYaml(BrickYaml brick) async {
     HookFile? preGenHook;
     HookFile? postGenHook;
-    List<int>? pubspec;
+    Uint8List? pubspec;
 
     final accumulator = AccumulatorSink<Digest>();
     final sink = sha1.startChunkedConversion(accumulator);
@@ -151,7 +151,7 @@ class GeneratorHooks {
   final HookFile? postGenHook;
 
   /// Contents of the hooks `pubspec.yaml` if exists.
-  final List<int>? pubspec;
+  final Uint8List? pubspec;
 
   /// The hash of the hooks directory and its contents.
   final String checksum;
@@ -403,7 +403,7 @@ class HookFile {
   final String path;
 
   /// The template file content.
-  final List<int> content;
+  final Uint8List content;
 }
 
 /// A reference to core mason APIs to be used within hooks.
