@@ -56,12 +56,7 @@ class _MakeCommand extends MasonCommand {
       ..addSeparator('${'-' * 79}\n');
 
     for (final entry in _brick.vars.entries) {
-      final variable = entry.key;
-      final properties = entry.value;
-      argParser.addOption(
-        variable,
-        help: properties.toHelp(),
-      );
+      argParser.addOptionsForVariable(entry);
     }
   }
 
@@ -115,7 +110,7 @@ class _MakeCommand extends MasonCommand {
         final variable = entry.key;
         final properties = entry.value;
         if (vars.containsKey(variable)) continue;
-        final arg = results[variable] as String?;
+        final arg = results[variable];
         if (arg != null) {
           vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
         } else {
@@ -259,9 +254,9 @@ class _MakeCommand extends MasonCommand {
     return json.decode(content) as Map<String, dynamic>;
   }
 
-  dynamic _maybeDecode(String value) {
+  dynamic _maybeDecode(dynamic value) {
     try {
-      return json.decode(value);
+      return json.decode('$value');
     } catch (_) {
       return value;
     }
@@ -317,6 +312,51 @@ extension on BrickVariableProperties {
 }
 
 extension on ArgParser {
+  void addOptionsForVariable(
+    MapEntry<String, BrickVariableProperties> variable,
+  ) {
+    final name = variable.key;
+    final properties = variable.value;
+    final help = properties.toHelp();
+    switch (properties.type) {
+      case BrickVariableType.array:
+        return addMultiOption(
+          name,
+          help: help,
+          allowed: properties.values,
+          defaultsTo: (properties.defaultValues as List?)?.cast<String>(),
+        );
+      case BrickVariableType.number:
+        return addOption(
+          name,
+          help: help,
+          defaultsTo: properties.defaultValue?.toString(),
+        );
+      case BrickVariableType.string:
+        return addOption(
+          name,
+          help: help,
+          defaultsTo: properties.defaultValue?.toString(),
+        );
+      case BrickVariableType.boolean:
+        return addFlag(
+          name,
+          help: help,
+          defaultsTo: properties.defaultValue as bool?,
+          negatable: false,
+        );
+      case BrickVariableType.enumeration:
+        return addOption(
+          name,
+          help: help,
+          allowed: properties.values,
+          defaultsTo: properties.defaultValues as String?,
+        );
+      case BrickVariableType.list:
+        return addOption(name, help: help);
+    }
+  }
+
   void addOptions() {
     addFlag(
       'quiet',
