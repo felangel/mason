@@ -56,7 +56,12 @@ class _MakeCommand extends MasonCommand {
       ..addSeparator('${'-' * 79}\n');
 
     for (final entry in _brick.vars.entries) {
-      argParser.addOptionsForVariable(entry);
+      final variable = entry.key;
+      final properties = entry.value;
+      argParser.addOption(
+        variable,
+        help: properties.toHelp(),
+      );
     }
   }
 
@@ -301,35 +306,23 @@ extension on BrickVariableProperties {
     final _type = '<${type.name}>';
     final _defaultValue =
         type == BrickVariableType.string ? '"$defaultValue"' : '$defaultValue';
-    final defaultsTo = '(defaults to $_defaultValue)';
-    if (description != null && defaultValue != null) {
-      return '$description $_type\n$defaultsTo';
-    }
-    if (description != null) return '$description $_type';
-    if (defaultValue != null) return '$_type\n$defaultsTo';
-    return _type;
+    final allowed = (type == BrickVariableType.array ||
+            type == BrickVariableType.enumeration)
+        ? values as List?
+        : null;
+    final help = [
+      [
+        if (description != null) description,
+        _type,
+      ].join(' '),
+      if (defaultValue != null) '(defaults to $_defaultValue)',
+      if (allowed != null) '[${allowed.cast<String>().join(', ')}]',
+    ].join('\n');
+    return help;
   }
 }
 
 extension on ArgParser {
-  void addOptionsForVariable(
-    MapEntry<String, BrickVariableProperties> variable,
-  ) {
-    final name = variable.key;
-    final properties = variable.value;
-    final help = properties.toHelp();
-    switch (properties.type) {
-      case BrickVariableType.number:
-      case BrickVariableType.string:
-      case BrickVariableType.boolean:
-      case BrickVariableType.list:
-        return addOption(name, help: help);
-      case BrickVariableType.array:
-      case BrickVariableType.enumeration:
-        return addOption(name, help: help, allowed: properties.values);
-    }
-  }
-
   void addOptions() {
     addFlag(
       'quiet',
