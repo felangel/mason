@@ -306,17 +306,14 @@ extension on BrickVariableProperties {
     final _type = '<${type.name}>';
     final _defaultValue =
         type == BrickVariableType.string ? '"$defaultValue"' : '$defaultValue';
-    final allowed = (type == BrickVariableType.array ||
-            type == BrickVariableType.enumeration)
-        ? values as List?
-        : null;
+    final _values = values as List?;
     final help = [
       [
         if (description != null) description,
         _type,
       ].join(' '),
       if (defaultValue != null) '(defaults to $_defaultValue)',
-      if (allowed != null) '[${allowed.cast<String>().join(', ')}]',
+      if (_values != null) '[${_values.cast<String>().join(', ')}]',
     ].join('\n');
     return help;
   }
