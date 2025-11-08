@@ -306,13 +306,14 @@ extension on BrickVariableProperties {
     final _type = '<${type.name}>';
     final _defaultValue =
         type == BrickVariableType.string ? '"$defaultValue"' : '$defaultValue';
-    final defaultsTo = '(defaults to $_defaultValue)';
-    if (description != null && defaultValue != null) {
-      return '$description $_type\n$defaultsTo';
-    }
-    if (description != null) return '$description $_type';
-    if (defaultValue != null) return '$_type\n$defaultsTo';
-    return _type;
+    return [
+      [
+        if (description != null) description,
+        _type,
+      ].join(' '),
+      if (defaultValue != null) '(defaults to $_defaultValue)',
+      if (values != null) '[${values!.join(', ')}]',
+    ].join('\n');
   }
 }
 
