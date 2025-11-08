@@ -1,3 +1,8 @@
+# 0.1.3
+
+- feat: include allowed values in `mason make <name> --help`
+- ci: upgrade runners to `windows-latest`
+
 # 0.1.2
 
 - feat: improve the output of `mason --version` ([#1482](https://github.com/felangel/mason/issues/1482))
