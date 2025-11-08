@@ -312,7 +312,7 @@ extension on BrickVariableProperties {
         _type,
       ].join(' '),
       if (defaultValue != null) '(defaults to $_defaultValue)',
-      if (values != null) '[${values!.cast<String>().join(', ')}]',
+      if (values != null) '[${values!.join(', ')}]',
     ].join('\n');
   }
 }
