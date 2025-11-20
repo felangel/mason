@@ -476,12 +476,19 @@ class TemplateFile {
       }
 
       final fileContents = <FileContents>{};
-      final parameterKeys =
-          parameters.keys.where((key) => parameters[key] is List).toList();
+      final parameterKeys = parameters.keys
+          .where(
+            (key) =>
+                parameters[key] is List && (parameters[key] as List).isNotEmpty,
+          )
+          .toList();
       final permutations = _Permutations<dynamic>(
         [
           ...parameters.entries
-              .where((entry) => entry.value is List)
+              .where(
+                (entry) =>
+                    entry.value is List && (entry.value as List).isNotEmpty,
+              )
               .map((entry) => entry.value as List),
         ],
       ).generate();
