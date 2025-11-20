@@ -476,6 +476,7 @@ class TemplateFile {
       }
 
       final fileContents = <FileContents>{};
+      parameters.removeWhere((key, value) => value is List && value.isEmpty);
       final parameterKeys =
           parameters.keys.where((key) => parameters[key] is List).toList();
       final permutations = _Permutations<dynamic>(
