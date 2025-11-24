@@ -1,5 +1,6 @@
 // ignore_for_file: missing_whitespace_between_adjacent_strings
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:mason/mason.dart';
 import 'package:mocktail/mocktail.dart';
@@ -1094,7 +1095,7 @@ void main() {
       group('runSubstitution', () {
         test('handles malformed content', () {
           final tempDir = Directory.systemTemp.createTempSync();
-          final bytes = [0x80, 0x00];
+          final bytes = Uint8List.fromList([0x80, 0x00]);
           final template = TemplateFile.fromBytes(
             path.join(tempDir.path, 'malformed.txt'),
             bytes,
