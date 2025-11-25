@@ -150,8 +150,7 @@ void main() {
         expect(production.readAsStringSync(), equals('PRODUCTION'));
       });
 
-      test('constructs an instance (loops) with preceding empty list',
-          () async {
+      test('constructs an instance (loops) with extra empty list', () async {
         final brick = Brick.path(
           path.join('test', 'bricks', 'loop'),
         );
