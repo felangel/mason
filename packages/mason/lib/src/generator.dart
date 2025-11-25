@@ -476,12 +476,17 @@ class TemplateFile {
       }
 
       final fileContents = <FileContents>{};
-      parameters.removeWhere((key, value) => value is List && value.isEmpty);
-      final parameterKeys =
-          parameters.keys.where((key) => parameters[key] is List).toList();
+      final filteredParameters = {...parameters}
+        ..removeWhere((key, value) => value is List && value.isEmpty);
+      final filteredParameterKeys = [
+        ...filteredParameters.keys.where(
+          (key) => filteredParameters[key] is List,
+        ),
+      ];
+
       final permutations = _Permutations<dynamic>(
         [
-          ...parameters.entries
+          ...filteredParameters.entries
               .where((entry) => entry.value is List)
               .map((entry) => entry.value as List),
         ],
@@ -489,7 +494,9 @@ class TemplateFile {
       for (final permutation in permutations) {
         final param = Map<String, dynamic>.of(parameters);
         for (var i = 0; i < permutation.length; i++) {
-          param.addAll(<String, dynamic>{parameterKeys[i]: permutation[i]});
+          param.addAll(
+            <String, dynamic>{filteredParameterKeys[i]: permutation[i]},
+          );
         }
         final newPath = filePath.render(param);
         final newContents = TemplateFile(
