@@ -5,6 +5,11 @@ targets:
       exclude:
         - test/**
     builders:
+      source_gen|combining_builder:
+        options:
+          ignore_for_file:
+            - type=lint
+            - strict_raw_type
       json_serializable:
         options:
           any_map: true

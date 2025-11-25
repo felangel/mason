@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint, strict_raw_type
+
 part of 'mason_lock_json.dart';
 
 // **************************************************************************

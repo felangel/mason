@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint, strict_raw_type
+
 part of 'mason_yaml.dart';
 
 // **************************************************************************
@@ -47,20 +49,12 @@ BrickLocation _$BrickLocationFromJson(Map json) => $checkedCreate(
       },
     );
 
-Map<String, dynamic> _$BrickLocationToJson(BrickLocation instance) {
-  final val = <String, dynamic>{};
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('path', instance.path);
-  writeNotNull('git', instance.git?.toJson());
-  writeNotNull('version', instance.version);
-  return val;
-}
+Map<String, dynamic> _$BrickLocationToJson(BrickLocation instance) =>
+    <String, dynamic>{
+      if (instance.path case final value?) 'path': value,
+      if (instance.git?.toJson() case final value?) 'git': value,
+      if (instance.version case final value?) 'version': value,
+    };
 
 GitPath _$GitPathFromJson(Map json) => $checkedCreate(
       'GitPath',
@@ -79,18 +73,8 @@ GitPath _$GitPathFromJson(Map json) => $checkedCreate(
       },
     );
 
-Map<String, dynamic> _$GitPathToJson(GitPath instance) {
-  final val = <String, dynamic>{
-    'url': instance.url,
-    'path': instance.path,
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('ref', instance.ref);
-  return val;
-}
+Map<String, dynamic> _$GitPathToJson(GitPath instance) => <String, dynamic>{
+      'url': instance.url,
+      'path': instance.path,
+      if (instance.ref case final value?) 'ref': value,
+    };
