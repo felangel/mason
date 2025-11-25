@@ -1,5 +1,7 @@
 // GENERATED CODE - DO NOT MODIFY BY HAND
 
+// ignore_for_file: type=lint, strict_raw_type
+
 part of 'mason_bundle.dart';
 
 // **************************************************************************
@@ -107,27 +109,19 @@ MasonBundle _$MasonBundleFromJson(Map json) => $checkedCreate(
       fieldKeyMap: const {'publishTo': 'publish_to'},
     );
 
-Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) {
-  final val = <String, dynamic>{
-    'files': instance.files.map((e) => e.toJson()).toList(),
-    'hooks': instance.hooks.map((e) => e.toJson()).toList(),
-    'name': instance.name,
-    'description': instance.description,
-    'version': instance.version,
-    'environment': instance.environment.toJson(),
-  };
-
-  void writeNotNull(String key, dynamic value) {
-    if (value != null) {
-      val[key] = value;
-    }
-  }
-
-  writeNotNull('repository', instance.repository);
-  writeNotNull('publish_to', instance.publishTo);
-  writeNotNull('readme', instance.readme?.toJson());
-  writeNotNull('changelog', instance.changelog?.toJson());
-  writeNotNull('license', instance.license?.toJson());
-  writeNotNull('vars', const VarsConverter().toJson(instance.vars));
-  return val;
-}
+Map<String, dynamic> _$MasonBundleToJson(MasonBundle instance) =>
+    <String, dynamic>{
+      'files': instance.files.map((e) => e.toJson()).toList(),
+      'hooks': instance.hooks.map((e) => e.toJson()).toList(),
+      'name': instance.name,
+      'description': instance.description,
+      'version': instance.version,
+      'environment': instance.environment.toJson(),
+      if (instance.repository case final value?) 'repository': value,
+      if (instance.publishTo case final value?) 'publish_to': value,
+      if (instance.readme?.toJson() case final value?) 'readme': value,
+      if (instance.changelog?.toJson() case final value?) 'changelog': value,
+      if (instance.license?.toJson() case final value?) 'license': value,
+      if (const VarsConverter().toJson(instance.vars) case final value?)
+        'vars': value,
+    };
