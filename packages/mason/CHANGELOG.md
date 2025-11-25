@@ -1,3 +1,9 @@
+# 0.1.2
+
+- fix: loop rendering when parameters contains an empty list ([#1611](https://github.com/felangel/mason/issues/1611))
+- refactor: address `pana` issues ([#1613](https://github.com/felangel/mason/issues/1613))
+- refactor: upgrade analysis options ([#1539](https://github.com/felangel/mason/issues/1539))
+
 # 0.1.1
 
 - chore(deps): upgrade `pkg:archive` to `^4.0.0` ([#1532](https://github.com/felangel/mason/issues/1532))
