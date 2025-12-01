@@ -117,7 +117,7 @@
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
     "glob": "^13.0.0",
-    "prettier": "^3.7.1",
+    "prettier": "^3.7.3",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
     "webpack": "^5.103.0",
@@ -125,6 +125,6 @@
   },
   "dependencies": {
     "lodash": "^4.17.21",
-    "yaml": "^2.8.1"
+    "yaml": "^2.8.2"
   }
 }
