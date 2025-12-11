@@ -113,7 +113,7 @@
     "@types/glob": "^9.0.0",
     "@types/lodash": "^4.17.21",
     "@types/mocha": "^10.0.10",
-    "@types/node": "24.x",
+    "@types/node": "25.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
     "glob": "^13.0.0",
