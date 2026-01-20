@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File, FileMode, FileSystemEntity, Process;
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:collection/collection.dart';
@@ -202,7 +203,7 @@ abstract class Generator implements Comparable<Generator> {
   /// Map of partial files which will be used as includes.
   ///
   /// Contains a Map of partial file path to partial file content.
-  final Map<String, List<int>> partials = {};
+  final Map<String, Uint8List> partials = {};
 
   /// Add a new template file.
   void addTemplateFile(TemplateFile? file) {
@@ -238,7 +239,7 @@ abstract class Generator implements Comparable<Generator> {
         final resultFiles = await _runSubstitutionAsync(
           file,
           Map<String, dynamic>.of(vars),
-          Map<String, List<int>>.of(partials),
+          Map<String, Uint8List>.of(partials),
         );
         final root = RegExp(r'\w:\\|\w:\/');
         final separator = RegExp(r'\/|\\');
@@ -339,7 +340,7 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
   @override
   Future<GeneratedFile> createFile(
     String path,
-    List<int> contents, {
+    Uint8List contents, {
     Logger? logger,
     OverwriteRule? overwriteRule,
   }) async {
@@ -424,7 +425,7 @@ abstract class GeneratorTarget {
   /// Create a file at the given path with the given contents.
   Future<GeneratedFile> createFile(
     String path,
-    List<int> contents, {
+    Uint8List contents, {
     Logger? logger,
     OverwriteRule? overwriteRule,
   });
@@ -447,12 +448,12 @@ class TemplateFile {
   final String path;
 
   /// The template file content.
-  final List<int> content;
+  final Uint8List content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
   Set<FileContents> runSubstitution(
     Map<String, dynamic> parameters,
-    Map<String, List<int>> partials,
+    Map<String, Uint8List> partials,
   ) {
     var filePath = path.replaceAll(r'\', '/');
     if (_loopRegExp().hasMatch(filePath)) {
@@ -514,9 +515,9 @@ class TemplateFile {
     }
   }
 
-  List<int> _createContent(
+  Uint8List _createContent(
     Map<String, dynamic> vars,
-    Map<String, List<int>> partials,
+    Map<String, Uint8List> partials,
   ) {
     try {
       final decoded = utf8.decode(content);
@@ -541,7 +542,7 @@ class FileContents {
   final String path;
 
   /// The contents of the file.
-  final List<int> content;
+  final Uint8List content;
 
   @override
   bool operator ==(Object other) {
@@ -592,7 +593,7 @@ class _Permutations<T> {
 Future<Set<FileContents>> _runSubstitutionAsync(
   TemplateFile file,
   Map<String, dynamic> vars,
-  Map<String, List<int>> partials,
+  Map<String, Uint8List> partials,
 ) async {
   return Isolate.run(() => file.runSubstitution(vars, partials));
 }
