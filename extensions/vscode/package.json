@@ -116,7 +116,7 @@
     "@types/node": "25.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
-    "glob": "^13.0.5",
+    "glob": "^13.0.6",
     "prettier": "^3.8.1",
     "ts-loader": "^9.5.4",
     "typescript": "^5.9.3",
