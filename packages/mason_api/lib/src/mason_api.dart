@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:cli_util/cli_util.dart';
 import 'package:http/http.dart' as http;
@@ -184,7 +185,7 @@ class MasonApi {
   void logout() => _clearCredentials();
 
   /// Publish universal [bundle] to remote registry.
-  Future<void> publish({required List<int> bundle}) async {
+  Future<void> publish({required Uint8List bundle}) async {
     var credentials = _credentials;
 
     if (credentials == null) {

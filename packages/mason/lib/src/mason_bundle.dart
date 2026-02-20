@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:isolate';
+import 'dart:typed_data';
 
 import 'package:archive/archive.dart';
 import 'package:json_annotation/json_annotation.dart';
@@ -58,7 +59,7 @@ class MasonBundle {
       _$MasonBundleFromJson(json);
 
   /// Converts a universal bundle into a [MasonBundle] instance.
-  static Future<MasonBundle> fromUniversalBundle(List<int> bytes) async {
+  static Future<MasonBundle> fromUniversalBundle(Uint8List bytes) async {
     final bundleJson = await Isolate.run(
       () => json.decode(
         utf8.decode(BZip2Decoder().decodeBytes(bytes)),
@@ -121,11 +122,13 @@ class MasonBundle {
   Map<String, dynamic> toJson() => _$MasonBundleToJson(this);
 
   /// Converts a [MasonBundle] into universal bundle bytes.
-  Future<List<int>> toUniversalBundle() {
+  Future<Uint8List> toUniversalBundle() {
     return Isolate.run(() => _encodeBundle(this));
   }
 
-  Future<List<int>> _encodeBundle(MasonBundle bundle) async {
-    return BZip2Encoder().encode(utf8.encode(json.encode(bundle.toJson())));
+  Future<Uint8List> _encodeBundle(MasonBundle bundle) async {
+    return BZip2Encoder().encodeBytes(
+      utf8.encode(json.encode(bundle.toJson())),
+    );
   }
 }
