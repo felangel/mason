@@ -11,3 +11,5 @@
 ///
 /// Get started at [https://github.com/felangel/mason](https://github.com/felangel/mason) 🧱
 library mason_cli;
+
+export 'src/commands/make.dart' show BrickVarComputer;

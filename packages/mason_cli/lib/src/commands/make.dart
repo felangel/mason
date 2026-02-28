@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'dart:io';
 
 import 'package:args/args.dart';
+import 'package:checked_yaml/checked_yaml.dart';
 import 'package:mason/mason.dart';
 import 'package:mason_cli/src/command.dart';
 import 'package:path/path.dart' as p;
@@ -98,9 +99,11 @@ class _MakeCommand extends MasonCommand {
 
     Future<int> _make() async {
       final path = File(_brick.path!).parent.path;
-      final generator = await MasonGenerator.fromBrick(Brick.path(path));
+      final brick = Brick.path(path);
+      final generator = await MasonGenerator.fromBrick(brick);
       final vars = <String, dynamic>{};
 
+      // Pre-populate variables from config file.
       try {
         vars.addAll(await _decodeFile(configPath));
       } on FormatException catch (error) {
@@ -111,71 +114,21 @@ class _MakeCommand extends MasonCommand {
         return ExitCode.usage.code;
       }
 
+      // Pre-populate variables from command-line options.
       for (final entry in _brick.vars.entries) {
-        final variable = entry.key;
-        final properties = entry.value;
-        if (vars.containsKey(variable)) continue;
-        final arg = results[variable] as String?;
-        if (arg != null) {
-          vars.addAll(<String, dynamic>{variable: _maybeDecode(arg)});
-        } else {
-          final prompt =
-              '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
-          late final dynamic response;
-          switch (properties.type) {
-            case BrickVariableType.string:
-              response = _maybeDecode(
-                logger.prompt(prompt, defaultValue: properties.defaultValue),
-              );
-            case BrickVariableType.number:
-              response = logger.prompt(
-                prompt,
-                defaultValue: properties.defaultValue,
-              );
-              if (num.tryParse(response as String) == null) {
-                throw FormatException(
-                  'Invalid $variable.\n"$response" is not a number.',
-                );
-              }
-            case BrickVariableType.boolean:
-              response = logger.confirm(
-                prompt,
-                defaultValue: properties.defaultValue as bool? ?? false,
-              );
-            case BrickVariableType.enumeration:
-              final choices = properties.values;
-              if (choices == null || choices.isEmpty) {
-                throw FormatException(
-                  'Invalid $variable.\n"Enums must have at least one value.',
-                );
-              }
-              response = logger.chooseOne(
-                prompt,
-                choices: choices,
-                defaultValue: properties.defaultValue?.toString(),
-              );
-            case BrickVariableType.array:
-              final choices = properties.values;
-              if (choices == null || choices.isEmpty) {
-                throw FormatException(
-                  'Invalid $variable.\n"Arrays must have at least one value.',
-                );
-              }
-              response = logger.chooseAny(
-                prompt,
-                choices: choices,
-                defaultValues:
-                    (properties.defaultValues as List?)?.cast<String>(),
-              );
-            case BrickVariableType.list:
-              response = logger.promptAny(
-                prompt,
-                separator: properties.separator ?? ',',
-              );
-          }
-          vars.addAll(<String, dynamic>{variable: response});
-        }
+        final arg = results[entry.key] as String?;
+        if (arg == null) continue;
+        vars.addAll(<String, dynamic>{entry.key: _maybeDecode(arg)});
       }
+
+      // Compute remaining variables.
+      vars.addAll(
+        await brick.computeVars(
+          logger: logger,
+          overrides: {...vars},
+          yaml: _brick,
+        ),
+      );
 
       Map<String, dynamic>? updatedVars;
 
@@ -258,13 +211,13 @@ class _MakeCommand extends MasonCommand {
     final content = await File(path).readAsString();
     return json.decode(content) as Map<String, dynamic>;
   }
+}
 
-  dynamic _maybeDecode(String value) {
-    try {
-      return json.decode(value);
-    } catch (_) {
-      return value;
-    }
+dynamic _maybeDecode(String value) {
+  try {
+    return json.decode(value);
+  } catch (_) {
+    return value;
   }
 }
 
@@ -383,5 +336,94 @@ extension on Logger {
     return fileCount == 1
         ? err('${lightRed.wrap('✗')} $fileCount file changed')
         : err('${lightRed.wrap('✗')} $fileCount files changed');
+  }
+}
+
+/// Extension on [Brick] that exposes a reusable way
+/// to compute variable values for the given brick instance.
+extension BrickVarComputer on Brick {
+  Future<BrickYaml> get _brickYaml async {
+    final path = location.path != null
+        ? location.path!
+        : (await BricksJson.temp().add(this)).path;
+    final file = File(p.join(path, BrickYaml.file));
+    return checkedYamlDecode(
+      file.readAsStringSync(),
+      (m) => BrickYaml.fromJson(m!),
+    ).copyWith(path: file.path);
+  }
+
+  /// Compute the values of the variables defined by the brick.
+  Future<Map<String, dynamic>> computeVars({
+    Logger? logger,
+    Map<String, dynamic> overrides = const {},
+    BrickYaml? yaml,
+  }) async {
+    final vars = {...overrides};
+    logger ??= Logger();
+    yaml ??= await _brickYaml;
+
+    for (final entry in yaml.vars.entries) {
+      final variable = entry.key;
+      final properties = entry.value;
+      if (vars.containsKey(variable)) continue;
+
+      final prompt =
+          '''${styleBold.wrap(lightGreen.wrap('?'))} ${properties.prompt ?? variable}''';
+      late final dynamic response;
+      switch (properties.type) {
+        case BrickVariableType.string:
+          response = _maybeDecode(
+            logger.prompt(prompt, defaultValue: properties.defaultValue),
+          );
+        case BrickVariableType.number:
+          response = logger.prompt(
+            prompt,
+            defaultValue: properties.defaultValue,
+          );
+          if (num.tryParse(response as String) == null) {
+            throw FormatException(
+              'Invalid $variable.\n"$response" is not a number.',
+            );
+          }
+        case BrickVariableType.boolean:
+          response = logger.confirm(
+            prompt,
+            defaultValue: properties.defaultValue as bool? ?? false,
+          );
+        case BrickVariableType.enumeration:
+          final choices = properties.values;
+          if (choices == null || choices.isEmpty) {
+            throw FormatException(
+              'Invalid $variable.\n"Enums must have at least one value.',
+            );
+          }
+          response = logger.chooseOne(
+            prompt,
+            choices: choices,
+            defaultValue: properties.defaultValue?.toString(),
+          );
+        case BrickVariableType.array:
+          final choices = properties.values;
+          if (choices == null || choices.isEmpty) {
+            throw FormatException(
+              'Invalid $variable.\n"Arrays must have at least one value.',
+            );
+          }
+          response = logger.chooseAny(
+            prompt,
+            choices: choices,
+            defaultValues: (properties.defaultValues as List?)?.cast<String>(),
+          );
+        case BrickVariableType.list:
+          response = logger.promptAny(
+            prompt,
+            separator: properties.separator ?? ',',
+          );
+      }
+      vars.addAll(<String, dynamic>{variable: response});
+    }
+
+    return vars;
   }
 }
