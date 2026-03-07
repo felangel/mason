@@ -22,7 +22,7 @@ environment:
 dependencies:
   ffi: ^2.1.3
   io: ^1.0.4
-  win32: ^5.11.0
+  win32: ">=5.11.0 <7.0.0"
 
 dev_dependencies:
   meta: ^1.15.0
