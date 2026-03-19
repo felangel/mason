@@ -1,5 +1,0 @@
-# Alex
-
-## TODO: Eat
-
-**DONE**

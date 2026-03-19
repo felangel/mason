@@ -1,0 +1,14 @@
+name: enum_no_choices
+description: A new brick created with the Masonex CLI.
+
+version: 0.1.0+1
+
+environment:
+  masonex: ^0.1.2
+
+vars:
+  color:
+    type: enum
+    description: Your favorite color
+    prompt: What is your favorite color?
+    values:

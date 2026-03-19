@@ -1,0 +1,15 @@
+name: loop
+description: A new brick created with the Masonex CLI.
+
+version: 0.1.0+1
+
+environment:
+  masonex: ^0.1.0
+
+vars:
+  values:
+    type: array
+    values:
+      - development
+      - staging
+      - production

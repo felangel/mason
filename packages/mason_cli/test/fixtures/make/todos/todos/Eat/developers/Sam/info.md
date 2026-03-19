@@ -1,5 +1,0 @@
-# Sam
-
-## TODO: Eat
-
-**DONE**
