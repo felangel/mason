@@ -5,13 +5,13 @@ import 'package:args/command_runner.dart';
 import 'package:cli_completion/cli_completion.dart';
 import 'package:masonex/masonex.dart' hide packageVersion;
 import 'package:masonex/masonex.dart' as masonex;
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/commands/commands.dart';
 import 'package:masonex_cli/src/version.dart';
 import 'package:pub_updater/pub_updater.dart';
 
-/// Type definition for `MasonexApi.new`.
-typedef MasonexApiBuilder = MasonexApi Function({Uri? hostedUri});
+/// Type definition for `MasonApi.new`.
+typedef MasonApiBuilder = MasonApi Function({Uri? hostedUri});
 
 /// The package name.
 const packageName = 'masonex_cli';

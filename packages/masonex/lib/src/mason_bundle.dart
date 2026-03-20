@@ -5,7 +5,7 @@ import 'package:archive/archive.dart';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:masonex/src/brick_yaml.dart';
 
-part 'masonex_bundle.g.dart';
+part 'mason_bundle.g.dart';
 
 /// {@template masonex_bundled_file}
 /// A bundled file which is included as part of a a [MasonexBundle].

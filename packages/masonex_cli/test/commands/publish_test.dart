@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:masonex/masonex.dart' hide packageVersion;
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:path/path.dart' as p;
@@ -13,7 +13,7 @@ import '../helpers/helpers.dart';
 
 class _MockLogger extends Mock implements Logger {}
 
-class _MockMasonexApi extends Mock implements MasonexApi {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
 class _MockUser extends Mock implements User {}
 
@@ -34,17 +34,17 @@ void main() {
     final brickPath =
         p.join('..', '..', '..', '..', '..', 'bricks', 'greeting');
     late Logger logger;
-    late MasonexApi masonexApi;
+    late MasonApi masonApi;
     late ArgResults argResults;
     late PublishCommand publishCommand;
 
     setUp(() async {
       logger = _MockLogger();
-      masonexApi = _MockMasonexApi();
+      masonApi = _MockMasonApi();
       argResults = _MockArgResults();
       publishCommand = PublishCommand(
         logger: logger,
-        masonexApiBuilder: ({Uri? hostedUri}) => masonexApi,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
       )..testArgResults = argResults;
       when(() => logger.progress(any())).thenReturn(_MockProgress());
       setUpTestingEnvironment(cwd, suffix: '.publish');
@@ -86,7 +86,7 @@ void main() {
       verify(
         () => logger.err('Could not find ${BrickYaml.file} at $brickYamlPath.'),
       ).called(1);
-      verifyNever(() => masonexApi.close());
+      verifyNever(() => masonApi.close());
     });
 
     test('exits with code 70 when it is a private brick', () async {
@@ -103,7 +103,7 @@ void main() {
         () => logger.err('''
 Please change or remove the "publish_to" field in the brick.yaml before publishing.'''),
       ).called(1);
-      verifyNever(() => masonexApi.close());
+      verifyNever(() => masonApi.close());
     });
 
     test('exits with code 70 when publish_to has an invalid value', () async {
@@ -123,7 +123,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           '"https://registry.brickhub.dev" or "none" for private bricks.',
         ),
       ).called(1);
-      verifyNever(() => masonexApi.close());
+      verifyNever(() => masonApi.close());
 
       expect(result, equals(ExitCode.software.code));
     });
@@ -136,29 +136,29 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       verify(
         () => logger.err("Run 'masonex login' to log in and try again."),
       ).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when email is not verified', () async {
       final user = _MockUser();
       when(() => user.emailVerified).thenReturn(false);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
       expect(result, equals(ExitCode.software.code));
       verify(
         () => logger.err('You must verify your email in order to publish.'),
       ).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when bundle is too large', () async {
       final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final publishCommand = PublishCommand(
-        masonexApiBuilder: ({Uri? hostedUri}) => masonexApi,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
         logger: logger,
         maxBundleSize: 100,
       )..testArgResults = argResults;
@@ -172,16 +172,16 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           ),
         ),
       ).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 without publishing when using --dry-run', () async {
       final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(
-        () => masonexApi.publish(bundle: any(named: 'bundle')),
+        () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
       final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -205,8 +205,8 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
         );
       });
-      verifyNever(() => masonexApi.publish(bundle: any(named: 'bundle')));
-      verify(() => masonexApi.close()).called(1);
+      verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish is aborted', () async {
@@ -215,7 +215,7 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       );
       final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(() => logger.confirm(any())).thenReturn(false);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
@@ -238,26 +238,26 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       ).called(1);
       verify(() => logger.err('Brick was not published.')).called(1);
       verifyNever(() => logger.progress('Publishing greeting 0.1.0+1'));
-      verifyNever(() => masonexApi.publish(bundle: any(named: 'bundle')));
-      verify(() => masonexApi.close()).called(1);
+      verifyNever(() => masonApi.publish(bundle: any(named: 'bundle')));
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when publish fails', () async {
       final user = _MockUser();
       const message = 'oops';
-      const exception = MasonexApiPublishFailure(message: message);
+      const exception = MasonApiPublishFailure(message: message);
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(
-        () => masonexApi.publish(bundle: any(named: 'bundle')),
+        () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenThrow(exception);
       when(() => logger.confirm(any())).thenReturn(true);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       final result = await publishCommand.run();
       expect(result, equals(ExitCode.software.code));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
-      verify(() => masonexApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
       verify(() => logger.err('$exception')).called(1);
     });
 
@@ -265,25 +265,25 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
       final exception = Exception('oops');
       final user = _MockUser();
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(
-        () => masonexApi.publish(bundle: any(named: 'bundle')),
+        () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenThrow(exception);
       when(() => logger.confirm(any())).thenReturn(true);
       when(() => argResults['directory'] as String).thenReturn(brickPath);
       await expectLater(publishCommand.run, throwsA(exception));
       verify(() => logger.progress('Publishing greeting 0.1.0+1')).called(1);
-      verify(() => masonexApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when publish succeeds', () async {
       final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(
-        () => masonexApi.publish(bundle: any(named: 'bundle')),
+        () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
       final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -305,17 +305,17 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           '''\nPublished greeting 0.1.0+1 to ${BricksJson.hostedUri}.''',
         );
       }).called(1);
-      verify(() => masonexApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when publish succeeds with --force', () async {
       final user = _MockUser();
       final progressLogs = <String>[];
       when(() => user.emailVerified).thenReturn(true);
-      when(() => masonexApi.currentUser).thenReturn(user);
+      when(() => masonApi.currentUser).thenReturn(user);
       when(
-        () => masonexApi.publish(bundle: any(named: 'bundle')),
+        () => masonApi.publish(bundle: any(named: 'bundle')),
       ).thenAnswer((_) async {});
       final progress = _MockProgress();
       when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -338,8 +338,8 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
         );
       }).called(1);
       verifyNever(() => logger.confirm(any()));
-      verify(() => masonexApi.publish(bundle: any(named: 'bundle'))).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.publish(bundle: any(named: 'bundle'))).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test(
@@ -354,16 +354,16 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
 
         Uri? publishTo;
         final publishCommand = PublishCommand(
-          masonexApiBuilder: ({Uri? hostedUri}) {
+          masonApiBuilder: ({Uri? hostedUri}) {
             publishTo = hostedUri;
-            return masonexApi;
+            return masonApi;
           },
           logger: logger,
         )..testArgResults = argResults;
 
-        when(() => masonexApi.currentUser).thenReturn(user);
+        when(() => masonApi.currentUser).thenReturn(user);
         when(
-          () => masonexApi.publish(bundle: any(named: 'bundle')),
+          () => masonApi.publish(bundle: any(named: 'bundle')),
         ).thenAnswer((_) async {});
         final progress = _MockProgress();
         when(() => progress.complete(any())).thenAnswer((invocation) {
@@ -394,9 +394,9 @@ Please change or remove the "publish_to" field in the brick.yaml before publishi
           ),
         ).called(1);
         verify(
-          () => masonexApi.publish(bundle: any(named: 'bundle')),
+          () => masonApi.publish(bundle: any(named: 'bundle')),
         ).called(1);
-        verify(() => masonexApi.close()).called(1);
+        verify(() => masonApi.close()).called(1);
       },
     );
   });

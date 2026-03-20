@@ -17,7 +17,7 @@ dependencies:
   checked_yaml: ^2.0.3
   cli_completion: 0.5.0
   masonex: ^0.1.0
-  masonex_api: ^0.1.0
+  mason_api: ^0.1.0
   meta: ^1.15.0
   path: ^1.9.0
   pub_updater: ^0.5.0

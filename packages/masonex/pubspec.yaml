@@ -18,7 +18,7 @@ platforms:
   windows:
 
 environment:
-  sdk: ">=3.5.0 <4.0.0"
+  sdk: ">=3.11.0 <4.0.0"
 
 dependencies:
   archive: ^4.0.0
@@ -28,7 +28,7 @@ dependencies:
   crypto: ^3.0.5
   http: ^1.2.2
   json_annotation: ^4.9.0
-  masonex_logger: ^0.3.0
+  mason_logger: ^0.3.0
   meta: ^1.15.0
   mustachex: ^1.0.0
   path: ^1.9.0

@@ -5,7 +5,7 @@ import 'dart:typed_data';
 import 'package:args/args.dart';
 import 'package:checked_yaml/checked_yaml.dart';
 import 'package:masonex/masonex.dart';
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/command.dart';
 import 'package:masonex_cli/src/command_runner.dart';
 import 'package:path/path.dart' as path;
@@ -19,14 +19,14 @@ class PublishCommand extends MasonexCommand {
   /// {@macro publish_command}
   PublishCommand({
     super.logger,
-    MasonexApiBuilder? masonexApiBuilder,
+    MasonApiBuilder? masonApiBuilder,
     int? maxBundleSize,
-  })  : _masonexApiBuilder = masonexApiBuilder ?? MasonexApi.new,
+  })  : _masonApiBuilder = masonApiBuilder ?? MasonApi.new,
         _maxBundleSize = maxBundleSize ?? _maxBundleSizeInBytes {
     argParser.addOptions();
   }
 
-  final MasonexApiBuilder _masonexApiBuilder;
+  final MasonApiBuilder _masonApiBuilder;
   final int _maxBundleSize;
 
   @override
@@ -88,19 +88,19 @@ class PublishCommand extends MasonexCommand {
 
     if (hostedUri == null) return ExitCode.software.code;
 
-    final masonexApi = _masonexApiBuilder(hostedUri: hostedUri);
-    final user = masonexApi.currentUser;
+    final masonApi = _masonApiBuilder(hostedUri: hostedUri);
+    final user = masonApi.currentUser;
     if (user == null) {
       logger
         ..err('You must be logged in to publish.')
         ..err("Run 'masonex login' to log in and try again.");
-      masonexApi.close();
+      masonApi.close();
       return ExitCode.software.code;
     }
 
     if (!user.emailVerified) {
       logger.err('You must verify your email in order to publish.');
-      masonexApi.close();
+      masonApi.close();
       return ExitCode.software.code;
     }
 
@@ -116,7 +116,7 @@ class PublishCommand extends MasonexCommand {
       logger.err(
         '''Your bundle is $sizeInMb MB. Hosted bricks must be smaller than $maxSizeInMb MB.''',
       );
-      masonexApi.close();
+      masonApi.close();
       return ExitCode.software.code;
     }
 
@@ -124,7 +124,7 @@ class PublishCommand extends MasonexCommand {
       logger
         ..info('No issues detected.')
         ..info('The server may enforce additional checks.');
-      masonexApi.close();
+      masonApi.close();
       return ExitCode.success.code;
     }
 
@@ -149,7 +149,7 @@ class PublishCommand extends MasonexCommand {
 
       if (!confirmed) {
         logger.err('Brick was not published.');
-        masonexApi.close();
+        masonApi.close();
         return ExitCode.software.code;
       }
     }
@@ -159,12 +159,12 @@ class PublishCommand extends MasonexCommand {
     );
 
     try {
-      await masonexApi.publish(bundle: universalBundle);
+      await masonApi.publish(bundle: universalBundle);
       publishProgress.complete('Published ${bundle.name} ${bundle.version}');
       logger.success(
         '''\nPublished ${bundle.name} ${bundle.version} to $hostedUri.''',
       );
-    } on MasonexApiPublishFailure catch (error) {
+    } on MasonApiPublishFailure catch (error) {
       publishProgress.fail();
       logger.err('$error');
       return ExitCode.software.code;
@@ -172,7 +172,7 @@ class PublishCommand extends MasonexCommand {
       publishProgress.fail();
       rethrow;
     } finally {
-      masonexApi.close();
+      masonApi.close();
     }
 
     return ExitCode.success.code;

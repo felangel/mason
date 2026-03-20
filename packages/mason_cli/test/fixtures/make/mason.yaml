@@ -1,0 +1,29 @@
+bricks:
+  app_icon:
+    path: ../../../../../bricks/app_icon
+  bio:
+    path: ../../../../../bricks/bio
+  documentation:
+    path: ../../../../../bricks/documentation
+  favorite_color:
+    path: ../../../../../bricks/favorite_color
+  flavors:
+    path: ../../../../../bricks/flavors
+  hello_world:
+    path: ../../../../../bricks/hello_world
+  hooks:
+    path: ../../../../../bricks/hooks
+  greeting:
+    path: ../../../../../bricks/greeting
+  legacy:
+    path: ../../../../../bricks/legacy
+  plugin:
+    path: ../../../../../bricks/plugin
+  random_color:
+    path: ../../../../../bricks/random_color
+  simple:
+    path: ../../../../../bricks/simple
+  todos:
+    path: ../../../../../bricks/todos
+  widget:
+    path: ../../../../../bricks/widget

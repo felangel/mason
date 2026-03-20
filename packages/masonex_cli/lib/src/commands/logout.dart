@@ -1,5 +1,5 @@
 import 'package:masonex/masonex.dart' hide packageVersion;
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/command.dart';
 import 'package:masonex_cli/src/command_runner.dart';
 
@@ -8,10 +8,10 @@ import 'package:masonex_cli/src/command_runner.dart';
 /// {@endtemplate}
 class LogoutCommand extends MasonexCommand {
   /// {@macro logout_command}
-  LogoutCommand({super.logger, MasonexApiBuilder? masonexApiBuilder})
-      : _masonexApiBuilder = masonexApiBuilder ?? MasonexApi.new;
+  LogoutCommand({super.logger, MasonApiBuilder? masonApiBuilder})
+      : _masonApiBuilder = masonApiBuilder ?? MasonApi.new;
 
-  final MasonexApiBuilder _masonexApiBuilder;
+  final MasonApiBuilder _masonApiBuilder;
 
   @override
   final String description = 'Log out of brickhub.dev.';
@@ -21,17 +21,17 @@ class LogoutCommand extends MasonexCommand {
 
   @override
   Future<int> run() async {
-    final masonexApi = _masonexApiBuilder();
-    final user = masonexApi.currentUser;
+    final masonApi = _masonApiBuilder();
+    final user = masonApi.currentUser;
     if (user == null) {
       logger.info('You are already logged out.');
-      masonexApi.close();
+      masonApi.close();
       return ExitCode.success.code;
     }
 
     final progress = logger.progress('Logging out of brickhub.dev.');
     try {
-      masonexApi.logout();
+      masonApi.logout();
       progress.complete('Logged out of brickhub.dev');
       return ExitCode.success.code;
     } catch (error) {
@@ -39,7 +39,7 @@ class LogoutCommand extends MasonexCommand {
       logger.err('$error');
       return ExitCode.software.code;
     } finally {
-      masonexApi.close();
+      masonApi.close();
     }
   }
 }

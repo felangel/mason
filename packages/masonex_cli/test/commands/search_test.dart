@@ -3,14 +3,14 @@ import 'dart:io';
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
 import 'package:masonex/masonex.dart' hide Brick;
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/commands/commands.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:test/test.dart';
 
 class _MockLogger extends Mock implements Logger {}
 
-class _MockMasonexApi extends Mock implements MasonexApi {}
+class _MockMasonApi extends Mock implements MasonApi {}
 
 class _MockProgress extends Mock implements Progress {}
 
@@ -21,7 +21,7 @@ class _MockStdout extends Mock implements Stdout {}
 void main() {
   group('SearchCommand', () {
     late Logger logger;
-    late MasonexApi masonexApi;
+    late MasonApi masonApi;
     late SearchCommand searchCommand;
     late ArgResults argResults;
     late BrickSearchResult brick;
@@ -37,12 +37,12 @@ void main() {
         downloads: 42,
       );
       logger = _MockLogger();
-      masonexApi = _MockMasonexApi();
+      masonApi = _MockMasonApi();
       argResults = _MockArgResults();
       stdout = _MockStdout();
       searchCommand = SearchCommand(
         logger: logger,
-        masonexApiBuilder: ({Uri? hostedUri}) => masonexApi,
+        masonApiBuilder: ({Uri? hostedUri}) => masonApi,
       )..testArgResults = argResults;
 
       when(() => logger.progress(any())).thenReturn(_MockProgress());
@@ -69,7 +69,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => const []);
       final result = await searchCommand.run();
 
@@ -77,7 +77,7 @@ void main() {
       verify(
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
       expect(progressDoneCalls, equals(['No bricks found.']));
     });
 
@@ -92,7 +92,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => [brick]);
 
       final result = await searchCommand.run();
@@ -109,7 +109,7 @@ void main() {
         ),
       ).called(1);
       verify(() => logger.info(brick.description)).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 0 when more than one result is shown', () async {
@@ -123,7 +123,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => [brick, brick]);
 
       final result = await searchCommand.run();
@@ -139,7 +139,7 @@ void main() {
         ),
       ).called(2);
       verify(() => logger.info(brick.description)).called(2);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('exits with code 70 when exception occurs', () async {
@@ -153,7 +153,7 @@ void main() {
       });
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
-      when(() => masonexApi.search(query: 'query')).thenThrow(exception);
+      when(() => masonApi.search(query: 'query')).thenThrow(exception);
 
       final result = await searchCommand.run();
 
@@ -162,7 +162,7 @@ void main() {
         () => logger.progress('Searching "query" on brickhub.dev'),
       ).called(1);
       verify(() => logger.err('$exception')).called(1);
-      verify(() => masonexApi.close()).called(1);
+      verify(() => masonApi.close()).called(1);
     });
 
     test('separator length is 80 when terminal is not available', () async {
@@ -171,7 +171,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => [brick]);
 
       final result = await searchCommand.run();
@@ -187,7 +187,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => [brick]);
       when(() => stdout.hasTerminal).thenReturn(true);
       when(() => stdout.terminalColumns).thenReturn(100);
@@ -210,7 +210,7 @@ void main() {
       when(() => logger.progress(any())).thenReturn(progress);
       when(() => argResults.rest).thenReturn(['query']);
       when(
-        () => masonexApi.search(query: 'query'),
+        () => masonApi.search(query: 'query'),
       ).thenAnswer((_) async => [brick]);
       when(() => stdout.hasTerminal).thenReturn(true);
       when(() => stdout.terminalColumns).thenReturn(42);

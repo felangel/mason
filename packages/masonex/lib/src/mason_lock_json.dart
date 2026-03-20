@@ -1,7 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:masonex/masonex.dart';
 
-part 'masonex_lock_json.g.dart';
+part 'mason_lock_json.g.dart';
 
 /// {@template masonex_lock_json}
 /// Masonex lock file which contains locked brick locations.

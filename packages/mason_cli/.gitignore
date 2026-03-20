@@ -1,0 +1,26 @@
+# Files and directories created by pub
+.dart_tool/
+.packages
+# Remove the following pattern if you wish to check in your lock file
+pubspec.lock
+
+# Conventional directory for build outputs
+build/
+
+# Directory created by dartdoc
+doc/api/
+
+# Temporary Files
+.tmp/
+
+# Local Mason Files
+.mason/
+mason-lock.json
+
+# Test Related Files
+coverage/
+test/fixtures/.*/
+
+# Exceptions to the above rules
+!test/fixtures/*/.mason/
+!test/fixtures/*/mason-lock.json

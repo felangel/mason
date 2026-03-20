@@ -3,21 +3,6 @@ environment:
   sdk: ">=3.11.1 <4.0.0"
 dev_dependencies:
   melos: ^7.4.1
-workspace:
-  - packages/masonex/test/fixtures/basic/hooks
-  - packages/masonex_cli/test/bricks/compilation_error/hooks
-  - packages/masonex/test/fixtures/compile_exception/hooks
-  - packages/masonex/test/fixtures/dependency_install_failure/hooks
-  - packages/masonex/test/fixtures/execution_exception/hooks
-  - packages/masonex/test/fixtures/hooks/hooks
-  - packages/masonex/test/fixtures/long_run/hooks
-  - packages/masonex/test/fixtures/malformed_pubspec/hooks
-  - packages/masonex
-  - packages/masonex_api
-  - packages/masonex_cli
-  - packages/masonex_logger
-  - packages/masonex/test/fixtures/missing_run/hooks
-  - packages/masonex/test/fixtures/relative_imports/hooks
-  - packages/masonex/test/fixtures/run_exception/hooks
-  - packages/masonex/test/fixtures/unicode_hook/hooks
+# melos: 
+
 melos: 

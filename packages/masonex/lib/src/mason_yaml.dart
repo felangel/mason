@@ -3,7 +3,7 @@ import 'dart:io';
 import 'package:json_annotation/json_annotation.dart';
 import 'package:path/path.dart' as p;
 
-part 'masonex_yaml.g.dart';
+part 'mason_yaml.g.dart';
 
 /// {@template masonex_yaml}
 /// Masonex configuration yaml file which contains metadata

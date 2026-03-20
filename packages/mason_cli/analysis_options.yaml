@@ -1,0 +1,11 @@
+include: ../../analysis_options.yaml
+analyzer:
+  exclude:
+    - "test/.test_coverage.dart"
+    - "test/fixtures/**"
+    - "test/bricks/**"
+    - "**/*.g.dart"
+    - "**/version.dart"
+linter:
+  rules:
+    no_leading_underscores_for_local_identifiers: false

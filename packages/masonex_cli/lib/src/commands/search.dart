@@ -2,7 +2,7 @@ import 'dart:io';
 import 'dart:math';
 
 import 'package:masonex/masonex.dart' hide Brick, packageVersion;
-import 'package:masonex_api/masonex_api.dart';
+import 'package:mason_api/mason_api.dart';
 import 'package:masonex_cli/src/command.dart';
 import 'package:masonex_cli/src/command_runner.dart';
 
@@ -11,10 +11,10 @@ import 'package:masonex_cli/src/command_runner.dart';
 /// {@endtemplate}
 class SearchCommand extends MasonexCommand {
   /// {@macro logout_command}
-  SearchCommand({super.logger, MasonexApiBuilder? masonexApiBuilder})
-      : _masonexApiBuilder = masonexApiBuilder ?? MasonexApi.new;
+  SearchCommand({super.logger, MasonApiBuilder? masonApiBuilder})
+      : _masonApiBuilder = masonApiBuilder ?? MasonApi.new;
 
-  final MasonexApiBuilder _masonexApiBuilder;
+  final MasonApiBuilder _masonApiBuilder;
 
   @override
   final String description = 'Search published bricks on brickhub.dev.';
@@ -31,9 +31,9 @@ class SearchCommand extends MasonexCommand {
       'Searching "$query" on brickhub.dev',
     );
 
-    final masonexApi = _masonexApiBuilder();
+    final masonApi = _masonApiBuilder();
     try {
-      final results = await masonexApi.search(query: query);
+      final results = await masonApi.search(query: query);
       searchProgress.complete(
         results.isEmpty
             ? 'No bricks found.'
@@ -64,7 +64,7 @@ class SearchCommand extends MasonexCommand {
       logger.err('$error');
       return ExitCode.software.code;
     } finally {
-      masonexApi.close();
+      masonApi.close();
     }
   }
 }
