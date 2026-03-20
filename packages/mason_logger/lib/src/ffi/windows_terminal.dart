@@ -6,27 +6,25 @@ import 'package:win32/win32.dart';
 
 class WindowsTerminal implements Terminal {
   WindowsTerminal() {
-    outputHandle = GetStdHandle(STD_OUTPUT_HANDLE).value;
-    inputHandle = GetStdHandle(STD_INPUT_HANDLE).value;
+    outputHandle = GetStdHandle(STD_OUTPUT_HANDLE);
+    inputHandle = GetStdHandle(STD_INPUT_HANDLE);
   }
 
-  late final HANDLE inputHandle;
-  late final HANDLE outputHandle;
+  late final int inputHandle;
+  late final int outputHandle;
 
   @override
   void enableRawMode() {
-    const dwMode = CONSOLE_MODE(
-      (~ENABLE_ECHO_INPUT) &
-          (~ENABLE_PROCESSED_INPUT) &
-          (~ENABLE_LINE_INPUT) &
-          (~ENABLE_WINDOW_INPUT),
-    );
+    const dwMode = (~ENABLE_ECHO_INPUT) &
+        (~ENABLE_PROCESSED_INPUT) &
+        (~ENABLE_LINE_INPUT) &
+        (~ENABLE_WINDOW_INPUT);
     SetConsoleMode(inputHandle, dwMode);
   }
 
   @override
   void disableRawMode() {
-    final dwMode = ENABLE_ECHO_INPUT |
+    const dwMode = ENABLE_ECHO_INPUT |
         ENABLE_EXTENDED_FLAGS |
         ENABLE_INSERT_MODE |
         ENABLE_LINE_INPUT |
