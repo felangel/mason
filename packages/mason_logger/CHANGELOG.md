@@ -1,3 +1,8 @@
+# 0.3.4
+
+- deps: upgrade `pkg:win32` to `^6.0.0` ([#1650](https://github.com/felangel/mason/pull/1650))
+- refactor: upgrade analysis options ([#1539](https://github.com/felangel/mason/pull/1539))
+
 # 0.3.3
 
 - deps: upgrade `pkg:win32` to `^5.11.0` ([#1537](https://github.com/felangel/mason/pull/1537))
