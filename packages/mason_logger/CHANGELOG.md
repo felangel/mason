@@ -1,3 +1,8 @@
+# 0.3.5
+
+- revert: upgrade `pkg:win32` to `^6.0.0`
+  - due to use of native assets this was breaking hook execution on windows
+
 # 0.3.4
 
 - deps: upgrade `pkg:win32` to `^6.0.0` ([#1650](https://github.com/felangel/mason/pull/1650))
