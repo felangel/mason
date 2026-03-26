@@ -47,6 +47,15 @@ class MustachexProcessor {
         partialsResolver: _partialsResolverAdapted);
   }
 
+  /// Processes the template and returns raw bytes (List<int>).
+  /// Binary values (Uint8List / List<int>) are written directly without
+  /// string conversion. Text portions are UTF-8 encoded.
+  Future<List<int>> processBytes(String source) async {
+    return await _processMustacheThrowingIfAbsentBytes(
+        source, variablesResolver.getAll,
+        partialsResolver: _partialsResolverAdapted);
+  }
+
   Template _partialsResolverAdapted(String name) {
     if (partialsResolver == null) {
       throw MissingPartialsResolverFunction();
@@ -234,6 +243,23 @@ class MustachexProcessor {
     }
 
     return _tryRender();
+  }
+
+  /// Binary version: resolves all variables via the string pipeline first,
+  /// then renders the final result as raw bytes.
+  Future<List<int>> _processMustacheThrowingIfAbsentBytes(
+      String source, Map resolverVars,
+      {_PartialsResolver? partialsResolver}) async {
+    // First, resolve all missing variables via the normal string pipeline.
+    // This handles hasX guards, recasing, and missing var fulfillment.
+    await _processMustacheThrowingIfAbsent(source, resolverVars,
+        partialsResolver: partialsResolver);
+
+    // Now all variables are resolved. Render as bytes using BinaryRenderer.
+    Template template = _sourceCache[source]!['template'];
+    final updatedVars = Map.from(variablesResolver.getAll)
+      ..addAll(mustache_recase.cases);
+    return template.renderBytes(updatedVars);
   }
 
   _MustacheIteration _getPrimigenicMustacheIteration(

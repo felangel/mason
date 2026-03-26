@@ -116,3 +116,31 @@ var json = {'foo': valueOfFoo}
 | `['a']`    | true         | hasFoo was true   |
 | `false`    | true         | hasFoo was false  |
 | `true`     | true         | hasFoo was true   |
+
+---
+
+### Binary data support
+
+When a variable's value is a `Uint8List` or `List<int>`, you can use `processBytes()` to render the template as raw bytes without string conversion. This prevents binary data (like images or files) from being corrupted.
+
+```dart
+import 'dart:typed_data';
+import 'package:mustachex/mustachex.dart';
+
+main() async {
+  final pngData = Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, /* ... */]);
+  var processor = MustachexProcessor(
+    initialVariables: {'image': pngData, 'name': 'logo'},
+  );
+
+  // Returns List<int> with text UTF-8 encoded and binary data raw
+  List<int> bytes = await processor.processBytes('{{name}}: {{{image}}}');
+  // Write bytes directly to a file
+}
+```
+
+| Method | Return type | Binary handling |
+| --- | --- | --- |
+| `process()` | `Future<String>` | Values are `.toString()`'d (may corrupt binary) |
+| `processBytes()` | `Future<List<int>>` | `Uint8List`/`List<int>` written raw, text UTF-8 encoded |
+

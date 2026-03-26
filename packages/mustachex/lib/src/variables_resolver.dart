@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:mustachex/src/variable_recase_decomposer.dart';
 import 'package:recase/recase.dart';
 
@@ -143,7 +145,10 @@ class VariablesResolver {
 
   //Convierte el value en algo usable, bien formateado, etc
   dynamic _process(value) {
-    if (value is String) {
+    if (value is Uint8List || (value is List<int> && value is! List<Map>)) {
+      // Preserve binary data as-is for BinaryRenderer
+      return value;
+    } else if (value is String) {
       return StringVariable(value);
     } else if (value is StringVariable || value is bool || value is num) {
       return value;

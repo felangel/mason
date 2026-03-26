@@ -1,6 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
 import 'dart:io' show Directory, File, FileMode, FileSystemEntity, Process;
+import 'dart:typed_data';
 import 'dart:isolate';
 
 import 'package:checked_yaml/checked_yaml.dart';
@@ -519,14 +520,83 @@ class TemplateFile {
     Map<String, List<int>> partials,
   ) {
     try {
+      final binaryStore = <String, List<int>>{};
+      final processedVars =
+          _processBinaryVars(vars, binaryStore) as Map<String, dynamic>;
+
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimiterRegExp)) return content;
-      final rendered = decoded.render(vars, partials);
-      return utf8.encode(rendered);
+      final rendered = decoded.render(processedVars, partials);
+
+      List<int> outputBytes = utf8.encode(rendered);
+      if (binaryStore.isNotEmpty) {
+        outputBytes = _replaceBinaryMarkers(outputBytes, binaryStore);
+      }
+      return outputBytes;
     } on Exception {
       return content;
     }
   }
+}
+
+dynamic _processBinaryVars(dynamic value, Map<String, List<int>> binaryStore) {
+  if (value is List<int> || value is Uint8List) {
+    final Uint8List bytes;
+    if (value is Uint8List) {
+      bytes = value;
+    } else {
+      bytes = Uint8List.fromList(value as List<int>);
+    }
+    final marker = '__MASON_BIN_${binaryStore.length}__';
+    binaryStore[marker] = bytes;
+    return marker;
+  }
+  if (value is Map<String, dynamic>) {
+    return value.map((k, v) => MapEntry(k, _processBinaryVars(v, binaryStore)));
+  }
+  if (value is List) {
+    return value.map((v) => _processBinaryVars(v, binaryStore)).toList();
+  }
+  return value;
+}
+
+List<int> _replaceBinaryMarkers(
+  List<int> content,
+  Map<String, List<int>> binaryStore,
+) {
+  var result = content;
+  for (final entry in binaryStore.entries) {
+    final needle = utf8.encode(entry.key);
+    result = _replaceBytes(result, needle, entry.value);
+  }
+  return result;
+}
+
+List<int> _replaceBytes(
+  List<int> source,
+  List<int> needle,
+  List<int> replacement,
+) {
+  final result = <int>[];
+  var i = 0;
+  while (i < source.length) {
+    if (_matchesAt(source, i, needle)) {
+      result.addAll(replacement);
+      i += needle.length;
+    } else {
+      result.add(source[i]);
+      i++;
+    }
+  }
+  return result;
+}
+
+bool _matchesAt(List<int> source, int index, List<int> needle) {
+  if (index + needle.length > source.length) return false;
+  for (var i = 0; i < needle.length; i++) {
+    if (source[index + i] != needle[i]) return false;
+  }
+  return true;
 }
 
 /// {@template file_contents}

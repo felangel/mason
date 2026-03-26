@@ -119,19 +119,20 @@ extension on String {
   String transpiled() {
     final builtInLambdaNamesEscaped =
         _builtInLambdas.keys.map(RegExp.escape).join('|');
-    final lambdaPattern =
-        RegExp('{?{{ *([^{}]*)\\.($builtInLambdaNamesEscaped)\\(\\) *}}}?');
+    final lambdaPattern = RegExp(
+      '{?{{ *([^{}]*?)(?:\\.($builtInLambdaNamesEscaped)\\(\\) *| *\\| *([a-zA-Z0-9_]+) *)}}}?',
+    );
 
     var currentIteration = this;
 
-    // Continue substituting until no match is found to account for chained
-    // lambdas
     while (lambdaPattern.hasMatch(currentIteration)) {
       currentIteration =
           currentIteration.replaceAllMapped(lambdaPattern, (match) {
         final expression = match.group(0)!;
-        final variable = match.group(1)!;
-        final lambda = match.group(2)!;
+        final variable = match.group(1)!.trim();
+        final lambda = match.group(2) ?? match.group(3);
+
+        if (lambda == null) return expression;
 
         final startsWithTriple = expression.startsWith('{{{');
         final endsWithTriple = expression.endsWith('}}}');

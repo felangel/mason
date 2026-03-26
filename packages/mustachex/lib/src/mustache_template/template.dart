@@ -56,6 +56,15 @@ class Template {
         _partialResolver, _name, '', source);
     renderer.render(_nodes);
   }
+
+  /// Renders the template to raw bytes. Binary values (Uint8List / List<int>)
+  /// are written directly without string conversion. Text is UTF-8 encoded.
+  List<int> renderBytes(values) {
+    var renderer = BinaryRenderer(
+        [values], _lenient, _htmlEscapeValues, _partialResolver, _name, source);
+    renderer.render(_nodes);
+    return renderer.collectBytes();
+  }
 }
 
 // Expose getter for nodes internally within this package.

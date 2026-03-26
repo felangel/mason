@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import '../interfaces.dart';
 import 'lambda_context.dart';
 import 'node.dart';
@@ -277,3 +280,68 @@ const int _QUOTE = 34;
 const int _APOS = 39;
 const int _FORWARD_SLASH = 47;
 const int _NEWLINE = 10;
+
+/// A renderer that collects output as raw bytes (List<int>).
+/// Text is UTF-8 encoded, and binary values (Uint8List / List<int>)
+/// are written directly without any string conversion.
+class BinaryRenderer extends Renderer {
+  final List<List<int>> _segments = [];
+
+  BinaryRenderer(List stack, bool lenient, bool htmlEscapeValues,
+      PartialResolver? partialResolver, String? templateName, String source)
+      : super(StringBuffer(), stack, lenient, htmlEscapeValues,
+            partialResolver, templateName, '', source);
+
+  /// Collects all segments into a single flat List<int>.
+  List<int> collectBytes() {
+    // Flush any leftover text from the StringBuffer sink
+    _flushTextSink();
+    final result = <int>[];
+    for (final segment in _segments) {
+      result.addAll(segment);
+    }
+    return result;
+  }
+
+  /// Flushes the current StringBuffer contents as a UTF-8 segment.
+  void _flushTextSink() {
+    final text = sink.toString();
+    if (text.isNotEmpty) {
+      _segments.add(utf8.encode(text));
+      // Clear the StringBuffer by replacing it with a new write
+      (sink as StringBuffer).clear();
+    }
+  }
+
+  @override
+  void visitVariable(VariableNode node) {
+    var value = resolveValue(node.name);
+
+    if (value is Function) {
+      var context = LambdaContext(node, this);
+      var valueFunction = value;
+      value = valueFunction(context);
+      context.close();
+    }
+
+    if (value == noSuchProperty) {
+      if (!lenient) {
+        throw error('Value was missing for variable tag: ${node.name}.', node);
+      }
+    } else if (value is Uint8List) {
+      // Write raw binary data directly
+      _flushTextSink();
+      _segments.add(value);
+    } else if (value is List<int>) {
+      // Write raw binary data directly
+      _flushTextSink();
+      _segments.add(List<int>.from(value));
+    } else {
+      var valueString = (value == null) ? '' : value.toString();
+      var output = !node.escape || !htmlEscapeValues
+          ? valueString
+          : _htmlEscape(valueString);
+      write(output);
+    }
+  }
+}

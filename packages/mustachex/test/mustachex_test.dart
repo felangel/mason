@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:mustachex/mustachex.dart';
 import 'package:test/test.dart';
 
@@ -236,6 +238,54 @@ void main() {
       final renderedChanged = await p.process(src);
       expect(renderedNormal, 'TEST 😭 1234 😭😭');
       expect(renderedChanged, 'TEST 😭 1234 😭😭');
+    });
+
+    group('Binary data support', () {
+      test('Uint8List variable renders exact bytes without corruption',
+          () async {
+        final binaryData =
+            Uint8List.fromList([0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A]);
+        var p = MustachexProcessor(initialVariables: {'img': binaryData});
+        var result = await p.processBytes('{{{img}}}');
+        expect(result, equals(binaryData));
+      });
+
+      test('Mixed text and binary data renders correctly', () async {
+        final binaryData = Uint8List.fromList([0xFF, 0xD8, 0xFF, 0xE0]);
+        var p = MustachexProcessor(
+            initialVariables: {'data': binaryData, 'name': 'test'});
+        var result = await p.processBytes('{{name}}: {{{data}}} end');
+        // "test: " in UTF-8
+        final prefix = 'test: '.codeUnits;
+        final suffix = ' end'.codeUnits;
+        expect(result.sublist(0, prefix.length), equals(prefix));
+        expect(
+            result.sublist(prefix.length, prefix.length + binaryData.length),
+            equals(binaryData));
+        expect(result.sublist(prefix.length + binaryData.length),
+            equals(suffix));
+      });
+
+      test('List<int> works the same as Uint8List', () async {
+        final binaryData = <int>[0x00, 0x01, 0x02, 0xFF, 0xFE];
+        var p = MustachexProcessor(initialVariables: {'raw': binaryData});
+        var result = await p.processBytes('{{{raw}}}');
+        expect(result, equals(binaryData));
+      });
+
+      test('processBytes with only text returns UTF-8 encoded string',
+          () async {
+        var p = MustachexProcessor(initialVariables: {'name': 'hello'});
+        var result = await p.processBytes('{{name}} world');
+        expect(result, equals('hello world'.codeUnits));
+      });
+
+      test('regular process() still works normally (backward compat)',
+          () async {
+        var p = MustachexProcessor(initialVariables: {'name': 'hello'});
+        var result = await p.process('{{name}} world');
+        expect(result, equals('hello world'));
+      });
     });
   });
 }
