@@ -13,6 +13,23 @@
 
 A collection of packages that enable developers to create and consume reusable templates called bricks.
 
+---
+> [!NOTE]
+> This is a **masonex** repository, a fork originally developed by **Jules** and **Antigravity**. It extends the original `mason` with advanced features.
+
+## Masonex File Generation
+
+`masonex` provides a more robust and flexible template generation process, including support for binary data and advanced template syntax.
+
+### Key Features
+
+1. **Binary Data Protection**: Detects binary variables (`List<int>`) and uses temporary markers to prevent corruption during the rendering process.
+2. **Extended Syntax**: Supports pipes (`{{ var | pascalCase }}`), dot notation (`{{ var.camelCase() }}`), and alternative closing tags (`{{%name}}`).
+3. **Advanced Engine**: Uses [mustachex](https://gitlab.com/Rodsevich/mustachex) for enhanced Lambda and Partial support.
+4. **Binary Restoration**: Re-injects original raw bytes after rendering to ensure binary files (like PNGs) remain uncorrupted.
+
+---
+
 ![Mason Demo][mason_demo]
 
 ## Packages

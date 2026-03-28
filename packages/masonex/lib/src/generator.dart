@@ -236,10 +236,12 @@ abstract class Generator implements Comparable<Generator> {
         );
         generatedFiles.add(generatedFile);
       } else {
-        final resultFiles = await _runSubstitutionAsync(
-          file,
+        final resultFiles = await file.runSubstitution(
           Map<String, dynamic>.of(vars),
           Map<String, List<int>>.of(partials),
+          onMissingVariable: logger != null
+              ? (variable) => logger.prompt('Enter value for $variable')
+              : null,
         );
         final root = RegExp(r'\w:\\|\w:\/');
         final separator = RegExp(r'\/|\\');
@@ -451,10 +453,11 @@ class TemplateFile {
   final List<int> content;
 
   /// Performs a substitution on the [path] based on the incoming [parameters].
-  Set<FileContents> runSubstitution(
+  Future<Set<FileContents>> runSubstitution(
     Map<String, dynamic> parameters,
-    Map<String, List<int>> partials,
-  ) {
+    Map<String, List<int>> partials, {
+    FutureOr<String> Function(String variable)? onMissingVariable,
+  }) async {
     var filePath = path.replaceAll(r'\', '/');
     if (_loopRegExp().hasMatch(filePath)) {
       final matches = _loopKeyRegExp.allMatches(filePath);
@@ -499,26 +502,41 @@ class TemplateFile {
             <String, dynamic>{filteredParameterKeys[i]: permutation[i]},
           );
         }
-        final newPath = filePath.render(param);
-        final newContents = TemplateFile(
+        final newPath = await filePath.render(
+          param,
+          onMissingVariable: onMissingVariable,
+        );
+        final newContents = await TemplateFile(
           newPath,
           utf8.decode(content),
-        )._createContent(parameters..addAll(param), partials);
+        )._createContent(
+          parameters..addAll(param),
+          partials,
+          onMissingVariable: onMissingVariable,
+        );
         fileContents.add(FileContents(newPath, newContents));
       }
 
       return fileContents;
     } else {
-      final newPath = filePath.render(parameters);
-      final newContents = _createContent(parameters, partials);
+      final newPath = await filePath.render(
+        parameters,
+        onMissingVariable: onMissingVariable,
+      );
+      final newContents = await _createContent(
+        parameters,
+        partials,
+        onMissingVariable: onMissingVariable,
+      );
       return {FileContents(newPath, newContents)};
     }
   }
 
-  List<int> _createContent(
+  Future<List<int>> _createContent(
     Map<String, dynamic> vars,
-    Map<String, List<int>> partials,
-  ) {
+    Map<String, List<int>> partials, {
+    FutureOr<String> Function(String variable)? onMissingVariable,
+  }) async {
     try {
       final binaryStore = <String, List<int>>{};
       final processedVars =
@@ -526,7 +544,11 @@ class TemplateFile {
 
       final decoded = utf8.decode(content);
       if (!decoded.contains(_delimiterRegExp)) return content;
-      final rendered = decoded.render(processedVars, partials);
+      final rendered = await decoded.render(
+        processedVars,
+        partials: partials,
+        onMissingVariable: onMissingVariable,
+      );
 
       List<int> outputBytes = utf8.encode(rendered);
       if (binaryStore.isNotEmpty) {
@@ -659,13 +681,6 @@ class _Permutations<T> {
   }
 }
 
-Future<Set<FileContents>> _runSubstitutionAsync(
-  TemplateFile file,
-  Map<String, dynamic> vars,
-  Map<String, List<int>> partials,
-) async {
-  return Isolate.run(() => file.runSubstitution(vars, partials));
-}
 
 extension on FileConflictResolution {
   OverwriteRule? toOverwriteRule() {

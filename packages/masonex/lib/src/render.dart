@@ -1,3 +1,4 @@
+import 'dart:async';
 import 'dart:convert';
 
 import 'package:masonex/masonex.dart';
@@ -95,22 +96,32 @@ const _builtInVars = <String, dynamic>{
 /// {@endtemplate}
 extension RenderTemplate on String {
   /// {@macro render_template}
-  String render(
-    Map<String, dynamic> vars, [
+  Future<String> render(
+    Map<String, dynamic> vars, {
     Map<String, List<int>>? partials = const {},
-  ]) {
-    final template = Template(
-      _sanitizeInput(transpiled()),
-      lenient: true,
-      partialResolver: (name) => partials?.resolve(name),
-    );
-
-    return _sanitizeOutput(
-      template.renderString(<String, dynamic>{
+    FutureOr<String> Function(String variable)? onMissingVariable,
+  }) async {
+    final processor = MustachexProcessor(
+      initialVariables: <String, dynamic>{
         ...vars,
         ..._builtInLambdas,
         ..._builtInVars,
-      }),
+      },
+      missingVarFulfiller: onMissingVariable != null
+          ? (exception) async => await onMissingVariable(exception.request)
+          : null,
+      partialsResolver: (exception) {
+        final name = exception.partialName;
+        if (name == null) return null;
+        final content = partials?['{{~ $name }}'];
+        if (content == null) return null;
+        final decoded = utf8.decode(content);
+        return _sanitizeInput(decoded.transpiled());
+      },
+    );
+
+    return _sanitizeOutput(
+      await processor.process(_sanitizeInput(transpiled())),
     );
   }
 }

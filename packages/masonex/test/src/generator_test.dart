@@ -1129,14 +1129,14 @@ void main() {
 
     group('TemplateFile', () {
       group('runSubstitution', () {
-        test('handles malformed content', () {
+        test('handles malformed content', () async {
           final tempDir = Directory.systemTemp.createTempSync();
           final bytes = [0x80, 0x00];
           final template = TemplateFile.fromBytes(
             path.join(tempDir.path, 'malformed.txt'),
             bytes,
           );
-          final set = template.runSubstitution(<String, dynamic>{}, {});
+          final set = await template.runSubstitution(<String, dynamic>{}, {});
           expect(set.length, equals(1));
           expect(set.first.content, equals(bytes));
         });
