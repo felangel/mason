@@ -32,6 +32,7 @@ export 'src/generator.dart'
         OverwriteRule,
         TemplateFile;
 export 'src/mason_bundle.dart' show MasonBundle, MasonBundledFile;
+export 'src/merger.dart' show Merger;
 export 'src/mason_lock_json.dart' show MasonLockJson;
 export 'src/mason_yaml.dart' show BrickLocation, GitPath, MasonYaml;
 export 'src/path.dart' show canonicalize;

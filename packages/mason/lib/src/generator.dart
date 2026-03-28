@@ -138,6 +138,9 @@ enum GeneratedFileStatus {
   /// File already existed and new content was appended.
   appended,
 
+  /// File already existed and new content was merged.
+  merged,
+
   /// File already existed and previous contents were left unmodified.
   skipped,
 
@@ -163,6 +166,10 @@ class GeneratedFile {
   /// {@macro generated_file}
   const GeneratedFile.appended({required String path})
       : this._(path: path, status: GeneratedFileStatus.appended);
+
+  /// {@macro generated_file}
+  const GeneratedFile.merged({required String path})
+      : this._(path: path, status: GeneratedFileStatus.merged);
 
   /// {@macro generated_file}
   const GeneratedFile.skipped({required String path})
@@ -249,11 +256,18 @@ abstract class Generator implements Comparable<Generator> {
           if (!wasRoot && isRoot) continue;
           if (file.path.isEmpty) continue;
           if (file.path.split(separator).contains('')) continue;
+
+          final fileName = p.basename(file.path);
+          final isMerge = fileName.startsWith('>>>');
+          final path = isMerge
+              ? p.join(p.dirname(file.path), fileName.substring(3))
+              : file.path;
+
           final generatedFile = await target.createFile(
-            file.path,
+            path,
             file.content,
             logger: logger,
-            overwriteRule: overwriteRule,
+            overwriteRule: isMerge ? OverwriteRule.alwaysMerge : overwriteRule,
           );
           generatedFiles.add(generatedFile);
         }
@@ -312,6 +326,9 @@ enum OverwriteRule {
   /// Always append the existing file.
   alwaysAppend,
 
+  /// Always merge the existing file.
+  alwaysMerge,
+
   /// Overwrite one time.
   overwriteOnce,
 
@@ -320,6 +337,9 @@ enum OverwriteRule {
 
   /// Append one time
   appendOnce,
+
+  /// Merge one time
+  mergeOnce,
 }
 
 /// {@template directory_generator_target}
@@ -368,7 +388,8 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
     final shouldPrompt = logger != null &&
         (_overwriteRule != OverwriteRule.alwaysOverwrite &&
             _overwriteRule != OverwriteRule.alwaysSkip &&
-            _overwriteRule != OverwriteRule.alwaysAppend);
+            _overwriteRule != OverwriteRule.alwaysAppend &&
+            _overwriteRule != OverwriteRule.alwaysMerge);
 
     if (shouldPrompt) {
       logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
@@ -384,6 +405,17 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.skipOnce:
         logger?.delayed('  ${yellow.wrap('skipped')} $filePath');
         return GeneratedFile.skipped(path: file.path);
+      case OverwriteRule.alwaysMerge:
+      case OverwriteRule.mergeOnce:
+        final merger = Merger.fromPath(file.path);
+        final mergedContents = merger.merge(existingContents, contents);
+        await file
+            .create(recursive: true)
+            .then<File>((_) => file.writeAsBytes(mergedContents))
+            .whenComplete(
+              () => logger?.delayed('${lightBlue.wrap('merged')} $filePath'),
+            );
+        return GeneratedFile.merged(path: file.path);
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
       case OverwriteRule.appendOnce:

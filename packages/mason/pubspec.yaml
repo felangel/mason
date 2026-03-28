@@ -21,6 +21,7 @@ environment:
   sdk: ">=3.5.0 <4.0.0"
 
 dependencies:
+  analyzer: ^12.0.0
   archive: ^4.0.0
   checked_yaml: ^2.0.3
   collection: ^1.18.0
