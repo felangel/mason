@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/token.dart';
 import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/collection.dart';
 import 'package:mason/src/yaml_encode.dart';
@@ -48,8 +49,9 @@ class JsonMerger extends Merger {
   @override
   List<int> merge(List<int> existingContent, List<int> newContent) {
     final existingSource = utf8.decode(existingContent);
-    final existingJson =
-        existingSource.isEmpty ? <String, dynamic>{} : json.decode(existingSource);
+    final existingJson = existingSource.isEmpty
+        ? <String, dynamic>{}
+        : json.decode(existingSource);
     final newJson = json.decode(utf8.decode(newContent));
 
     final mergedJson = _merge(existingJson, newJson);
@@ -78,8 +80,9 @@ class YamlMerger extends Merger {
   @override
   List<int> merge(List<int> existingContent, List<int> newContent) {
     final existingSource = utf8.decode(existingContent);
-    final existingYaml =
-        existingSource.isEmpty ? <dynamic, dynamic>{} : loadYaml(existingSource);
+    final existingYaml = existingSource.isEmpty
+        ? <dynamic, dynamic>{}
+        : loadYaml(existingSource);
     final newYaml = loadYaml(utf8.decode(newContent));
 
     final mergedYaml = _merge(existingYaml, newYaml);
@@ -134,73 +137,46 @@ class YamlMerger extends Merger {
 /// {@template dart_merger}
 /// A [Merger] which merges two Dart files.
 /// {@endtemplate}
-class DartMerger extends Merger {
-  @override
-  List<int> merge(List<int> existingContent, List<int> newContent) {
-    final existingSource = utf8.decode(existingContent);
-    final newSource = utf8.decode(newContent);
-
-    final existingUnit = parseString(content: existingSource).unit;
-    final newUnit = parseString(content: newSource).unit;
-
-    final existingVariables = _getTopLevelVariables(existingUnit);
-    final newDeclarations = _getTopLevelDeclarations(newUnit);
-
-    var mergedSource = existingSource;
-
-    for (final entry in newDeclarations.entries) {
-      final name = entry.key;
-      final newDeclaration = entry.value;
-      final newVariable = newDeclaration.variables.variables
-          .firstWhere((v) => v.name.lexeme == name);
-
-      if (existingVariables.containsKey(name)) {
-        final existingVariable = existingVariables[name]!;
-        final mergedValue = _mergeValues(existingVariable, newVariable);
-        if (mergedValue != null) {
-          mergedSource = mergedSource.replaceRange(
-            existingVariable.beginToken.offset,
-            existingVariable.endToken.end,
-            mergedValue,
-          );
-          // Re-parse to update offsets for subsequent replacements
-          final updatedUnit = parseString(content: mergedSource).unit;
-          existingVariables.clear();
-          existingVariables.addAll(_getTopLevelVariables(updatedUnit));
-        }
-      } else {
-        // Variable doesn't exist in existing file, append the entire declaration
-        mergedSource += '\n${newDeclaration.toSource()}';
-      }
-    }
-
-    return utf8.encode(mergedSource);
-  }
-
-  Map<String, VariableDeclaration> _getTopLevelVariables(CompilationUnit unit) {
-    final variables = <String, VariableDeclaration>{};
-    for (final declaration in unit.declarations) {
-      if (declaration is TopLevelVariableDeclaration) {
-        for (final variable in declaration.variables.variables) {
-          variables[variable.name.lexeme] = variable;
-        }
-      }
-    }
-    return variables;
-  }
-
-  Map<String, TopLevelVariableDeclaration> _getTopLevelDeclarations(
+abstract class DartMerger extends Merger {
+  Map<String, CompilationUnitMember> _getTopLevelDeclarations(
     CompilationUnit unit,
   ) {
-    final declarations = <String, TopLevelVariableDeclaration>{};
+    final declarations = <String, CompilationUnitMember>{};
     for (final declaration in unit.declarations) {
-      if (declaration is TopLevelVariableDeclaration) {
-        for (final variable in declaration.variables.variables) {
-          declarations[variable.name.lexeme] = declaration;
-        }
+      final names = _getDeclarationNames(declaration);
+      for (final name in names) {
+        declarations[name] = declaration;
       }
     }
     return declarations;
+  }
+
+  List<String> _getDeclarationNames(CompilationUnitMember declaration) {
+    Token? nameToken;
+    if (declaration is ClassDeclaration) {
+      nameToken = declaration.name;
+    } else if (declaration is FunctionDeclaration) {
+      nameToken = declaration.name;
+    } else if (declaration is EnumDeclaration) {
+      nameToken = declaration.name;
+    } else if (declaration is MixinDeclaration) {
+      nameToken = declaration.name;
+    } else if (declaration is ExtensionDeclaration) {
+      nameToken = declaration.name;
+    }
+
+    if (nameToken != null) {
+      return [nameToken.lexeme];
+    }
+
+    if (declaration is TopLevelVariableDeclaration) {
+      return declaration.variables.variables.map((v) => v.name.lexeme).toList();
+    }
+    return [];
+  }
+
+  String? _getDeclarationName(CompilationUnitMember declaration) {
+    return _getDeclarationNames(declaration).firstOrNull;
   }
 
   String? _mergeValues(
@@ -266,34 +242,71 @@ class DartRecursiveMerger extends DartMerger {
     final newUnit = parseString(content: newSource).unit;
 
     final existingVariables = _getAllVariables(existingUnit);
-    final newVariables = _getAllVariables(newUnit);
+    final existingDeclarations = _getTopLevelDeclarations(existingUnit);
 
     var mergedSource = existingSource;
 
+    // Handle imports
+    final brickImports = newUnit.directives.whereType<ImportDirective>();
+    final targetImports =
+        existingUnit.directives.whereType<ImportDirective>().toList();
+    for (final brickImport in brickImports) {
+      final exists = targetImports.any(
+        (targetImport) =>
+            targetImport.uri.toSource() == brickImport.uri.toSource(),
+      );
+      if (!exists) {
+        mergedSource = '${brickImport.toSource()}\n$mergedSource';
+      }
+    }
+
+    final handledBrickDeclarations = <CompilationUnitMember>{};
+
+    // First, handle top-level declarations that are not variables (e.g., classes, functions)
+    for (final declaration in newUnit.declarations) {
+      if (declaration is! TopLevelVariableDeclaration) {
+        final name = _getDeclarationName(declaration);
+        if (name != null && !existingDeclarations.containsKey(name)) {
+          mergedSource += '\n${declaration.toSource()}';
+          handledBrickDeclarations.add(declaration);
+        }
+      }
+    }
+
+    // Then, handle variables
+    final newVariables = _getAllVariables(newUnit);
+    final newDeclarations = _getTopLevelDeclarations(newUnit);
+
     for (final entry in newVariables.entries) {
-      final name = entry.key;
+      final qualifiedName = entry.key;
       final newVariable = entry.value;
 
-      if (existingVariables.containsKey(name)) {
-        final existingVariable = existingVariables[name]!;
+      if (existingVariables.containsKey(qualifiedName)) {
+        final existingVariable = existingVariables[qualifiedName]!;
         final mergedValue = _mergeValues(existingVariable, newVariable);
         if (mergedValue != null) {
+          final updatedUnit = parseString(content: mergedSource).unit;
+          final currentVariables = _getAllVariables(updatedUnit);
+          final currentVariable = currentVariables[qualifiedName]!;
+
           mergedSource = mergedSource.replaceRange(
-            existingVariable.beginToken.offset,
-            existingVariable.endToken.end,
+            currentVariable.beginToken.offset,
+            currentVariable.endToken.end,
             mergedValue,
           );
-          // Re-parse to update offsets for subsequent replacements
-          final updatedUnit = parseString(content: mergedSource).unit;
-          existingVariables.clear();
-          existingVariables.addAll(_getAllVariables(updatedUnit));
         }
       } else {
-        // For recursive, we might only want to append top-level ones if they don't exist.
-        // Appending to classes is complex.
-        final declarations = _getTopLevelDeclarations(newUnit);
-        if (declarations.containsKey(name)) {
-          mergedSource += '\n${declarations[name]!.toSource()}';
+        // Only append top-level variables if they don't exist anywhere
+        final variableName = qualifiedName.contains('.')
+            ? qualifiedName.split('.').last
+            : qualifiedName;
+
+        if (newDeclarations.containsKey(variableName)) {
+          final declaration = newDeclarations[variableName]!;
+          if (!handledBrickDeclarations.contains(declaration)) {
+            mergedSource += '\n${declaration.toSource()}';
+            handledBrickDeclarations.add(declaration);
+          }
         }
       }
     }
@@ -310,10 +323,24 @@ class DartRecursiveMerger extends DartMerger {
 
 class _VariableVisitor extends RecursiveAstVisitor<void> {
   final variables = <String, VariableDeclaration>{};
+  String? _currentClass;
+
+  @override
+  void visitClassDeclaration(ClassDeclaration node) {
+    final previousClass = _currentClass;
+    _currentClass = node.name.lexeme;
+    super.visitClassDeclaration(node);
+    _currentClass = previousClass;
+  }
 
   @override
   void visitVariableDeclaration(VariableDeclaration node) {
-    variables[node.name.lexeme] = node;
+    final qualifiedName = _currentClass != null
+        ? '$_currentClass.${node.name.lexeme}'
+        : node.name.lexeme;
+    if (!variables.containsKey(qualifiedName)) {
+      variables[qualifiedName] = node;
+    }
     super.visitVariableDeclaration(node);
   }
 }
