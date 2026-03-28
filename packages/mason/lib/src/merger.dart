@@ -1,6 +1,7 @@
 import 'dart:convert';
 import 'package:analyzer/dart/analysis/utilities.dart';
 import 'package:analyzer/dart/ast/ast.dart';
+import 'package:analyzer/dart/ast/visitor.dart';
 import 'package:collection/collection.dart';
 import 'package:mason/src/yaml_encode.dart';
 import 'package:path/path.dart' as p;
@@ -18,7 +19,7 @@ abstract class Merger {
     final extension = p.extension(path);
     switch (extension) {
       case '.dart':
-        return DartMerger();
+        return DartRecursiveMerger();
       case '.json':
         return JsonMerger();
       case '.yaml':
@@ -202,13 +203,18 @@ class DartMerger extends Merger {
     return declarations;
   }
 
-  String? _mergeValues(VariableDeclaration existing, VariableDeclaration incoming) {
+  String? _mergeValues(
+    VariableDeclaration existing,
+    VariableDeclaration incoming,
+  ) {
     final existingInit = existing.initializer;
     final incomingInit = incoming.initializer;
 
     if (existingInit is ListLiteral && incomingInit is ListLiteral) {
-      final existingElements = existingInit.elements.map((e) => e.toSource()).toList();
-      final incomingElements = incomingInit.elements.map((e) => e.toSource()).toList();
+      final existingElements =
+          existingInit.elements.map((e) => e.toSource()).toList();
+      final incomingElements =
+          incomingInit.elements.map((e) => e.toSource()).toList();
       final mergedElements = [...existingElements, ...incomingElements];
       return '${existing.name.lexeme} = [${mergedElements.join(', ')}]';
     }
@@ -244,5 +250,70 @@ class DartMerger extends Merger {
     throw Exception(
       'Cannot merge variables with name "${existing.name.lexeme}" because their types mismatch or are not supported for merging.',
     );
+  }
+}
+
+/// {@template dart_recursive_merger}
+/// A [Merger] which merges two Dart files recursively.
+/// {@endtemplate}
+class DartRecursiveMerger extends DartMerger {
+  @override
+  List<int> merge(List<int> existingContent, List<int> newContent) {
+    final existingSource = utf8.decode(existingContent);
+    final newSource = utf8.decode(newContent);
+
+    final existingUnit = parseString(content: existingSource).unit;
+    final newUnit = parseString(content: newSource).unit;
+
+    final existingVariables = _getAllVariables(existingUnit);
+    final newVariables = _getAllVariables(newUnit);
+
+    var mergedSource = existingSource;
+
+    for (final entry in newVariables.entries) {
+      final name = entry.key;
+      final newVariable = entry.value;
+
+      if (existingVariables.containsKey(name)) {
+        final existingVariable = existingVariables[name]!;
+        final mergedValue = _mergeValues(existingVariable, newVariable);
+        if (mergedValue != null) {
+          mergedSource = mergedSource.replaceRange(
+            existingVariable.beginToken.offset,
+            existingVariable.endToken.end,
+            mergedValue,
+          );
+          // Re-parse to update offsets for subsequent replacements
+          final updatedUnit = parseString(content: mergedSource).unit;
+          existingVariables.clear();
+          existingVariables.addAll(_getAllVariables(updatedUnit));
+        }
+      } else {
+        // For recursive, we might only want to append top-level ones if they don't exist.
+        // Appending to classes is complex.
+        final declarations = _getTopLevelDeclarations(newUnit);
+        if (declarations.containsKey(name)) {
+          mergedSource += '\n${declarations[name]!.toSource()}';
+        }
+      }
+    }
+
+    return utf8.encode(mergedSource);
+  }
+
+  Map<String, VariableDeclaration> _getAllVariables(CompilationUnit unit) {
+    final visitor = _VariableVisitor();
+    unit.accept(visitor);
+    return visitor.variables;
+  }
+}
+
+class _VariableVisitor extends RecursiveAstVisitor<void> {
+  final variables = <String, VariableDeclaration>{};
+
+  @override
+  void visitVariableDeclaration(VariableDeclaration node) {
+    variables[node.name.lexeme] = node;
+    super.visitVariableDeclaration(node);
   }
 }

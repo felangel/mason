@@ -163,5 +163,84 @@ var oldVar = 'old';
       expect(content, contains("var oldVar = 'old';"));
       expect(content, contains("final newVar = 'new';"));
     });
+
+    test('merges Dart list variables in complex file', () async {
+      final brickDir = Directory(path.join(tempDir.path, 'brick'))..createSync();
+      File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: test_brick
+description: test
+version: 0.1.0
+''');
+      final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+        ..createSync();
+      File(path.join(brickFiles.path, '>>>file.dart')).writeAsStringSync('''
+var list = ['banana', 'manzana'];
+''');
+
+      final targetDir = Directory(path.join(tempDir.path, 'target'))
+        ..createSync();
+      final targetFile = File(path.join(targetDir.path, 'file.dart'))
+        ..writeAsStringSync('''
+import 'dart:math';
+
+class PublicClass {
+  void sayHi() => print('hi');
+}
+
+class _PrivateClass {
+  int get value => 42;
+}
+
+var list = ['naranja'];
+
+void main() {
+  print('Running...');
+  PublicClass().sayHi();
+}
+''');
+
+      final generator =
+          await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+      await generator.generate(DirectoryGeneratorTarget(targetDir));
+
+      final content = targetFile.readAsStringSync();
+      expect(content, contains("import 'dart:math';"));
+      expect(content, contains('class PublicClass'));
+      expect(content, contains('class _PrivateClass'));
+      expect(content, contains("var list = ['naranja', 'banana', 'manzana'];"));
+      expect(content, contains('void main()'));
+    });
+
+    test('merges Dart list variables inside classes', () async {
+      final brickDir = Directory(path.join(tempDir.path, 'brick'))..createSync();
+      File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: test_brick
+description: test
+version: 0.1.0
+''');
+      final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+        ..createSync();
+      File(path.join(brickFiles.path, '>>>file.dart')).writeAsStringSync('''
+class MyClass {
+  static var list = ['banana'];
+}
+''');
+
+      final targetDir = Directory(path.join(tempDir.path, 'target'))
+        ..createSync();
+      final targetFile = File(path.join(targetDir.path, 'file.dart'))
+        ..writeAsStringSync('''
+class MyClass {
+  static var list = ['naranja'];
+}
+''');
+
+      final generator =
+          await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+      await generator.generate(DirectoryGeneratorTarget(targetDir));
+
+      final content = targetFile.readAsStringSync();
+      expect(content, contains("static var list = ['naranja', 'banana']"));
+    });
   });
 }
