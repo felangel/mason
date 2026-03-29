@@ -22,6 +22,10 @@ environment:
 
 dependencies:
   archive: ^4.0.0
+  build: ^2.4.1
+  source_gen: ^1.5.0
+  masonex_annotations:
+    path: ../masonex_annotations
   checked_yaml: ^2.0.3
   collection: ^1.18.0
   convert: ^3.1.1

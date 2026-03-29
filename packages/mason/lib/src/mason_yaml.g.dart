@@ -49,12 +49,20 @@ BrickLocation _$BrickLocationFromJson(Map json) => $checkedCreate(
       },
     );
 
-Map<String, dynamic> _$BrickLocationToJson(BrickLocation instance) =>
-    <String, dynamic>{
-      if (instance.path case final value?) 'path': value,
-      if (instance.git?.toJson() case final value?) 'git': value,
-      if (instance.version case final value?) 'version': value,
-    };
+Map<String, dynamic> _$BrickLocationToJson(BrickLocation instance) {
+  final val = <String, dynamic>{};
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('path', instance.path);
+  writeNotNull('git', instance.git?.toJson());
+  writeNotNull('version', instance.version);
+  return val;
+}
 
 GitPath _$GitPathFromJson(Map json) => $checkedCreate(
       'GitPath',
@@ -73,8 +81,18 @@ GitPath _$GitPathFromJson(Map json) => $checkedCreate(
       },
     );
 
-Map<String, dynamic> _$GitPathToJson(GitPath instance) => <String, dynamic>{
-      'url': instance.url,
-      'path': instance.path,
-      if (instance.ref case final value?) 'ref': value,
-    };
+Map<String, dynamic> _$GitPathToJson(GitPath instance) {
+  final val = <String, dynamic>{
+    'url': instance.url,
+    'path': instance.path,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('ref', instance.ref);
+  return val;
+}

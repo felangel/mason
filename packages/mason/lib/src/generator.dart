@@ -138,8 +138,14 @@ enum GeneratedFileStatus {
   /// File already existed and new content was appended.
   appended,
 
+  /// File already existed and new content was prepended.
+  prepended,
+
   /// File already existed and new content was merged.
   merged,
+
+  /// File was temporary and was deleted after generation.
+  temporary,
 
   /// File already existed and previous contents were left unmodified.
   skipped,
@@ -168,8 +174,16 @@ class GeneratedFile {
       : this._(path: path, status: GeneratedFileStatus.appended);
 
   /// {@macro generated_file}
+  const GeneratedFile.prepended({required String path})
+      : this._(path: path, status: GeneratedFileStatus.prepended);
+
+  /// {@macro generated_file}
   const GeneratedFile.merged({required String path})
       : this._(path: path, status: GeneratedFileStatus.merged);
+
+  /// {@macro generated_file}
+  const GeneratedFile.temporary({required String path})
+      : this._(path: path, status: GeneratedFileStatus.temporary);
 
   /// {@macro generated_file}
   const GeneratedFile.skipped({required String path})
@@ -229,7 +243,37 @@ abstract class Generator implements Comparable<Generator> {
   }) async {
     final overwriteRule = fileConflictResolution?.toOverwriteRule();
     final generatedFiles = <GeneratedFile>[];
-    await Future.forEach<TemplateFile>(files, (TemplateFile file) async {
+    final templateFiles = [...files];
+
+    // Handle *iterator* prefix
+    final resolvedFiles = <TemplateFile>[];
+    for (final file in templateFiles) {
+      final fileName = p.basename(file.path);
+      if (fileName.startsWith('*')) {
+        final parts = fileName.split('*');
+        if (parts.length >= 3) {
+          final variableName = parts[1];
+          final remainingName = parts.sublist(2).join('*');
+          final iterable = vars[variableName];
+          if (iterable is Iterable) {
+            for (final item in iterable) {
+              final itemVars = {...vars, 'item': item};
+              final newPath = p.join(
+                p.dirname(file.path),
+                remainingName,
+              );
+              // Render the path for Each item
+              final renderedPath = newPath.render(itemVars);
+              resolvedFiles.add(TemplateFile.fromBytes(renderedPath, file.content));
+            }
+            continue;
+          }
+        }
+      }
+      resolvedFiles.add(file);
+    }
+
+    await Future.forEach<TemplateFile>(resolvedFiles, (TemplateFile file) async {
       final fileMatch = _fileRegExp.firstMatch(file.path);
       if (fileMatch != null) {
         final resultFile = await _fetch(vars[fileMatch[1]] as String);
@@ -257,22 +301,84 @@ abstract class Generator implements Comparable<Generator> {
           if (file.path.isEmpty) continue;
           if (file.path.split(separator).contains('')) continue;
 
-          final fileName = p.basename(file.path);
+          var fileName = p.basename(file.path);
+
+          // Handle ?conditional? prefix
+          if (fileName.startsWith('?')) {
+            final parts = fileName.split('?');
+            if (parts.length >= 3) {
+              final variableName = parts[1];
+              final isTrue = vars[variableName] == true ||
+                  (vars[variableName] is Iterable && (vars[variableName] as Iterable).isNotEmpty);
+              if (!isTrue) return;
+              fileName = parts.sublist(2).join('?');
+            }
+          }
+
           final isMerge = fileName.startsWith('>>>');
-          final path = isMerge
-              ? p.join(p.dirname(file.path), fileName.substring(3))
-              : file.path;
+          final isAppend = !isMerge && fileName.startsWith('>>');
+          final isPrepend =
+              !isMerge && !isAppend && fileName.startsWith('<<');
+          final isOverwrite = !isMerge &&
+              !isAppend &&
+              !isPrepend &&
+              fileName.startsWith('>');
+          final isIfNotExists = fileName.startsWith('!');
+          final isTemporary = fileName.startsWith('~');
+          final isSnippet = fileName.startsWith('%');
+
+          final prefixLength = isMerge
+              ? 3
+              : (isAppend || isPrepend)
+                  ? 2
+                  : (isOverwrite || isIfNotExists || isTemporary || isSnippet)
+                      ? 1
+                      : 0;
+
+          final path = prefixLength > 0
+              ? p.normalize(p.join(p.dirname(file.path), fileName.substring(prefixLength)))
+              : p.normalize(p.join(p.dirname(file.path), fileName));
+
+          final rule = isMerge
+              ? OverwriteRule.alwaysMerge
+              : isAppend
+                  ? OverwriteRule.alwaysAppend
+                  : isPrepend
+                      ? OverwriteRule.alwaysPrepend
+                      : isOverwrite
+                          ? OverwriteRule.alwaysOverwrite
+                          : isIfNotExists
+                              ? OverwriteRule.ifNotExists
+                              : isTemporary
+                                  ? OverwriteRule.temporary
+                                  : overwriteRule;
+
+          if (isSnippet) {
+            final idMatch = RegExp(r"%(.+?)%").firstMatch(fileName);
+            if (idMatch != null) {
+              final id = idMatch.group(1)!;
+            }
+            continue;
+          }
 
           final generatedFile = await target.createFile(
             path,
             file.content,
             logger: logger,
-            overwriteRule: isMerge ? OverwriteRule.alwaysMerge : overwriteRule,
+            overwriteRule: rule,
           );
           generatedFiles.add(generatedFile);
         }
       }
     });
+
+    for (final file in generatedFiles) {
+      if (file.status == GeneratedFileStatus.temporary) {
+        final f = File(file.path);
+        if (f.existsSync()) f.deleteSync(recursive: true);
+      }
+    }
+
     return generatedFiles;
   }
 
@@ -326,8 +432,17 @@ enum OverwriteRule {
   /// Always append the existing file.
   alwaysAppend,
 
+  /// Always prepend the existing file.
+  alwaysPrepend,
+
   /// Always merge the existing file.
   alwaysMerge,
+
+  /// Only generate if the file does not exist.
+  ifNotExists,
+
+  /// The file is temporary and should be deleted after generation.
+  temporary,
 
   /// Overwrite one time.
   overwriteOnce,
@@ -340,6 +455,9 @@ enum OverwriteRule {
 
   /// Merge one time
   mergeOnce,
+
+  /// Prepend one time
+  prependOnce,
 }
 
 /// {@template directory_generator_target}
@@ -389,7 +507,10 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
         (_overwriteRule != OverwriteRule.alwaysOverwrite &&
             _overwriteRule != OverwriteRule.alwaysSkip &&
             _overwriteRule != OverwriteRule.alwaysAppend &&
-            _overwriteRule != OverwriteRule.alwaysMerge);
+            _overwriteRule != OverwriteRule.alwaysPrepend &&
+            _overwriteRule != OverwriteRule.alwaysMerge &&
+            _overwriteRule != OverwriteRule.ifNotExists &&
+            _overwriteRule != OverwriteRule.temporary);
 
     if (shouldPrompt) {
       logger.info('${red.wrap(styleBold.wrap('conflict'))} $filePath');
@@ -419,6 +540,21 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.alwaysOverwrite:
       case OverwriteRule.overwriteOnce:
       case OverwriteRule.appendOnce:
+      case OverwriteRule.alwaysPrepend:
+      case OverwriteRule.prependOnce:
+        final existing = await file.readAsBytes();
+        await file.writeAsBytes([...contents, ...existing]);
+        logger?.delayed('  ${lightBlue.wrap('modified')} $filePath');
+        return GeneratedFile.prepended(path: file.path);
+
+      case OverwriteRule.ifNotExists:
+        logger?.delayed('  ${yellow.wrap('skipped')} $filePath');
+        return GeneratedFile.skipped(path: file.path);
+
+      case OverwriteRule.temporary:
+        logger?.delayed('  ${darkGray.wrap('temporary')} $filePath');
+        return GeneratedFile.temporary(path: file.path);
+
       case OverwriteRule.alwaysAppend:
       case null:
         final shouldAppend = _overwriteRule == OverwriteRule.appendOnce ||

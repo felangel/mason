@@ -20,6 +20,7 @@ class BrickYaml {
     this.publishTo,
     this.environment = const BrickEnvironment(),
     this.vars = const <String, BrickVariableProperties>{},
+    this.inFileGenerations = const <String, Map<String, String>>{},
     this.repository,
     this.path,
   });
@@ -70,17 +71,25 @@ class BrickYaml {
   @VarsConverter()
   final Map<String, BrickVariableProperties> vars;
 
+  /// Map of in-file generations.
+  @JsonKey(name: 'inFileGenerations')
+  final Map<String, Map<String, String>> inFileGenerations;
+
   /// Path to the [BrickYaml] file.
   final String? path;
 
   /// Returns a copy of the current [BrickYaml] with
   /// an overridden [path].
-  BrickYaml copyWith({String? path}) {
+  BrickYaml copyWith({
+    String? path,
+    Map<String, Map<String, String>>? inFileGenerations,
+  }) {
     return BrickYaml(
       name: name,
       description: description,
       version: version,
       vars: vars,
+      inFileGenerations: inFileGenerations ?? this.inFileGenerations,
       environment: environment,
       repository: repository,
       path: path ?? this.path,

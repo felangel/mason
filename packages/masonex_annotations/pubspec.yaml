@@ -1,0 +1,5 @@
+name: masonex_annotations
+description: Annotations for masonex code generation.
+version: 0.1.0
+environment:
+  sdk: ">=3.11.0 <4.0.0"

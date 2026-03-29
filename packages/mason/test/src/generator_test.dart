@@ -739,6 +739,137 @@ void main() {
         );
       });
 
+      test('constructs an instance with > prefix (alwaysOverwrite)', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: overwrite_brick
+description: test
+version: 0.1.0
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '>file.txt')).writeAsStringSync('new');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+        final targetFile = File(path.join(targetDir.path, 'file.txt'))
+          ..writeAsStringSync('old');
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+        await generator.generate(DirectoryGeneratorTarget(targetDir));
+
+        expect(targetFile.readAsStringSync(), equals('new'));
+      });
+
+      test('constructs an instance with >> prefix (alwaysAppend)', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: append_brick
+description: test
+version: 0.1.0
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '>>file.txt')).writeAsStringSync('new');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+        final targetFile = File(path.join(targetDir.path, 'file.txt'))
+          ..writeAsStringSync('old');
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+        await generator.generate(DirectoryGeneratorTarget(targetDir));
+
+        expect(targetFile.readAsStringSync(), equals('oldnew'));
+      });
+
+      test('constructs an instance with << prefix (alwaysPrepend)', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: prepend_brick
+description: test
+version: 0.1.0
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '<<file.txt')).writeAsStringSync('new');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+        final targetFile = File(path.join(targetDir.path, 'file.txt'))
+          ..writeAsStringSync('old');
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+        await generator.generate(DirectoryGeneratorTarget(targetDir));
+
+        expect(targetFile.readAsStringSync(), equals('newold'));
+      });
+
+      test('constructs an instance with *iterator* prefix', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: iterator_brick
+description: test
+version: 0.1.0
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '*items*file_{{item}}.txt'))
+            .writeAsStringSync('content {{item}}');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+        await generator.generate(
+          DirectoryGeneratorTarget(targetDir),
+          vars: {
+            'items': ['a', 'b']
+          },
+        );
+
+        expect(
+          File(path.join(targetDir.path, 'file_a.txt')).readAsStringSync(),
+          equals('content a'),
+        );
+        expect(
+          File(path.join(targetDir.path, 'file_b.txt')).readAsStringSync(),
+          equals('content b'),
+        );
+      });
+
+      test('constructs an instance with ?conditional? prefix', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: conditional_brick
+description: test
+version: 0.1.0
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '?generate?file.txt'))
+            .writeAsStringSync('content');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+
+        // Should NOT generate
+        await generator.generate(
+          DirectoryGeneratorTarget(targetDir),
+          vars: {'generate': false},
+        );
+        expect(File(path.join(targetDir.path, 'file.txt')).existsSync(), isFalse);
+
+        // Should generate
+        await generator.generate(
+          DirectoryGeneratorTarget(targetDir),
+          vars: {'generate': true},
+        );
+        expect(File(path.join(targetDir.path, 'file.txt')).existsSync(), isTrue);
+      });
+
       test('constructs an instance w/skip and no conflicts (hello_world)',
           () async {
         const name = 'Dash';

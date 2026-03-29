@@ -22,6 +22,7 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
             'repository',
             'publish_to',
             'vars',
+            'inFileGenerations',
             'path'
           ],
         );
@@ -40,6 +41,14 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
               (v) => v == null
                   ? const <String, BrickVariableProperties>{}
                   : const VarsConverter().fromJson(v)),
+          inFileGenerations: $checkedConvert(
+              'inFileGenerations',
+              (v) =>
+                  (v as Map?)?.map(
+                    (k, e) => MapEntry(
+                        k as String, Map<String, String>.from(e as Map)),
+                  ) ??
+                  const <String, Map<String, String>>{}),
           repository: $checkedConvert('repository', (v) => v as String?),
           path: $checkedConvert('path', (v) => v as String?),
         );
@@ -48,17 +57,27 @@ BrickYaml _$BrickYamlFromJson(Map json) => $checkedCreate(
       fieldKeyMap: const {'publishTo': 'publish_to'},
     );
 
-Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) => <String, dynamic>{
-      'name': instance.name,
-      'description': instance.description,
-      'version': instance.version,
-      'environment': instance.environment.toJson(),
-      if (instance.repository case final value?) 'repository': value,
-      if (instance.publishTo case final value?) 'publish_to': value,
-      if (const VarsConverter().toJson(instance.vars) case final value?)
-        'vars': value,
-      if (instance.path case final value?) 'path': value,
-    };
+Map<String, dynamic> _$BrickYamlToJson(BrickYaml instance) {
+  final val = <String, dynamic>{
+    'name': instance.name,
+    'description': instance.description,
+    'version': instance.version,
+    'environment': instance.environment.toJson(),
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('repository', instance.repository);
+  writeNotNull('publish_to', instance.publishTo);
+  writeNotNull('vars', const VarsConverter().toJson(instance.vars));
+  val['inFileGenerations'] = instance.inFileGenerations;
+  writeNotNull('path', instance.path);
+  return val;
+}
 
 BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
     $checkedCreate(
@@ -97,16 +116,25 @@ BrickVariableProperties _$BrickVariablePropertiesFromJson(Map json) =>
     );
 
 Map<String, dynamic> _$BrickVariablePropertiesToJson(
-        BrickVariableProperties instance) =>
-    <String, dynamic>{
-      'type': _$BrickVariableTypeEnumMap[instance.type]!,
-      if (instance.description case final value?) 'description': value,
-      if (instance.defaultValue case final value?) 'default': value,
-      if (instance.defaultValues case final value?) 'defaults': value,
-      if (instance.prompt case final value?) 'prompt': value,
-      if (instance.values case final value?) 'values': value,
-      if (instance.separator case final value?) 'separator': value,
-    };
+    BrickVariableProperties instance) {
+  final val = <String, dynamic>{
+    'type': _$BrickVariableTypeEnumMap[instance.type]!,
+  };
+
+  void writeNotNull(String key, dynamic value) {
+    if (value != null) {
+      val[key] = value;
+    }
+  }
+
+  writeNotNull('description', instance.description);
+  writeNotNull('default', instance.defaultValue);
+  writeNotNull('defaults', instance.defaultValues);
+  writeNotNull('prompt', instance.prompt);
+  writeNotNull('values', instance.values);
+  writeNotNull('separator', instance.separator);
+  return val;
+}
 
 const _$BrickVariableTypeEnumMap = {
   BrickVariableType.array: 'array',

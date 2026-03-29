@@ -1,21 +1,7 @@
-# See https://github.com/dart-lang/build/tree/master/build_web_compilers#configuration
-targets:
-  $default:
-    sources:
-      exclude:
-        - test/**
-    builders:
-      source_gen|combining_builder:
-        options:
-          ignore_for_file:
-            - type=lint
-            - strict_raw_type
-      json_serializable:
-        options:
-          any_map: true
-          disallow_unrecognized_keys: true
-          field_rename: kebab
-          include_if_null: false
-          checked: true
-          explicit_to_json: true
-          create_to_json: true
+builders:
+  inFileGenerationBuilder:
+    import: "package:masonex/builders.dart"
+    builder_factories: ["inFileGenerationBuilder"]
+    build_extensions: {r"$lib$": ["brick.yaml"]}
+    auto_apply: root_package
+    build_to: source
