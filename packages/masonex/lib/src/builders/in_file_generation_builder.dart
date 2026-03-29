@@ -62,7 +62,7 @@ class InFileGenerationBuilder implements Builder {
 
         await buildStep.writeAsString(
           brickYamlAsset,
-          Yaml.encode(updatedBrickYaml.toJson()),
+          updatedBrickYaml.toYaml(),
         );
       }
     }

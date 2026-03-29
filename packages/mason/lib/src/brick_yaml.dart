@@ -1,6 +1,7 @@
 import 'dart:convert';
 
 import 'package:json_annotation/json_annotation.dart';
+import 'package:mason/src/yaml_encode.dart';
 import 'package:meta/meta.dart';
 
 part 'brick_yaml.g.dart';
@@ -105,6 +106,9 @@ class BrickYaml {
 
   @override
   int get hashCode => name.hashCode;
+
+  /// Returns a YAML representation of this [BrickYaml].
+  String toYaml() => Yaml.encode(toJson());
 }
 
 /// The type of brick variable.
