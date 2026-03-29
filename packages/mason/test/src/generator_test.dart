@@ -870,6 +870,37 @@ version: 0.1.0
         expect(File(path.join(targetDir.path, 'file.txt')).existsSync(), isTrue);
       });
 
+      test('constructs an instance with %snippet% prefix', () async {
+        final brickDir = Directory.systemTemp.createTempSync();
+        File(path.join(brickDir.path, 'brick.yaml')).writeAsStringSync('''
+name: snippet_brick
+description: test
+version: 0.1.0
+inFileGenerations:
+  file.txt:
+    my_id: "{{value}}"
+''');
+        final brickFiles = Directory(path.join(brickDir.path, '__brick__'))
+          ..createSync();
+        File(path.join(brickFiles.path, '%my_id%snippet.txt'))
+            .writeAsStringSync('injected_content');
+
+        final targetDir = Directory.systemTemp.createTempSync();
+        final targetFile = File(path.join(targetDir.path, 'file.txt'))
+          ..writeAsStringSync('existing my_id content');
+
+        final generator =
+            await MasonGenerator.fromBrick(Brick.path(brickDir.path));
+        await generator.generate(
+          DirectoryGeneratorTarget(targetDir),
+          vars: {'value': 'test'},
+        );
+
+        final content = targetFile.readAsStringSync();
+        expect(content, contains('existing my_id content'));
+        expect(content, contains('injected_content'));
+      });
+
       test('constructs an instance w/skip and no conflicts (hello_world)',
           () async {
         const name = 'Dash';

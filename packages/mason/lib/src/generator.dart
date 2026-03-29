@@ -9,6 +9,7 @@ import 'package:convert/convert.dart';
 import 'package:crypto/crypto.dart';
 import 'package:http/http.dart' as http;
 import 'package:mason/mason.dart';
+import 'package:mason/src/render.dart';
 import 'package:meta/meta.dart';
 import 'package:path/path.dart' as p;
 import 'package:pool/pool.dart';
@@ -55,11 +56,15 @@ class MasonGenerator extends Generator {
     List<TemplateFile?> files = const <TemplateFile>[],
     GeneratorHooks hooks = const GeneratorHooks(),
     this.vars = const <String>[],
+    this.brickYaml,
   }) : super(id, description, hooks) {
     for (final file in files) {
       addTemplateFile(file);
     }
   }
+
+  @override
+  final BrickYaml? brickYaml;
 
   /// Factory which creates a [MasonGenerator] based on
   /// a local [MasonBundle].
@@ -119,6 +124,7 @@ class MasonGenerator extends Generator {
       vars: brickYaml.vars.keys.toList(),
       files: await Future.wait(brickFiles),
       hooks: await GeneratorHooks.fromBrickYaml(brickYaml),
+      brickYaml: brickYaml,
     );
   }
 
@@ -207,6 +213,9 @@ class GeneratedFile {
 abstract class Generator implements Comparable<Generator> {
   /// {@macro generator}
   Generator(this.id, this.description, [this.hooks = const GeneratorHooks()]);
+
+  /// The [BrickYaml] associated with this generator.
+  BrickYaml? get brickYaml => null;
 
   /// Unique identifier for the generator.
   final String id;
@@ -357,6 +366,30 @@ abstract class Generator implements Comparable<Generator> {
             final idMatch = RegExp(r"%(.+?)%").firstMatch(fileName);
             if (idMatch != null) {
               final id = idMatch.group(1)!;
+              final brickYaml = this.brickYaml;
+              if (brickYaml != null) {
+                for (final entry in brickYaml.inFileGenerations.entries) {
+                  final targetPath = entry.key;
+                  final generations = entry.value;
+                  if (generations.containsKey(id)) {
+                    final template = generations[id]!;
+                    final snippetContent =
+                        utf8.decode(file.content).render(vars);
+                    final targetFile = target is DirectoryGeneratorTarget
+                        ? File(p.join(target.dir.path, targetPath))
+                        : null;
+                    if (targetFile != null && targetFile.existsSync()) {
+                      var content = targetFile.readAsStringSync();
+                      final annotation = id; // Simple match for now
+                      if (content.contains(annotation)) {
+                        content = content.replaceFirst(annotation, '$annotation\n$snippetContent');
+                        targetFile.writeAsStringSync(content);
+                        logger?.delayed('  ${lightBlue.wrap('injected')} $targetPath');
+                      }
+                    }
+                  }
+                }
+              }
             }
             continue;
           }
@@ -542,9 +575,12 @@ class DirectoryGeneratorTarget extends GeneratorTarget {
       case OverwriteRule.appendOnce:
       case OverwriteRule.alwaysPrepend:
       case OverwriteRule.prependOnce:
-        final existing = await file.readAsBytes();
+        final existing = fileExists ? await file.readAsBytes() : <int>[];
+        await file.create(recursive: true);
         await file.writeAsBytes([...contents, ...existing]);
-        logger?.delayed('  ${lightBlue.wrap('modified')} $filePath');
+        logger?.delayed(
+          '  ${fileExists ? lightBlue.wrap('modified') : green.wrap('created')} $filePath',
+        );
         return GeneratedFile.prepended(path: file.path);
 
       case OverwriteRule.ifNotExists:
