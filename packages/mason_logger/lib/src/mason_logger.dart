@@ -340,7 +340,7 @@ class Logger {
     _stdin
       ..echoMode = false
       ..lineMode = false;
-
+    _reserveLines(choices.length + 1);
     writeChoices();
 
     T? result;
@@ -440,7 +440,7 @@ class Logger {
     _stdin
       ..echoMode = false
       ..lineMode = false;
-
+    _reserveLines(choices.length + 1);
     writeChoices();
 
     List<T>? results;
@@ -492,6 +492,15 @@ class Logger {
     }
 
     return results;
+  }
+
+  void _reserveLines(int count) {
+    if (!_stdout.hasTerminal || count <= 0) {
+      return;
+    }
+    _stdout
+      ..write('\n' * count)
+      ..write('\x1b[${count}A');
   }
 
   String? _readLineSync() {
