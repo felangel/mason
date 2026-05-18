@@ -1,0 +1,11 @@
+name: windows_native_assets_hooks
+
+environment:
+  sdk: ">=3.5.0 <4.0.0"
+
+dependencies:
+  mason:
+    git:
+      url: https://github.com/felangel/mason
+      path: packages/mason
+  win32: ">=6.0.0 <7.0.0"

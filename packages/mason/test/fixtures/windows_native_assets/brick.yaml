@@ -1,0 +1,4 @@
+name: windows_native_assets
+
+description: Hook fixture that exercises native-asset dependencies on Windows.
+version: 0.1.0+1
