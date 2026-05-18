@@ -280,6 +280,15 @@ class GeneratorHooks {
     String? workingDirectory,
     Logger? logger,
   }) async {
+    if (Platform.isWindows) {
+      return _runHookInProcess(
+        hook: hook,
+        vars: vars,
+        onVarsChanged: onVarsChanged,
+        workingDirectory: workingDirectory,
+      );
+    }
+
     final subscriptions = <StreamSubscription<dynamic>>[];
     final messagePort = ReceivePort();
     final errorPort = ReceivePort();
@@ -389,6 +398,76 @@ class GeneratorHooks {
       throw HookExecutionException(hook.path, content);
     }
   }
+
+  Future<void> _runHookInProcess({
+    required HookFile hook,
+    Map<String, dynamic> vars = const <String, dynamic>{},
+    void Function(Map<String, dynamic> vars)? onVarsChanged,
+    String? workingDirectory,
+  }) async {
+    var installedDependencies = false;
+
+    Future<void> runHookProcess() async {
+      final uri = await _getHookUri(hook, checksum);
+      if (uri == null) throw HookMissingRunException(hook.path);
+
+      final inputFile =
+          File(p.join(hook.buildDirectory.path, 'hook_vars_input.json'))
+            ..createSync(recursive: true)
+            ..writeAsStringSync(json.encode(vars));
+
+      final outputFile = File(
+        p.join(hook.buildDirectory.path, 'hook_vars_output.json'),
+      );
+      if (outputFile.existsSync()) {
+        outputFile.deleteSync();
+      }
+
+      final args = <String>[
+        'run',
+        uri.toFilePath(),
+        '--vars-input',
+        inputFile.path,
+        '--vars-output',
+        outputFile.path,
+        if (workingDirectory != null) ...<String>[
+          '--working-directory',
+          workingDirectory,
+        ],
+      ];
+
+      final result = await Process.run(
+        'dart',
+        args,
+        workingDirectory: hook.directory.path,
+        runInShell: true,
+      );
+
+      if (result.exitCode != ExitCode.success.code) {
+        final stderr = result.stderr.toString().trim();
+        final stdout = result.stdout.toString().trim();
+        final error = stderr.isNotEmpty ? stderr : stdout;
+        throw HookExecutionException(hook.path, error);
+      }
+
+      if (onVarsChanged != null && outputFile.existsSync()) {
+        final content = await outputFile.readAsString();
+        final updatedVars = json.decode(content) as Map<String, dynamic>;
+        onVarsChanged(updatedVars);
+      }
+    }
+
+    installedDependencies = await _installDependencies();
+
+    try {
+      await runHookProcess();
+    } on HookExecutionException {
+      if (installedDependencies) rethrow;
+
+      await _dartPubGet(workingDirectory: hook.directory.path);
+      await runHookProcess();
+    }
+  }
 }
 
 /// {@template hook_file}
@@ -464,19 +543,62 @@ String _generatedHookCode(String hookPath) => '''
 // GENERATED CODE - DO NOT MODIFY BY HAND
 import 'dart:collection';
 import 'dart:convert';
+import 'dart:io';
 import 'dart:isolate';
 import 'package:mason/mason.dart';
 import '$hookPath' as hook;
 
-void main(List<String> args, SendPort port) {
-  hook.run(_HookContext._(port, vars: json.decode(args.first)));
+void main(List<String> args, [Object? message]) {
+  if (message is SendPort) {
+    final vars = json.decode(args.first) as Map<String, dynamic>;
+    hook.run(_HookContext._(port: message, vars: vars));
+    return;
+  }
+
+  final varsInput = _readOption(args, '--vars-input');
+  final varsOutput = _readOption(args, '--vars-output');
+  final workingDirectory = _readOption(args, '--working-directory');
+
+  Map<String, dynamic> vars = <String, dynamic>{};
+  if (varsInput != null && varsInput.isNotEmpty) {
+    final content = File(varsInput).readAsStringSync();
+    if (content.isNotEmpty) {
+      vars = json.decode(content) as Map<String, dynamic>;
+    }
+  }
+
+  final previousDirectory = Directory.current.path;
+  if (workingDirectory != null && workingDirectory.isNotEmpty) {
+    Directory.current = workingDirectory;
+  }
+
+  try {
+    final context = _HookContext._(vars: vars);
+    hook.run(context);
+
+    if (varsOutput != null && varsOutput.isNotEmpty) {
+      File(varsOutput)
+        ..createSync(recursive: true)
+        ..writeAsStringSync(json.encode(context.vars));
+    }
+  } finally {
+    Directory.current = previousDirectory;
+  }
+}
+
+String? _readOption(List<String> args, String option) {
+  final index = args.indexOf(option);
+  if (index < 0) return null;
+  if (index + 1 >= args.length) return null;
+  return args[index + 1];
 }
 
 class _HookContext implements HookContext {
-  _HookContext._(this._port, {Map<String, dynamic>? vars})
-      : _vars = _Vars(_port, vars: vars);
+  _HookContext._({SendPort? port, Map<String, dynamic>? vars})
+      : _port = port,
+        _vars = _Vars(port, vars: vars);
 
-  final SendPort _port;
+  final SendPort? _port;
   _Vars _vars;
 
   @override
@@ -488,7 +610,7 @@ class _HookContext implements HookContext {
   @override
   set vars(Map<String, dynamic> value) {
     _vars = _Vars(_port, vars: value);
-    _port.send(json.encode(_vars));
+    _port?.send(json.encode(_vars));
   }
 }
 
@@ -498,7 +620,7 @@ class _Vars with MapMixin<String, dynamic> {
     Map<String, dynamic>? vars,
   }) : _vars = vars ?? const <String, dynamic>{};
 
-  final SendPort _port;
+  final SendPort? _port;
   final Map<String, dynamic> _vars;
 
   @override
@@ -526,7 +648,7 @@ class _Vars with MapMixin<String, dynamic> {
     return result;
   }
 
-  void _updateVars() => _port.send(json.encode(_vars));
+  void _updateVars() => _port?.send(json.encode(_vars));
 }
 ''';
 

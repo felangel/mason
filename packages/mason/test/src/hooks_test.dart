@@ -23,6 +23,27 @@ void main() {
         expect(generator.hooks.preGen(), completes);
       });
 
+      test('supports hook dependencies with native assets on Windows',
+          () async {
+        if (!Platform.isWindows) return;
+
+        final brick = Brick.path(
+          path.join('test', 'fixtures', 'windows_native_assets'),
+        );
+        final generator = await MasonGenerator.fromBrick(brick);
+
+        Map<String, dynamic>? updatedVars;
+        await generator.hooks.preGen(
+          vars: const <String, dynamic>{'name': 'Dash'},
+          onVarsChanged: (Map<String, dynamic> vars) {
+            updatedVars = vars;
+          },
+        );
+
+        expect(updatedVars, isNotNull);
+        expect(updatedVars!['activeCodePage'], isNotNull);
+      });
+
       group('supports programmatic usage', () {
         const name = 'dash';
         final program = path.join(
