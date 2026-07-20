@@ -311,10 +311,10 @@ class Logger {
         defaultValue != null && resolvedDisplay(defaultValue).isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
+    final linesToClear = '$message'.split('\n').length + choices.length - 1;
+
     void writeChoices() {
       _stdout
-        // save cursor
-        ..write('\x1b7')
         // hide cursor
         ..write('\x1b[?25l')
         ..writeln('$message');
@@ -364,11 +364,8 @@ class Logger {
           ..lineMode = true
           ..echoMode = true;
 
+        _clearChoices(linesToClear);
         _stdout
-          // restore cursor
-          ..write('\x1b8')
-          // clear to end of screen
-          ..write('\x1b[J')
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
@@ -380,8 +377,7 @@ class Logger {
         break;
       }
 
-      // restore cursor
-      _stdout.write('\x1b8');
+      _clearChoices(linesToClear);
       writeChoices();
     }
 
@@ -409,10 +405,10 @@ class Logger {
         : <int>{};
     var index = 0;
 
+    final linesToClear = '$message'.split('\n').length + choices.length - 1;
+
     void writeChoices() {
       _stdout
-        // save cursor
-        ..write('\x1b7')
         // hide cursor
         ..write('\x1b[?25l')
         ..writeln('$message');
@@ -469,11 +465,8 @@ class Logger {
 
         results = selections.map((index) => choices[index]).toList();
 
+        _clearChoices(linesToClear);
         _stdout
-          // restore cursor
-          ..write('\x1b8')
-          // clear to end of screen
-          ..write('\x1b[J')
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
@@ -486,12 +479,25 @@ class Logger {
         break;
       }
 
-      // restore cursor
-      _stdout.write('\x1b8');
+      _clearChoices(linesToClear);
       writeChoices();
     }
 
     return results;
+  }
+
+  /// Moves the cursor up [lines] and clears everything from there to the end
+  /// of the screen so a selection prompt can be redrawn in place.
+  void _clearChoices(int lines) {
+    if (lines > 0) {
+      // move cursor up to the first line of the choices
+      _stdout.write('\x1b[${lines}A');
+    }
+    _stdout
+      // move cursor to the start of the line
+      ..write('\r')
+      // clear to end of screen
+      ..write('\x1b[J');
   }
 
   String? _readLineSync() {
