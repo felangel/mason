@@ -145,7 +145,7 @@ enum ControlCharacter {
   F4,
 
   /// Unknown control character
-  unknown
+  unknown,
 }
 
 /// {@template key_stroke}
@@ -161,10 +161,7 @@ class KeyStroke {
   /// {@macro key_stroke}
   factory KeyStroke.char(String char) {
     assert(char.length == 1, 'characters must be a single unit');
-    return KeyStroke(
-      char: char,
-      controlChar: ControlCharacter.none,
-    );
+    return KeyStroke(char: char, controlChar: ControlCharacter.none);
   }
 
   /// {@macro key_stroke}
@@ -233,43 +230,25 @@ KeyStroke readKey() {
 
             escapeSequence.add(String.fromCharCode(charCode));
             if (escapeSequence[2] != '~') {
-              keyStroke = KeyStroke.control(
-                ControlCharacter.unknown,
-              );
+              keyStroke = KeyStroke.control(ControlCharacter.unknown);
             } else {
               switch (escapeSequence[1]) {
                 case '1':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.home,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.home);
                 case '3':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.delete,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.delete);
                 case '4':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.end,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.end);
                 case '5':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.pageUp,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.pageUp);
                 case '6':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.pageDown,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.pageDown);
                 case '7':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.home,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.home);
                 case '8':
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.end,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.end);
                 default:
-                  keyStroke = KeyStroke.control(
-                    ControlCharacter.unknown,
-                  );
+                  keyStroke = KeyStroke.control(ControlCharacter.unknown);
               }
             }
           } else {
