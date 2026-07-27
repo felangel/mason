@@ -63,8 +63,8 @@ class Progress {
     this._stdout,
     this._level, {
     ProgressOptions options = const ProgressOptions(),
-  })  : _stopwatch = Stopwatch(),
-        _options = options {
+  }) : _stopwatch = Stopwatch(),
+       _options = options {
     _stopwatch
       ..reset()
       ..start();
@@ -188,8 +188,9 @@ class Progress {
     final elapsedTime = _stopwatch.elapsed.inMilliseconds;
     final displayInMilliseconds = elapsedTime < 100;
     final time = displayInMilliseconds ? elapsedTime : elapsedTime / 1000;
-    final formattedTime =
-        displayInMilliseconds ? '${time}ms' : '${time.toStringAsFixed(1)}s';
+    final formattedTime = displayInMilliseconds
+        ? '${time}ms'
+        : '${time.toStringAsFixed(1)}s';
     return '${darkGray.wrap('($formattedTime)')}';
   }
 }

@@ -114,20 +114,16 @@ final class TermIOS extends Struct {
 }
 
 // int tcgetattr(int, struct termios *);
-typedef TCGetAttrNative = Int32 Function(
-  Int32 fildes,
-  Pointer<TermIOS> termios,
-);
+typedef TCGetAttrNative =
+    Int32 Function(Int32 fildes, Pointer<TermIOS> termios);
 typedef TCGetAttrDart = int Function(int fildes, Pointer<TermIOS> termios);
 
 // int tcsetattr(int, int, const struct termios *);
-typedef TCSetAttrNative = Int32 Function(
-  Int32 fildes,
-  Int32 optional_actions,
-  Pointer<TermIOS> termios,
-);
-typedef TCSetAttrDart = int Function(
-  int fildes,
-  int optional_actions,
-  Pointer<TermIOS> termios,
-);
+typedef TCSetAttrNative =
+    Int32 Function(
+      Int32 fildes,
+      Int32 optional_actions,
+      Pointer<TermIOS> termios,
+    );
+typedef TCSetAttrDart =
+    int Function(int fildes, int optional_actions, Pointer<TermIOS> termios);
