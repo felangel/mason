@@ -40,12 +40,12 @@ class LogTheme {
     LogStyle? warn,
     LogStyle? alert,
     LogStyle? success,
-  })  : detail = detail ?? _detailStyle,
-        info = info ?? _infoStyle,
-        err = err ?? _errStyle,
-        warn = warn ?? _warnStyle,
-        alert = alert ?? _alertStyle,
-        success = success ?? _successStyle;
+  }) : detail = detail ?? _detailStyle,
+       info = info ?? _infoStyle,
+       err = err ?? _errStyle,
+       warn = warn ?? _warnStyle,
+       alert = alert ?? _alertStyle,
+       success = success ?? _successStyle;
 
   /// The [LogStyle] used by [detail].
   final LogStyle detail;
@@ -185,16 +185,19 @@ class Logger {
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
-    final suffix =
-        hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
+    final suffix = hasDefault
+        ? ' ${darkGray.wrap('($resolvedDefaultValue)')}'
+        : '';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
     final input = hidden ? _readLineHiddenSync() : _readLineSync();
-    final response =
-        input == null || input.isEmpty ? resolvedDefaultValue : input;
+    final response = input == null || input.isEmpty
+        ? resolvedDefaultValue
+        : input;
     final lines = resolvedMessage.split('\n').length - 1;
-    final prefix =
-        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
+    final prefix = lines > 1
+        ? '\x1b[A\u001B[2K\u001B[${lines}A'
+        : '\x1b[A\u001B[2K';
     _stdout.writeln(
       '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
@@ -217,12 +220,13 @@ class Logger {
 
     while (true) {
       final key = _readKey();
-      final isEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+      final isEnterOrReturnKey =
+          key.controlChar == ControlCharacter.ctrlJ ||
           key.controlChar == ControlCharacter.ctrlM;
       final isDeleteOrBackspaceKey =
           key.controlChar == ControlCharacter.delete ||
-              key.controlChar == ControlCharacter.backspace ||
-              key.controlChar == ControlCharacter.ctrlH;
+          key.controlChar == ControlCharacter.backspace ||
+          key.controlChar == ControlCharacter.ctrlH;
 
       if (isEnterOrReturnKey) break;
 
@@ -284,8 +288,9 @@ class Logger {
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
     final lines = resolvedMessage.split('\n').length - 1;
-    final prefix =
-        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
+    final prefix = lines > 1
+        ? '\x1b[A\u001B[2K\u001B[${lines}A'
+        : '\x1b[A\u001B[2K';
     _stdout.writeln(
       '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
@@ -352,8 +357,8 @@ class Logger {
           key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final isReturnOrEnterOrSpaceKey =
           key.controlChar == ControlCharacter.ctrlJ ||
-              key.controlChar == ControlCharacter.ctrlM ||
-              key.char == ' ';
+          key.controlChar == ControlCharacter.ctrlM ||
+          key.char == ' ';
 
       if (isArrowUpOrKKey) {
         index = (index - 1) % (choices.length);
@@ -451,7 +456,8 @@ class Logger {
       final keyIsDownOrJKey =
           key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final keyIsSpaceKey = key.char == ' ';
-      final keyIsEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+      final keyIsEnterOrReturnKey =
+          key.controlChar == ControlCharacter.ctrlJ ||
           key.controlChar == ControlCharacter.ctrlM;
 
       if (keyIsUpOrKKey) {
@@ -538,7 +544,8 @@ class Logger {
 /// {@endtemplate}
 class NoTerminalAttachedError extends StateError {
   /// {@macro no_terminal_attached_error}
-  NoTerminalAttachedError() : super('''
+  NoTerminalAttachedError()
+    : super('''
 No terminal attached to stdout.
 Ensure a terminal is attached via "stdout.hasTerminal" before requesting input.
 ''');
