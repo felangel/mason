@@ -493,23 +493,19 @@ void main() {
         );
       });
 
-      test('handles long messages correctly', () {
+      test('handles multi-line messages correctly', () {
         IOOverrides.runZoned(
           () {
-            const message =
-                '''Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.''';
+            const message = 'This is a multi-line\n\nmessage.';
             final prompt =
-                '''Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ${darkGray.wrap('(y/N)')} ''';
-            const noWords = ['n', 'N', 'No', 'no', 'nope', 'Nope', 'nopE'];
-            for (final word in noWords) {
-              final promptWithResponse =
-                  '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
-              when(() => stdin.readLineSync()).thenReturn(word);
-              final actual = Logger().confirm(message);
-              expect(actual, isFalse);
-              verify(() => stdout.write(prompt)).called(1);
-              verify(() => stdout.writeln(promptWithResponse)).called(1);
-            }
+                'This is a multi-line\n\nmessage. ${darkGray.wrap('(y/N)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K\u001B[2A$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
+            when(() => stdin.readLineSync()).thenReturn('y');
+            final actual = Logger().confirm(message);
+            expect(actual, isTrue);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
           },
           stdout: () => stdout,
           stdin: () => stdin,
