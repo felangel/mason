@@ -1,3 +1,7 @@
+# 0.1.2
+
+- deps: bump `cli_util` to `0.6.0`
+
 # 0.1.1
 
 - chore: fix `unintended_html_in_doc_comment` lint
