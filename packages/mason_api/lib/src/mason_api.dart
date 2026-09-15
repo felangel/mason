@@ -83,7 +83,8 @@ class MasonApi {
       return environment['_MASON_TEST_CONFIG_DIR'];
     }
     try {
-      final configHome = testApplicationConfigHome ?? applicationConfigHome;
+      final configHome = testApplicationConfigHome ??
+          (name) => BaseDirectories(name).configHome;
       return configHome(_applicationName);
     } catch (_) {
       return null;

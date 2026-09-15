@@ -29,46 +29,33 @@ void main() {
 
     group('theme', () {
       test('can be overridden at the logger level', () {
-        final theme = LogTheme(
-          info: (message) => '[message]: $message',
-        );
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(theme: theme).info(message);
-            verify(() => stdout.writeln('[message]: $message')).called(1);
-          },
-          stdout: () => stdout,
-        );
+        final theme = LogTheme(info: (message) => '[message]: $message');
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(theme: theme).info(message);
+          verify(() => stdout.writeln('[message]: $message')).called(1);
+        }, stdout: () => stdout);
       });
 
       test('can be overridden at the method level', () {
         String? style(String? message) => '[message]: $message';
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().info(message, style: style);
-            verify(() => stdout.writeln('[message]: $message')).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().info(message, style: style);
+          verify(() => stdout.writeln('[message]: $message')).called(1);
+        }, stdout: () => stdout);
       });
 
       test('is ignored when a method override is used.', () {
-        final theme = LogTheme(
-          info: (message) => '[message]: $message',
-        );
+        final theme = LogTheme(info: (message) => '[message]: $message');
         String? style(String? message) => '[info]: $message';
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(theme: theme).info(message, style: style);
-            verify(() => stdout.writeln('[info]: $message')).called(1);
-            Logger(theme: theme).info(message);
-            verify(() => stdout.writeln('[message]: $message')).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(theme: theme).info(message, style: style);
+          verify(() => stdout.writeln('[info]: $message')).called(1);
+          Logger(theme: theme).info(message);
+          verify(() => stdout.writeln('[message]: $message')).called(1);
+        }, stdout: () => stdout);
       });
     });
 
@@ -109,237 +96,180 @@ void main() {
 
     group('.write', () {
       test('writes to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().write(message);
-            verify(() => stdout.write(message)).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().write(message);
+          verify(() => stdout.write(message)).called(1);
+        }, stdout: () => stdout);
       });
     });
 
     group('.info', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().info(message);
-            verify(() => stdout.writeln(message)).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().info(message);
+          verify(() => stdout.writeln(message)).called(1);
+        }, stdout: () => stdout);
       });
 
       test('does not write to stdout when Level > info', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.critical).info(message);
-            verifyNever(() => stdout.writeln(contains(message)));
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.critical).info(message);
+          verifyNever(() => stdout.writeln(contains(message)));
+        }, stdout: () => stdout);
       });
     });
 
     group('.delayed', () {
       test('does not write to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().delayed(message);
-            verifyNever(() => stdout.writeln(message));
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().delayed(message);
+          verifyNever(() => stdout.writeln(message));
+        }, stdout: () => stdout);
       });
     });
 
     group('.flush', () {
       test('writes to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const messages = ['test', 'message', '!'];
-            final logger = Logger();
-            for (final message in messages) {
-              logger.delayed(message);
-            }
-            verifyNever(() => stdout.writeln(any()));
+        IOOverrides.runZoned(() {
+          const messages = ['test', 'message', '!'];
+          final logger = Logger();
+          for (final message in messages) {
+            logger.delayed(message);
+          }
+          verifyNever(() => stdout.writeln(any()));
 
-            logger.flush();
+          logger.flush();
 
-            for (final message in messages) {
-              verify(() => stdout.writeln(message)).called(1);
-            }
-          },
-          stdout: () => stdout,
-        );
+          for (final message in messages) {
+            verify(() => stdout.writeln(message)).called(1);
+          }
+        }, stdout: () => stdout);
       });
     });
 
     group('.err', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().err(message);
-            verify(() => stderr.writeln(lightRed.wrap(message))).called(1);
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().err(message);
+          verify(() => stderr.writeln(lightRed.wrap(message))).called(1);
+        }, stderr: () => stderr);
       });
 
       test('does not write to stderr when Level > error', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.critical).err(message);
-            verifyNever(() => stderr.writeln(lightRed.wrap(message)));
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.critical).err(message);
+          verifyNever(() => stderr.writeln(lightRed.wrap(message)));
+        }, stderr: () => stderr);
       });
     });
 
     group('.alert', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().alert(message);
-            verify(
-              () => stderr.writeln(
-                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
-              ),
-            ).called(1);
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().alert(message);
+          verify(
+            () => stderr.writeln(
+              backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+            ),
+          ).called(1);
+        }, stderr: () => stderr);
       });
 
       test('does not write to stderr when Level > critical', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.quiet).alert(message);
-            verifyNever(
-              () => stderr.writeln(
-                backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
-              ),
-            );
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.quiet).alert(message);
+          verifyNever(
+            () => stderr.writeln(
+              backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
+            ),
+          );
+        }, stderr: () => stderr);
       });
     });
 
     group('.detail', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.debug).detail(message);
-            verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.debug).detail(message);
+          verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
+        }, stdout: () => stdout);
       });
 
       test('does not write to stdout when Level > debug', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().detail(message);
-            verifyNever(() => stdout.writeln(darkGray.wrap(message)));
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().detail(message);
+          verifyNever(() => stdout.writeln(darkGray.wrap(message)));
+        }, stdout: () => stdout);
       });
     });
 
     group('.warn', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().warn(message);
-            verify(
-              () {
-                stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
-              },
-            ).called(1);
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().warn(message);
+          verify(() {
+            stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+          }).called(1);
+        }, stderr: () => stderr);
       });
 
       test('writes line to stderr with custom tag', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().warn(message, tag: '🚨');
-            verify(
-              () {
-                stderr.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
-              },
-            ).called(1);
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().warn(message, tag: '🚨');
+          verify(() {
+            stderr.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
+          }).called(1);
+        }, stderr: () => stderr);
       });
 
       test('writes line to stderr with empty tag', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().warn(message, tag: '');
-            verify(
-              () {
-                stderr.writeln(yellow.wrap(styleBold.wrap(message)));
-              },
-            ).called(1);
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().warn(message, tag: '');
+          verify(() {
+            stderr.writeln(yellow.wrap(styleBold.wrap(message)));
+          }).called(1);
+        }, stderr: () => stderr);
       });
 
       test('does not write to stderr when Level > warning', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.error).warn(message);
-            verifyNever(() {
-              stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
-            });
-          },
-          stderr: () => stderr,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.error).warn(message);
+          verifyNever(() {
+            stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
+          });
+        }, stderr: () => stderr);
       });
     });
 
     group('.success', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger().success(message);
-            verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger().success(message);
+          verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
+        }, stdout: () => stdout);
       });
 
       test('does not write to stdout when Level > info', () {
-        IOOverrides.runZoned(
-          () {
-            const message = 'test message';
-            Logger(level: Level.warning).success(message);
-            verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
-          },
-          stdout: () => stdout,
-        );
+        IOOverrides.runZoned(() {
+          const message = 'test message';
+          Logger(level: Level.warning).success(message);
+          verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
+        }, stdout: () => stdout);
       });
     });
 
@@ -427,9 +357,9 @@ void main() {
               101,
               13,
             ];
-            when(() => stdin.readByteSync()).thenAnswer(
-              (_) => bytes.removeAt(0),
-            );
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => bytes.removeAt(0));
             final actual = Logger().prompt(
               message,
               defaultValue: defaultValue,
@@ -563,6 +493,25 @@ void main() {
         );
       });
 
+      test('handles multi-line messages correctly', () {
+        IOOverrides.runZoned(
+          () {
+            const message = 'This is a multi-line\n\nmessage.';
+            final prompt =
+                'This is a multi-line\n\nmessage. ${darkGray.wrap('(y/N)')} ';
+            final promptWithResponse =
+                '''\x1b[A\u001B[2K\u001B[2A$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
+            when(() => stdin.readLineSync()).thenReturn('y');
+            final actual = Logger().confirm(message);
+            expect(actual, isTrue);
+            verify(() => stdout.write(prompt)).called(1);
+            verify(() => stdout.writeln(promptWithResponse)).called(1);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+        );
+      });
+
       test('returns default when response is neither yes/no (default no)', () {
         IOOverrides.runZoned(
           () {
@@ -660,10 +609,8 @@ void main() {
         IOOverrides.runZoned(
           () {
             expect(
-              () => Logger().chooseAny(
-                'test message',
-                choices: ['a', 'b', 'c'],
-              ),
+              () =>
+                  Logger().chooseAny('test message', choices: ['a', 'b', 'c']),
               throwsA(isA<NoTerminalAttachedError>()),
             );
           },
@@ -694,8 +641,7 @@ void main() {
         }
       });
 
-      test(
-          'enter/return selects the nothing '
+      test('enter/return selects the nothing '
           'when defaultValues is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
@@ -708,7 +654,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -740,17 +685,18 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(' '),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
+                ),
               ]);
             },
             stdout: () => stdout,
@@ -781,7 +727,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -790,17 +735,16 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -809,7 +753,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' ◯  a'),
@@ -817,37 +760,38 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(' '),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(' '),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
+                ),
               ]);
             },
             stdout: () => stdout,
@@ -872,7 +816,6 @@ void main() {
               );
               expect(actual, equals(isEmpty));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -881,7 +824,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -891,6 +833,34 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('redraws in place using relative cursor moves', () {
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        TerminalOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              Logger().chooseAny(message, choices: ['a', 'b', 'c']);
+              verifyInOrder([
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
+                () => stdout.write('\x1b[J'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+              ]);
+              verifyNever(() => stdout.write('\x1b7'));
+              verifyNever(() => stdout.write('\x1b8'));
             },
             stdout: () => stdout,
             stdin: () => stdin,
@@ -914,7 +884,6 @@ void main() {
               );
               expect(actual, equals(isEmpty));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -923,7 +892,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -956,7 +924,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -965,7 +932,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -998,7 +964,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1007,7 +972,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1042,7 +1006,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1051,7 +1014,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1060,7 +1022,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1069,7 +1030,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1104,7 +1064,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1137,7 +1096,8 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b8'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
                 () => stdout.write('\x1b[J'),
                 () => stdout.write('$message '),
                 () => stdout.writeln('[Key: a, Key: c]'),
@@ -1157,10 +1117,8 @@ void main() {
         IOOverrides.runZoned(
           () {
             expect(
-              () => Logger().chooseOne(
-                'test message',
-                choices: ['a', 'b', 'c'],
-              ),
+              () =>
+                  Logger().chooseOne('test message', choices: ['a', 'b', 'c']),
               throwsA(isA<NoTerminalAttachedError>()),
             );
           },
@@ -1191,8 +1149,7 @@ void main() {
         }
       });
 
-      test(
-          'enter selects the initial value '
+      test('enter selects the initial value '
           'when defaultValue is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
@@ -1206,12 +1163,12 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1239,14 +1196,14 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
@@ -1273,14 +1230,14 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
@@ -1308,27 +1265,55 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('redraws in place using relative cursor moves', () {
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        TerminalOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              Logger().chooseOne(message, choices: ['a', 'b', 'c']);
+              verifyInOrder([
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
+                () => stdout.write('\x1b[J'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+              ]);
+              verifyNever(() => stdout.write('\x1b7'));
+              verifyNever(() => stdout.write('\x1b8'));
             },
             stdout: () => stdout,
             stdin: () => stdin,
@@ -1354,22 +1339,22 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1399,17 +1384,16 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1417,8 +1401,9 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
+                ),
               ]);
             },
             stdout: () => stdout,
@@ -1445,7 +1430,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1453,14 +1437,15 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
-                () => stdout.write('\x1b7'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
+                ),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1490,24 +1475,24 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
@@ -1536,22 +1521,22 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1583,13 +1568,12 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(
-                      ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
-                    ),
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('Key: a')}',
+                ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  Key: b'),
                 () => stdout.write(' '),
