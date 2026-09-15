@@ -850,10 +850,7 @@ void main() {
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
-              Logger().chooseAny(
-                message,
-                choices: ['a', 'b', 'c'],
-              );
+              Logger().chooseAny(message, choices: ['a', 'b', 'c']);
               verifyInOrder([
                 () => stdout.write(' ◯  c'),
                 () => stdout.write('\x1b[3A'),
@@ -1306,10 +1303,7 @@ void main() {
           () => IOOverrides.runZoned(
             () {
               const message = 'test message';
-              Logger().chooseOne(
-                message,
-                choices: ['a', 'b', 'c'],
-              );
+              Logger().chooseOne(message, choices: ['a', 'b', 'c']);
               verifyInOrder([
                 () => stdout.write(' ◯  c'),
                 () => stdout.write('\x1b[3A'),
@@ -1443,8 +1437,9 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout
-                    .write(' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}'),
+                () => stdout.write(
+                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
+                ),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
