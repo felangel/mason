@@ -654,7 +654,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -686,7 +685,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -729,7 +727,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -738,7 +735,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -749,7 +745,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -758,7 +753,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' ◯  a'),
@@ -766,7 +760,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -777,7 +770,6 @@ void main() {
                 ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -788,7 +780,6 @@ void main() {
                 ),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -825,7 +816,6 @@ void main() {
               );
               expect(actual, equals(isEmpty));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -834,7 +824,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -844,6 +833,34 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('redraws in place using relative cursor moves', () {
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlM),
+        ];
+        TerminalOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              Logger().chooseAny(message, choices: ['a', 'b', 'c']);
+              verifyInOrder([
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
+                () => stdout.write('\x1b[J'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+              ]);
+              verifyNever(() => stdout.write('\x1b7'));
+              verifyNever(() => stdout.write('\x1b8'));
             },
             stdout: () => stdout,
             stdin: () => stdin,
@@ -867,7 +884,6 @@ void main() {
               );
               expect(actual, equals(isEmpty));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -876,7 +892,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -909,7 +924,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -918,7 +932,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -951,7 +964,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -960,7 +972,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -995,7 +1006,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1004,7 +1014,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1013,7 +1022,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1022,7 +1030,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1057,7 +1064,6 @@ void main() {
               );
               expect(actual, isEmpty);
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1090,7 +1096,8 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b8'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
                 () => stdout.write('\x1b[J'),
                 () => stdout.write('$message '),
                 () => stdout.writeln('[Key: a, Key: c]'),
@@ -1156,7 +1163,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1190,7 +1196,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1225,7 +1230,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1261,7 +1265,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1272,7 +1275,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1284,6 +1286,34 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('redraws in place using relative cursor moves', () {
+        final keyStrokes = [
+          KeyStroke.control(ControlCharacter.arrowDown),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        TerminalOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              Logger().chooseOne(message, choices: ['a', 'b', 'c']);
+              verifyInOrder([
+                () => stdout.write(' ◯  c'),
+                () => stdout.write('\x1b[3A'),
+                () => stdout.write('\r'),
+                () => stdout.write('\x1b[J'),
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.writeln(message),
+              ]);
+              verifyNever(() => stdout.write('\x1b7'));
+              verifyNever(() => stdout.write('\x1b8'));
             },
             stdout: () => stdout,
             stdin: () => stdin,
@@ -1309,7 +1339,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1320,7 +1349,6 @@ void main() {
                 ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1356,7 +1384,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1367,7 +1394,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1404,7 +1430,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1415,7 +1440,6 @@ void main() {
                 () => stdout.write(
                   ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
                 ),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1451,7 +1475,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1462,7 +1485,6 @@ void main() {
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1499,7 +1521,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1510,7 +1531,6 @@ void main() {
                 ),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1548,7 +1568,6 @@ void main() {
               );
               expect(actual, equals(expected));
               verifyInOrder([
-                () => stdout.write('\x1b7'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
