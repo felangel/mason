@@ -127,31 +127,32 @@ void main() {
     });
 
     test(
-        'writes static message when stdioType is not terminal w/custom trailing',
-        () async {
-      const progressOptions = ProgressOptions(trailing: '!!!');
-      when(() => stdout.hasTerminal).thenReturn(false);
-      await _runZoned(
-        () async {
-          const message = 'test message';
-          final done = Logger(progressOptions: progressOptions).progress(
-            message,
-          );
-          await Future<void>.delayed(const Duration(milliseconds: 400));
-          done.complete();
-          verifyInOrder([
-            () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
-            () {
-              stdout.write(
-                '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-              );
-            },
-          ]);
-        },
-        stdout: () => stdout,
-        zoneValues: {AnsiCode: true},
-      );
-    });
+      'writes static message when stdioType is not terminal w/custom trailing',
+      () async {
+        const progressOptions = ProgressOptions(trailing: '!!!');
+        when(() => stdout.hasTerminal).thenReturn(false);
+        await _runZoned(
+          () async {
+            const message = 'test message';
+            final done = Logger(
+              progressOptions: progressOptions,
+            ).progress(message);
+            await Future<void>.delayed(const Duration(milliseconds: 400));
+            done.complete();
+            verifyInOrder([
+              () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
+              () {
+                stdout.write(
+                  '''\r${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
+                );
+              },
+            ]);
+          },
+          stdout: () => stdout,
+          zoneValues: {AnsiCode: true},
+        );
+      },
+    );
 
     test('writes custom progress animation to stdout', () async {
       await _runZoned(
@@ -262,8 +263,7 @@ void main() {
       );
     });
 
-    test('writes custom progress animation to stdout w/custom trailing',
-        () async {
+    test('writes custom progress animation to stdout w/custom trailing', () async {
       await _runZoned(
         () async {
           const time = '(0.Xs)';
@@ -311,22 +311,16 @@ void main() {
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.complete();
-            verify(
-              () {
-                stdout.write(
-                  any(
-                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
-                  ),
-                );
-              },
-            ).called(1);
-            verify(
-              () {
-                stdout.write(
-                  any(that: matches(RegExp(r'✓.*test message.*\(0.1s\)'))),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)'))),
+              );
+            }).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'✓.*test message.*\(0.1s\)'))),
+              );
+            }).called(1);
           },
           stdout: () => stdout,
           zoneValues: {AnsiCode: true},
@@ -358,21 +352,17 @@ void main() {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.update(update);
             await Future<void>.delayed(const Duration(milliseconds: 100));
-            verify(
-              () {
-                stdout.write(
-                  any(that: matches(RegExp(r'⠙.*message\.\.\..*\(8\dms\)'))),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'⠙.*message\.\.\..*\(8\dms\)'))),
+              );
+            }).called(1);
 
-            verify(
-              () {
-                stdout.write(
-                  any(that: matches(RegExp(r'⠹.*update\.\.\..*\(0\.1s\)'))),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'⠹.*update\.\.\..*\(0\.1s\)'))),
+              );
+            }).called(1);
           },
           stdout: () => stdout,
           zoneValues: {AnsiCode: true},
@@ -405,23 +395,17 @@ void main() {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.fail();
 
-            verify(
-              () {
-                stdout.write(
-                  any(
-                    that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)')),
-                  ),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)'))),
+              );
+            }).called(1);
 
-            verify(
-              () {
-                stdout.write(
-                  any(that: matches(RegExp(r'✗.*test message.*\(0\.1s\)'))),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(
+                any(that: matches(RegExp(r'✗.*test message.*\(0\.1s\)'))),
+              );
+            }).called(1);
           },
           stdout: () => stdout,
           zoneValues: {AnsiCode: true},
@@ -451,33 +435,21 @@ void main() {
             final progress = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 100));
             progress.cancel();
-            verify(
-              () {
-                stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
-                      ),
+            verify(() {
+              stdout.write(
+                any(
+                  that: matches(
+                    RegExp(
+                      r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
                     ),
                   ),
-                );
-              },
-            ).called(1);
+                ),
+              );
+            }).called(1);
 
-            verify(
-              () {
-                stdout.write(
-                  any(
-                    that: matches(
-                      RegExp(
-                        r'\[2K\u000D',
-                      ),
-                    ),
-                  ),
-                );
-              },
-            ).called(1);
+            verify(() {
+              stdout.write(any(that: matches(RegExp(r'\[2K\u000D'))));
+            }).called(1);
           },
           stdout: () => stdout,
           zoneValues: {AnsiCode: true},
