@@ -1,3 +1,8 @@
+# 0.3.6
+
+- fix: redraw choose options with relative cursor moves ([#1680](https://github.com/felangel/mason/pull/1680))
+- deps: upgrade `pkg:win32` to `^6.3.0` ([#1684](https://github.com/felangel/mason/pull/1684))
+
 # 0.3.5
 
 - revert: upgrade `pkg:win32` to `^6.0.0`
