@@ -558,7 +558,7 @@ bricks:
         'make',
         'app_icon',
         '--url',
-        'https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png',
+        'https://flutter.dev/assets/lockup_flutter_horizontal.d0515092173211776ceed19b39c2a041.png',
       ]);
       expect(result, equals(ExitCode.success.code));
 
@@ -573,7 +573,7 @@ bricks:
 
     test('generates app_icon (from prompt)', () async {
       const url =
-          'https://storage.googleapis.com/cms-storage-bucket/c823e53b3a1a7b0d36a9.png';
+          'https://flutter.dev/assets/lockup_flutter_horizontal.d0515092173211776ceed19b39c2a041.png';
       when(() => logger.prompt(any())).thenReturn(url);
       final testDir = Directory(
         path.join(Directory.current.path, 'app_icon'),
