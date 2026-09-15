@@ -30,24 +30,34 @@ void main() {
     const lead = '\x1B]8;;';
     const trail = '\x1B\\';
 
-    test(
-      'builds output with correct encodings: ' r'\x1B]8;;' ' and ' r'\x1B\\',
-      () {
-        const message = 'message';
-        final output = runWithOverrides(() => link(message: message, uri: uri));
-        final matcher = stringContainsInOrder(
-          [lead, '$uri', trail, message, lead, trail],
-        );
+    test('builds output with correct encodings: '
+        r'\x1B]8;;'
+        ' and '
+        r'\x1B\\', () {
+      const message = 'message';
+      final output = runWithOverrides(() => link(message: message, uri: uri));
+      final matcher = stringContainsInOrder([
+        lead,
+        '$uri',
+        trail,
+        message,
+        lead,
+        trail,
+      ]);
 
-        expect(output, matcher);
-      },
-    );
+      expect(output, matcher);
+    });
 
     test('builds String with Uri when message is null: ', () {
       final output = runWithOverrides(() => link(uri: uri));
-      final matcher = stringContainsInOrder(
-        [lead, '$uri', trail, '$uri', lead, trail],
-      );
+      final matcher = stringContainsInOrder([
+        lead,
+        '$uri',
+        trail,
+        '$uri',
+        lead,
+        trail,
+      ]);
 
       expect(output, matcher);
     });

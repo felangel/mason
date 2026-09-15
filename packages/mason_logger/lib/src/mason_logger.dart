@@ -40,12 +40,12 @@ class LogTheme {
     LogStyle? warn,
     LogStyle? alert,
     LogStyle? success,
-  })  : detail = detail ?? _detailStyle,
-        info = info ?? _infoStyle,
-        err = err ?? _errStyle,
-        warn = warn ?? _warnStyle,
-        alert = alert ?? _alertStyle,
-        success = success ?? _successStyle;
+  }) : detail = detail ?? _detailStyle,
+       info = info ?? _infoStyle,
+       err = err ?? _errStyle,
+       warn = warn ?? _warnStyle,
+       alert = alert ?? _alertStyle,
+       success = success ?? _successStyle;
 
   /// The [LogStyle] used by [detail].
   final LogStyle detail;
@@ -185,16 +185,19 @@ class Logger {
   String prompt(String? message, {Object? defaultValue, bool hidden = false}) {
     final hasDefault = defaultValue != null && '$defaultValue'.isNotEmpty;
     final resolvedDefaultValue = hasDefault ? '$defaultValue' : '';
-    final suffix =
-        hasDefault ? ' ${darkGray.wrap('($resolvedDefaultValue)')}' : '';
+    final suffix = hasDefault
+        ? ' ${darkGray.wrap('($resolvedDefaultValue)')}'
+        : '';
     final resolvedMessage = '$message$suffix ';
     _stdout.write(resolvedMessage);
     final input = hidden ? _readLineHiddenSync() : _readLineSync();
-    final response =
-        input == null || input.isEmpty ? resolvedDefaultValue : input;
+    final response = input == null || input.isEmpty
+        ? resolvedDefaultValue
+        : input;
     final lines = resolvedMessage.split('\n').length - 1;
-    final prefix =
-        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
+    final prefix = lines > 1
+        ? '\x1b[A\u001B[2K\u001B[${lines}A'
+        : '\x1b[A\u001B[2K';
     _stdout.writeln(
       '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(hidden ? '******' : response))}''',
     );
@@ -217,12 +220,13 @@ class Logger {
 
     while (true) {
       final key = _readKey();
-      final isEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+      final isEnterOrReturnKey =
+          key.controlChar == ControlCharacter.ctrlJ ||
           key.controlChar == ControlCharacter.ctrlM;
       final isDeleteOrBackspaceKey =
           key.controlChar == ControlCharacter.delete ||
-              key.controlChar == ControlCharacter.backspace ||
-              key.controlChar == ControlCharacter.ctrlH;
+          key.controlChar == ControlCharacter.backspace ||
+          key.controlChar == ControlCharacter.ctrlH;
 
       if (isEnterOrReturnKey) break;
 
@@ -284,8 +288,9 @@ class Logger {
         ? defaultValue
         : input.toBoolean() ?? defaultValue;
     final lines = resolvedMessage.split('\n').length - 1;
-    final prefix =
-        lines > 1 ? '\x1b[A\u001B[2K\u001B[${lines}A' : '\x1b[A\u001B[2K';
+    final prefix = lines > 1
+        ? '\x1b[A\u001B[2K\u001B[${lines}A'
+        : '\x1b[A\u001B[2K';
     _stdout.writeln(
       '''$prefix$resolvedMessage${styleDim.wrap(lightCyan.wrap(response ? 'Yes' : 'No'))}''',
     );
@@ -311,10 +316,10 @@ class Logger {
         defaultValue != null && resolvedDisplay(defaultValue).isNotEmpty;
     var index = hasDefault ? choices.indexOf(defaultValue) : 0;
 
+    final linesToClear = '$message'.split('\n').length + choices.length - 1;
+
     void writeChoices() {
       _stdout
-        // save cursor
-        ..write('\x1b7')
         // hide cursor
         ..write('\x1b[?25l')
         ..writeln('$message');
@@ -352,8 +357,8 @@ class Logger {
           key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final isReturnOrEnterOrSpaceKey =
           key.controlChar == ControlCharacter.ctrlJ ||
-              key.controlChar == ControlCharacter.ctrlM ||
-              key.char == ' ';
+          key.controlChar == ControlCharacter.ctrlM ||
+          key.char == ' ';
 
       if (isArrowUpOrKKey) {
         index = (index - 1) % (choices.length);
@@ -364,11 +369,8 @@ class Logger {
           ..lineMode = true
           ..echoMode = true;
 
+        _clearChoices(linesToClear);
         _stdout
-          // restore cursor
-          ..write('\x1b8')
-          // clear to end of screen
-          ..write('\x1b[J')
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
@@ -380,8 +382,7 @@ class Logger {
         break;
       }
 
-      // restore cursor
-      _stdout.write('\x1b8');
+      _clearChoices(linesToClear);
       writeChoices();
     }
 
@@ -409,10 +410,10 @@ class Logger {
         : <int>{};
     var index = 0;
 
+    final linesToClear = '$message'.split('\n').length + choices.length - 1;
+
     void writeChoices() {
       _stdout
-        // save cursor
-        ..write('\x1b7')
         // hide cursor
         ..write('\x1b[?25l')
         ..writeln('$message');
@@ -451,7 +452,8 @@ class Logger {
       final keyIsDownOrJKey =
           key.controlChar == ControlCharacter.arrowDown || key.char == 'j';
       final keyIsSpaceKey = key.char == ' ';
-      final keyIsEnterOrReturnKey = key.controlChar == ControlCharacter.ctrlJ ||
+      final keyIsEnterOrReturnKey =
+          key.controlChar == ControlCharacter.ctrlJ ||
           key.controlChar == ControlCharacter.ctrlM;
 
       if (keyIsUpOrKKey) {
@@ -469,11 +471,8 @@ class Logger {
 
         results = selections.map((index) => choices[index]).toList();
 
+        _clearChoices(linesToClear);
         _stdout
-          // restore cursor
-          ..write('\x1b8')
-          // clear to end of screen
-          ..write('\x1b[J')
           // show cursor
           ..write('\x1b[?25h')
           ..write('$message ')
@@ -486,12 +485,25 @@ class Logger {
         break;
       }
 
-      // restore cursor
-      _stdout.write('\x1b8');
+      _clearChoices(linesToClear);
       writeChoices();
     }
 
     return results;
+  }
+
+  /// Moves the cursor up [lines] and clears everything from there to the end
+  /// of the screen so a selection prompt can be redrawn in place.
+  void _clearChoices(int lines) {
+    if (lines > 0) {
+      // move cursor up to the first line of the choices
+      _stdout.write('\x1b[${lines}A');
+    }
+    _stdout
+      // move cursor to the start of the line
+      ..write('\r')
+      // clear to end of screen
+      ..write('\x1b[J');
   }
 
   String? _readLineSync() {
@@ -538,7 +550,8 @@ class Logger {
 /// {@endtemplate}
 class NoTerminalAttachedError extends StateError {
   /// {@macro no_terminal_attached_error}
-  NoTerminalAttachedError() : super('''
+  NoTerminalAttachedError()
+    : super('''
 No terminal attached to stdout.
 Ensure a terminal is attached via "stdout.hasTerminal" before requesting input.
 ''');
