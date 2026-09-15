@@ -1,3 +1,7 @@
+# 0.1.4
+
+- fix: pana score ([#1687](https://github.com/felangel/mason/issues/1687))
+
 # 0.1.3
 
 - feat: include allowed values in `mason make <name> --help`
