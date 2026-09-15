@@ -1,3 +1,8 @@
+# 0.1.3
+
+- fix: pana score ([#1687](https://github.com/felangel/mason/issues/1687))
+- chore(deps): various dependency upgrades ([#1615](https://github.com/felangel/mason/issues/1615))
+
 # 0.1.2
 
 - fix: loop rendering when parameters contains an empty list ([#1611](https://github.com/felangel/mason/issues/1611))
