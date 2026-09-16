@@ -111,20 +111,20 @@
   },
   "devDependencies": {
     "@types/glob": "^9.0.0",
-    "@types/lodash": "^4.17.24",
+    "@types/lodash": "^4.17.25",
     "@types/mocha": "^10.0.10",
-    "@types/node": "25.x",
+    "@types/node": "26.x",
     "@types/vscode": "^1.75.0",
     "@types/yaml": "^1.9.7",
     "glob": "^13.0.6",
-    "prettier": "^3.8.1",
-    "ts-loader": "^9.5.4",
-    "typescript": "^5.9.3",
-    "webpack": "^5.105.4",
-    "webpack-cli": "^7.0.2"
+    "prettier": "^3.9.6",
+    "ts-loader": "^9.6.2",
+    "typescript": "^7.0.2",
+    "webpack": "^5.110.3",
+    "webpack-cli": "^7.2.3"
   },
   "dependencies": {
-    "lodash": "^4.17.23",
-    "yaml": "^2.8.3"
+    "lodash": "^4.18.1",
+    "yaml": "^2.9.1"
   }
 }
