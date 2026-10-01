@@ -391,6 +391,42 @@ void main() {
         verifyNever(() => progress.complete('Compiled post_gen.dart'));
       });
 
+      test(
+          'compile serializes concurrent compilations '
+          '(https://github.com/felangel/mason/issues/1655)', () async {
+        final hooksBuildDirectory = Directory(
+          path.join('test', 'fixtures', 'basic', 'hooks', 'build', 'hooks'),
+        );
+        try {
+          await hooksBuildDirectory.delete(recursive: true);
+        } catch (_) {}
+
+        final brick = Brick.path(path.join('test', 'fixtures', 'basic'));
+        final generator = await MasonGenerator.fromBrick(brick);
+
+        // Concurrent compilations race on the shared hook cache
+        // (build directory + module files). They must all complete
+        // without errors.
+        await expectLater(
+          Future.wait([
+            for (var i = 0; i < 6; i++) generator.hooks.compile(),
+          ]),
+          completes,
+        );
+
+        // Sanity check: the hooks were actually compiled.
+        expect(
+          File(
+            path.join(
+              hooksBuildDirectory.path,
+              'pre_gen',
+              'pre_gen_${generator.hooks.checksum}.dill',
+            ),
+          ).existsSync(),
+          isTrue,
+        );
+      });
+
       test('compile reports compilation errors', () async {
         final brick = Brick.path(
           path.join('test', 'fixtures', 'run_exception'),
