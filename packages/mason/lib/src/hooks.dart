@@ -200,15 +200,28 @@ class GeneratorHooks {
   /// Hooks are compiled lazily by default but calling [compile]
   /// can be used to compile hooks ahead of time.
   Future<void> compile({Logger? logger}) async {
-    await _installDependencies();
-
-    if (preGenHook != null && !preGenHook!.module(checksum).existsSync()) {
-      await _compile(hook: preGenHook!, logger: logger);
+    final preGenHook = this.preGenHook;
+    if (preGenHook != null) {
+      await _ensureHookCompiled(preGenHook, logger: logger);
     }
 
-    if (postGenHook != null && !postGenHook!.module(checksum).existsSync()) {
-      await _compile(hook: postGenHook!, logger: logger);
+    final postGenHook = this.postGenHook;
+    if (postGenHook != null) {
+      await _ensureHookCompiled(postGenHook, logger: logger);
     }
+  }
+
+  /// Compiles [hook] unless its module is already cached.
+  ///
+  /// Concurrent compilations are serialized via [_withHookCompileLock].
+  Future<void> _ensureHookCompiled(HookFile hook, {Logger? logger}) async {
+    await _withHookCompileLock(hook, () async {
+      // The module may have been compiled while waiting for the lock.
+      if (!hook.module(checksum).existsSync()) {
+        await _installDependencies();
+        await _compile(hook: hook, logger: logger);
+      }
+    });
   }
 
   Future<void> _dartPubGet({required String workingDirectory}) async {
@@ -304,9 +317,14 @@ class GeneratorHooks {
     var compiledHook = false;
     final module = hook.module(checksum);
     if (!module.existsSync()) {
-      installedDependencies = await _installDependencies();
-      await _compile(hook: hook, logger: logger);
-      compiledHook = true;
+      await _withHookCompileLock(hook, () async {
+        // The module may have been compiled while waiting for the lock.
+        if (!hook.module(checksum).existsSync()) {
+          installedDependencies = await _installDependencies();
+          await _compile(hook: hook, logger: logger);
+          compiledHook = true;
+        }
+      });
     }
 
     Future<Isolate> spawnIsolate(Uri uri) {
@@ -535,4 +553,51 @@ bool _isHookFile(FileSystemEntity entity) {
   if (!isFile) return false;
   final ext = p.extension(entity.path);
   return ext == '.dart' || ext == '.yaml';
+}
+
+/// Guards hook compilation within this isolate, keyed by lock file path.
+///
+/// Combined with the operating system file lock acquired in
+/// [_withHookCompileLock], this serializes hook compilations both
+/// within this process and across processes.
+/// See https://github.com/felangel/mason/issues/1655.
+final Map<String, Pool> _hookCompilePools = {};
+
+/// Runs [action] with exclusive access to [hook]'s compilation.
+///
+/// Hook compilation targets a shared on-disk cache, so concurrent
+/// compilations (even from separate processes, e.g. `melos exec`)
+/// must be serialized to avoid deleting or overwriting each other's
+/// intermediate artifacts.
+/// See https://github.com/felangel/mason/issues/1655.
+Future<T> _withHookCompileLock<T>(
+  HookFile hook,
+  Future<T> Function() action,
+) async {
+  final lockFilePath = p.join(
+    hook.directory.path,
+    '.${p.basenameWithoutExtension(hook.path)}.compile.lock',
+  );
+  final pool = _hookCompilePools.putIfAbsent(lockFilePath, () => Pool(1));
+  final resource = await pool.request();
+  try {
+    // The lock file is intentionally never deleted: deleting it would
+    // allow a new file (and therefore a new, non-conflicting lock)
+    // to be created at the same path while another process is waiting.
+    // Note: `mode: FileMode.write` is required (not redundant) so the
+    // lock file is created when missing. `File.open` defaults to read.
+    final lock = await File(lockFilePath).open(mode: FileMode.write);
+    try {
+      await lock.lock();
+      try {
+        return await action();
+      } finally {
+        await lock.unlock();
+      }
+    } finally {
+      await lock.close();
+    }
+  } finally {
+    resource.release();
+  }
 }
