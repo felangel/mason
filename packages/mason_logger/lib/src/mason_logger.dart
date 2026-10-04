@@ -101,7 +101,10 @@ class Logger {
       _terminal.enableRawMode();
       final key = TerminalOverrides.current?.readKey() ?? readKey();
       _terminal.disableRawMode();
-      if (key.controlChar == ControlCharacter.ctrlC) _exit(130);
+      if (key.controlChar == ControlCharacter.ctrlC) {
+        _stdout.write('\x1b[?25h');
+        _exit(130);
+      }
       return key;
     };
   }
