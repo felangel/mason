@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:args/args.dart';
 import 'package:args/command_runner.dart';
@@ -28,6 +29,7 @@ void main() {
 
   setUpAll(() {
     registerFallbackValue(FakeUri());
+    registerFallbackValue(Uint8List.fromList([]));
   });
 
   group('PublishCommand', () {

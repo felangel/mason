@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:http/http.dart' as http;
 import 'package:mason_api/mason_api.dart';
@@ -331,7 +332,7 @@ void main() {
         );
 
         try {
-          await masonApi.publish(bundle: <int>[]);
+          await masonApi.publish(bundle: Uint8List.fromList([]));
           fail('should throw');
         } on MasonApiPublishFailure catch (error) {
           expect(
@@ -347,7 +348,7 @@ void main() {
     });
 
     group('publish', () {
-      final bytes = <int>[42];
+      final bytes = Uint8List.fromList([42]);
 
       test('throws when user not found', () async {
         File(
