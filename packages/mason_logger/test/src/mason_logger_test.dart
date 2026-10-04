@@ -619,10 +619,10 @@ void main() {
         );
       });
 
-      test('exits when control+c is pressed', () {
-        final exitCalls = <int>[];
-        try {
-          TerminalOverrides.runZoned(
+      test('restores cursor before exiting when control+c is pressed', () {
+        final exitError = StateError('exit');
+        expect(
+          () => TerminalOverrides.runZoned(
             () => IOOverrides.runZoned(
               () =>
                   Logger().chooseAny('test message', choices: ['a', 'b', 'c']),
@@ -631,14 +631,16 @@ void main() {
             ),
             readKey: () => KeyStroke.control(ControlCharacter.ctrlC),
             exit: (code) {
-              exitCalls.add(code);
-              throw Exception('exit');
+              expect(code, equals(130));
+              verifyInOrder([
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.write('\x1b[?25h'),
+              ]);
+              throw exitError;
             },
-          );
-          fail('should have called exit');
-        } catch (_) {
-          expect(exitCalls, equals([130]));
-        }
+          ),
+          throwsA(same(exitError)),
+        );
       });
 
       test('enter/return selects the nothing '
@@ -1127,10 +1129,10 @@ void main() {
         );
       });
 
-      test('exits when control+c is pressed', () {
-        final exitCalls = <int>[];
-        try {
-          TerminalOverrides.runZoned(
+      test('restores cursor before exiting when control+c is pressed', () {
+        final exitError = StateError('exit');
+        expect(
+          () => TerminalOverrides.runZoned(
             () => IOOverrides.runZoned(
               () =>
                   Logger().chooseOne('test message', choices: ['a', 'b', 'c']),
@@ -1139,14 +1141,16 @@ void main() {
             ),
             readKey: () => KeyStroke.control(ControlCharacter.ctrlC),
             exit: (code) {
-              exitCalls.add(code);
-              throw Exception('exit');
+              expect(code, equals(130));
+              verifyInOrder([
+                () => stdout.write('\x1b[?25l'),
+                () => stdout.write('\x1b[?25h'),
+              ]);
+              throw exitError;
             },
-          );
-          fail('should have called exit');
-        } catch (_) {
-          expect(exitCalls, equals([130]));
-        }
+          ),
+          throwsA(same(exitError)),
+        );
       });
 
       test('enter selects the initial value '
