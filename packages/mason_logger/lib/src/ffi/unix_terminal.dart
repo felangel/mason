@@ -15,7 +15,7 @@ class UnixTerminal implements Terminal {
   UnixTerminal() {
     _lib = Platform.isMacOS
         ? DynamicLibrary.open('/usr/lib/libSystem.dylib')
-        : DynamicLibrary.open('libc.so.6');
+        : DynamicLibrary.process();
 
     _tcgetattr = _lib.lookupFunction<TCGetAttrNative, TCGetAttrDart>(
       'tcgetattr',
