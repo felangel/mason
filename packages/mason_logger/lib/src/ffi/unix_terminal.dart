@@ -8,6 +8,7 @@
 
 import 'dart:ffi';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:ffi/ffi.dart';
 import 'package:mason_logger/src/ffi/terminal.dart';
@@ -25,12 +26,16 @@ class UnixTerminal implements Terminal {
       'tcsetattr',
     );
 
-    _origTermIOSPointer = calloc<Uint8>(_termiosSize);
-    _tcgetattr(_STDIN_FILENO, _origTermIOSPointer);
+    // Keep a copy of the original settings in Dart memory, so that no native
+    // memory needs to outlive this call.
+    final termIOSPointer = calloc<Uint8>(_termiosSize);
+    _tcgetattr(_STDIN_FILENO, termIOSPointer);
+    _origTermIOS = Uint8List.fromList(termIOSPointer.asTypedList(_termiosSize));
+    calloc.free(termIOSPointer);
   }
 
   late final DynamicLibrary _lib;
-  late final Pointer<Uint8> _origTermIOSPointer;
+  late final Uint8List _origTermIOS;
   late final TCGetAttrDart _tcgetattr;
   late final TCSetAttrDart _tcsetattr;
 
@@ -45,9 +50,7 @@ class UnixTerminal implements Terminal {
     // doesn't change (including ones that only some C libraries have) keeps
     // its value.
     final newTermIOSPointer = calloc<Uint8>(_termiosSize);
-    newTermIOSPointer
-        .asTypedList(_termiosSize)
-        .setAll(0, _origTermIOSPointer.asTypedList(_termiosSize));
+    newTermIOSPointer.asTypedList(_termiosSize).setAll(0, _origTermIOS);
     t
       ..setFlags(
         newTermIOSPointer,
@@ -80,8 +83,10 @@ class UnixTerminal implements Terminal {
 
   @override
   void disableRawMode() {
-    if (nullptr == _origTermIOSPointer.cast()) return;
-    _tcsetattr(_STDIN_FILENO, _TCSANOW, _origTermIOSPointer);
+    final termIOSPointer = calloc<Uint8>(_termiosSize);
+    termIOSPointer.asTypedList(_termiosSize).setAll(0, _origTermIOS);
+    _tcsetattr(_STDIN_FILENO, _TCSANOW, termIOSPointer);
+    calloc.free(termIOSPointer);
   }
 }
 
