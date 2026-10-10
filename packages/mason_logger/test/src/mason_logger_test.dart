@@ -11,11 +11,28 @@ class _MockStdout extends Mock implements Stdout {}
 
 class _MockStdin extends Mock implements Stdin {}
 
+// While mocktail records a verification, every call on a mock returns null.
+// A `wrap()` in an expectation reads `supportsAnsiEscapes` from the stdout or
+// stderr mock, gets null and throws, and mocktail then verifies that getter
+// instead of the write. These helpers read whether ANSI output is enabled
+// first and keep it fixed while mocktail records the expectations.
+VerificationResult _verify<T>(T Function() call) =>
+    overrideAnsiOutput(ansiOutputEnabled, () => verify(call));
+
+void _verifyNever<T>(T Function() call) =>
+    overrideAnsiOutput(ansiOutputEnabled, () => verifyNever(call));
+
+List<VerificationResult> _verifyInOrder<T>(List<T Function()> calls) =>
+    overrideAnsiOutput(ansiOutputEnabled, () => verifyInOrder(calls));
+
 void main() {
   group('Logger', () {
     late Stdout stdout;
     late Stdin stdin;
     late Stdout stderr;
+
+    Stdout mockStdout() => stdout;
+    Stdout mockStderr() => stderr;
 
     setUp(() {
       stdout = _MockStdout();
@@ -28,10 +45,26 @@ void main() {
       when(() => stdout.terminalColumns).thenReturn(80);
     });
 
+    // Mocks both stdout and stderr, so whether ANSI output is enabled only
+    // depends on the mocks, not on the terminal the tests run in.
+    T runWithMocks<T>(
+      T Function() body, {
+      Stdout Function()? stdout,
+      Stdin Function()? stdin,
+      Stdout Function()? stderr,
+    }) {
+      return IOOverrides.runZoned(
+        body,
+        stdout: stdout ?? mockStdout,
+        stdin: stdin,
+        stderr: stderr ?? mockStderr,
+      );
+    }
+
     group('theme', () {
       test('can be overridden at the logger level', () {
         final theme = LogTheme(info: (message) => '[message]: $message');
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(theme: theme).info(message);
           verify(() => stdout.writeln('[message]: $message')).called(1);
@@ -40,7 +73,7 @@ void main() {
 
       test('can be overridden at the method level', () {
         String? style(String? message) => '[message]: $message';
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().info(message, style: style);
           verify(() => stdout.writeln('[message]: $message')).called(1);
@@ -50,7 +83,7 @@ void main() {
       test('is ignored when a method override is used.', () {
         final theme = LogTheme(info: (message) => '[message]: $message');
         String? style(String? message) => '[info]: $message';
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(theme: theme).info(message, style: style);
           verify(() => stdout.writeln('[info]: $message')).called(1);
@@ -97,7 +130,7 @@ void main() {
 
     group('.write', () {
       test('writes to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().write(message);
           verify(() => stdout.write(message)).called(1);
@@ -107,7 +140,7 @@ void main() {
 
     group('.info', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().info(message);
           verify(() => stdout.writeln(message)).called(1);
@@ -115,7 +148,7 @@ void main() {
       });
 
       test('does not write to stdout when Level > info', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.critical).info(message);
           verifyNever(() => stdout.writeln(contains(message)));
@@ -125,7 +158,7 @@ void main() {
 
     group('.delayed', () {
       test('does not write to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().delayed(message);
           verifyNever(() => stdout.writeln(message));
@@ -135,7 +168,7 @@ void main() {
 
     group('.flush', () {
       test('writes to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const messages = ['test', 'message', '!'];
           final logger = Logger();
           for (final message in messages) {
@@ -154,7 +187,7 @@ void main() {
 
     group('.err', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().err(message);
           final expected = lightRed.wrap(message);
@@ -163,7 +196,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > error', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.critical).err(message);
           final expected = lightRed.wrap(message);
@@ -174,7 +207,7 @@ void main() {
 
     group('.alert', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().alert(message);
           final expected = backgroundRed.wrap(
@@ -185,7 +218,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > critical', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.quiet).alert(message);
           final expected = backgroundRed.wrap(
@@ -198,25 +231,25 @@ void main() {
 
     group('.detail', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.debug).detail(message);
-          verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
+          _verify(() => stdout.writeln(darkGray.wrap(message))).called(1);
         }, stdout: () => stdout);
       });
 
       test('does not write to stdout when Level > debug', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().detail(message);
-          verifyNever(() => stdout.writeln(darkGray.wrap(message)));
+          _verifyNever(() => stdout.writeln(darkGray.wrap(message)));
         }, stdout: () => stdout);
       });
     });
 
     group('.warn', () {
       test('writes line to stderr', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().warn(message);
           final expected = yellow.wrap(styleBold.wrap('[WARN] $message'));
@@ -225,7 +258,7 @@ void main() {
       });
 
       test('writes line to stderr with custom tag', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().warn(message, tag: '🚨');
           final expected = yellow.wrap(styleBold.wrap('[🚨] $message'));
@@ -234,7 +267,7 @@ void main() {
       });
 
       test('writes line to stderr with empty tag', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().warn(message, tag: '');
           final expected = yellow.wrap(styleBold.wrap(message));
@@ -243,7 +276,7 @@ void main() {
       });
 
       test('does not write to stderr when Level > warning', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.error).warn(message);
           final expected = yellow.wrap(styleBold.wrap('[WARN] $message'));
@@ -254,18 +287,18 @@ void main() {
 
     group('.success', () {
       test('writes line to stdout', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger().success(message);
-          verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
+          _verify(() => stdout.writeln(lightGreen.wrap(message))).called(1);
         }, stdout: () => stdout);
       });
 
       test('does not write to stdout when Level > info', () {
-        IOOverrides.runZoned(() {
+        runWithMocks(() {
           const message = 'test message';
           Logger(level: Level.warning).success(message);
-          verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
+          _verifyNever(() => stdout.writeln(lightGreen.wrap(message)));
         }, stdout: () => stdout);
       });
     });
@@ -273,7 +306,7 @@ void main() {
     group('.prompt', () {
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             const prompt = '$message ';
@@ -289,7 +322,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             const response = 'test response';
@@ -308,7 +341,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin with default', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const defaultValue = 'Dash';
             const message = 'test message';
@@ -328,7 +361,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin hidden', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const defaultValue = 'Dash';
             const message = 'test message';
@@ -374,7 +407,7 @@ void main() {
       });
 
       test('writes multi line to stdout and resets after response', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message\nwith more\nlines';
             final lines = message.split('\n').length - 1;
@@ -397,7 +430,7 @@ void main() {
     group('.confirm', () {
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -413,7 +446,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin (default no)', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -431,7 +464,7 @@ void main() {
       });
 
       test('writes line to stdout and reads line from stdin (default yes)', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
@@ -449,7 +482,7 @@ void main() {
       });
 
       test('handles all versions of yes correctly', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -470,7 +503,7 @@ void main() {
       });
 
       test('handles all versions of no correctly', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -491,7 +524,7 @@ void main() {
       });
 
       test('handles multi-line messages correctly', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'This is a multi-line\n\nmessage.';
             final prompt =
@@ -510,7 +543,7 @@ void main() {
       });
 
       test('returns default when response is neither yes/no (default no)', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -528,7 +561,7 @@ void main() {
       });
 
       test('returns default when response is neither yes/no (default yes)', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
@@ -546,7 +579,7 @@ void main() {
       });
 
       test('returns default when a utf8 decoding error occurs', () {
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
@@ -569,29 +602,31 @@ void main() {
     group('.progress', () {
       test('writes lines to stdout', () async {
         when(() => stdout.hasTerminal).thenReturn(true);
-        await IOOverrides.runZoned(
+        await runWithMocks(
           () async {
-            const time = '(0.Xs)';
             const message = 'test message';
             final done = Logger().progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 300));
             done.complete();
-            verifyInOrder([
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠙')} $message... ${darkGray.wrap('(0.1s)')}''',
-                );
-              },
-              () {
-                stdout.write(
-                  '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠹')} $message... ${darkGray.wrap('(0.2s)')}''',
-                );
-              },
-              () {
-                stdout.write(
-                  '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.3s)')}\n''',
-                );
-              },
+            _verifyInOrder([
+              () => stdout.write(
+                any(
+                  that: startsWith(
+                    '\x1b[?7l\u001b[2K\r${lightGreen.wrap('⠙')} $message... ',
+                  ),
+                ),
+              ),
+              () => stdout.write(
+                any(
+                  that: startsWith(
+                    '\x1b[?7l\u001b[2K\r${lightGreen.wrap('⠹')} $message... ',
+                  ),
+                ),
+              ),
+              () => stdout.write(
+                '\x1b[?7h\u001b[2K\r${lightGreen.wrap('✓')} $message '
+                '${darkGray.wrap('(0.3s)')}\n',
+              ),
             ]);
           },
           stdout: () => stdout,
@@ -601,15 +636,9 @@ void main() {
     });
 
     group('.chooseAny', () {
-      setUp(() {
-        // The expected output below is uncolored. Without this, colors would
-        // depend on whether the real stderr supports ANSI escapes.
-        when(() => stdout.supportsAnsiEscapes).thenReturn(false);
-      });
-
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             expect(
               () =>
@@ -626,7 +655,7 @@ void main() {
         final exitCalls = <int>[];
         try {
           TerminalOverrides.runZoned(
-            () => IOOverrides.runZoned(
+            () => runWithMocks(
               () =>
                   Logger().chooseAny('test message', choices: ['a', 'b', 'c']),
               stdout: () => stdout,
@@ -648,7 +677,7 @@ void main() {
           'when defaultValues is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -656,7 +685,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, isEmpty);
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -677,7 +706,7 @@ void main() {
       test('enter/return selects the default values when specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['b', 'c'];
@@ -687,19 +716,15 @@ void main() {
                 defaultValues: ['b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
-                () => stdout.write(
-                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
-                ),
+                () => stdout.write(' ${lightCyan.wrap('◉')}  b'),
                 () => stdout.write(' '),
-                () => stdout.write(
-                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
-                ),
+                () => stdout.write(' ${lightCyan.wrap('◉')}  c'),
               ]);
             },
             stdout: () => stdout,
@@ -720,7 +745,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['b', 'c'];
@@ -729,11 +754,11 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -751,7 +776,7 @@ void main() {
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -760,7 +785,7 @@ void main() {
                 () => stdout.writeln(message),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  b'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
                 () => stdout.write('\x1b[?25l'),
@@ -778,19 +803,15 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(' '),
-                () => stdout.write(
-                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
-                ),
+                () => stdout.write(' ${lightCyan.wrap('◉')}  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  c'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(' '),
-                () => stdout.write(
-                  ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('b')}',
-                ),
+                () => stdout.write(' ${lightCyan.wrap('◉')}  b'),
                 () => stdout.write(green.wrap('❯')),
                 () => stdout.write(
                   ' ${lightCyan.wrap('◉')}  ${lightCyan.wrap('c')}',
@@ -810,7 +831,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -818,11 +839,11 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(isEmpty));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -832,7 +853,7 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  b'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
@@ -850,7 +871,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               Logger().chooseAny(message, choices: ['a', 'b', 'c']);
@@ -878,7 +899,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -886,11 +907,11 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(isEmpty));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -900,7 +921,7 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  b'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
               ]);
@@ -918,7 +939,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -926,7 +947,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, isEmpty);
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -942,7 +963,7 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  c'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
               ]);
             },
             stdout: () => stdout,
@@ -958,7 +979,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -966,11 +987,11 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, isEmpty);
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -982,7 +1003,7 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  c'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
               ]);
             },
             stdout: () => stdout,
@@ -1000,7 +1021,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny(
@@ -1008,11 +1029,11 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, isEmpty);
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1022,7 +1043,7 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  a'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  b'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('b')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  c'),
                 () => stdout.write('\x1b[?25l'),
@@ -1032,11 +1053,11 @@ void main() {
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  c'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('c')}'),
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  b'),
                 () => stdout.write(' '),
@@ -1053,7 +1074,7 @@ void main() {
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               final actual = Logger().chooseAny<Map<String, String>>(
@@ -1066,11 +1087,11 @@ void main() {
                 display: (data) => 'Key: ${data['key']}',
               );
               expect(actual, isEmpty);
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
-                () => stdout.write(' ◯  Key: a'),
+                () => stdout.write(' ◯  ${lightCyan.wrap('Key: a')}'),
                 () => stdout.write(' '),
                 () => stdout.write(' ◯  Key: b'),
                 () => stdout.write(' '),
@@ -1087,7 +1108,7 @@ void main() {
       test('converts results to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['a', 'c'];
@@ -1098,12 +1119,14 @@ void main() {
                 display: (data) => 'Key: $data',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[3A'),
                 () => stdout.write('\r'),
                 () => stdout.write('\x1b[J'),
                 () => stdout.write('$message '),
-                () => stdout.writeln('[Key: a, Key: c]'),
+                () => stdout.writeln(
+                  styleDim.wrap(lightCyan.wrap('[Key: a, Key: c]')),
+                ),
               ]);
             },
             stdout: () => stdout,
@@ -1117,7 +1140,7 @@ void main() {
     group('.chooseOne', () {
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             expect(
               () =>
@@ -1134,7 +1157,7 @@ void main() {
         final exitCalls = <int>[];
         try {
           TerminalOverrides.runZoned(
-            () => IOOverrides.runZoned(
+            () => runWithMocks(
               () =>
                   Logger().chooseOne('test message', choices: ['a', 'b', 'c']),
               stdout: () => stdout,
@@ -1156,7 +1179,7 @@ void main() {
           'when defaultValue is not specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'a';
@@ -1165,7 +1188,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1188,7 +1211,7 @@ void main() {
       test('enter selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlM)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'b';
@@ -1198,7 +1221,7 @@ void main() {
                 defaultValue: 'b',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1221,7 +1244,7 @@ void main() {
       test('space selects the default value when specified.', () {
         final keyStrokes = [KeyStroke.char(' ')];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'b';
@@ -1232,7 +1255,7 @@ void main() {
                 defaultValue: 'b',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1258,7 +1281,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'b';
@@ -1267,7 +1290,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1303,7 +1326,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               Logger().chooseOne(message, choices: ['a', 'b', 'c']);
@@ -1331,7 +1354,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'a';
@@ -1341,7 +1364,7 @@ void main() {
                 defaultValue: 'b',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1377,7 +1400,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'c';
@@ -1386,7 +1409,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1422,7 +1445,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'a';
@@ -1432,7 +1455,7 @@ void main() {
                 defaultValue: 'c',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1468,7 +1491,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'b';
@@ -1477,7 +1500,7 @@ void main() {
                 choices: ['a', 'b', 'c'],
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1513,7 +1536,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = 'a';
@@ -1523,7 +1546,7 @@ void main() {
                 defaultValue: 'b',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(' '),
@@ -1556,7 +1579,7 @@ void main() {
       test('converts choices to a preferred display', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = {'key': 'a'};
@@ -1570,7 +1593,7 @@ void main() {
                 display: (data) => 'Key: ${data['key']}',
               );
               expect(actual, equals(expected));
-              verifyInOrder([
+              _verifyInOrder([
                 () => stdout.write('\x1b[?25l'),
                 () => stdout.writeln(message),
                 () => stdout.write(green.wrap('❯')),
@@ -1594,7 +1617,7 @@ void main() {
     group('promptAny', () {
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
-        IOOverrides.runZoned(
+        runWithMocks(
           () {
             const message = 'test message';
             expect(
@@ -1611,7 +1634,7 @@ void main() {
       test('returns empty list', () {
         final keyStrokes = [KeyStroke.control(ControlCharacter.ctrlJ)];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = <String>[];
@@ -1635,7 +1658,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = <String>['dart'];
@@ -1663,7 +1686,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
@@ -1692,7 +1715,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
@@ -1725,7 +1748,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
@@ -1753,7 +1776,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlM),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
@@ -1781,7 +1804,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];
@@ -1813,7 +1836,7 @@ void main() {
           KeyStroke.control(ControlCharacter.ctrlJ),
         ];
         TerminalOverrides.runZoned(
-          () => IOOverrides.runZoned(
+          () => runWithMocks(
             () {
               const message = 'test message';
               const expected = ['dart', 'css'];

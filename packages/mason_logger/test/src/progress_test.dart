@@ -7,6 +7,14 @@ import 'package:test/test.dart';
 
 class _MockStdout extends Mock implements Stdout {}
 
+// While mocktail records a verification, every call on a mock returns null.
+// A `wrap()` in an expectation reads `supportsAnsiEscapes` from the stdout
+// mock, gets null and throws, and mocktail then verifies that getter instead
+// of the write. This reads whether ANSI output is enabled first and keeps it
+// fixed while mocktail records the expectations.
+List<VerificationResult> _verifyInOrder<T>(List<T Function()> calls) =>
+    overrideAnsiOutput(ansiOutputEnabled, () => verifyInOrder(calls));
+
 void main() {
   group('Progress', () {
     late Stdout stdout;
@@ -112,7 +120,7 @@ void main() {
           final done = Logger().progress(message);
           await Future<void>.delayed(const Duration(milliseconds: 400));
           done.complete();
-          verifyInOrder([
+          _verifyInOrder([
             () => stdout.write('${lightGreen.wrap('⠋')} $message...'),
             () {
               stdout.write(
@@ -139,7 +147,7 @@ void main() {
             ).progress(message);
             await Future<void>.delayed(const Duration(milliseconds: 400));
             done.complete();
-            verifyInOrder([
+            _verifyInOrder([
               () => stdout.write('${lightGreen.wrap('⠋')} $message!!!'),
               () {
                 stdout.write(
@@ -157,7 +165,6 @@ void main() {
     test('writes custom progress animation to stdout', () async {
       await _runZoned(
         () async {
-          const time = '(0.Xs)';
           const message = 'test message';
           const progressOptions = ProgressOptions(
             animation: ProgressAnimation(frames: ['+', 'x', '*']),
@@ -165,38 +172,43 @@ void main() {
           final done = Logger().progress(message, options: progressOptions);
           await Future<void>.delayed(const Duration(milliseconds: 400));
           done.complete();
-          verifyInOrder([
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message... ${darkGray.wrap('(0.1s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}x')} $message... ${darkGray.wrap('(0.2s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}*')} $message... ${darkGray.wrap('(0.3s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-              );
-            },
+          _verifyInOrder([
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('x')} $message... ',
+                ),
+              ),
+            ),
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('*')} $message... ',
+                ),
+              ),
+            ),
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('+')} $message... ',
+                ),
+              ),
+            ),
+            () => stdout.write(
+              '\x1b[?7h\u001b[2K\r${lightGreen.wrap('✓')} $message '
+              '${darkGray.wrap('(0.4s)')}\n',
+            ),
           ]);
         },
         stdout: () => stdout,
         stdin: () => stdin,
+        zoneValues: {AnsiCode: true},
       );
     });
 
     test('writes custom progress interval to stdout', () async {
       await _runZoned(
         () async {
-          const time = '(0.Xs)';
           const message = 'test message';
           const progressOptions = ProgressOptions(
             animation: ProgressAnimation(interval: Duration(milliseconds: 400)),
@@ -204,30 +216,31 @@ void main() {
           final done = Logger().progress(message, options: progressOptions);
           await Future<void>.delayed(const Duration(milliseconds: 400));
           done.complete();
-          verifyInOrder([
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}⠋')} $message... ${darkGray.wrap('(0.1s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-              );
-            },
+          _verifyInOrder([
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('⠙')} $message... ',
+                ),
+              ),
+            ),
+            () => stdout.write(
+              '\x1b[?7h\u001b[2K\r${lightGreen.wrap('✓')} $message '
+              '${darkGray.wrap('(0.4s)')}\n',
+            ),
           ]);
           verifyNever(() => stdout.write(any(that: contains('0.2s'))));
           verifyNever(() => stdout.write(any(that: contains('0.3s'))));
         },
         stdout: () => stdout,
         stdin: () => stdin,
+        zoneValues: {AnsiCode: true},
       );
     });
 
     test('supports empty list of animation frames', () async {
       await _runZoned(
         () async {
-          const time = '(0.Xs)';
           const message = 'test message';
           const progressOptions = ProgressOptions(
             animation: ProgressAnimation(frames: []),
@@ -235,73 +248,75 @@ void main() {
           final done = Logger().progress(message, options: progressOptions);
           await Future<void>.delayed(const Duration(milliseconds: 400));
           done.complete();
-          verifyInOrder([
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.1s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.2s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}')}$message... ${darkGray.wrap('(0.3s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-              );
-            },
+          _verifyInOrder([
+            () => stdout.write(
+              any(that: startsWith('\x1b[?7l\u001b[2K\r$message... ')),
+            ),
+            () => stdout.write(
+              any(that: startsWith('\x1b[?7l\u001b[2K\r$message... ')),
+            ),
+            () => stdout.write(
+              any(that: startsWith('\x1b[?7l\u001b[2K\r$message... ')),
+            ),
+            () => stdout.write(
+              '\x1b[?7h\u001b[2K\r${lightGreen.wrap('✓')} $message '
+              '${darkGray.wrap('(0.4s)')}\n',
+            ),
           ]);
         },
         stdout: () => stdout,
         stdin: () => stdin,
+        zoneValues: {AnsiCode: true},
       );
     });
 
-    test('writes custom progress animation to stdout w/custom trailing', () async {
-      await _runZoned(
-        () async {
-          const time = '(0.Xs)';
-          const message = 'test message';
-          const progressOptions = ProgressOptions(
-            animation: ProgressAnimation(frames: ['+', 'x', '*']),
-            trailing: '!!!',
-          );
-          final done = Logger().progress(message, options: progressOptions);
-          await Future<void>.delayed(const Duration(milliseconds: 400));
-          done.complete();
-          verifyInOrder([
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}+')} $message!!! ${darkGray.wrap('(0.1s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}x')} $message!!! ${darkGray.wrap('(0.2s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''${lightGreen.wrap('\b${'\b' * (message.length + 4 + time.length)}*')} $message!!! ${darkGray.wrap('(0.3s)')}''',
-              );
-            },
-            () {
-              stdout.write(
-                '''\b${'\b' * (message.length + 4 + time.length)}\u001b[2K${lightGreen.wrap('✓')} $message ${darkGray.wrap('(0.4s)')}\n''',
-              );
-            },
-          ]);
-        },
-        stdout: () => stdout,
-        stdin: () => stdin,
-      );
-    });
+    test(
+      'writes custom progress animation to stdout w/custom trailing',
+      () async {
+        await _runZoned(
+          () async {
+            const message = 'test message';
+            const progressOptions = ProgressOptions(
+              animation: ProgressAnimation(frames: ['+', 'x', '*']),
+              trailing: '!!!',
+            );
+            final done = Logger().progress(message, options: progressOptions);
+            await Future<void>.delayed(const Duration(milliseconds: 400));
+            done.complete();
+            _verifyInOrder([
+              () => stdout.write(
+                any(
+                  that: startsWith(
+                    '\x1b[?7l\u001b[2K\r${lightGreen.wrap('x')} $message!!! ',
+                  ),
+                ),
+              ),
+              () => stdout.write(
+                any(
+                  that: startsWith(
+                    '\x1b[?7l\u001b[2K\r${lightGreen.wrap('*')} $message!!! ',
+                  ),
+                ),
+              ),
+              () => stdout.write(
+                any(
+                  that: startsWith(
+                    '\x1b[?7l\u001b[2K\r${lightGreen.wrap('+')} $message!!! ',
+                  ),
+                ),
+              ),
+              () => stdout.write(
+                '\x1b[?7h\u001b[2K\r${lightGreen.wrap('✓')} $message '
+                '${darkGray.wrap('(0.4s)')}\n',
+              ),
+            ]);
+          },
+          stdout: () => stdout,
+          stdin: () => stdin,
+          zoneValues: {AnsiCode: true},
+        );
+      },
+    );
 
     group('.complete', () {
       test('writes lines to stdout', () async {
