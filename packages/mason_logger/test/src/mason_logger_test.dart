@@ -23,6 +23,7 @@ void main() {
       stderr = _MockStdout();
 
       when(() => stdout.supportsAnsiEscapes).thenReturn(true);
+      when(() => stderr.supportsAnsiEscapes).thenReturn(true);
       when(() => stdout.hasTerminal).thenReturn(true);
       when(() => stdout.terminalColumns).thenReturn(80);
     });
@@ -156,7 +157,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger().err(message);
-          verify(() => stderr.writeln(lightRed.wrap(message))).called(1);
+          final expected = lightRed.wrap(message);
+          verify(() => stderr.writeln(expected)).called(1);
         }, stderr: () => stderr);
       });
 
@@ -164,7 +166,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger(level: Level.critical).err(message);
-          verifyNever(() => stderr.writeln(lightRed.wrap(message)));
+          final expected = lightRed.wrap(message);
+          verifyNever(() => stderr.writeln(expected));
         }, stderr: () => stderr);
       });
     });
@@ -174,11 +177,10 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger().alert(message);
-          verify(
-            () => stderr.writeln(
-              backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
-            ),
-          ).called(1);
+          final expected = backgroundRed.wrap(
+            styleBold.wrap(white.wrap(message)),
+          );
+          verify(() => stderr.writeln(expected)).called(1);
         }, stderr: () => stderr);
       });
 
@@ -186,11 +188,10 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger(level: Level.quiet).alert(message);
-          verifyNever(
-            () => stderr.writeln(
-              backgroundRed.wrap(styleBold.wrap(white.wrap(message))),
-            ),
+          final expected = backgroundRed.wrap(
+            styleBold.wrap(white.wrap(message)),
           );
+          verifyNever(() => stderr.writeln(expected));
         }, stderr: () => stderr);
       });
     });
@@ -218,9 +219,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger().warn(message);
-          verify(() {
-            stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
-          }).called(1);
+          final expected = yellow.wrap(styleBold.wrap('[WARN] $message'));
+          verify(() => stderr.writeln(expected)).called(1);
         }, stderr: () => stderr);
       });
 
@@ -228,9 +228,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger().warn(message, tag: '🚨');
-          verify(() {
-            stderr.writeln(yellow.wrap(styleBold.wrap('[🚨] $message')));
-          }).called(1);
+          final expected = yellow.wrap(styleBold.wrap('[🚨] $message'));
+          verify(() => stderr.writeln(expected)).called(1);
         }, stderr: () => stderr);
       });
 
@@ -238,9 +237,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger().warn(message, tag: '');
-          verify(() {
-            stderr.writeln(yellow.wrap(styleBold.wrap(message)));
-          }).called(1);
+          final expected = yellow.wrap(styleBold.wrap(message));
+          verify(() => stderr.writeln(expected)).called(1);
         }, stderr: () => stderr);
       });
 
@@ -248,9 +246,8 @@ void main() {
         IOOverrides.runZoned(() {
           const message = 'test message';
           Logger(level: Level.error).warn(message);
-          verifyNever(() {
-            stderr.writeln(yellow.wrap(styleBold.wrap('[WARN] $message')));
-          });
+          final expected = yellow.wrap(styleBold.wrap('[WARN] $message'));
+          verifyNever(() => stderr.writeln(expected));
         }, stderr: () => stderr);
       });
     });
@@ -604,6 +601,12 @@ void main() {
     });
 
     group('.chooseAny', () {
+      setUp(() {
+        // The expected output below is uncolored. Without this, colors would
+        // depend on whether the real stderr supports ANSI escapes.
+        when(() => stdout.supportsAnsiEscapes).thenReturn(false);
+      });
+
       test('throws NoTerminalAttachedError when no terminal is attached', () {
         when(() => stdout.hasTerminal).thenReturn(false);
         IOOverrides.runZoned(
