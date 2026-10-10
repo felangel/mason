@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 export 'package:io/io.dart' show ExitCode;
@@ -160,7 +161,7 @@ class KeyStroke {
 
   /// {@macro key_stroke}
   factory KeyStroke.char(String char) {
-    assert(char.length == 1, 'characters must be a single unit');
+    assert(char.runes.length == 1, 'characters must be a single character');
     return KeyStroke(char: char, controlChar: ControlCharacter.none);
   }
 
@@ -289,9 +290,28 @@ KeyStroke readKey() {
     keyStroke = KeyStroke.control(ControlCharacter.backspace);
   } else if (codeUnit == 0x00 || (codeUnit >= 0x1c && codeUnit <= 0x1f)) {
     keyStroke = KeyStroke.control(ControlCharacter.unknown);
+  } else if (codeUnit >= 0xc2 && codeUnit <= 0xf4) {
+    // the first byte of a multi-byte UTF-8 character (e.g. ö or €)
+    keyStroke = KeyStroke.char(_readUtf8Char(codeUnit));
   } else {
     // assume other characters are printable
     keyStroke = KeyStroke.char(String.fromCharCode(codeUnit));
   }
   return keyStroke;
+}
+
+/// Reads the rest of the UTF-8 character that starts with [firstByte].
+String _readUtf8Char(int firstByte) {
+  final length = firstByte >= 0xf0
+      ? 4
+      : firstByte >= 0xe0
+      ? 3
+      : 2;
+  final bytes = [firstByte];
+  while (bytes.length < length) {
+    final byte = stdin.readByteSync();
+    if (byte == -1) break;
+    bytes.add(byte);
+  }
+  return utf8.decode(bytes, allowMalformed: true);
 }

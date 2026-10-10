@@ -26,6 +26,58 @@ void main() {
           }, stdin: () => stdin);
         });
 
+        test('returns a two-byte UTF-8 char', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0xc3, 0xb6];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having((s) => s.char, 'char', 'ö'),
+            );
+          }, stdin: () => stdin);
+        });
+
+        test('returns a three-byte UTF-8 char', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0xe2, 0x82, 0xac];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having((s) => s.char, 'char', '€'),
+            );
+          }, stdin: () => stdin);
+        });
+
+        test('returns a four-byte UTF-8 char', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0xf0, 0x9f, 0x98, 0x80];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having((s) => s.char, 'char', '\u{1F600}'),
+            );
+          }, stdin: () => stdin);
+        });
+
+        test('returns a replacement char for a truncated UTF-8 char', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0xc3, -1];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having((s) => s.char, 'char', '\uFFFD'),
+            );
+          }, stdin: () => stdin);
+        });
+
         test('returns Ctrl+A control character for 0x01', () {
           IOOverrides.runZoned(() {
             when(() => stdin.readByteSync()).thenReturn(0x01);

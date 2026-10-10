@@ -233,12 +233,18 @@ class Logger {
       if (isDeleteOrBackspaceKey) {
         if (rawString.isNotEmpty) {
           if (rawString.endsWith(delimiter)) {
-            _stdout.write('\b\b\x1b[K');
             rawString = rawString.substring(0, rawString.length - 2);
           } else {
-            _stdout.write('\b\x1b[K');
-            rawString = rawString.substring(0, rawString.length - 1);
+            // Remove the whole last character, which can be two code units.
+            final lastChar = String.fromCharCode(rawString.runes.last);
+            rawString = rawString.substring(
+              0,
+              rawString.length - lastChar.length,
+            );
           }
+          // Redraw the line rather than moving the cursor back, because the
+          // removed character can be more than one column wide.
+          _stdout.write('\r\x1b[K$message $rawString');
         }
         continue;
       }
@@ -508,7 +514,7 @@ class Logger {
 
   String? _readLineSync() {
     _ensureTerminalAttached();
-    return _stdin.readLineSync()?.trim();
+    return _stdin.readLineSync(encoding: utf8)?.trim();
   }
 
   String _readLineHiddenSync() {
