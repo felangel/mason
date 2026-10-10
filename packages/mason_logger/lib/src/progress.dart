@@ -170,9 +170,9 @@ class Progress {
   }
 
   void _onTick(Timer? _) {
-    _index++;
     final frames = _options.animation.frames;
     final char = frames.isEmpty ? '' : frames[_index % frames.length];
+    _index++;
     final prefix = char.isEmpty ? char : '${lightGreen.wrap(char)} ';
     _write(
       '''$_disableWrap$_clearLine$prefix$_clampedMessage${_options.trailing} $_time''',
