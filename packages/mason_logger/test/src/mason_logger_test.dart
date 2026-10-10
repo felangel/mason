@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:io';
 
 import 'package:mason_logger/mason_logger.dart';
@@ -299,7 +300,7 @@ void main() {
             const prompt = '$message ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$message ${styleDim.wrap(lightCyan.wrap(response))}''';
-            when(() => stdin.readLineSync()).thenReturn(response);
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn(response);
             final actual = Logger().prompt(message);
             expect(actual, equals(response));
             verify(() => stdout.write(prompt)).called(1);
@@ -319,7 +320,7 @@ void main() {
             final prompt = '$message ${darkGray.wrap('($defaultValue)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap(response))}''';
-            when(() => stdin.readLineSync()).thenReturn(response);
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn(response);
             final actual = Logger().prompt(message, defaultValue: defaultValue);
             expect(actual, equals(response));
             verify(() => stdout.write(prompt)).called(1);
@@ -385,7 +386,7 @@ void main() {
             const prompt = '$message ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K\u001B[${lines}A$message ${styleDim.wrap(lightCyan.wrap(response))}''';
-            when(() => stdin.readLineSync()).thenReturn(response);
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn(response);
             final actual = Logger().prompt(message);
             expect(actual, equals(response));
             verify(() => stdout.write(prompt)).called(1);
@@ -422,7 +423,7 @@ void main() {
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
-            when(() => stdin.readLineSync()).thenReturn('');
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn('');
             final actual = Logger().confirm(message);
             expect(actual, isFalse);
             verify(() => stdout.write(prompt)).called(1);
@@ -440,7 +441,7 @@ void main() {
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
-            when(() => stdin.readLineSync()).thenReturn('y');
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn('y');
             final actual = Logger().confirm(message, defaultValue: true);
             expect(actual, isTrue);
             verify(() => stdout.write(prompt)).called(1);
@@ -460,7 +461,7 @@ void main() {
             for (final word in yesWords) {
               final promptWithResponse =
                   '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
-              when(() => stdin.readLineSync()).thenReturn(word);
+              when(() => stdin.readLineSync(encoding: utf8)).thenReturn(word);
               final actual = Logger().confirm(message);
               expect(actual, isTrue);
               verify(() => stdout.write(prompt)).called(1);
@@ -481,7 +482,7 @@ void main() {
             for (final word in noWords) {
               final promptWithResponse =
                   '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
-              when(() => stdin.readLineSync()).thenReturn(word);
+              when(() => stdin.readLineSync(encoding: utf8)).thenReturn(word);
               final actual = Logger().confirm(message);
               expect(actual, isFalse);
               verify(() => stdout.write(prompt)).called(1);
@@ -501,7 +502,7 @@ void main() {
                 'This is a multi-line\n\nmessage. ${darkGray.wrap('(y/N)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K\u001B[2A$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
-            when(() => stdin.readLineSync()).thenReturn('y');
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn('y');
             final actual = Logger().confirm(message);
             expect(actual, isTrue);
             verify(() => stdout.write(prompt)).called(1);
@@ -519,7 +520,7 @@ void main() {
             final prompt = 'test message ${darkGray.wrap('(y/N)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
-            when(() => stdin.readLineSync()).thenReturn('maybe');
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn('maybe');
             final actual = Logger().confirm(message);
             expect(actual, isFalse);
             verify(() => stdout.write(prompt)).called(1);
@@ -537,7 +538,7 @@ void main() {
             final prompt = 'test message ${darkGray.wrap('(Y/n)')} ';
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('Yes'))}''';
-            when(() => stdin.readLineSync()).thenReturn('maybe');
+            when(() => stdin.readLineSync(encoding: utf8)).thenReturn('maybe');
             final actual = Logger().confirm(message, defaultValue: true);
             expect(actual, isTrue);
             verify(() => stdout.write(prompt)).called(1);
@@ -556,7 +557,7 @@ void main() {
             final promptWithResponse =
                 '''\x1b[A\u001B[2K$prompt${styleDim.wrap(lightCyan.wrap('No'))}''';
             when(
-              () => stdin.readLineSync(),
+              () => stdin.readLineSync(encoding: utf8),
             ).thenThrow(const FormatException('Missing extension byte'));
             final actual = Logger().confirm(message);
             expect(actual, isFalse);
@@ -1817,6 +1818,39 @@ void main() {
               final actual = Logger().promptAny(message);
               expect(actual, equals(expected));
               verify(() => stdout.write('$message ')).called(1);
+              verify(() => stdout.write('\r\x1b[K$message dart, ')).called(1);
+              verify(() => stdout.write('\r\x1b[K$message dart')).called(1);
+            },
+            stdout: () => stdout,
+            stdin: () => stdin,
+          ),
+          readKey: () => keyStrokes.removeAt(0),
+        );
+      });
+
+      test('backspace deletes a whole non-ASCII character', () {
+        final keyStrokes = [
+          KeyStroke.char('d'),
+          KeyStroke.char('a'),
+          KeyStroke.char('\u{1F600}'),
+          KeyStroke.control(ControlCharacter.delete),
+          KeyStroke.char('r'),
+          KeyStroke.char('t'),
+          KeyStroke.char(','),
+          KeyStroke.char('j'),
+          KeyStroke.char('ö'),
+          KeyStroke.char('n'),
+          KeyStroke.control(ControlCharacter.ctrlJ),
+        ];
+        TerminalOverrides.runZoned(
+          () => IOOverrides.runZoned(
+            () {
+              const message = 'test message';
+              const expected = ['dart', 'jön'];
+              final actual = Logger().promptAny(message);
+              expect(actual, equals(expected));
+              verify(() => stdout.write('$message ')).called(1);
+              verify(() => stdout.write('\r\x1b[K$message da')).called(1);
             },
             stdout: () => stdout,
             stdin: () => stdin,
