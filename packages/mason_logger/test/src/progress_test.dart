@@ -79,6 +79,26 @@ void main() {
       );
     });
 
+    test('does not split a character when truncating the message', () async {
+      await _runZoned(
+        () async {
+          // 36 columns leave room for 21 UTF-16 code units. The emoji takes
+          // two (20 and 21), so it can't be cut in half.
+          const message = 'abcdefghijklmnopqrst\u{1F600}uvwxyz';
+          when(() => stdout.terminalColumns).thenReturn(36);
+          final progress = Logger().progress(message);
+          await Future<void>.delayed(const Duration(milliseconds: 150));
+          progress.cancel();
+          verify(
+            () =>
+                stdout.write(any(that: contains(' abcdefghijklmnopqrst... '))),
+          ).called(greaterThanOrEqualTo(1));
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     test('writes full message when stdout does not have a terminal', () async {
       await _runZoned(
         () async {

@@ -149,8 +149,12 @@ class Progress {
 
   String get _clampedMessage {
     final width = max(_terminalColumns - _padding, _padding);
-    if (_message.length > width) return _message.substring(0, width);
-    return _message;
+    if (_message.length <= width) return _message;
+    // Don't cut a character that takes two UTF-16 code units (such as an
+    // emoji) in half: the first half alone isn't valid text.
+    final lastUnit = _message.codeUnitAt(width - 1);
+    final isLeadSurrogate = lastUnit >= 0xd800 && lastUnit <= 0xdbff;
+    return _message.substring(0, isLeadSurrogate ? width - 1 : width);
   }
 
   String get _clearLine {
