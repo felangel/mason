@@ -154,6 +154,38 @@ void main() {
       },
     );
 
+    test('starts the animation with the first frame', () async {
+      await _runZoned(
+        () async {
+          const message = 'test message';
+          const progressOptions = ProgressOptions(
+            animation: ProgressAnimation(frames: ['+', 'x', '*']),
+          );
+          final done = Logger().progress(message, options: progressOptions);
+          await Future<void>.delayed(const Duration(milliseconds: 250));
+          done.complete();
+          verifyInOrder([
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('+')} $message... ',
+                ),
+              ),
+            ),
+            () => stdout.write(
+              any(
+                that: startsWith(
+                  '\x1b[?7l\u001b[2K\r${lightGreen.wrap('x')} $message... ',
+                ),
+              ),
+            ),
+          ]);
+        },
+        stdout: () => stdout,
+        zoneValues: {AnsiCode: true},
+      );
+    });
+
     test('writes custom progress animation to stdout', () async {
       await _runZoned(
         () async {
@@ -313,7 +345,7 @@ void main() {
             progress.complete();
             verify(() {
               stdout.write(
-                any(that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)'))),
+                any(that: matches(RegExp(r'⠋.*test message\.\.\..*\(8\dms\)'))),
               );
             }).called(1);
             verify(() {
@@ -354,13 +386,13 @@ void main() {
             await Future<void>.delayed(const Duration(milliseconds: 100));
             verify(() {
               stdout.write(
-                any(that: matches(RegExp(r'⠙.*message\.\.\..*\(8\dms\)'))),
+                any(that: matches(RegExp(r'⠋.*message\.\.\..*\(8\dms\)'))),
               );
             }).called(1);
 
             verify(() {
               stdout.write(
-                any(that: matches(RegExp(r'⠹.*update\.\.\..*\(0\.1s\)'))),
+                any(that: matches(RegExp(r'⠙.*update\.\.\..*\(0\.1s\)'))),
               );
             }).called(1);
           },
@@ -397,7 +429,7 @@ void main() {
 
             verify(() {
               stdout.write(
-                any(that: matches(RegExp(r'⠙.*test message\.\.\..*\(8\dms\)'))),
+                any(that: matches(RegExp(r'⠋.*test message\.\.\..*\(8\dms\)'))),
               );
             }).called(1);
 
@@ -440,7 +472,7 @@ void main() {
                 any(
                   that: matches(
                     RegExp(
-                      r'\[2K\u000D\[92m⠙\[0m test message... \[90m\(8\dms\)\[0m',
+                      r'\[2K\u000D\[92m⠋\[0m test message... \[90m\(8\dms\)\[0m',
                     ),
                   ),
                 ),
