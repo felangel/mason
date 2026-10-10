@@ -204,57 +204,39 @@ KeyStroke readKey() {
     if (charCode == 127) {
       keyStroke = KeyStroke.control(ControlCharacter.wordBackspace);
     } else if (escapeSequence[0] == '[') {
-      charCode = stdin.readByteSync();
-      if (charCode == -1) return keyStroke;
-
-      escapeSequence.add(String.fromCharCode(charCode));
-
-      switch (escapeSequence[1]) {
-        case 'A':
-          keyStroke = KeyStroke.control(ControlCharacter.arrowUp);
-        case 'B':
-          keyStroke = KeyStroke.control(ControlCharacter.arrowDown);
-        case 'C':
-          keyStroke = KeyStroke.control(ControlCharacter.arrowRight);
-        case 'D':
-          keyStroke = KeyStroke.control(ControlCharacter.arrowLeft);
-        case 'H':
-          keyStroke = KeyStroke.control(ControlCharacter.home);
-        case 'F':
-          keyStroke = KeyStroke.control(ControlCharacter.end);
-        default:
-          if (escapeSequence[1].codeUnits[0] > '0'.codeUnits[0] &&
-              escapeSequence[1].codeUnits[0] < '9'.codeUnits[0]) {
-            charCode = stdin.readByteSync();
-            if (charCode == -1) return keyStroke;
-
-            escapeSequence.add(String.fromCharCode(charCode));
-            if (escapeSequence[2] != '~') {
-              keyStroke = KeyStroke.control(ControlCharacter.unknown);
-            } else {
-              switch (escapeSequence[1]) {
-                case '1':
-                  keyStroke = KeyStroke.control(ControlCharacter.home);
-                case '3':
-                  keyStroke = KeyStroke.control(ControlCharacter.delete);
-                case '4':
-                  keyStroke = KeyStroke.control(ControlCharacter.end);
-                case '5':
-                  keyStroke = KeyStroke.control(ControlCharacter.pageUp);
-                case '6':
-                  keyStroke = KeyStroke.control(ControlCharacter.pageDown);
-                case '7':
-                  keyStroke = KeyStroke.control(ControlCharacter.home);
-                case '8':
-                  keyStroke = KeyStroke.control(ControlCharacter.end);
-                default:
-                  keyStroke = KeyStroke.control(ControlCharacter.unknown);
-              }
-            }
-          } else {
-            keyStroke = KeyStroke.control(ControlCharacter.unknown);
-          }
+      // A control sequence: parameter and intermediate bytes (0x20-0x3F, e.g.
+      // `1;5`), then one final byte (0x40-0x7E). Read all of it, so that the
+      // rest of a sequence this doesn't recognize, such as Ctrl+Right
+      // (`[1;5C`) or F5 (`[15~`), isn't read as typed characters.
+      final parameters = StringBuffer();
+      while (true) {
+        charCode = stdin.readByteSync();
+        if (charCode == -1) {
+          if (parameters.isEmpty) return keyStroke;
+          return KeyStroke.control(ControlCharacter.unknown);
+        }
+        if (charCode >= 0x40 && charCode <= 0x7e) break;
+        if (charCode < 0x20 || charCode > 0x3f) {
+          return KeyStroke.control(ControlCharacter.unknown);
+        }
+        parameters.writeCharCode(charCode);
       }
+
+      keyStroke = KeyStroke.control(switch ((
+        parameters.toString(),
+        String.fromCharCode(charCode),
+      )) {
+        ('', 'A') => ControlCharacter.arrowUp,
+        ('', 'B') => ControlCharacter.arrowDown,
+        ('', 'C') => ControlCharacter.arrowRight,
+        ('', 'D') => ControlCharacter.arrowLeft,
+        ('', 'H') || ('1', '~') || ('7', '~') => ControlCharacter.home,
+        ('', 'F') || ('4', '~') || ('8', '~') => ControlCharacter.end,
+        ('3', '~') => ControlCharacter.delete,
+        ('5', '~') => ControlCharacter.pageUp,
+        ('6', '~') => ControlCharacter.pageDown,
+        _ => ControlCharacter.unknown,
+      });
     } else if (escapeSequence[0] == 'O') {
       charCode = stdin.readByteSync();
       if (charCode == -1) return keyStroke;

@@ -312,6 +312,67 @@ void main() {
           }, stdin: () => stdin);
         });
 
+        for (final (name, sequence) in [
+          ('Shift+Right', '[1;2C'),
+          ('Ctrl+Right', '[1;5C'),
+          ('Ctrl+Delete', '[3;5~'),
+          ('F5', '[15~'),
+          ('F12', '[24~'),
+        ]) {
+          test('returns unknown for $name ($sequence) and reads all of it', () {
+            IOOverrides.runZoned(() {
+              final charCodes = [0x1b, ...sequence.codeUnits];
+              when(
+                () => stdin.readByteSync(),
+              ).thenAnswer((_) => charCodes.removeAt(0));
+              expect(
+                readKey(),
+                isA<KeyStroke>().having(
+                  (s) => s.controlChar,
+                  'controlChar',
+                  ControlCharacter.unknown,
+                ),
+              );
+              expect(charCodes, isEmpty);
+            }, stdin: () => stdin);
+          });
+        }
+
+        test('returns unknown for a sequence with a control character', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0x1b, ...'[1'.codeUnits, 0x01];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having(
+                (s) => s.controlChar,
+                'controlChar',
+                ControlCharacter.unknown,
+              ),
+            );
+            expect(charCodes, isEmpty);
+          }, stdin: () => stdin);
+        });
+
+        test('returns escape for 0x1b [ with nothing after it', () {
+          IOOverrides.runZoned(() {
+            final charCodes = [0x1b, ...'['.codeUnits, -1];
+            when(
+              () => stdin.readByteSync(),
+            ).thenAnswer((_) => charCodes.removeAt(0));
+            expect(
+              readKey(),
+              isA<KeyStroke>().having(
+                (s) => s.controlChar,
+                'controlChar',
+                ControlCharacter.escape,
+              ),
+            );
+          }, stdin: () => stdin);
+        });
+
         test('returns end for 0x1b OF', () {
           IOOverrides.runZoned(() {
             final charCodes = [0x1b, ...'OF'.codeUnits, 0x1b, -1];
