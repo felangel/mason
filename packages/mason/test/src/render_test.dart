@@ -35,6 +35,66 @@ void main() {
       expect(input.render(<String, dynamic>{}), equals(expected));
     });
 
+    group('backslashes', () {
+      const path = r'C:\Users\Émile';
+      const command = 'docker run \\\n  my-image';
+
+      test('are preserved in variable values', () {
+        expect('{{{v}}}'.render(<String, dynamic>{'v': path}), equals(path));
+        expect('{{v}}'.render(<String, dynamic>{'v': path}), equals(path));
+        expect(
+          '{{{v}}}'.render(<String, dynamic>{'v': command}),
+          equals(command),
+        );
+      });
+
+      test('are preserved in nested variable values', () {
+        const input =
+            '{{#items}}{{{path}}};{{/items}}{{#user}}{{{name}}}{{/user}}';
+        expect(
+          input.render(<String, dynamic>{
+            'items': [
+              {'path': path},
+              {'path': command},
+            ],
+            'user': {'name': path},
+          }),
+          equals('$path;$command;$path'),
+        );
+        expect(
+          '{{#items}}{{{.}}};{{/items}}'.render(<String, dynamic>{
+            'items': [path, command],
+          }),
+          equals('$path;$command;'),
+        );
+      });
+
+      test('are preserved in variable values passed to lambdas', () {
+        expect(
+          '{{v.upperCase()}}'.render(<String, dynamic>{'v': path}),
+          equals(r'C:\USERS\ÉMILE'),
+        );
+      });
+
+      test('are preserved in variable values rendered in partials', () {
+        expect(
+          '{{> p }}'.render(
+            <String, dynamic>{'v': path},
+            {'{{~ p }}': utf8.encode('{{{v}}}')},
+          ),
+          equals(path),
+        );
+      });
+
+      test('are preserved in template text', () {
+        const input = 'a\\\nb\\Éc\\\\d\\{{v}}';
+        expect(
+          input.render(<String, dynamic>{'v': 'e'}),
+          equals('a\\\nb\\Éc\\\\d\\e'),
+        );
+      });
+    });
+
     group('partials', () {
       test('resolve outputs correct template', () {
         const name = 'header';
