@@ -3,6 +3,8 @@ import 'dart:convert';
 import 'package:mason/mason.dart';
 import 'package:mustache_template/mustache_template.dart';
 
+final _backslashInRegExp = RegExp(r'\\\\');
+final _backslashOutRegExp = RegExp(r'\\');
 final _newlineInRegExp = RegExp(r'(\\\r\n|\\\r|\\\n)');
 final _newlineOutRegExp = RegExp(r'(\r\n|\r|\n)');
 final _unicodeInRegExp = RegExp(r'\\[^\x00-\x7F]');
@@ -10,16 +12,32 @@ final _unicodeOutRegExp = RegExp(r'[^\x00-\x7F]');
 
 String _sanitizeInput(String input) {
   return input.replaceAllMapped(
-    RegExp('${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}'),
+    RegExp(
+      '${_backslashOutRegExp.pattern}|'
+      '${_newlineOutRegExp.pattern}|${_unicodeOutRegExp.pattern}',
+    ),
     (match) => match.group(0) != null ? '\\${match.group(0)}' : match.input,
   );
 }
 
 String _sanitizeOutput(String output) {
   return output.replaceAllMapped(
-    RegExp('${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}'),
+    RegExp(
+      '${_backslashInRegExp.pattern}|'
+      '${_newlineInRegExp.pattern}|${_unicodeInRegExp.pattern}',
+    ),
     (match) => match.group(0)?.substring(1) ?? match.input,
   );
+}
+
+/// Escapes string values so they round-trip through [_sanitizeOutput].
+dynamic _sanitizeValue(dynamic value) {
+  if (value is String) return _sanitizeInput(value);
+  if (value is Map) {
+    return value.map((key, value) => MapEntry(key, _sanitizeValue(value)));
+  }
+  if (value is Iterable) return value.map(_sanitizeValue).toList();
+  return value;
 }
 
 /// [Map] of all the built-in lambda functions.
@@ -107,7 +125,7 @@ extension RenderTemplate on String {
 
     return _sanitizeOutput(
       template.renderString(<String, dynamic>{
-        ...vars,
+        ...vars.map((key, value) => MapEntry(key, _sanitizeValue(value))),
         ..._builtInLambdas,
         ..._builtInVars,
       }),
